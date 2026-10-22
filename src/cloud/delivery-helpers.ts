@@ -4,7 +4,15 @@ export const equal = (a: unknown, b: unknown) => {
 };
 export const supported = (patch: TaskPatch) => {
   return Object.keys(patch).every((key) => {
-    return ["summary", "description", "priority", "complexity"].includes(key);
+    return [
+      "summary",
+      "description",
+      "priority",
+      "complexity",
+      "parentId",
+      "state",
+      "assignedState",
+    ].includes(key);
   });
 };
 export const replaceRemote = (data: WorkspaceData, item: TaskItem) => {

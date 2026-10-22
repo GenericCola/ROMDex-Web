@@ -3,6 +3,7 @@ import { editTask } from "@/domain/task-actions";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
+import TaskParent from "./task-parent";
 const option = (value: string) => {
   return <option key={value}>{value}</option>;
 };
@@ -62,6 +63,7 @@ const TaskProperties = ({
           <p role="alert">Enter an item name. Your draft is kept.</p>
         )}
       <div className="detail-properties">
+        <TaskParent item={item} data={data} />
         <label>
           Status
           <select

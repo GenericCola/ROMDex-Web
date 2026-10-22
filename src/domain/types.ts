@@ -50,7 +50,13 @@ export type TaskOperation =
       text: string;
       created: number;
     }
-  | { opId: string; type: "delete"; issueId: string; ids: string[] };
+  | {
+      opId: string;
+      type: "delete";
+      issueId: string;
+      ids: string[];
+      bases?: Record<string, TaskItem>;
+    };
 export type DetailsMode = "default" | "expanded" | "collapsed";
 export interface WorkspaceData {
   schemaVersion: 1;

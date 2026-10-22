@@ -1,4 +1,3 @@
-import { reviewDelivery } from "@/cloud/review";
 import {
   connectDelivery,
   deliveryConnected,
@@ -8,16 +7,13 @@ import { cloudData } from "@/cloud/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
+import DeliveryReview from "./delivery-review";
 const DeliveryControls = () => {
   const [token, setToken] = useState("");
-  const [receipt, setReceipt] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const changeToken = (event: ChangeEvent<HTMLInputElement>) => {
     return setToken(event.target.value);
-  };
-  const changeReceipt = (event: ChangeEvent<HTMLInputElement>) => {
-    return setReceipt(event.target.value);
   };
   const execute = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -47,78 +43,29 @@ const DeliveryControls = () => {
   const records = Object.entries(
     cloudData(workspaceStore.getSnapshot().data).records,
   ).filter(([, record]) => {
-    return record.status !== "confirmed";
+    return record.status !== "confirmed" && record.status !== "ready";
   });
   const render = ([id, record]: (typeof records)[number]) => {
-    const operation = workspaceStore
-      .getSnapshot()
-      .data.operations.find((entry) => {
-        return entry.opId === id;
-      });
-    const cloud = () => {
-      void execute(() => {
-        return reviewDelivery(id, "cloud");
-      });
-    };
-    const local = () => {
-      void execute(() => {
-        return reviewDelivery(id, "local");
-      });
-    };
-    const confirm = () => {
-      void execute(() => {
-        return reviewDelivery(id, "confirm", receipt);
-      });
-    };
     return (
-      <section key={id}>
-        <h3>
-          {record.status === "conflict"
-            ? "Conflicting edits"
-            : "Uncertain delivery"}
-        </h3>
-        <p>{record.message}</p>
-        <details>
-          <summary>Queued change for {operation?.issueId}</summary>
-          <pre className="port-detail-text">
-            {JSON.stringify(operation, null, 2)}
-          </pre>
-        </details>
-        {record.conflicts && (
-          <pre className="port-detail-text">
-            {JSON.stringify(record.conflicts, null, 2)}
-          </pre>
-        )}
-        <label>
-          Exact comment ID, if needed
-          <input value={receipt} onChange={changeReceipt} />
-        </label>
-        <div className="port-actions">
-          <button onClick={confirm} disabled={busy}>
-            Read back and confirm; do not resend
-          </button>
-          {record.status === "conflict" && (
-            <button onClick={local} disabled={busy}>
-              Keep my edit; rebase for next Save
-            </button>
-          )}
-          <button onClick={cloud} disabled={busy}>
-            Keep YouTrack; archive pending change
-          </button>
-        </div>
-      </section>
+      <DeliveryReview
+        key={id}
+        id={id}
+        record={record}
+        busy={busy}
+        execute={execute}
+      />
     );
   };
   return (
     <section>
       <h3>Cloud delivery</h3>
       <p>
-        Optional, session only. Save Changes sends existing-task titles, notes,
-        priority, complexity and comments. Creation, deletion, hierarchy and
-        assigned-status operations remain queued for the next adapter. Auto-Sync
-        is off initially. Enabling delivery uses your saved preference. Avoid
-        simultaneous desktop edits to the same fields. A timeout pauses
-        automatic delivery until review.
+        Optional, session only. Save Changes delivers new tasks, listed
+        deletions, hierarchy, native State, titles, notes, priority, complexity
+        and comments. Deletions permanently remove only the reviewed list.
+        Auto-Sync is off initially. Enabling delivery uses your saved
+        preference. Avoid simultaneous desktop edits to the same fields. A
+        timeout pauses automatic delivery until review.
       </p>
       <label>
         Session token for delivery

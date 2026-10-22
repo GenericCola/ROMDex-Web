@@ -60,8 +60,23 @@ export const validateQueue = (data: WorkspaceData) => {
         validateTask(operation.item);
         break;
       case "delete":
-        if (!Array.isArray(operation.ids) || !operation.ids.every(text))
+        if (
+          !Array.isArray(operation.ids) ||
+          !operation.ids.length ||
+          new Set(operation.ids).size !== operation.ids.length ||
+          !operation.ids.includes(operation.issueId) ||
+          !operation.ids.every((id) => {
+            return (
+              typeof id === "string" &&
+              (/^PMON-\d+$/.test(id) || id.startsWith("local-"))
+            );
+          })
+        )
           invalid();
+        for (const [id, base] of Object.entries(operation.bases ?? {})) {
+          validateTask(base);
+          if (base.id !== id || !operation.ids.includes(id)) invalid();
+        }
         break;
       default:
         invalid();
@@ -77,15 +92,49 @@ export const validateQueue = (data: WorkspaceData) => {
   )
     invalid();
   for (const [id, record] of Object.entries(cloud.records)) {
+    if (!object(record)) invalid();
+    const operation =
+      data.operations.find((op) => {
+        return op.opId === id;
+      }) ?? record.archivedOperation;
+    if (record.status === "ready" && operation?.type !== "delete") invalid();
+    if (
+      [record.deletedIds, record.deleteReceipts].some((entries) => {
+        return (
+          entries !== undefined &&
+          (!Array.isArray(entries) ||
+            operation?.type !== "delete" ||
+            entries.some((entry) => {
+              return !operation.ids.includes(entry);
+            }))
+        );
+      })
+    )
+      invalid();
+    if (
+      record.targetId !== undefined &&
+      (typeof record.targetId !== "string" ||
+        !operation ||
+        (operation.type === "delete"
+          ? !operation.ids.includes(record.targetId)
+          : operation.issueId !== record.targetId))
+    )
+      invalid();
     if (
       !object(record) ||
-      !["attempting", "uncertain", "conflict", "confirmed"].includes(
+      !["attempting", "uncertain", "conflict", "confirmed", "ready"].includes(
         record.status,
       ) ||
       typeof record.message !== "string" ||
-      !text(cloud.accountId) ||
+      (record.status !== "confirmed" && !text(cloud.accountId)) ||
       (record.remoteId !== undefined && !text(record.remoteId)) ||
-      (record.status === "confirmed" ? ids.has(id) : !ids.has(id))
+      (record.status === "confirmed" ? ids.has(id) : !ids.has(id)) ||
+      [record.deletedIds, record.deleteReceipts].some((entries) => {
+        return (
+          entries !== undefined &&
+          (!Array.isArray(entries) || !entries.every(text))
+        );
+      })
     )
       invalid();
   }

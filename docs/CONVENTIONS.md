@@ -37,7 +37,7 @@ An inline script in the root layout's `<head>` adds `<meta name="color-scheme">`
 
 ## Backend
 
-YouTrack is the only future application backend. The foundation has no application data connection.
+YouTrack is the only application backend. Browser workspace data and the delivery journal use IndexedDB; tokens remain in memory. See STRUCTURAL-DELIVERY.md for direct REST delivery and its limits.
 
 ## Git
 

@@ -78,13 +78,46 @@ export const editTask = (data: WorkspaceData, id: string, patch: TaskPatch) => {
 export const deleteTask = (data: WorkspaceData, id: string) => {
   requireReviewClear(data);
   const items = materialize(data.remote, data.operations);
+  if (
+    !items.some((item) => {
+      return item.id === id;
+    })
+  )
+    throw Error("The item no longer exists.");
   const ids = [id, ...descendants(items, id)];
-  data.operations.push({
-    opId: crypto.randomUUID(),
-    type: "delete",
-    issueId: id,
-    ids,
+  const cancelled = data.operations.filter((op) => {
+    return ids.includes(op.issueId);
   });
+  data.operations = data.operations.filter((op) => {
+    return !ids.includes(op.issueId);
+  });
+  const cloud = cloudData(data);
+  const records = { ...cloud.records };
+  for (const op of cancelled)
+    records[op.opId] = {
+      status: "confirmed",
+      message: "Pending operation archived by deletion review before delivery.",
+      archivedOperation: op,
+    };
+  data.cloud = { ...cloud, records };
+  const bases = Object.fromEntries(
+    data.remote
+      .filter((item) => {
+        return ids.includes(item.id);
+      })
+      .map((item) => {
+        return [item.id, structuredClone(item)];
+      }),
+  );
+  const remoteIds = Object.keys(bases);
+  if (remoteIds.length)
+    data.operations.push({
+      opId: crypto.randomUUID(),
+      type: "delete",
+      issueId: remoteIds.includes(id) ? id : (remoteIds[0] ?? id),
+      ids: remoteIds,
+      bases,
+    });
   if (data.view.selected && ids.includes(data.view.selected))
     data.view.selected = null;
   if (data.view.scope && ids.includes(data.view.scope)) data.view.scope = null;

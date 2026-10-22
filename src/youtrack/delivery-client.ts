@@ -1,43 +1,23 @@
 import type { DeliveryPort } from "@/cloud/types";
-import type { TaskPatch } from "@/domain/types";
+import type { TaskItem, TaskPatch } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
+import { changeParent, childrenOf } from "./hierarchy";
+import type { Field } from "./issue-body";
+import { creationBody, issueBody } from "./issue-body";
 import type { RawIssue } from "./read-tasks";
-import { normalize, YOUTRACK_ORIGIN } from "./read-tasks";
+import { normalize } from "./read-tasks";
+import type { YouTrackRequest } from "./request";
+import { issueId, sessionRequest } from "./request";
 const fields =
   "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(id,name,$type,value(name)),commentsCount,comments(id,text,created,author(login,fullName))";
-type Field = Record<"name" | "$type" | "id", string>;
 export class DeliveryClient implements DeliveryPort {
   accountId = "";
-  private token: string;
+  private request: YouTrackRequest;
   private fields = new Map<string, Field[]>();
+  private creations = new Map<string, unknown>();
   constructor(token: string) {
-    this.token = token.trim();
-    if (!this.token) throw Error("Enter a YouTrack token.");
+    this.request = sessionRequest(token);
   }
-  private request = async (
-    route: string,
-    method = "GET",
-    body?: unknown,
-  ): Promise<unknown> => {
-    const response = await fetch(YOUTRACK_ORIGIN + "/api/" + route, {
-      method,
-      headers: {
-        Authorization: "Bearer " + this.token,
-        Accept: "application/json",
-        ...(body ? { "Content-Type": "application/json" } : {}),
-      },
-      credentials: "omit",
-      cache: "no-store",
-      redirect: "error",
-      signal: AbortSignal.timeout(30000),
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    });
-    if (response.status === 404 && method === "GET") return null;
-    if (!response.ok)
-      throw Error("YouTrack request failed (HTTP " + response.status + ").");
-    const text = await response.text();
-    return text ? (JSON.parse(text) as unknown) : null;
-  };
   connect = async () => {
     const user = (await this.request("users/me?fields=id")) as {
       id?: unknown;
@@ -78,42 +58,49 @@ export class DeliveryClient implements DeliveryPort {
     validateTask(item);
     return item;
   };
-  update = async (id: string, patch: TaskPatch) => {
-    if (!/^PMON-\d+$/.test(id)) throw Error("Invalid task.");
-    const body: Record<string, unknown> = {};
-    const customFields: unknown[] = [];
-    for (const [key, value] of Object.entries(patch)) {
-      if (key === "summary" || key === "description") {
-        body[key] = value;
-        continue;
-      }
-      const name =
-        key === "priority"
-          ? "Priority"
-          : key === "complexity"
-            ? "Complexity"
-            : null;
-      const field = this.fields.get(id)?.find((candidate) => {
-        return candidate.name === name;
-      });
-      if (
-        !name ||
-        field?.$type !== "SingleEnumIssueCustomField" ||
-        typeof field.id !== "string" ||
-        !field.id
-      )
-        throw Error(
-          "This field cannot be safely delivered with its current configuration.",
-        );
-      customFields.push({
-        id: field.id,
-        name,
-        $type: field.$type,
-        value: value === null ? null : { name: value },
-      });
-    }
-    if (customFields.length) body.customFields = customFields;
-    await this.request("issues/" + id, "POST", body);
+  update = async (id: string, patch: TaskPatch, expected?: TaskItem) => {
+    issueId(id);
+    if (
+      (patch.state !== undefined || patch.assignedState !== undefined) &&
+      typeof this.fields.get(id)?.find((field) => {
+        return field.name === "State";
+      })?.value?.name !== "string"
+    )
+      throw Error("The current native State value cannot be verified.");
+    const body = issueBody(patch, this.fields.get(id) ?? []);
+    if (Object.keys(body).length)
+      await this.request("issues/" + id, "POST", body);
+    if (patch.parentId !== undefined)
+      await changeParent(
+        this.request,
+        this.get,
+        id,
+        patch.parentId,
+        expected?.parentId,
+      );
+  };
+  prepareCreate = async (item: TaskItem) => {
+    validateTask(item);
+    if (item.parentId && !(await this.get(item.parentId)))
+      throw Error("The creation parent is not readable.");
+    this.creations.set(item.id, await creationBody(this.request, item));
+  };
+  create = async (item: TaskItem) => {
+    const body = this.creations.get(item.id);
+    if (!body) throw Error("Creation was not prepared.");
+    const receipt = (await this.request(
+      "issues?fields=idReadable",
+      "POST",
+      body,
+    )) as { idReadable?: string } | null;
+    if (!receipt?.idReadable) throw Error("Missing creation receipt.");
+    return { id: issueId(receipt.idReadable) };
+  };
+  children = (id: string) => {
+    return childrenOf(this.request, id);
+  };
+  remove = async (id: string) => {
+    await this.request("issues/" + issueId(id), "DELETE");
   };
   verifyComment = async (id: string, commentId: string, text: string) => {
     if (!/^PMON-\d+$/.test(id) || !/^\d+-\d+$/.test(commentId))

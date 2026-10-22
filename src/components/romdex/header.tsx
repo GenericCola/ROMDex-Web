@@ -12,6 +12,7 @@ interface HeaderProps {
 const Header = ({ state, connect }: HeaderProps) => {
   const [message, setMessage] = useState("");
   const save = () => {
+    setMessage("");
     const done = (value: string) => {
       return setMessage(value);
     };
@@ -22,9 +23,11 @@ const Header = ({ state, connect }: HeaderProps) => {
     };
     void saveDelivery().then(done, failed);
   };
-  const status = state.connection.startsWith("Automatic delivery paused")
-    ? state.connection
-    : message;
+  const status = state.delivering
+    ? ""
+    : state.connection.startsWith("Automatic delivery paused")
+      ? state.connection
+      : message;
   const toggleSync = () => {
     void workspaceStore.change((data) => {
       data.cloud = { ...cloudData(data), autoSync: !cloudData(data).autoSync };

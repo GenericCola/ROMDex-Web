@@ -1,5 +1,7 @@
 # YouTrack delivery checkpoint
 
+Historical initial adapter checkpoint. See STRUCTURAL-DELIVERY.md for subsequent task creation, deletion, hierarchy and native State delivery.
+
 The web port now has optional cloud delivery for existing PMON task titles, notes, priority, complexity and comments. This is the first delivery adapter. Creation, deletion, hierarchy changes, State and Assigned State remain queued and stop the cycle at their position. No operation is silently skipped or discarded.
 
 The original desktop application, desktop saves, credentials, migration archive and source-only reference remain separate and unchanged. Verification uses synthetic responses. No production queue was resumed or cloud record changed as a test.

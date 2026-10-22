@@ -37,6 +37,7 @@ export const normalize = (raw: RawIssue): TaskItem => {
     description: raw.description ?? "",
     parentId: parents[0]?.idReadable ?? null,
     state: value("State") ?? "To do",
+    assignedState: value("State") ?? "To do",
     priority: value("Priority") ?? "Normal",
     complexity: value("Complexity") ?? null,
     type: value("Type") ?? "Task",

@@ -30,10 +30,12 @@ const DeleteReview = ({
     );
   };
   return (
-    <Dialog title="Delete items from this browser?" close={close}>
+    <Dialog title="Queue deletion of listed tasks?" close={close}>
       <p>
-        These items and descendants will be queued for deletion. Deletion
-        delivery is not supported yet.
+        Connected delivery permanently deletes the listed YouTrack tasks. New
+        local tasks that have never been sent are cancelled in this browser.
+        Pending edits are archived in recovery. A recovery copy cannot restore
+        deleted YouTrack IDs, comments or attachments.
       </p>
       <ul>{[item.id, ...descendants(items, item.id)].map(render)}</ul>
       <div className="dialog-actions">
