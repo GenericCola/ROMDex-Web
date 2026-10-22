@@ -4,7 +4,7 @@ interface InstallPrompt extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: string }>;
 }
-export const usePwa = () => {
+export const usePwa = (beforeUpdate?: () => Promise<void>) => {
   const [install, setInstall] = useState<InstallPrompt | null>(null);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [message, setMessage] = useState(
@@ -84,8 +84,14 @@ export const usePwa = () => {
       setMessage("Installation failed. Use the browser menu to try again.");
     }
   };
-  const reloadToUpdate = () => {
+  const reloadToUpdate = async () => {
     if (!waiting) return;
+    try {
+      await beforeUpdate?.();
+    } catch {
+      setMessage("Save or export your drafts before applying the update.");
+      return;
+    }
     const channel = new MessageChannel();
     const controllerChanged = () => {
       window.location.reload();

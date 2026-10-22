@@ -52,4 +52,13 @@ export default [
       },
     },
   },
+  // The port deliberately retains the accepted desktop CSS selectors, not Tailwind utilities.
+  {
+    files: ["src/components/romdex/**/*.tsx"],
+    rules: {
+      "better-tailwindcss/no-unknown-classes": "off",
+      "better-tailwindcss/enforce-consistent-class-order": "off",
+      "better-tailwindcss/no-conflicting-classes": "off",
+    },
+  },
 ];

@@ -1,0 +1,80 @@
+export type LampColor = "grey" | "yellow" | "blue" | "purple" | "green" | "red";
+export interface TaskComment {
+  id: string;
+  text: string;
+  author: string;
+  created: number;
+}
+export interface TaskItem {
+  id: string;
+  dbId?: string;
+  summary: string;
+  description: string;
+  parentId: string | null;
+  state: string;
+  assignedState?: string;
+  priority: string;
+  complexity: string | null;
+  type: string;
+  updated: number | null;
+  comments: TaskComment[];
+  commentCount: number;
+  url?: string;
+}
+export type TaskPatch = Partial<
+  Pick<
+    TaskItem,
+    | "summary"
+    | "description"
+    | "parentId"
+    | "state"
+    | "assignedState"
+    | "priority"
+    | "complexity"
+  >
+>;
+export type TaskOperation =
+  | { opId: string; type: "create"; issueId: string; item: TaskItem }
+  | {
+      opId: string;
+      type: "edit";
+      issueId: string;
+      base: TaskItem;
+      patch: TaskPatch;
+    }
+  | {
+      opId: string;
+      type: "comment";
+      issueId: string;
+      text: string;
+      created: number;
+    }
+  | { opId: string; type: "delete"; issueId: string; ids: string[] };
+export type DetailsMode = "default" | "expanded" | "collapsed";
+export interface WorkspaceData {
+  schemaVersion: 1;
+  newTask: { title: string; parentId: string | null } | null;
+  titleDrafts: Record<string, string>;
+  remote: TaskItem[];
+  operations: TaskOperation[];
+  order: Record<string, number>;
+  commentDrafts: Record<string, string>;
+  view: {
+    workspace: "romdex" | "npcdex";
+    scope: string | null;
+    selected: string | null;
+    search: string;
+    hideCompleted: boolean;
+    expanded: string[];
+    selectorExpanded: string[];
+    detailsMode: DetailsMode;
+    workHeight: number;
+  };
+}
+export interface WorkspaceSnapshot {
+  ready: boolean;
+  data: WorkspaceData;
+  pendingWrites: number;
+  error: string;
+  connection: string;
+}

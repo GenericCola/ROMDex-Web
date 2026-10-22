@@ -28,7 +28,7 @@ try {
   const page = await browser.newPage({
     viewport: { width: 1100, height: 900 },
   });
-  await page.goto("http://127.0.0.1:3000");
+  await page.goto("http://127.0.0.1:3000/foundation/");
   await page.getByLabel("Preview text").fill("React preview");
   await page.screenshot({
     path: "test-results/foundation-preview.png",

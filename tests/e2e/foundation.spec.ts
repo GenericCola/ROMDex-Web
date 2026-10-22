@@ -11,7 +11,7 @@ test("manifest, headers, icons and 404", async ({ request }) => {
   expect((await request.get("/missing-route/")).status()).toBe(404);
 });
 test("React controls work without horizontal overflow", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/foundation/");
   await page.getByLabel("Preview text").fill("Hello");
   await expect(page.getByRole("status").first()).toHaveText("Hello");
   await page.getByRole("button", { name: "Count: 0" }).click();
@@ -28,7 +28,7 @@ test("cached shell reopens offline in another window", async ({
   page,
   context,
 }) => {
-  await page.goto("/");
+  await page.goto("/foundation/");
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
     if (!navigator.serviceWorker.controller)
@@ -46,7 +46,7 @@ test("cached shell reopens offline in another window", async ({
     page.getByRole("heading", { name: "ROMDex", exact: true }),
   ).toBeVisible();
   const other = await context.newPage();
-  await other.goto("/");
+  await other.goto("/foundation/");
   await expect(other.getByRole("button", { name: "Count: 0" })).toBeVisible();
   await context.setOffline(false);
 });
@@ -58,7 +58,7 @@ test("updates require consent and protect other windows", async ({
   const { readFile, writeFile } = await import("node:fs/promises");
   const original = await readFile("out/sw.js", "utf8");
   try {
-    await page.goto("/");
+    await page.goto("/foundation/");
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;
       if (!navigator.serviceWorker.controller)
@@ -71,7 +71,7 @@ test("updates require consent and protect other windows", async ({
         );
     });
     const other = await context.newPage();
-    await other.goto("/");
+    await other.goto("/foundation/");
     await other.getByRole("button", { name: "Count: 0" }).click();
     await writeFile(
       "out/sw.js",

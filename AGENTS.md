@@ -1,6 +1,6 @@
 # ROMDex Web
 
-React and PWA foundation restarted on October 22, 2026. The application feature port still requires the user's explicit authorization after original feature completion.
+React and PWA foundation restarted on October 22, 2026. On October 22, 2026 the user supplied PASSKEY and authorized porting the current accepted desktop app first, then finishing remaining features on web. Keep the desktop app and its data intact as the fallback.
 
 Use YouTrack as the only application backend. Static hosting is allowed. No Payload, runtime GitHub data backend, proxy, Server Actions or production data changes.
 
