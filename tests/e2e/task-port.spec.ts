@@ -40,3 +40,10 @@ test("desktop hierarchy stays beside the work panes",async({page})=>{
   expect(sidebar.x+sidebar.width).toBeLessThanOrEqual(work.x);
   expect(Math.abs(sidebar.y-work.y)).toBeLessThan(2);
 });
+
+test("Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion",async({page})=>{
+  await page.emulateMedia({reducedMotion:"no-preference"});await page.goto("/");await page.getByRole("button",{name:"Add Epic",exact:true}).click();await page.getByRole("dialog").getByLabel("Name",{exact:true}).fill("Synthetic amber task");await page.getByRole("button",{name:"Create Item",exact:true}).click();
+  const picker=page.getByRole("combobox",{name:"Assigned Status",exact:true});const options=await picker.locator("option").allTextContents();expect(options[options.indexOf("In Development")+1]).toBe("Awaiting Testing");await picker.selectOption("Awaiting Testing");
+  const lamp=page.getByRole("img",{name:"Awaiting Testing",exact:true}).first();await expect(lamp).toBeVisible();await expect(lamp).toHaveClass("bulb amber");expect(await lamp.evaluate(el=>getComputedStyle(el,"::after").animationName)).toBe("indicator-amber-blink");
+  await expect(page.getByRole("status").first()).toHaveText("All changes saved in this browser");await page.reload();await expect(picker).toHaveValue("Awaiting Testing");await page.emulateMedia({reducedMotion:"reduce"});expect(await lamp.evaluate(el=>getComputedStyle(el,"::after").animationName)).toBe("none");expect(await lamp.evaluate(el=>getComputedStyle(el,"::after").backgroundColor)).toBe("rgb(245, 166, 35)");
+});

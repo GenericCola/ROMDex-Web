@@ -5,6 +5,7 @@ const classes = {
   yellow: "bulb yellow",
   blue: "bulb blue",
   purple: "bulb purple",
+  amber: "bulb amber",
   green: "bulb green",
   red: "bulb red",
 };

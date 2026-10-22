@@ -1,6 +1,7 @@
 import type { SharedStatus } from "@/cloud/shared-status-types";
 import type { CloudData } from "@/cloud/types";
-export type LampColor = "grey" | "yellow" | "blue" | "purple" | "green" | "red";
+export type LampColor =
+  "grey" | "yellow" | "blue" | "purple" | "amber" | "green" | "red";
 export interface TaskComment {
   id: string;
   text: string;

@@ -10,6 +10,12 @@ Browser-compatible domain rules can be reused with provenance. Renderers must be
 
 YouTrack-backed cross-device assigned status and its installable app are documented in SHARED-STATUS.md. The earlier browser-only status checkpoint is in STATUS-DELIVERY.md. Task creation, deletion and hierarchy delivery are documented in STRUCTURAL-DELIVERY.md. The earlier existing-task adapter checkpoint is in CLOUD-DELIVERY.md. The checklist below tracks full accepted-app parity.
 
+## Web status extension
+
+At the user's request, Awaiting Testing follows In Development in the status picker and displays a flashing amber light. Reduced-motion mode uses steady amber. The web core and app source share its rollup rule: it remains unfinished, below active work and Standby in precedence, and ahead of Done. The desktop reference and its data are unchanged.
+
+Verified on October 22, 2026: pnpm check passed 88 unit tests and 8 worker/build checks; pnpm build passed. The browser suite passed 123 tests with two expected mobile desktop-layout skips. The status order, flashing light, reload persistence and steady reduced-motion fallback passed across all five browser targets. Reviewed the web/server color rules and unfinished parent rollups. No live cloud change was made; live acceptance of the new State remains pending.
+
 ## Delivery checklist
 
 - [ ] React shared shell and task workflow with accepted appearance and keyboard behavior.

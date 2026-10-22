@@ -277,6 +277,11 @@ thead th,.eyebrow{text-transform:none}
 .bulb.purple::after{background:#b980ff;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #b980ff48;animation:indicator-purple-blink 1.2s steps(1,end) infinite}
 @keyframes indicator-purple-blink{0%{background:#b980ff;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #b980ff48}50%,100%{background:#45255e;box-shadow:0 0 0 0 transparent}}
 
+/* Awaiting Testing follows In Development; reduced-motion keeps the lit amber face. */
+:scope{--indicator-amber:#f5a623;--indicator-amber-dim:#73470f;--indicator-amber-glow:#f5a62348}
+.bulb.amber::after{background:var(--indicator-amber);box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) var(--indicator-amber-glow);animation:indicator-amber-blink 1.2s steps(1,end) infinite}
+@keyframes indicator-amber-blink{0%{background:var(--indicator-amber);box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) var(--indicator-amber-glow)}50%,100%{background:var(--indicator-amber-dim);box-shadow:0 0 0 0 transparent}}
+
 /* Shared geometry; layout/row behavior remains in the tool stylesheet. */
 :scope{--header-control-height:34px;--workspace-switch-size:calc(var(--header-control-height)*.8*.7);--settings-face-size:18px;--settings-art-size:12px}
 .suite-tray{border:6px solid #343e36;border-radius:10px;background:var(--screen);box-shadow:inset 0 0 15px #061d1870,0 2px 0 #64151f}

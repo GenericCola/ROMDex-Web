@@ -1,9 +1,10 @@
-// Ported from the accepted public/core.mjs statusOf/rollup rules; fixtures check their parity.
+// Ported status rules plus the requested Awaiting Testing web extension; fixtures check parity.
 const states = {
   grey: "To do",
   yellow: "In Progress",
   blue: "Standby",
   purple: "In Development",
+  amber: "Awaiting Testing",
   green: "Done",
   red: "Critical / Debugging",
 };
@@ -15,6 +16,7 @@ const statusOf = (value) => {
   )
     return "red";
   if (value === "In Development") return "purple";
+  if (value === "Awaiting Testing") return "amber";
   if (value === "In Progress") return "yellow";
   return "grey";
 };
@@ -26,6 +28,7 @@ const rollup = (colors) => {
   if (colors.some((color) => color === "grey" || color === "yellow"))
     return "yellow";
   if (colors.includes("blue")) return "blue";
+  if (colors.includes("amber")) return "amber";
   return "green";
 };
 module.exports = { states, statusOf, rollup };

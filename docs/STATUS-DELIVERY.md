@@ -1,5 +1,7 @@
 # Assigned status and parent rollups
 
+The subsequent web status extension restores Awaiting Testing after In Development, using flashing amber. It remains unfinished and rolls up after Standby, before Done; see PORT.md.
+
 This records the browser-only checkpoint at commit 65f541a. Current opt-in YouTrack-backed metadata and its setup are documented in SHARED-STATUS.md.
 
 The Assigned Status control now preserves a task's own choice separately from its effective YouTrack State. A leaf uses its assigned status. A parent uses its children's calculated colors, through the unchanged accepted desktop core. Removing or moving its last child restores the parent's assigned choice.

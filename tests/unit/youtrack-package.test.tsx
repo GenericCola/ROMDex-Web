@@ -5,15 +5,16 @@ import {readFileSync} from "node:fs";
 import {createHash} from "node:crypto";
 import {crc32} from "node:zlib";
 import {createRequire} from "node:module";
+const {version}=JSON.parse(readFileSync("youtrack-app/manifest.json","utf8"));
 test("installable app ZIP contains only the exact backend sources with valid CRCs and deterministic checksum",()=>{
-  execFileSync(process.execPath,["scripts/package-youtrack.mjs"],{stdio:"pipe"});const path="artifacts/romdex-status-1.0.1.zip",zip=readFileSync(path);let at=0;const names:string[]=[];
+  execFileSync(process.execPath,["scripts/package-youtrack.mjs"],{stdio:"pipe"});const path=`artifacts/romdex-status-${version}.zip`,zip=readFileSync(path);let at=0;const names:string[]=[];
   while(zip.readUInt32LE(at)===0x04034b50){assert.equal(zip.readUInt16LE(at+8),0);const size=zip.readUInt32LE(at+18),length=zip.readUInt16LE(at+26),name=zip.subarray(at+30,at+30+length).toString();names.push(name);const bytes=zip.subarray(at+30+length,at+30+length+size);assert.equal(crc32(bytes),zip.readUInt32LE(at+14));assert.deepEqual(bytes,readFileSync("youtrack-app/"+name));at+=30+length+size;}
   assert.deepEqual(names,["manifest.json","entity-extensions.json","status.js","capabilities.js","status-record.js","status-rules.js"]);assert.equal(zip.readUInt32LE(at),0x02014b50);assert.equal(zip.readUInt32LE(zip.length-22),0x06054b50);assert.equal(zip.readUInt16LE(zip.length-12),6);const sum=createHash("sha256").update(zip).digest("hex");assert.equal(readFileSync(path+".sha256","utf8").split(" ")[0],sum);execFileSync(process.execPath,["scripts/package-youtrack.mjs"],{stdio:"pipe"});assert.deepEqual(readFileSync(path),zip);
 });
 
 test("acceptance package isolates the two explicitly authorized NPCD fixtures and rejects production",()=>{
   execFileSync(process.execPath,["scripts/package-youtrack.mjs","--acceptance"],{stdio:"pipe"});
-  const zip=readFileSync("artifacts/romdex-status-acceptance-1.0.1.zip"),files=new Map<string,Buffer>();let at=0;
+  const zip=readFileSync(`artifacts/romdex-status-acceptance-${version}.zip`),files=new Map<string,Buffer>();let at=0;
   while(zip.readUInt32LE(at)===0x04034b50){const size=zip.readUInt32LE(at+18),length=zip.readUInt16LE(at+26),name=zip.subarray(at+30,at+30+length).toString();files.set(name,zip.subarray(at+30+length,at+30+length+size));at+=30+length+size;}
   const manifest=JSON.parse(files.get("manifest.json")!.toString());assert.equal(manifest.name,"romdex-status-acceptance");assert.equal(manifest.widgets.length,1);assert.ok(files.has("fault.js"));assert.ok(files.has("acceptance/panel.js"));
   for(const name of ["status-record.js","status-rules.js","entity-extensions.json"])assert.deepEqual(files.get(name),readFileSync("youtrack-app/"+name));
