@@ -1,5 +1,7 @@
+import { validateQueue } from "@/cloud/validation";
 import { indexTree } from "./accepted/core.mjs";
 import type { WorkspaceData } from "./types";
+import { validateTask } from "./validate-task";
 export const emptyWorkspace = (): WorkspaceData => {
   return {
     schemaVersion: 1,
@@ -45,19 +47,14 @@ export const validateWorkspace = (value: unknown): WorkspaceData => {
     );
   const ids = new Set<string>();
   for (const item of data.remote) {
-    if (
-      typeof item.id !== "string" ||
-      !item.id ||
-      ids.has(item.id) ||
-      typeof item.summary !== "string" ||
-      typeof item.description !== "string" ||
-      !Array.isArray(item.comments)
-    )
+    validateTask(item);
+    if (ids.has(item.id))
       throw Error(
         "Invalid task data. Your existing browser data has been kept.",
       );
     ids.add(item.id);
   }
+  validateQueue(data);
   indexTree(data.remote, data.order);
   return data;
 };

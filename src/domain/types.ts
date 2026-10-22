@@ -1,3 +1,4 @@
+import type { CloudData } from "@/cloud/types";
 export type LampColor = "grey" | "yellow" | "blue" | "purple" | "green" | "red";
 export interface TaskComment {
   id: string;
@@ -53,6 +54,7 @@ export type TaskOperation =
 export type DetailsMode = "default" | "expanded" | "collapsed";
 export interface WorkspaceData {
   schemaVersion: 1;
+  cloud?: CloudData;
   newTask: { title: string; parentId: string | null } | null;
   titleDrafts: Record<string, string>;
   remote: TaskItem[];
@@ -74,6 +76,7 @@ export interface WorkspaceData {
 export interface WorkspaceSnapshot {
   ready: boolean;
   updating: boolean;
+  delivering: boolean;
   data: WorkspaceData;
   pendingWrites: number;
   error: string;

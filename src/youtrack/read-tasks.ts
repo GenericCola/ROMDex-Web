@@ -1,6 +1,6 @@
 import type { TaskItem } from "@/domain/types";
 export const YOUTRACK_ORIGIN = "https://thegobindsingh.youtrack.cloud";
-interface RawIssue {
+export interface RawIssue {
   id: string;
   idReadable: string;
   summary: string;
@@ -11,7 +11,7 @@ interface RawIssue {
   customFields?: { name: string; value?: { name?: string } | null }[];
   commentsCount?: number;
 }
-const normalize = (raw: RawIssue): TaskItem => {
+export const normalize = (raw: RawIssue): TaskItem => {
   if (
     raw.project.shortName !== "PMON" ||
     !/^PMON-\d+$/.test(raw.idReadable) ||

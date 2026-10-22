@@ -1,10 +1,20 @@
+import { cloudData } from "@/cloud/types";
 import { descendants, materialize, validateMove } from "./accepted/core.mjs";
 import type { TaskItem, TaskPatch, WorkspaceData } from "./types";
+const requireReviewClear = (data: WorkspaceData) => {
+  if (
+    Object.values(cloudData(data).records).some((record) => {
+      return record.status !== "confirmed";
+    })
+  )
+    throw Error("Review cloud delivery before changing the queue.");
+};
 export const createTask = (
   data: WorkspaceData,
   parentId: string | null,
   title: string,
 ): string => {
+  requireReviewClear(data);
   const summary = title.trim();
   if (!summary) throw Error("Enter an item name.");
   if (
@@ -37,6 +47,7 @@ export const createTask = (
   return id;
 };
 export const editTask = (data: WorkspaceData, id: string, patch: TaskPatch) => {
+  requireReviewClear(data);
   const items = materialize(data.remote, data.operations);
   const item = items.find((candidate) => {
     return candidate.id === id;
@@ -65,6 +76,7 @@ export const editTask = (data: WorkspaceData, id: string, patch: TaskPatch) => {
   });
 };
 export const deleteTask = (data: WorkspaceData, id: string) => {
+  requireReviewClear(data);
   const items = materialize(data.remote, data.operations);
   const ids = [id, ...descendants(items, id)];
   data.operations.push({
@@ -78,6 +90,7 @@ export const deleteTask = (data: WorkspaceData, id: string) => {
   if (data.view.scope && ids.includes(data.view.scope)) data.view.scope = null;
 };
 export const postComment = (data: WorkspaceData, id: string) => {
+  requireReviewClear(data);
   const text = data.commentDrafts[id]?.trim();
   if (!text) return;
   data.operations.push({

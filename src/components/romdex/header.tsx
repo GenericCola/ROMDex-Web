@@ -1,44 +1,34 @@
+import { deliveryConnected, saveDelivery } from "@/cloud/session";
+import { cloudData } from "@/cloud/types";
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import Lamp from "./lamp";
+import WorkspaceMenu from "./workspace-menu";
 interface HeaderProps {
   state: WorkspaceSnapshot;
   connect: () => void;
 }
 const Header = ({ state, connect }: HeaderProps) => {
-  const [menu, setMenu] = useState(false);
   const [message, setMessage] = useState("");
-  const toggle = () => {
-    return setMenu(!menu);
-  };
-  const close = () => {
-    return setMenu(false);
-  };
   const save = () => {
-    const done = () => {
-      return setMessage(
-        "Saved in this browser. YouTrack delivery is not enabled yet.",
-      );
+    const done = (value: string) => {
+      return setMessage(value);
     };
     const failed = (error: unknown) => {
       return setMessage(
-        error instanceof Error ? error.message : "Local save failed.",
+        error instanceof Error ? error.message : "Cloud delivery failed",
       );
     };
-    void workspaceStore.flush().then(done, failed);
+    void saveDelivery().then(done, failed);
   };
-  const changeWorkspace = (workspace: "romdex" | "npcdex") => {
+  const status = state.connection.startsWith("Automatic delivery paused")
+    ? state.connection
+    : message;
+  const toggleSync = () => {
     void workspaceStore.change((data) => {
-      data.view.workspace = workspace;
+      data.cloud = { ...cloudData(data), autoSync: !cloudData(data).autoSync };
     });
-    close();
-  };
-  const openRomdex = () => {
-    return changeWorkspace("romdex");
-  };
-  const openNpcdex = () => {
-    return changeWorkspace("npcdex");
   };
   return (
     <>
@@ -57,48 +47,21 @@ const Header = ({ state, connect }: HeaderProps) => {
           </div>
         </div>
         <div className="header-actions">
-          <div className="suite-menu-anchor">
-            <button
-              id="workspace-switcher"
-              className="workspace-switcher"
-              aria-label="Switch Workspace"
-              title="Switch Workspace"
-              aria-haspopup="menu"
-              aria-expanded={menu}
-              onClick={toggle}
-            />
-            {menu && (
-              <div
-                className="suite-popover"
-                role="menu"
-                aria-label="Workspaces"
-              >
-                <button
-                  role="menuitemradio"
-                  aria-checked={state.data.view.workspace === "romdex"}
-                  onClick={openRomdex}
-                >
-                  ROMDex
-                </button>
-                <button
-                  role="menuitemradio"
-                  aria-checked={state.data.view.workspace === "npcdex"}
-                  onClick={openNpcdex}
-                >
-                  NPCDex
-                </button>
-              </div>
-            )}
-          </div>
+          <WorkspaceMenu workspace={state.data.view.workspace} />
           <button
             className="auto-sync-toggle"
+            {...{ autoComplete: "off" }}
             role="switch"
             aria-label="Auto-Sync Data"
-            aria-checked={false}
-            disabled
-            title="Cloud delivery is not enabled in this port yet"
+            aria-checked={cloudData(state.data).autoSync}
+            disabled={!deliveryConnected()}
+            onClick={toggleSync}
+            title="Deliver supported queued changes every 10 seconds while connected"
           >
-            Auto-Sync Data <span className="toggle-value">Off</span>
+            Auto-Sync Data{" "}
+            <span className="toggle-value">
+              {cloudData(state.data).autoSync ? "On" : "Off"}
+            </span>
           </button>
           <div className="save-controls">
             <button
@@ -138,9 +101,9 @@ const Header = ({ state, connect }: HeaderProps) => {
           </div>
         </div>
       </header>
-      {message && (
+      {status && (
         <p className="port-notice" role="status">
-          {message}
+          {status}
         </p>
       )}
     </>

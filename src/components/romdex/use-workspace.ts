@@ -1,3 +1,4 @@
+import { automaticDelivery } from "@/cloud/session";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useSyncExternalStore } from "react";
 const beforeUnload = (event: BeforeUnloadEvent) => {
@@ -9,8 +10,10 @@ const beforeUnload = (event: BeforeUnloadEvent) => {
 };
 const connectWorkspace = () => {
   void workspaceStore.start();
+  const timer = window.setInterval(automaticDelivery, 10000);
   window.addEventListener("beforeunload", beforeUnload);
   const cleanup = () => {
+    window.clearInterval(timer);
     return window.removeEventListener("beforeunload", beforeUnload);
   };
   return cleanup;

@@ -32,8 +32,8 @@ const DeleteReview = ({
   return (
     <Dialog title="Delete items from this browser?" close={close}>
       <p>
-        These items and descendants will be queued for deletion. Cloud delivery
-        is not enabled.
+        These items and descendants will be queued for deletion. Deletion
+        delivery is not supported yet.
       </p>
       <ul>{[item.id, ...descendants(items, item.id)].map(render)}</ul>
       <div className="dialog-actions">

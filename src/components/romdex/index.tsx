@@ -1,4 +1,6 @@
 "use client";
+import { cloudData } from "@/cloud/types";
+
 import { materialize } from "@/domain/accepted/core.mjs";
 import { workspaceStore } from "@/domain/workspace-store";
 import PwaControls from "@components/pwa-controls";
@@ -43,17 +45,19 @@ const Romdex = () => {
   const mode = view.detailsMode;
   const style = { "--work-height": view.workHeight + "%" } as CSSProperties;
   return (
-    <div className="romdex-app" inert={state.updating}>
+    <div className="romdex-app" inert={state.updating || state.delivering}>
       <Header state={state} connect={openConnection} />
       <div className="port-workspace-status">
         <p role="status">
           {state.error
             ? "Local save needs attention"
-            : !state.ready
-              ? "Opening browser workspace…"
-              : state.pendingWrites
-                ? "Saving in this browser…"
-                : "All changes saved in this browser"}
+            : state.delivering
+              ? "Delivering supported queued changes..."
+              : !state.ready
+                ? "Opening browser workspace…"
+                : state.pendingWrites
+                  ? "Saving in this browser…"
+                  : "All changes saved in this browser"}
         </p>
         <button onClick={exportRecovery} disabled={!state.ready}>
           Export Recovery Copy
@@ -65,7 +69,15 @@ const Romdex = () => {
         </p>
       )}
       {state.ready && (
-        <div className="device-body" inert={!!state.error}>
+        <div
+          className="device-body"
+          inert={
+            !!state.error ||
+            Object.values(cloudData(state.data).records).some((record) => {
+              return record.status !== "confirmed";
+            })
+          }
+        >
           <Selectors data={state.data} items={items} add={add} />
           {view.workspace === "romdex" ? (
             <main
@@ -106,8 +118,8 @@ const Romdex = () => {
       <details className="port-notice">
         <summary>Web port status and updates</summary>
         <p>
-          Task workflow preview · local browser saves · YouTrack reads only ·
-          cloud delivery off
+          Task workflow preview · durable browser saves · YouTrack task reads ·
+          optional session delivery for existing tasks
         </p>
         <PwaControls beforeUpdate={workspaceStore.prepareUpdate} />
       </details>

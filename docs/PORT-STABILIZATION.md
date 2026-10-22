@@ -1,5 +1,7 @@
 # Task-port stabilization
 
+Historical stabilization checkpoint. See CLOUD-DELIVERY.md for the subsequent delivery milestone.
+
 Resumed at the user's request on October 22, 2026. The application port remains in progress on codex/accepted-app-port.
 
 ## Changes

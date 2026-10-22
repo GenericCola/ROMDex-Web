@@ -80,9 +80,7 @@ const TaskWriting = ({
         <section>
           <div>{[...item.comments, ...queued].map(renderComment)}</div>
           {item.commentCount > item.comments.length && (
-            <p>
-              Remote comments are not downloaded by the initial task reader yet.
-            </p>
+            <p>Some remote comments have not been downloaded yet.</p>
           )}
           <textarea
             aria-label="Write a Comment"

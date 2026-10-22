@@ -8,6 +8,8 @@ The migration archive's installed-source is the accepted 0.5.15 client with Octo
 
 Browser-compatible domain rules can be reused with provenance. Renderers must be React; no legacy HTML renderer or iframe wrapper. The first reused modules are public/core.mjs and its pure plan-queue.mjs dependency, for hierarchy, rollups, operation materialization and conflict contracts. Shared Poké Ball/settings SVGs are original UI assets. Never copy source examples, real content or saved maps into public web fixtures.
 
+The initial existing-task delivery adapter and its safety limits are documented in CLOUD-DELIVERY.md. The checklist below tracks full accepted-app parity.
+
 ## Delivery checklist
 
 - [ ] React shared shell and task workflow with accepted appearance and keyboard behavior.

@@ -4,6 +4,7 @@ import { workspaceStore } from "@/domain/workspace-store";
 import { readTasks } from "@/youtrack/read-tasks";
 import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
+import DeliveryControls from "./delivery-controls";
 import Dialog from "./dialog";
 const Connection = ({ close }: { close: () => void }) => {
   const [token, setToken] = useState("");
@@ -41,13 +42,15 @@ const Connection = ({ close }: { close: () => void }) => {
         data.remote = preview;
       })
       .then(() => {
-        workspaceStore.setConnection("Read-only copy · YouTrack delivery off");
+        if (workspaceStore.getSnapshot().error) return;
+        workspaceStore.setConnection("YouTrack copy saved in this browser");
         close();
       });
   };
   return (
     <Dialog title="Connection Details" close={close}>
       <p>thegobindsingh.youtrack.cloud · PMON</p>
+      <DeliveryControls />
       <p className="port-notice">
         This step reads tasks only. No cloud writes, field setup or desktop-data
         import runs. The token stays in this dialog's memory and is discarded
