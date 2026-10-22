@@ -2,6 +2,8 @@
 
 The owner authorized test-only app installation and live testing on October 22, 2026. No disposable project exists. The owner then explicitly chose NPCD, an existing project, for testing. Existing NPCD issues and settings must be preserved. Production PMON sharing remains off, and the desktop app, saves, source reference and credentials remain intact.
 
+The owner subsequently authorized development against live PMON, the current ROMDex task project. PMON field-schema and task reads are verified through MCP. This allows live reads and compatibility development; existing PMON issues are not synthetic acceptance fixtures. The NPCD test app and its fixed fixture allowlist remain separate. No installed app was changed or activated in the PMON compatibility checkpoint. See PMON-DEVELOPMENT.md.
+
 ## Installed state and blocker
 
 A separate app named romdex-status-acceptance, titled ROMDex acceptance - synthetic issues only, version 1.0.1, is installed and attached only to NPCD. Its YouTrack app ID is 155-84. It is inactive system-wide. GenericCola can upload a new app through NPCD settings but cannot manage its system Active switch. The UI explicitly says the account does not have permission to manage this setting. The project switch is disabled because the app is deactivated system-wide.

@@ -29,7 +29,9 @@ export class SharedStatusClient implements SharedStatusPort {
       !("app" in result) ||
       result.app !== "romdex-status" ||
       !("project" in result) ||
-      result.project !== "PMON"
+      result.project !== "PMON" ||
+      !("statusRules" in result) ||
+      result.statusRules !== 2
     )
       throw Error(
         "The ROMDex status app is unavailable or incompatible. Shared status was stopped.",

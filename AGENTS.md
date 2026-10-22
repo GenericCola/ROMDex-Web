@@ -4,6 +4,8 @@ React and PWA foundation restarted on October 22, 2026. On October 22, 2026 the 
 
 On October 22, 2026 the user authorized test-only YouTrack app installation and live acceptance testing, then selected existing NPCD because no disposable project is available. Restrict mutations to the new private fixtures NPCD-872 and NPCD-873. Preserve all existing NPCD issues and settings; production PMON sharing remains off. See docs/LIVE-ACCEPTANCE.md for the administrator activation blocker.
 
+On October 22, 2026 the owner authorized continuing web development against live PMON, the current ROMDex task project. Live reads and PMON compatibility work are allowed. Keep developer acceptance mutations confined to the existing NPCD fixture allowlist; do not use existing PMON tasks or live queues as tests. User-triggered web delivery remains explicit and session-scoped. Preserve the installed desktop app, saved data and credentials.
+
 Use YouTrack as the only application backend. Static hosting is allowed. No Payload, runtime GitHub data backend, proxy, Server Actions or production data changes.
 
 Read README.md, docs/PROJECT.md, docs/PWA.md, docs/CONVENTIONS.md and docs/DESIGN.md before editing. Preserve compatible template components and tooling. Use ponytail (full), ponytail-review and human-writing in .agents/skills. Fetch current library documentation and inspect installed Next.js docs before using unfamiliar APIs.

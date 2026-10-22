@@ -1,6 +1,8 @@
 import {applyPlanSync} from './plan-queue.mjs';
 export const STATUS = {grey:'Untouched',yellow:'In Progress',blue:'Standby',purple:'In Development',amber:'Awaiting Testing',green:'Complete',red:'Critical'};
 export const STATES = {grey:'To do',yellow:'In Progress',blue:'Standby',purple:'In Development',amber:'Awaiting Testing',green:'Done',red:'Critical / Debugging'};
+// The desktop display label maps to the existing native PMON State.
+export const youTrackState = value => value === 'Awaiting Testing' ? 'Needs Testing' : value;
 export const FIELDS = ['summary','description','state','priority','complexity','parentId','assignedState','assignee','dueDate','tags'];
 export const isEditableField=key=>FIELDS.includes(key)||/^custom:[-\w]{1,100}$/.test(key);
 export const clone = x => structuredClone(x);
@@ -18,18 +20,18 @@ export function statusOf(value){
   if(['Standby','Prompt Ready'].includes(value)) return 'blue';
   if(['Critical / Debugging','Critical','Debugging','Blocked'].includes(value)) return 'red';
   if(value==='In Development')return 'purple';
-  if(value==='Awaiting Testing')return 'amber';
+  if(value==='Awaiting Testing'||value==='Needs Testing')return 'amber';
   if(value==='In Progress') return 'yellow';
   return 'grey';
 }
 export function rollup(colors){
   if(!colors.length) return null;
+  if(colors.includes('amber')) return 'amber';
   if(colors.includes('red')) return 'red';
   if(colors.includes('purple'))return 'purple';
   if(colors.every(x=>x==='grey')) return 'grey';
   if(colors.some(x=>x==='grey'||x==='yellow')) return 'yellow';
   if(colors.includes('blue')) return 'blue';
-  if(colors.includes('amber')) return 'amber';
   return 'green';
 }
 export function indexTree(items,order={}){

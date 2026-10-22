@@ -12,7 +12,7 @@ YouTrack-backed cross-device assigned status and its installable app are documen
 
 ## Web status extension
 
-At the user's request, Awaiting Testing follows In Development in the status picker and displays a flashing amber light. Reduced-motion mode uses steady amber. The web core and app source share its rollup rule: it remains unfinished, below active work and Standby in precedence, and ahead of Done. The desktop reference and its data are unchanged.
+At the user's request, Awaiting Testing follows In Development in the status picker and displays a flashing amber light. Reduced-motion mode uses steady amber. The current web core and app source give testing children precedence over every other sibling status, through all ancestor levels, matching the owner's subsequent desktop requirement. ROMDex displays Awaiting Testing and uses PMON's existing Needs Testing State for native writes. The immutable desktop reference and saved data remain intact. See PMON-DEVELOPMENT.md for the current compatibility checkpoint.
 
 Verified on October 22, 2026: pnpm check passed 88 unit tests and 8 worker/build checks; pnpm build passed. The browser suite passed 123 tests with two expected mobile desktop-layout skips. The status order, flashing light, reload persistence and steady reduced-motion fallback passed across all five browser targets. Reviewed the web/server color rules and unfinished parent rollups. No live cloud change was made; live acceptance of the new State remains pending.
 

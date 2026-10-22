@@ -1,4 +1,4 @@
-import { indexTree, STATES } from "@/domain/accepted/core.mjs";
+import { indexTree, STATES, youTrackState } from "@/domain/accepted/core.mjs";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
 import { observeStatus } from "./assigned-status";
@@ -43,9 +43,11 @@ export const readRollupTree = async (
   const desired = (item: TaskItem) => {
     const color = tree.colors.get(item.id);
     if (!color) throw Error("A task has no calculated status.");
-    return tree.children.get(item.id)?.length
-      ? STATES[color]
-      : (item.assignedState ?? item.state);
+    return youTrackState(
+      tree.children.get(item.id)?.length
+        ? STATES[color]
+        : (item.assignedState ?? item.state),
+    );
   };
   const next = deepest.find((item) => {
     return item.state !== desired(item);

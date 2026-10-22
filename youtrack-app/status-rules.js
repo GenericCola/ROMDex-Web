@@ -8,6 +8,7 @@ const states = {
   green: "Done",
   red: "Critical / Debugging",
 };
+const youTrackState = (value) => value === "Awaiting Testing" ? "Needs Testing" : value;
 const statusOf = (value) => {
   if (["Done", "Fixed", "Complete"].includes(value)) return "green";
   if (["Standby", "Prompt Ready"].includes(value)) return "blue";
@@ -16,19 +17,19 @@ const statusOf = (value) => {
   )
     return "red";
   if (value === "In Development") return "purple";
-  if (value === "Awaiting Testing") return "amber";
+  if (value === "Awaiting Testing" || value === "Needs Testing") return "amber";
   if (value === "In Progress") return "yellow";
   return "grey";
 };
 const rollup = (colors) => {
   if (!colors.length) return null;
+  if (colors.includes("amber")) return "amber";
   if (colors.includes("red")) return "red";
   if (colors.includes("purple")) return "purple";
   if (colors.every((color) => color === "grey")) return "grey";
   if (colors.some((color) => color === "grey" || color === "yellow"))
     return "yellow";
   if (colors.includes("blue")) return "blue";
-  if (colors.includes("amber")) return "amber";
   return "green";
 };
-module.exports = { states, statusOf, rollup };
+module.exports = { states, statusOf, rollup, youTrackState };

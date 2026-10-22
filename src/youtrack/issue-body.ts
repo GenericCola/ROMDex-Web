@@ -1,3 +1,4 @@
+import { youTrackState } from "@/domain/accepted/core.mjs";
 import type { TaskItem, TaskPatch } from "@/domain/types";
 import type { YouTrackRequest } from "./request";
 import { list } from "./request";
@@ -45,7 +46,15 @@ export const issueBody = (
       id: field.id,
       name,
       $type: field.$type,
-      value: value === null ? null : { name: value },
+      value:
+        value === null
+          ? null
+          : {
+              name:
+                key === "state" && typeof value === "string"
+                  ? youTrackState(value)
+                  : value,
+            },
     });
   }
   if (customFields.size) body.customFields = [...customFields.values()];

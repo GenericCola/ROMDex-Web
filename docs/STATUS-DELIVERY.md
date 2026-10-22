@@ -1,6 +1,6 @@
 # Assigned status and parent rollups
 
-The subsequent web status extension restores Awaiting Testing after In Development, using flashing amber. It remains unfinished and rolls up after Standby, before Done; see PORT.md.
+The subsequent web status extension restores Awaiting Testing after In Development, using flashing amber. It now takes precedence whenever any child awaits testing, including through higher ancestors. Native PMON writes use the existing Needs Testing State; see PMON-DEVELOPMENT.md.
 
 This records the browser-only checkpoint at commit 65f541a. Current opt-in YouTrack-backed metadata and its setup are documented in SHARED-STATUS.md.
 
@@ -20,7 +20,7 @@ New tasks are created with their assigned status as initial native State. Their 
 
 ## Calculation and delivery
 
-The accepted precedence remains Critical, then In Development; all untouched children produce To do, any remaining untouched or In Progress child produces In Progress, then Standby, otherwise Done. A parent's own choice stays saved while children determine its effective status.
+The current precedence starts with any Awaiting Testing child, then Critical, then In Development; all untouched children produce To do, any remaining untouched or In Progress child produces In Progress, then Standby, otherwise Done. A parent's own choice stays saved while children determine its effective status.
 
 A durable pending-rollup flag survives even when the user queue is empty. Save Changes and opted-in Auto-Sync process this work. The Save lamp stays red while it remains. A failed cycle suspends automatic delivery. Reconnecting or a successful explicit Save can resume it after any required review. Reload requires reconnecting the session token and preserves the sync preference.
 

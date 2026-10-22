@@ -13,3 +13,30 @@ test("an interrupted parent rollup preserves the assignment and cannot be replay
   const s=await structuralFixture(page,"status-lost");s.tasks.get("PMON-900003")!.state="Done";await select(page,"Fixture Root");await page.getByRole("combobox",{name:"Assigned Status",exact:true}).selectOption("In Development");await s.connect();await s.save();await s.uncertain();expect(s.tasks.get("PMON-900001")?.state).toBe("Done");expect(s.writes.filter(write=>write.method==="POST")).toHaveLength(1);
   await page.reload();await s.connect();await s.save();await expect(page.getByText("An earlier request has an uncertain result. Review it before sending more changes.",{exact:true})).toBeVisible();expect(s.writes.filter(write=>write.method==="POST")).toHaveLength(1);await page.getByRole("button",{name:"Connection Details",exact:true}).click();await expect(page.getByRole("button",{name:"Rebase remaining edit after readback",exact:true})).toHaveCount(0);await page.getByRole("button",{name:"Read back and confirm; do not resend",exact:true}).click();await expect(page.getByRole("heading",{name:"Uncertain delivery",exact:true})).toHaveCount(0);await page.getByRole("button",{name:"Close Connection Details",exact:true}).click();await s.save();await s.confirmed();expect(s.writes.filter(write=>write.method==="POST")).toHaveLength(1);await expect(page.getByRole("combobox",{name:"Assigned Status",exact:true})).toHaveValue("In Development");
 });
+
+test("PMON native testing reads keep the display label and priority, then deliver mapped parent status",async({page})=>{
+  const s=await structuralFixture(page);
+  s.tasks.get("PMON-900003")!.state="Needs Testing";
+  s.tasks.get("PMON-900003")!.priority="Major";
+  s.tasks.get("PMON-900002")!.parentId="PMON-900001";
+  s.tasks.get("PMON-900002")!.state="In Development";
+  await page.getByRole("button",{name:"Connection Details",exact:true}).click();
+  await page.getByLabel("YouTrack Permanent Token",{exact:true}).fill("fixture-read-token");
+  await page.getByRole("button",{name:"Read YouTrack Tasks",exact:true}).click();
+  await page.getByRole("button",{name:"Save 3 Tasks in This Browser",exact:true}).click();
+  const root=page.getByRole("row").filter({has:page.getByRole("button",{name:"Fixture Root",exact:true})});
+  await expect(root.getByRole("img",{name:"Awaiting Testing",exact:true})).toHaveClass("bulb amber");
+  await page.getByRole("button",{name:"Expand Fixture Root",exact:true}).last().click();
+  await select(page,"Fixture Child");
+  await expect(page.getByRole("combobox",{name:"Assigned Status",exact:true})).toHaveValue("Awaiting Testing");
+  const priority=page.getByRole("combobox",{name:"Item Priority",exact:true});
+  await expect(priority).toHaveValue("Major");
+  expect(await priority.locator("option").allTextContents()).toEqual(["Minor","Normal","Major","Critical","Show-stopper"]);
+  expect(s.writes).toHaveLength(0);
+  await s.connect();await s.save();await s.confirmed();
+  expect(s.tasks.get("PMON-900001")?.state).toBe("Needs Testing");
+  expect(s.tasks.get("PMON-900003")?.state).toBe("Needs Testing");
+  const writes=s.writes.length;await s.save();await s.confirmed();expect(s.writes).toHaveLength(writes);
+  await expect(page.getByText("All changes saved in this browser",{exact:true})).toBeVisible();
+  await page.reload();await expect(page.getByRole("combobox",{name:"Assigned Status",exact:true})).toHaveValue("Awaiting Testing");
+});

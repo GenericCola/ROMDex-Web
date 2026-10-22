@@ -39,8 +39,8 @@ const calculate = (root, user) => {
   if (!children || typeof children.isEmpty !== "function")
     records.fail(422, "The Subtask relationship is unavailable.");
   if (children.isEmpty())
-    return records.snapshot(root, records.load(root)).assignedState;
-  return rules.states[visit(root)];
+    return rules.youTrackState(records.snapshot(root, records.load(root)).assignedState);
+  return rules.youTrackState(rules.states[visit(root)]);
 };
 const read = (ctx) => {
   check(ctx.issue, ctx.currentUser);
@@ -69,7 +69,7 @@ const write = (ctx) => {
     records.fail(409, "Assigned status or task revision changed.");
   if (current.revision >= Number.MAX_SAFE_INTEGER)
     records.fail(422, "Status revision limit reached.");
-  const value = field.values.find((candidate) => candidate.name === body.value);
+  const value = field.values.find((candidate) => candidate.name === rules.youTrackState(body.value));
   if (!value) records.fail(422, "The requested State value is unavailable.");
   if (
     body.kind === "rollup" &&

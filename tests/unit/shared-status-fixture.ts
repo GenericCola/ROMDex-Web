@@ -8,7 +8,7 @@ export const sharedBackend=(initial:TaskItem[])=>{
   const options={appMissing:false,corrupt:false,lostAssign:false,lostRollup:false,workflowReject:false};
   const hooks={beforeWrite:(_id:string,_body:unknown)=>{}};
   const writes:{id:string;body:unknown;status:number}[]=[];const ordinaryWrites:{id:string;body:unknown}[]=[];
-  const states=["To do","In Progress","Standby","In Development","Awaiting Testing","Done","Critical / Debugging","Fixed","Open"];
+  const states=["To do","In Progress","Standby","In Development","Needs Testing","Done","Critical / Debugging","Fixed","Open"];
   const wrap=(id:string,map=tasks):unknown=>{
     const task=map.get(id)!;
     const stateField={typeName:"state[1]",values:states.map(name=>({name})),isVisibleInIssue:()=>!task.hiddenState};

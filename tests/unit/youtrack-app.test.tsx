@@ -31,9 +31,9 @@ test("a workflow failure cannot leave half a shared rollup committed",()=>{
   const s=sharedBackend([item(),item(child,"Done",root)]);s.options.workflowReject=true;assert.throws(()=>s.call(root,"POST",request(s,root,"rollup","Done")),/workflow/);assert.equal(s.tasks.get(root)?.metadata,undefined);assert.equal(s.tasks.get(root)?.state,"To do");
 });
 test("backend status rules match accepted desktop aliases and all three-child color combinations",()=>{
-  for(const alias of ["Done","Fixed","Complete","Standby","Prompt Ready","Critical / Debugging","Critical","Debugging","Blocked","In Development","Awaiting Testing","In Progress","Open"])assert.equal(rules.statusOf(alias),statusOf(alias));assert.deepEqual(rules.states,STATES);const colors=Object.keys(STATES);for(const a of colors)for(const b of colors)for(const c of colors)assert.equal(rules.rollup([a,b,c]),rollup([a,b,c]));
+  for(const alias of ["Done","Fixed","Complete","Standby","Prompt Ready","Critical / Debugging","Critical","Debugging","Blocked","In Development","Awaiting Testing","Needs Testing","In Progress","Open"])assert.equal(rules.statusOf(alias),statusOf(alias));assert.deepEqual(rules.states,STATES);const colors=Object.keys(STATES);for(const a of colors)for(const b of colors)for(const c of colors)assert.equal(rules.rollup([a,b,c]),rollup([a,b,c]));
 });
 
 test("Awaiting Testing rolls up through the shared handler without losing the parent's own status",()=>{
-  const s=sharedBackend([item(),item(child,"Awaiting Testing",root)]);const body=request(s,root,"rollup","Awaiting Testing");assert.equal(s.call(root,"POST",body).status,200);const read=s.call(root,"GET").body as {state:string;assignedState:string};assert.equal(read.state,"Awaiting Testing");assert.equal(read.assignedState,"To do");
+  const s=sharedBackend([item(),item(child,"Awaiting Testing",root)]);const body=request(s,root,"rollup","Needs Testing");assert.equal(s.call(root,"POST",body).status,200);const read=s.call(root,"GET").body as {state:string;assignedState:string};assert.equal(read.state,"Needs Testing");assert.equal(read.assignedState,"To do");
 });

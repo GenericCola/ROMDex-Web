@@ -49,6 +49,10 @@ const TaskProperties = ({
       return editTask(next, item.id, { complexity: value || null });
     });
   };
+  const assignedState = item.assignedState ?? item.state;
+  const displayedState =
+    assignedState === "Needs Testing" ? STATES.amber : assignedState;
+  const priorities = ["Minor", "Normal", "Major", "Critical", "Show-stopper"];
   return (
     <section className="detail-summary" aria-label="Task Properties">
       <input
@@ -68,9 +72,11 @@ const TaskProperties = ({
           Status
           <select
             aria-label="Assigned Status"
-            value={item.assignedState ?? item.state}
+            value={displayedState}
             onChange={state}
           >
+            {!Object.values(STATES).includes(displayedState) &&
+              option(displayedState)}
             {Object.values(STATES).map(option)}
           </select>
         </label>
@@ -81,7 +87,8 @@ const TaskProperties = ({
             value={item.priority}
             onChange={priority}
           >
-            {["Low", "Normal", "High", "Critical", "Show-stopper"].map(option)}
+            {!priorities.includes(item.priority) && option(item.priority)}
+            {priorities.map(option)}
           </select>
         </label>
         <label>

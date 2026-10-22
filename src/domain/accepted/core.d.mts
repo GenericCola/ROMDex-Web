@@ -1,6 +1,7 @@
 import type {TaskItem, TaskOperation, LampColor, TaskPatch} from "../types";
 export const STATUS: Record<LampColor,string>;
 export const STATES: Record<LampColor,string>;
+export function youTrackState(value:string):string;
 export function statusOf(value:string):LampColor;
 export function rollup(colors:LampColor[]):LampColor|null;
 export function hasMeaningfulNotes(value:string):boolean;

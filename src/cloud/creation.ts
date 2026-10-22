@@ -1,3 +1,4 @@
+import { youTrackState } from "@/domain/accepted/core.mjs";
 import type { TaskItem, TaskOperation, WorkspaceData } from "@/domain/types";
 import { equal } from "./delivery-helpers";
 import { acknowledge, attemptDelivery, recordDelivery } from "./journal";
@@ -14,7 +15,7 @@ export const matchesCreation = (item: TaskItem, remote: TaskItem) => {
   ].every((key) => {
     return equal(
       key === "state"
-        ? (item.assignedState ?? item.state)
+        ? youTrackState(item.assignedState ?? item.state)
         : item[key as keyof TaskItem],
       remote[key as keyof TaskItem],
     );
