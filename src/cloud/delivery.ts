@@ -1,11 +1,11 @@
-import { reconcile } from "@/domain/accepted/core.mjs";
-import type { TaskItem, WorkspaceData } from "@/domain/types";
+import type { WorkspaceData } from "@/domain/types";
+import { seedAssigned } from "./assigned-status";
 import { cancelLocalDeletions } from "./cancel-local-deletions";
 import { deliverCreation } from "./creation";
 import { creationDependency } from "./creation-dependency";
 import { deliverDeletion } from "./deletion";
-import { equal, supported } from "./delivery-helpers";
-import { acknowledge, attemptDelivery, recordDelivery } from "./journal";
+import { deliverExisting } from "./existing-delivery";
+import { deliverRollup, planRollup } from "./rollup";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
 import { validateQueue } from "./validation";
@@ -31,9 +31,13 @@ export const deliverQueue = async (
     throw Error("This browser queue belongs to a different YouTrack account.");
   await commit((data) => {
     cancelLocalDeletions(data);
+    seedAssigned(data);
     data.cloud = { ...cloudData(data), accountId: port.accountId };
   });
-  while (snapshot().operations.length) {
+  while (snapshot().operations.length || cloudData(snapshot()).rollupPending) {
+    const planned = !snapshot().operations.length
+      ? await planRollup(snapshot, commit, port)
+      : undefined;
     const first = snapshot().operations[0];
     if (!first) return;
     const dependency = creationDependency(snapshot());
@@ -56,6 +60,17 @@ export const deliverQueue = async (
       );
     if (record?.status === "conflict")
       throw Error("Review the conflicting operation before continuing.");
+    if (
+      operation.type === "create" ||
+      operation.type === "delete" ||
+      (operation.type === "edit" &&
+        (operation.patch.state !== undefined ||
+          operation.patch.assignedState !== undefined ||
+          operation.patch.parentId !== undefined))
+    )
+      await commit((data) => {
+        data.cloud = { ...cloudData(data), rollupPending: true };
+      });
     if (operation.type === "create") {
       await deliverCreation(operation, commit, port);
       continue;
@@ -64,74 +79,8 @@ export const deliverQueue = async (
       await deliverDeletion(operation, snapshot, commit, port);
       continue;
     }
-    if (
-      !/^PMON-\d+$/.test(operation.issueId) ||
-      (operation.type === "edit" && !supported(operation.patch))
-    )
-      throw Error(
-        "Unsupported task operation remains queued. Nothing was sent for it.",
-      );
-    const received = await port.get(operation.issueId);
-    if (!received)
-      throw Error(
-        "A queued task is no longer readable. Nothing was sent for it.",
-      );
-    const remote = {
-      ...received,
-      assignedState: received.assignedState ?? received.state,
-    };
-    let patch = operation.type === "edit" ? operation.patch : {};
-    if (operation.type === "edit") {
-      const base = {
-        ...operation.base,
-        assignedState: operation.base.assignedState ?? operation.base.state,
-      };
-      const result = reconcile(base, operation.patch, remote);
-      ({ patch } = result);
-      if (result.conflicts.length) {
-        await commit((data) => {
-          recordDelivery(data, operation.opId, {
-            status: "conflict",
-            message: "Both browser and YouTrack changed these fields.",
-            remote,
-            conflicts: result.conflicts,
-          });
-        });
-        throw Error("Review conflicting edits. Both versions were preserved.");
-      }
-      if (!Object.keys(patch).length) {
-        await commit((data) => {
-          acknowledge(data, operation, remote);
-        });
-        continue;
-      }
-    }
-    await attemptDelivery(operation, commit, async () => {
-      if (operation.type === "edit")
-        await port.update(operation.issueId, patch, remote);
-      else {
-        const receipt = await port.comment(operation.issueId, operation.text);
-        if (!receipt.id) throw Error("Missing comment receipt.");
-        await commit((data) => {
-          recordDelivery(data, operation.opId, { remoteId: receipt.id });
-        });
-      }
-      const result = await port.get(operation.issueId);
-      if (!result) throw Error("Readback unavailable.");
-      const verified = {
-        ...result,
-        assignedState: result.assignedState ?? result.state,
-      };
-      if (
-        operation.type === "edit" &&
-        !Object.entries(patch).every(([key, value]) => {
-          return equal(verified[key as keyof TaskItem], value);
-        })
-      )
-        throw Error("Readback differs.");
-      await commit((data) => {
-        acknowledge(data, operation, verified);
-      });
-    });
+    if (operation.type === "edit" && operation.purpose === "rollup")
+      await deliverRollup(operation, snapshot, commit, port, planned);
+    else await deliverExisting(operation, snapshot, commit, port);
   }
 };

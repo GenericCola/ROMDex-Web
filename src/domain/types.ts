@@ -40,6 +40,7 @@ export type TaskOperation =
       opId: string;
       type: "edit";
       issueId: string;
+      purpose?: "rollup";
       base: TaskItem;
       patch: TaskPatch;
     }

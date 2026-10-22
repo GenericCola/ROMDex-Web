@@ -1,10 +1,12 @@
-import type { TaskItem, WorkspaceData } from "@/domain/types";
+import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { abandonCreation } from "./abandon-creation";
+import { observeStatus } from "./assigned-status";
 import { completeCreation, matchesCreation } from "./creation";
-import { equal, replaceRemote } from "./delivery-helpers";
+import { replaceRemote } from "./delivery-helpers";
 import { acknowledge } from "./journal";
 import { reviewDeletion } from "./review-deletion";
+import { confirmEdit, reviewedEdit } from "./review-edit";
 import { requireDelivery } from "./session";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
@@ -55,10 +57,11 @@ export const reviewQueue = async (
     throw Error(
       "The task is not readable; preserve recovery and resolve access first.",
     );
-  const remote = {
-    ...received,
-    assignedState: received.assignedState ?? received.state,
-  };
+  const copy = structuredClone(data);
+  const remote = observeStatus(copy, received);
+  await commit((next) => {
+    next.cloud = cloudData(copy);
+  });
   if (operation.type === "create") {
     if (choice !== "confirm" || !matchesCreation(operation.item, remote))
       throw Error(
@@ -70,26 +73,26 @@ export const reviewQueue = async (
     return;
   }
   if (choice === "confirm") {
-    if (operation.type === "edit") {
-      if (
-        !Object.entries(operation.patch).every(([key, value]) => {
-          return equal(remote[key as keyof TaskItem], value);
-        })
-      )
-        throw Error(
-          "YouTrack does not match the queued change. No retry was sent.",
-        );
-    } else
+    if (operation.type === "edit") confirmEdit(operation, remote);
+    else
       await port.verifyComment(
         operation.issueId,
         cloudData(data).records[opId]?.remoteId ?? receipt,
         operation.text,
       );
   }
-  if (choice === "local" && operation.type !== "edit")
+  if (
+    choice === "local" &&
+    (operation.type !== "edit" || operation.purpose === "rollup")
+  )
     throw Error("Only an edit can be rebased after readback.");
   await commit((next) => {
-    replaceRemote(next, remote);
+    replaceRemote(
+      next,
+      operation.type === "edit"
+        ? reviewedEdit(next, operation, remote, choice === "confirm")
+        : remote,
+    );
     if (choice === "local") {
       const queued = next.operations.find((op) => {
         return op.opId === opId;

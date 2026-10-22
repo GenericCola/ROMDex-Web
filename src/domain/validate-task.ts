@@ -10,6 +10,8 @@ export const validateTask: (value: unknown) => asserts value is TaskItem = (
         return typeof entry === "string" && entry.length > 0;
       },
     ) ||
+    (item.assignedState !== undefined &&
+      (typeof item.assignedState !== "string" || !item.assignedState)) ||
     typeof item.description !== "string" ||
     !(item.parentId === null || typeof item.parentId === "string") ||
     !(item.complexity === null || typeof item.complexity === "string") ||

@@ -80,7 +80,8 @@ const Header = ({ state, connect }: HeaderProps) => {
                     ? "red"
                     : state.pendingWrites
                       ? "yellow"
-                      : state.data.operations.length
+                      : state.data.operations.length ||
+                          cloudData(state.data).rollupPending
                         ? "red"
                         : "green"
                 }

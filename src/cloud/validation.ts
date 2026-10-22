@@ -1,5 +1,6 @@
 import type { WorkspaceData } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
+import { validateStatuses } from "./status-validation";
 const object = (value: unknown): value is Record<string, unknown> => {
   return !!value && typeof value === "object" && !Array.isArray(value);
 };
@@ -82,7 +83,10 @@ export const validateQueue = (data: WorkspaceData) => {
         invalid();
     }
   }
-  if (data.cloud === undefined) return;
+  if (data.cloud === undefined) {
+    validateStatuses(data);
+    return;
+  }
   const { cloud } = data;
   if (
     !object(cloud) ||
@@ -91,6 +95,7 @@ export const validateQueue = (data: WorkspaceData) => {
     (cloud.accountId !== undefined && !text(cloud.accountId))
   )
     invalid();
+  validateStatuses(data);
   for (const [id, record] of Object.entries(cloud.records)) {
     if (!object(record)) invalid();
     const operation =

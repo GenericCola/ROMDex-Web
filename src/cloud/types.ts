@@ -21,13 +21,22 @@ export interface DeliveryRecord {
     remote: unknown;
   }[];
 }
+export interface AssignedStatus {
+  assignedState: string;
+  lastState: string;
+  lastUpdated: number | null;
+  pendingState: string | null;
+}
 export interface CloudData {
+  assigned?: Record<string, AssignedStatus>;
+  rollupPending?: boolean;
   accountId?: string;
   autoSync: boolean;
   records: Record<string, DeliveryRecord>;
 }
 export interface DeliveryPort {
   accountId: string;
+  all: () => Promise<TaskItem[]>;
   get: (id: string) => Promise<TaskItem | null>;
   update: (id: string, patch: TaskPatch, expected?: TaskItem) => Promise<void>;
   comment: (id: string, text: string) => Promise<{ id: string }>;

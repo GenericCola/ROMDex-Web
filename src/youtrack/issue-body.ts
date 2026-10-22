@@ -8,20 +8,15 @@ const names: Record<string, string> = {
   priority: "Priority",
   complexity: "Complexity",
   state: "State",
-  assignedState: "State",
   type: "Type",
 };
 export const issueBody = (
   patch: TaskPatch & { type?: string },
   fields: Field[],
 ) => {
-  if (
-    patch.state !== undefined &&
-    patch.assignedState !== undefined &&
-    patch.state !== patch.assignedState
-  )
+  if (patch.assignedState !== undefined)
     throw Error(
-      "State and assigned status must agree for native State delivery.",
+      "Assigned status must use the status journal before effective State delivery.",
     );
   const body: Record<string, unknown> = {};
   const customFields = new Map<string, unknown>();
@@ -97,8 +92,7 @@ export const creationBody = async (
     {
       summary: item.summary,
       description: item.description,
-      state: item.state,
-      ...(item.assignedState ? { assignedState: item.assignedState } : {}),
+      state: item.assignedState ?? item.state,
       priority: item.priority,
       complexity: item.complexity,
       type: item.type,

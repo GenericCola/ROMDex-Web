@@ -1,3 +1,4 @@
+import { adoptTasks } from "@/cloud/assigned-status";
 import { indexTree } from "@/domain/accepted/core.mjs";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
@@ -35,17 +36,25 @@ const Connection = ({ close }: { close: () => void }) => {
     event.preventDefault();
     void load();
   };
-  const adopt = () => {
+  const savePreview = async () => {
     if (!preview) return;
-    void workspaceStore
-      .change((data) => {
-        data.remote = preview;
-      })
-      .then(() => {
-        if (workspaceStore.getSnapshot().error) return;
-        workspaceStore.setConnection("YouTrack copy saved in this browser");
-        close();
+    try {
+      await workspaceStore.change((data) => {
+        adoptTasks(data, preview);
       });
+      if (workspaceStore.getSnapshot().error) return;
+      workspaceStore.setConnection("YouTrack copy saved in this browser");
+      close();
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Browser copy was not changed.",
+      );
+    }
+  };
+  const adopt = () => {
+    void savePreview();
   };
   return (
     <Dialog title="Connection Details" close={close}>

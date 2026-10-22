@@ -1,6 +1,7 @@
 import type { DeliveryPort } from "@/cloud/types";
 import type { TaskItem, TaskPatch } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
+import { readDeliveryTasks } from "./delivery-read";
 import { changeParent, childrenOf } from "./hierarchy";
 import type { Field } from "./issue-body";
 import { creationBody, issueBody } from "./issue-body";
@@ -25,6 +26,9 @@ export class DeliveryClient implements DeliveryPort {
     if (!user || typeof user.id !== "string")
       throw Error("Could not verify the YouTrack account.");
     this.accountId = user.id;
+  };
+  all = () => {
+    return readDeliveryTasks(this.request);
   };
   get = async (id: string) => {
     if (!/^PMON-\d+$/.test(id))

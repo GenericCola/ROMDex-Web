@@ -12,7 +12,12 @@ export const matchesCreation = (item: TaskItem, remote: TaskItem) => {
     "complexity",
     "type",
   ].every((key) => {
-    return equal(item[key as keyof TaskItem], remote[key as keyof TaskItem]);
+    return equal(
+      key === "state"
+        ? (item.assignedState ?? item.state)
+        : item[key as keyof TaskItem],
+      remote[key as keyof TaskItem],
+    );
   });
 };
 export const completeCreation = (

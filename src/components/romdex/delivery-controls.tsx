@@ -61,11 +61,13 @@ const DeliveryControls = () => {
       <h3>Cloud delivery</h3>
       <p>
         Optional, session only. Save Changes delivers new tasks, listed
-        deletions, hierarchy, native State, titles, notes, priority, complexity
-        and comments. Deletions permanently remove only the reviewed list.
-        Auto-Sync is off initially. Enabling delivery uses your saved
-        preference. Avoid simultaneous desktop edits to the same fields. A
-        timeout pauses automatic delivery until review.
+        deletions, hierarchy, assigned status with parent rollups, titles,
+        notes, priority, complexity and comments. Assigned choices stay in this
+        browser and its recovery export; calculated statuses go to YouTrack
+        State. Deletions permanently remove only the reviewed list. Auto-Sync is
+        off initially. Enabling delivery uses your saved preference. Avoid
+        simultaneous desktop edits to the same fields. A timeout pauses
+        automatic delivery until review.
       </p>
       <label>
         Session token for delivery

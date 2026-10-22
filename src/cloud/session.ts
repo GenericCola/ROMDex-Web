@@ -61,7 +61,7 @@ export const automaticDelivery = () => {
     state.updating ||
     state.delivering ||
     !cloudData(state.data).autoSync ||
-    !state.data.operations.length
+    (!state.data.operations.length && !cloudData(state.data).rollupPending)
   )
     return;
   const failed = (error: unknown) => {

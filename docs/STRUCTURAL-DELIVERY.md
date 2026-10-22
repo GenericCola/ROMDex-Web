@@ -1,6 +1,6 @@
 # Structural task delivery
 
-The web port now delivers task creation, explicit deletion lists, parent links and native YouTrack State, alongside titles, notes, priority, complexity and comments. The Parent control in Task Properties queues a move. These paths use the same bound-account session, serial queue, durable journal and editing/update locks as the earlier adapter.
+The web port delivers task creation, explicit deletion lists, parent links and calculated YouTrack State, alongside titles, notes, priority, complexity and comments. The Parent control in Task Properties queues a move. These paths use the same bound-account session, serial queue, durable journal and editing/update locks as the earlier adapter.
 
 The desktop executable, saves, credentials, assigned-status sidecar and migration archive remain intact. Development and verification use synthetic fixtures. No production task was created, moved, updated or deleted as a test.
 
@@ -32,9 +32,7 @@ Review can approve only the displayed current targets. If another change appears
 
 ## Native State and limits
 
-The current adapter delivers the selected status to the existing native StateIssueCustomField. The queued state and assignedState aliases must agree. A missing current value or an incompatible field type blocks status delivery. Readback must match the desired State. No status values or fields are created.
-
-The browser computes hierarchy lamps from the accepted rollup rules. It does not import the desktop assigned-status sidecar or propagate derived parent statuses to YouTrack. Cross-device assigned/effective-status parity remains part of the metadata port.
+The current assigned-status and parent-rollup checkpoint is documented in STATUS-DELIVERY.md. Assigned choices are preserved separately in the browser; effective leaf and parent statuses are delivered through the existing native StateIssueCustomField. Incompatible fields or unreadable values block delivery without changing project configuration.
 
 YouTrack requests do not provide an atomic transaction across tasks, an atomic conditional write, or a server idempotency key in this adapter. Other clients can still change data between checks and mutations. Avoid simultaneous desktop/web edits to the same tasks. Deletion checks cover the represented task fields and updated timestamp; they cannot prevent a change made after the last read. Uncertain outcomes require explicit review, with no automatic rollback or silent retry.
 
@@ -44,9 +42,9 @@ Live token permissions, real-origin CORS, workflow effects, full metadata/status
 
 Request shapes follow JetBrains' [issue creation](https://www.jetbrains.com/help/youtrack/devportal/resource-api-issues.html), [issue updates and deletion](https://www.jetbrains.com/help/youtrack/devportal/operations-api-issues.html), [link creation](https://www.jetbrains.com/help/youtrack/devportal/resource-api-issues-issueID-links-linkID-issues.html), [link removal](https://www.jetbrains.com/help/youtrack/devportal/operations-api-issues-issueID-links-linkID-issues.html) and [custom-field type mapping](https://www.jetbrains.com/help/youtrack/devportal/api-concept-custom-fields.html) documentation.
 
-## Verification
+## Structural checkpoint verification
 
-Verified on October 22, 2026 on codex/accepted-app-port. pnpm check passed TypeScript, formatting, zero-warning lint, 44 component/domain/client tests and eight worker/build tests. pnpm build passed and generated the static export with 69 public shell assets.
+Historical verification for commit 6af5fc0 on October 22, 2026, on codex/accepted-app-port. Current verification is in STATUS-DELIVERY.md. pnpm check passed TypeScript, formatting, zero-warning lint, 44 component/domain/client tests and eight worker/build tests. pnpm build passed and generated the static export with 69 public shell assets.
 
 The full production browser suite passed 93 checks across Chromium, Firefox, WebKit, Android emulation and iPhone emulation. Two desktop-only geometry checks were deliberately skipped on mobile. A subsequent focused run passed all 20 structural-delivery checks, including an existing task's native State edit, in all five browser projects.
 

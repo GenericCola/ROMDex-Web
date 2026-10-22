@@ -50,6 +50,13 @@ const DeliveryReview = ({
           : "Uncertain delivery"}
       </h3>
       <p>{record.message}</p>
+      {operation?.type === "edit" && operation.purpose === "rollup" && (
+        <p>
+          This is a calculated status; your assigned choice is kept. Confirm the
+          result or keep the current YouTrack value. The next Save recalculates
+          from fresh tasks.
+        </p>
+      )}
       <details>
         <summary>Queued change for {operation?.issueId}</summary>
         <pre className="port-detail-text">
@@ -100,7 +107,8 @@ const DeliveryReview = ({
         >
           Read back and confirm; do not resend
         </button>
-        {(operation?.type === "edit" || operation?.type === "delete") && (
+        {((operation?.type === "edit" && operation.purpose !== "rollup") ||
+          operation?.type === "delete") && (
           <button onClick={local} disabled={busy}>
             {operation.type === "delete"
               ? "Approve remaining listed deletions after readback"

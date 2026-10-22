@@ -34,7 +34,7 @@ const TaskProperties = ({
   const state = (event: ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
     void workspaceStore.change((next) => {
-      return editTask(next, item.id, { state: value, assignedState: value });
+      return editTask(next, item.id, { assignedState: value });
     });
   };
   const priority = (event: ChangeEvent<HTMLSelectElement>) => {

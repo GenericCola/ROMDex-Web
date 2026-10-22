@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 type Task={id:string;summary:string;description:string;parentId:string|null;state:string;priority:string;complexity:string|null;type:string;updated:number};
-export const structuralFixture=async(page:Page,mode:"normal"|"create-lost"|"delete-lost"|"move-lost"="normal")=>{
+export const structuralFixture=async(page:Page,mode:"normal"|"create-lost"|"delete-lost"|"move-lost"|"status-lost"="normal")=>{
   const tasks=new Map<string,Task>();for(const [id,summary,parentId] of [["PMON-900001","Fixture Root",null],["PMON-900002","Fixture Other",null],["PMON-900003","Fixture Child","PMON-900001"]] as const)tasks.set(id,{id,summary,parentId,description:"",state:"To do",priority:"Normal",complexity:null,type:"Task",updated:1});
   const writes:{method:string;path:string}[]=[];let creates=0,lost=false;
   const fields=["Type","State","Priority","Complexity"];
@@ -21,7 +21,7 @@ export const structuralFixture=async(page:Page,mode:"normal"|"create-lost"|"dele
     if(!task){await reply({error:"Not found"},404);return;}
     if(parts.length===4){
       if(method==="GET"){await reply(raw(task));return;}
-      if(method==="POST"){const body=request.postDataJSON();for(const key of ["summary","description"] as const)if(key in body)task[key]=body[key];for(const field of body.customFields??[])task[field.name.toLowerCase() as "state"|"priority"|"complexity"|"type"]=field.value?.name??null;await reply({});return;}
+      if(method==="POST"){const body=request.postDataJSON();for(const key of ["summary","description"] as const)if(key in body)task[key]=body[key];for(const field of body.customFields??[])task[field.name.toLowerCase() as "state"|"priority"|"complexity"|"type"]=field.value?.name??null;if(mode==="status-lost"&&!lost&&body.customFields?.some((field:{name:string})=>field.name==="State")){lost=true;await route.abort();return;}await reply({});return;}
       if(method==="DELETE"){tasks.delete(id);if(mode==="delete-lost"&&!lost){lost=true;await route.abort();return;}await route.fulfill({status:204,headers});return;}
     }
     if(parts[4]==="links"){

@@ -63,7 +63,7 @@ export const editTask = (data: WorkspaceData, id: string, patch: TaskPatch) => {
     Object.assign(last.item, patch);
     return;
   }
-  if (last?.type === "edit") {
+  if (last?.type === "edit" && last.purpose !== "rollup") {
     Object.assign(last.patch, patch);
     return;
   }

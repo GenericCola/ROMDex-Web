@@ -36,9 +36,11 @@ export const attemptDelivery = async (
   commit: Commit,
   action: () => Promise<void>,
   targetId = operation.issueId,
+  prepare?: (data: WorkspaceData) => void,
 ) => {
   // Save the marker before every mutation; a crash requires readback and explicit review.
   await commit((data) => {
+    prepare?.(data);
     recordDelivery(data, operation.opId, {
       status: "attempting",
       targetId,
