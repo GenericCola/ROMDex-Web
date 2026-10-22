@@ -18,10 +18,10 @@ The browser tests found and verified fixes for an update-consent message timing 
 
 ## Repository and boundaries
 
-The origin is https://github.com/GenericCola/ROMDex-Web.git. The GitHub connector returned 404, so repository existence and private visibility remain unverified. Nothing was pushed. The public template remote has push URL DISABLED. No hosting, release or Actions setup was performed.
+The origin is https://github.com/GenericCola/ROMDex-Web.git. The user authorized repository creation and publishing. The repository was created and confirmed private on October 22, 2026, with main as its default branch. The public template remote has push URL DISABLED. No hosting, release or Actions setup was performed.
 
 Real iPhone/iPad installation, real-device offline/update behavior and HTTPS hosting acceptance remain unverified. Mobile browser emulation does not certify those behaviors. There is no application authentication, local data store, offline operation queue or YouTrack connection yet.
 
 The original application, migration data and credentials were left untouched. Feature porting still awaits explicit authorization after original feature completion.
 
-Local checkpoint: foundation changes are saved on codex/web-foundation. The repository-local Git identity uses the connected GenericCola profile. Nothing has been pushed.
+Local checkpoint: foundation changes are saved on codex/web-foundation. The repository-local Git identity uses the connected GenericCola profile.
