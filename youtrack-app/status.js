@@ -108,16 +108,6 @@ const handle = (action) => (ctx) => {
 exports.httpHandler = {
   endpoints: [
     {
-      scope: "global",
-      method: "GET",
-      path: "capabilities",
-      handle: handle(() => ({
-        schema: 1,
-        app: "romdex-status",
-        project: "PMON",
-      })),
-    },
-    {
       scope: "issue",
       method: "GET",
       path: "assigned",

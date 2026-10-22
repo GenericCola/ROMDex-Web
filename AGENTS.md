@@ -2,6 +2,8 @@
 
 React and PWA foundation restarted on October 22, 2026. On October 22, 2026 the user supplied PASSKEY and authorized porting the current accepted desktop app first, then finishing remaining features on web. Keep the desktop app and its data intact as the fallback.
 
+On October 22, 2026 the user authorized test-only YouTrack app installation and live acceptance testing, then selected existing NPCD because no disposable project is available. Restrict mutations to the new private fixtures NPCD-872 and NPCD-873. Preserve all existing NPCD issues and settings; production PMON sharing remains off. See docs/LIVE-ACCEPTANCE.md for the administrator activation blocker.
+
 Use YouTrack as the only application backend. Static hosting is allowed. No Payload, runtime GitHub data backend, proxy, Server Actions or production data changes.
 
 Read README.md, docs/PROJECT.md, docs/PWA.md, docs/CONVENTIONS.md and docs/DESIGN.md before editing. Preserve compatible template components and tooling. Use ponytail (full), ponytail-review and human-writing in .agents/skills. Fetch current library documentation and inspect installed Next.js docs before using unfamiliar APIs.

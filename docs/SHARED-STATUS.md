@@ -2,11 +2,11 @@
 
 ROMDex Web can store assigned status in YouTrack app-owned issue properties. Each enabled web device reads the same assigned choice, while native State continues to represent the leaf or parent calculation. Existing browser-only workspaces stay unchanged until the user previews and enables sharing.
 
-The app source is in youtrack-app. It has no widgets, automatic workflows, external requests or separate server. All storage and endpoints run inside YouTrack. No installation, production-data write, desktop-data import or deployment was performed for this checkpoint.
+The production app source is in youtrack-app. It has no widgets, automatic workflows, external requests or separate server. All storage and endpoints run inside YouTrack. A separate fixture-restricted test app is installed in NPCD but inactive; see LIVE-ACCEPTANCE.md for the administrator blocker and current results. No production installation, production-data write or desktop-data import was performed.
 
 ## Installation and activation
 
-Run pnpm package:youtrack to generate artifacts/romdex-status-1.0.0.zip and its SHA-256 file. The package contains exactly manifest.json, entity-extensions.json, status.js, status-record.js and status-rules.js at its root. ZIP entries are deterministic and contain source only. No browser data, test content, tokens or desktop files are packaged. Node.js 24 is sufficient; packaging adds no dependencies.
+Run pnpm package:youtrack to generate artifacts/romdex-status-1.0.1.zip and its SHA-256 file. The package contains exactly manifest.json, entity-extensions.json, status.js, capabilities.js, status-record.js and status-rules.js at its root. ZIP entries are deterministic and contain source only. No browser data, test content, tokens or desktop files are packaged. Node.js 24 is sufficient; packaging adds no dependencies.
 
 The package targets YouTrack 2026.2 or newer. After separate deployment authorization, an administrator can upload it through YouTrack's Apps administration, enable the app and attach it to PMON. Keep the app name romdex-status and its assignedStatus property unchanged when upgrading. Removing the app or renaming its property deletes stored values according to [YouTrack's extension-property lifecycle](https://www.jetbrains.com/help/youtrack/devportal/apps-extension-properties.html). Preserve browser recovery exports and a YouTrack backup before changing that storage.
 
@@ -46,7 +46,7 @@ Save refreshes shared metadata even with an empty queue. Auto-Sync does the same
 
 The desktop executable, source reference, saves, credentials, assigned-status sidecar and migration archive remain intact. The desktop app does not read these new properties. Its native State changes are external edits from the web app's perspective. Avoid simultaneous desktop and web edits to the same tasks. Desktop-data migration and the desktop's former shared metadata provider are outside this checkpoint.
 
-The browser and app implementation are fixture-verified; the app is not installed by this work. Server-side revision checks execute within YouTrack's transaction model, but actual simultaneous transactions and production workflows remain unverified. Other clients can still change non-status properties and hierarchy outside this protocol. This checkpoint does not claim atomic transactions across an entire project. API throttling and large-workspace latency remain unmeasured; one personal workspace is the intended load.
+The browser and app implementation are fixture-verified; the production app is not installed. The separate acceptance app is installed but cannot execute while inactive. Server-side revision checks execute within YouTrack's transaction model, but actual simultaneous transactions and production workflows remain unverified. Other clients can still change non-status properties and hierarchy outside this protocol. This checkpoint does not claim atomic transactions across an entire project. API throttling and large-workspace latency remain unmeasured; one personal workspace is the intended load.
 
 ## API references
 
@@ -54,11 +54,11 @@ The app uses JetBrains' [HTTP handlers](https://www.jetbrains.com/help/youtrack/
 
 ## Verification
 
-Verified on October 22, 2026: pnpm check passed type checking, lint, 83 unit tests and 8 worker/build checks. pnpm build produced the static PWA. The full browser suite passed 118 checks across Chromium, Firefox, WebKit, mobile Chromium and iPhone emulation; two desktop-layout checks were skipped on mobile as expected. The comment-recovery path also passed a focused WebKit and iPhone rerun.
+Original implementation checkpoint 0263655, verified on October 22, 2026: pnpm check passed type checking, lint, 83 unit tests and 8 worker/build checks. pnpm build produced the static PWA. The full browser suite passed 118 checks across Chromium, Firefox, WebKit, mobile Chromium and iPhone emulation; two desktop-layout checks were skipped on mobile as expected. The comment-recovery path also passed a focused WebKit and iPhone rerun.
 
 Tests execute the packaged handler against synthetic transactions and independent browser stores. They cover stale revisions, exact receipts, offline conflicts, migration choices, missing or corrupt app storage, workflow failure rollback and browser-only compatibility. No real YouTrack mutations were used.
 
-The package test verifies deterministic ZIP entries, CRCs, exact source bytes and checksum output. An independent Python ZIP reader also verified the five source entries and SHA-256. The generated package remains outside Git and is reproducible with pnpm package:youtrack.
+The package test verifies deterministic ZIP entries, CRCs, exact source bytes and checksum output. An independent Python ZIP reader also verified the then-current five source entries and SHA-256. The generated package remains outside Git and is reproducible with pnpm package:youtrack.
 
 ## Review
 
@@ -66,4 +66,4 @@ What this change does: Adds YouTrack-owned assigned choices with explicit browse
 
 Looks good for the implementation checkpoint. Reviewed two independent device stores, offline edits, request durability, metadata provenance, migration evidence, permission boundaries, package contents and update locks for one personal workspace. Tests cover metadata revisions that change without native timestamp changes and retain browser-only mode compatibility.
 
-Not checked: live installation, deployed GraalJS compatibility, real transaction isolation, tenant permissions, production workflows, real-origin CORS, large-workspace capacity or real-device installation. Deployment requires a separate authorized step.
+Not checked: live installation, deployed GraalJS compatibility, real transaction isolation, tenant permissions, production workflows, real-origin CORS, large-workspace capacity or real-device installation. Production deployment requires a separate authorized step. Test-only installation was authorized and is tracked in LIVE-ACCEPTANCE.md.

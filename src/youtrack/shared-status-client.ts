@@ -19,7 +19,7 @@ export class SharedStatusClient implements SharedStatusPort {
   };
   private check = async () => {
     const result = await this.request(
-      "extensionEndpoints/romdex-status/status/capabilities",
+      "extensionEndpoints/romdex-status/capabilities/check",
     );
     if (
       !result ||

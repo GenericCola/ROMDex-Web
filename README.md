@@ -1,6 +1,6 @@
 # ROMDex Web
 
-React/PWA port of the accepted ROMDex desktop app, based on theGobindSingh/next-starter-template. The initial task workspace is implemented; the full application port remains in progress. Read docs/PORT.md for scope and docs/SHARED-STATUS.md for the current YouTrack-backed assigned-status checkpoint and app installation instructions. Structural delivery is documented in docs/STRUCTURAL-DELIVERY.md.
+React/PWA port of the accepted ROMDex desktop app, based on theGobindSingh/next-starter-template. The initial task workspace is implemented; the full application port remains in progress. Read docs/PORT.md for scope and docs/SHARED-STATUS.md for the current YouTrack-backed assigned-status checkpoint and app installation instructions. Test-only installation status and administrator steps are in docs/LIVE-ACCEPTANCE.md. Structural delivery is documented in docs/STRUCTURAL-DELIVERY.md.
 
 Requires Node.js 24+ and pnpm 11.25.0.
 
