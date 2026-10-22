@@ -1,3 +1,4 @@
+import type { SharedStatus } from "@/cloud/shared-status-types";
 import type { CloudData } from "@/cloud/types";
 export type LampColor = "grey" | "yellow" | "blue" | "purple" | "green" | "red";
 export interface TaskComment {
@@ -14,6 +15,7 @@ export interface TaskItem {
   parentId: string | null;
   state: string;
   assignedState?: string;
+  sharedStatus?: SharedStatus;
   priority: string;
   complexity: string | null;
   type: string;

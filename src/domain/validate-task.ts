@@ -1,9 +1,12 @@
+import { parseSharedStatus } from "@/cloud/shared-status-protocol";
 import type { TaskItem } from "./types";
 export const validateTask: (value: unknown) => asserts value is TaskItem = (
   value,
 ) => {
   if (!value || typeof value !== "object") throw Error("Invalid task data.");
   const item = value as TaskItem;
+  if (item.sharedStatus !== undefined)
+    parseSharedStatus(item.sharedStatus, item.id);
   if (
     ![item.id, item.summary, item.state, item.priority, item.type].every(
       (entry) => {

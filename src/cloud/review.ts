@@ -5,6 +5,7 @@ import { observeStatus } from "./assigned-status";
 import { completeCreation, matchesCreation } from "./creation";
 import { replaceRemote } from "./delivery-helpers";
 import { acknowledge } from "./journal";
+import { rebaseEdit } from "./rebase-edit";
 import { reviewDeletion } from "./review-deletion";
 import { confirmEdit, reviewedEdit } from "./review-edit";
 import { requireDelivery } from "./session";
@@ -93,15 +94,8 @@ export const reviewQueue = async (
         ? reviewedEdit(next, operation, remote, choice === "confirm")
         : remote,
     );
-    if (choice === "local") {
-      const queued = next.operations.find((op) => {
-        return op.opId === opId;
-      });
-      if (queued?.type === "edit") queued.base = remote;
-      const cloud = cloudData(next);
-      delete cloud.records[opId];
-      next.cloud = cloud;
-    } else acknowledge(next, operation);
+    if (choice === "local") rebaseEdit(next, opId, remote);
+    else acknowledge(next, operation);
   });
 };
 export const reviewDelivery = async (

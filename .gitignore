@@ -62,3 +62,6 @@ CLAUDE.md
 playwright-report/
 test-results/
 __pycache__/
+
+# Local installable YouTrack app packages
+/artifacts/

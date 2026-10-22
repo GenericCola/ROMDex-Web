@@ -21,7 +21,8 @@
     "test": "tsx --tsconfig tests/tsconfig.json --test tests/unit/*.test.tsx && node --test tests/worker.test.mjs tests/build.test.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "test:e2e": "node scripts/playwright.mjs test",
-    "icons:build": "node scripts/build-icons.mjs"
+    "icons:build": "node scripts/build-icons.mjs",
+    "package:youtrack": "node scripts/package-youtrack.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.59.0",

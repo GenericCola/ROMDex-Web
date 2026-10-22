@@ -6,6 +6,7 @@ import { creationDependency } from "./creation-dependency";
 import { deliverDeletion } from "./deletion";
 import { deliverExisting } from "./existing-delivery";
 import { deliverRollup, planRollup } from "./rollup";
+import { refreshShared } from "./shared-status-delivery";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
 import { validateQueue } from "./validation";
@@ -34,6 +35,7 @@ export const deliverQueue = async (
     seedAssigned(data);
     data.cloud = { ...cloudData(data), accountId: port.accountId };
   });
+  await refreshShared(snapshot, commit, port);
   while (snapshot().operations.length || cloudData(snapshot()).rollupPending) {
     const planned = !snapshot().operations.length
       ? await planRollup(snapshot, commit, port)

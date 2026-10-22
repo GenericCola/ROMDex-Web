@@ -1,0 +1,69 @@
+# YouTrack-backed assigned status
+
+ROMDex Web can store assigned status in YouTrack app-owned issue properties. Each enabled web device reads the same assigned choice, while native State continues to represent the leaf or parent calculation. Existing browser-only workspaces stay unchanged until the user previews and enables sharing.
+
+The app source is in youtrack-app. It has no widgets, automatic workflows, external requests or separate server. All storage and endpoints run inside YouTrack. No installation, production-data write, desktop-data import or deployment was performed for this checkpoint.
+
+## Installation and activation
+
+Run pnpm package:youtrack to generate artifacts/romdex-status-1.0.0.zip and its SHA-256 file. The package contains exactly manifest.json, entity-extensions.json, status.js, status-record.js and status-rules.js at its root. ZIP entries are deterministic and contain source only. No browser data, test content, tokens or desktop files are packaged. Node.js 24 is sufficient; packaging adds no dependencies.
+
+The package targets YouTrack 2026.2 or newer. After separate deployment authorization, an administrator can upload it through YouTrack's Apps administration, enable the app and attach it to PMON. Keep the app name romdex-status and its assignedStatus property unchanged when upgrading. Removing the app or renaming its property deletes stored values according to [YouTrack's extension-property lifecycle](https://www.jetbrains.com/help/youtrack/devportal/apps-extension-properties.html). Preserve browser recovery exports and a YouTrack backup before changing that storage.
+
+Live acceptance must use a separate synthetic project or disposable tenant with a test build whose project guard matches it. The shipped build accepts PMON only. Verify permission enforcement, CORS from the real web origin, field type and link names, workflow interaction, and simultaneous same-revision requests before enabling production sharing. The local transaction fixture does not verify YouTrack's deployed transaction isolation or GraalJS runtime.
+
+In Connection Details, enable delivery for the current session. Save or review any existing queue and rollup work. Outstanding delivery reviews keep priority; shared-status setup appears after they are cleared. Preview shared assigned status reads the app and shows each task's browser and YouTrack choices without writing. Uninitialized metadata is labeled as native State.
+
+Use YouTrack choices and enable sharing adopts the displayed shared values and archives different browser choices in recovery. Keep browser differences and enable sharing queues those differences against the previewed metadata revisions. Neither confirmation writes to YouTrack; the next Save or opted-in Auto-Sync delivers the queue. A stale workspace, changed account, missing task, incomplete hierarchy or pending operation blocks activation. Fresh web devices must enable sharing too.
+
+There is no automatic downgrade to browser-only delivery after activation. An unavailable, incompatible or corrupt app stops delivery and keeps the queue. Tokens remain in page memory. Reload discards the token and retains sharing and Auto-Sync preferences.
+
+## Shared storage and revision checks
+
+The app owns one JSON string extension property on each issue. It records schema version, increasing metadata revision, assigned choice, last effective State and the exact request receipt that created that revision. A read without stored metadata returns revision zero and derives its initial assigned choice from native State. Reads never initialize, repair or overwrite storage.
+
+The browser validates the issue identity, protocol, revision, receipt and current task snapshot. Previously stored metadata returning a lower revision is rejected. Missing or malformed storage is never treated as an empty document. A native State value different from the last recorded effective State is treated as a new external assignment; native edits that leave the same value cannot reveal a new assignment.
+
+Each write carries a unique operation ID, its purpose and value, and the expected metadata revision, initialized flag, assigned choice, native State and task timestamp. The handler compares all expected values before changing anything. An offline assignment also compares its queued baseline revision with the freshly read revision; intervening app revisions require review even when the current choice matches the original baseline.
+
+The handler accepts only PMON issues visible to the caller. Reads require READ_ISSUE. Writes require UPDATE_ISSUE and access to read and write the State field. The field must be a visible single State field and the requested value must already exist. No fields or values are created. The API's endpoint permission declarations are OR lists, so the write endpoint declares only UPDATE_ISSUE and the handler performs its additional checks itself.
+
+Assignment writes change only app metadata. Effective writes recompute the target's status from the current server hierarchy, reject mismatched calculations, and update metadata and State in one handler transaction. App validation errors are returned before mutations. Unexpected exceptions propagate so YouTrack can abort the transaction; an HTTP error response alone is not used as rollback. Every contributing descendant must be visible, in PMON and have a readable State field. Cycles and trees over 1,000 tasks stop the write. The standard Subtask outward name parent for must be available. The same accepted status aliases and precedence are verified against the desktop core.
+
+An exact replay of the latest stored request returns its current snapshot without writing. Reusing that ID with a different payload is rejected. After later writes, the original frozen revision is stale and cannot replay the old request. This is not a general historical receipt archive; browser recovery preserves previous operations and requests.
+
+## Delivery and review
+
+The browser saves the full metadata request in the same IndexedDB transaction as the attempting marker before sending it. A local saving failure prevents the network mutation. The account binding, serial delivery lock, PWA update lock and multi-window revision check remain in force.
+
+After a metadata POST, a fresh read must contain the exact operation receipt and matching assigned or effective value before acknowledgement. Matching a value alone cannot confirm an uncertain metadata write. Lost responses remain blocked across reload and require explicit readback. A manually rebased shared edit gets a new operation ID; the earlier attempt and payload are archived. Calculated rollups are recomputed instead of manually rebased.
+
+For mixed edits, metadata assignment is sent before ordinary property changes. If the metadata write succeeds but a later step fails, readback or explicit rebase can finish the remaining properties without repeating the metadata write. Native title, notes and hierarchy edits retain the earlier adapter's check/readback behavior and concurrency limits.
+
+Save refreshes shared metadata even with an empty queue. Auto-Sync does the same while idle only when enabled and connected. Full reads are paginated; metadata reads use batches of at most ten concurrent requests. Incomplete reads, missing known tasks or failed app responses stop the cycle. Effective-status work stays durable until its final fresh calculation is complete. Automatic delivery suspends on failure rather than retrying ambiguous mutations.
+
+## Desktop fallback and remaining acceptance
+
+The desktop executable, source reference, saves, credentials, assigned-status sidecar and migration archive remain intact. The desktop app does not read these new properties. Its native State changes are external edits from the web app's perspective. Avoid simultaneous desktop and web edits to the same tasks. Desktop-data migration and the desktop's former shared metadata provider are outside this checkpoint.
+
+The browser and app implementation are fixture-verified; the app is not installed by this work. Server-side revision checks execute within YouTrack's transaction model, but actual simultaneous transactions and production workflows remain unverified. Other clients can still change non-status properties and hierarchy outside this protocol. This checkpoint does not claim atomic transactions across an entire project. API throttling and large-workspace latency remain unmeasured; one personal workspace is the intended load.
+
+## API references
+
+The app uses JetBrains' [HTTP handlers](https://www.jetbrains.com/help/youtrack/devportal/apps-reference-http-handlers.html), [extension properties](https://www.jetbrains.com/help/youtrack/devportal/apps-extension-properties.html), [transaction model](https://www.jetbrains.com/help/youtrack/devportal/workflow-transactions.html) and [State API](https://www.jetbrains.com/help/youtrack/devportal/v1-State.html). Native permission and field access follow the [app permissions](https://www.jetbrains.com/help/youtrack/devportal/app-permissions.html) and [Project API](https://www.jetbrains.com/help/youtrack/devportal/v1-Project.html) references.
+
+## Verification
+
+Verified on October 22, 2026: pnpm check passed type checking, lint, 83 unit tests and 8 worker/build checks. pnpm build produced the static PWA. The full browser suite passed 118 checks across Chromium, Firefox, WebKit, mobile Chromium and iPhone emulation; two desktop-layout checks were skipped on mobile as expected. The comment-recovery path also passed a focused WebKit and iPhone rerun.
+
+Tests execute the packaged handler against synthetic transactions and independent browser stores. They cover stale revisions, exact receipts, offline conflicts, migration choices, missing or corrupt app storage, workflow failure rollback and browser-only compatibility. No real YouTrack mutations were used.
+
+The package test verifies deterministic ZIP entries, CRCs, exact source bytes and checksum output. An independent Python ZIP reader also verified the five source entries and SHA-256. The generated package remains outside Git and is reproducible with pnpm package:youtrack.
+
+## Review
+
+What this change does: Adds YouTrack-owned assigned choices with explicit browser migration, server-side revision checks and exact receipt recovery. It preserves separate native rollups and refuses native fallback when shared storage fails.
+
+Looks good for the implementation checkpoint. Reviewed two independent device stores, offline edits, request durability, metadata provenance, migration evidence, permission boundaries, package contents and update locks for one personal workspace. Tests cover metadata revisions that change without native timestamp changes and retain browser-only mode compatibility.
+
+Not checked: live installation, deployed GraalJS compatibility, real transaction isolation, tenant permissions, production workflows, real-origin CORS, large-workspace capacity or real-device installation. Deployment requires a separate authorized step.

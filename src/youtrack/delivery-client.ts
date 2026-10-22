@@ -1,6 +1,7 @@
 import type { DeliveryPort } from "@/cloud/types";
 import type { TaskItem, TaskPatch } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
+import { postComment, verifyComment } from "./comments";
 import { readDeliveryTasks } from "./delivery-read";
 import { changeParent, childrenOf } from "./hierarchy";
 import type { Field } from "./issue-body";
@@ -9,15 +10,18 @@ import type { RawIssue } from "./read-tasks";
 import { normalize } from "./read-tasks";
 import type { YouTrackRequest } from "./request";
 import { issueId, sessionRequest } from "./request";
+import { SharedStatusClient } from "./shared-status-client";
 const fields =
   "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(id,name,$type,value(name)),commentsCount,comments(id,text,created,author(login,fullName))";
 export class DeliveryClient implements DeliveryPort {
   accountId = "";
+  metadata?: SharedStatusClient;
   private request: YouTrackRequest;
   private fields = new Map<string, Field[]>();
   private creations = new Map<string, unknown>();
-  constructor(token: string) {
+  constructor(token: string, shared = false) {
     this.request = sessionRequest(token);
+    if (shared) this.metadata = new SharedStatusClient(this.request);
   }
   connect = async () => {
     const user = (await this.request("users/me?fields=id")) as {
@@ -26,9 +30,11 @@ export class DeliveryClient implements DeliveryPort {
     if (!user || typeof user.id !== "string")
       throw Error("Could not verify the YouTrack account.");
     this.accountId = user.id;
+    await this.metadata?.probe();
   };
-  all = () => {
-    return readDeliveryTasks(this.request);
+  all = async () => {
+    const items = await readDeliveryTasks(this.request);
+    return this.metadata ? this.metadata.annotateAll(items) : items;
   };
   get = async (id: string) => {
     if (!/^PMON-\d+$/.test(id))
@@ -60,10 +66,17 @@ export class DeliveryClient implements DeliveryPort {
       };
     });
     validateTask(item);
-    return item;
+    return this.metadata ? this.metadata.annotate(item) : item;
   };
   update = async (id: string, patch: TaskPatch, expected?: TaskItem) => {
     issueId(id);
+    if (
+      this.metadata &&
+      (patch.state !== undefined || patch.assignedState !== undefined)
+    )
+      throw Error(
+        "Shared status must use the revision-checked status endpoint.",
+      );
     if (
       (patch.state !== undefined || patch.assignedState !== undefined) &&
       typeof this.fields.get(id)?.find((field) => {
@@ -106,34 +119,18 @@ export class DeliveryClient implements DeliveryPort {
   remove = async (id: string) => {
     await this.request("issues/" + issueId(id), "DELETE");
   };
-  verifyComment = async (id: string, commentId: string, text: string) => {
-    if (!/^PMON-\d+$/.test(id) || !/^\d+-\d+$/.test(commentId))
-      throw Error("Enter the exact YouTrack comment ID.");
-    const comment = (await this.request(
-      "issues/" +
-        id +
-        "/comments/" +
-        encodeURIComponent(commentId) +
-        "?fields=id,text,deleted",
-    )) as { id?: unknown; text?: unknown; deleted?: boolean } | null;
-    if (
-      comment?.id !== commentId ||
-      comment.deleted !== false ||
-      comment.text !== text
-    )
-      throw Error(
-        "That comment does not match the queued text. Nothing was sent.",
-      );
+  verifyComment = (id: string, commentId: string, text: string) => {
+    return verifyComment(this.request, id, commentId, text);
   };
-  comment = async (id: string, text: string) => {
-    if (!/^PMON-\d+$/.test(id)) throw Error("Invalid task.");
-    const receipt = (await this.request(
-      "issues/" + id + "/comments?fields=id",
-      "POST",
-      { text },
-    )) as { id?: unknown } | null;
-    if (!receipt || typeof receipt.id !== "string")
-      throw Error("Missing comment receipt.");
-    return { id: receipt.id };
+  comment = (id: string, text: string) => {
+    return postComment(this.request, id, text);
+  };
+  readShared = async () => {
+    const metadata = new SharedStatusClient(this.request);
+    await metadata.probe();
+    return metadata.annotateAll(await readDeliveryTasks(this.request));
+  };
+  enableShared = () => {
+    this.metadata = new SharedStatusClient(this.request);
   };
 }

@@ -8,6 +8,7 @@ import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 import DeliveryReview from "./delivery-review";
+import SharedStatusControls from "./shared-status-controls";
 const DeliveryControls = () => {
   const [token, setToken] = useState("");
   const [message, setMessage] = useState("");
@@ -63,11 +64,11 @@ const DeliveryControls = () => {
         Optional, session only. Save Changes delivers new tasks, listed
         deletions, hierarchy, assigned status with parent rollups, titles,
         notes, priority, complexity and comments. Assigned choices stay in this
-        browser and its recovery export; calculated statuses go to YouTrack
-        State. Deletions permanently remove only the reviewed list. Auto-Sync is
-        off initially. Enabling delivery uses your saved preference. Avoid
-        simultaneous desktop edits to the same fields. A timeout pauses
-        automatic delivery until review.
+        browser until shared status is enabled below; recovery exports retain
+        them. Calculated statuses go to YouTrack State. Deletions permanently
+        remove only the reviewed list. Auto-Sync is off initially. Enabling
+        delivery uses your saved preference. Avoid simultaneous desktop edits to
+        the same fields. A timeout pauses automatic delivery until review.
       </p>
       <label>
         Session token for delivery
@@ -88,6 +89,9 @@ const DeliveryControls = () => {
       </div>
       <p role="status">{message}</p>
       {records.map(render)}
+      {records.length === 0 && (
+        <SharedStatusControls busy={busy} execute={execute} />
+      )}
     </section>
   );
 };

@@ -1,5 +1,7 @@
 # Assigned status and parent rollups
 
+This records the browser-only checkpoint at commit 65f541a. Current opt-in YouTrack-backed metadata and its setup are documented in SHARED-STATUS.md.
+
 The Assigned Status control now preserves a task's own choice separately from its effective YouTrack State. A leaf uses its assigned status. A parent uses its children's calculated colors, through the unchanged accepted desktop core. Removing or moving its last child restores the parent's assigned choice.
 
 For example, a parent assigned Standby with a Done child has native State Done and assigned status Standby. Moving that child elsewhere restores State Standby. Creating, deleting or moving children schedules the same calculation for the affected hierarchy.

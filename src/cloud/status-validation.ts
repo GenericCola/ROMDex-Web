@@ -1,4 +1,5 @@
 import type { WorkspaceData } from "@/domain/types";
+import { validateStatusWrite } from "./shared-status-protocol";
 export const validateStatuses = (data: WorkspaceData) => {
   const { cloud } = data;
   const invalid = () => {
@@ -6,6 +7,42 @@ export const validateStatuses = (data: WorkspaceData) => {
       "The assigned-status journal is invalid. Existing browser data has been kept.",
     );
   };
+  if (
+    cloud?.sharedStatuses !== undefined &&
+    typeof cloud.sharedStatuses !== "boolean"
+  )
+    invalid();
+  if (
+    cloud?.sharedStatuses &&
+    data.remote.some((item) => {
+      return (
+        item.sharedStatus?.state !== item.state ||
+        item.sharedStatus.updated !== item.updated ||
+        item.sharedStatus.assignedState !== item.assignedState
+      );
+    })
+  )
+    invalid();
+  for (const [opId, record] of Object.entries(cloud?.records ?? {})) {
+    if (!record?.metadataWrite) continue;
+    validateStatusWrite(record.metadataWrite);
+    const op =
+      data.operations.find((entry) => {
+        return entry.opId === opId;
+      }) ?? record.archivedOperation;
+    if (
+      !cloud?.sharedStatuses ||
+      op?.type !== "edit" ||
+      record.metadataWrite.opId !== opId ||
+      record.metadataWrite.kind !==
+        (op.purpose === "rollup" ? "rollup" : "assign") ||
+      record.metadataWrite.value !==
+        (op.purpose === "rollup"
+          ? op.patch.state
+          : (op.patch.assignedState ?? op.patch.state))
+    )
+      invalid();
+  }
   if (
     cloud?.rollupPending !== undefined &&
     typeof cloud.rollupPending !== "boolean"

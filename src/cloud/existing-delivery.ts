@@ -7,6 +7,11 @@ import {
 } from "./assigned-status";
 import { equal, supported } from "./delivery-helpers";
 import { acknowledge, attemptDelivery, recordDelivery } from "./journal";
+import {
+  confirmStatusAttempt,
+  saveStatusAttempt,
+  sharedWrite,
+} from "./shared-status-delivery";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
 type Existing = Extract<TaskOperation, { type: "edit" | "comment" }>;
@@ -41,6 +46,19 @@ export const deliverExisting = async (
     };
     const result = reconcile(base, patch, remote);
     ({ patch } = result);
+    if (
+      cloudData(snapshot()).sharedStatuses &&
+      patch.assignedState !== undefined &&
+      (operation.base.sharedStatus
+        ? operation.base.sharedStatus.revision !== remote.sharedStatus?.revision
+        : remote.sharedStatus?.initialized)
+    )
+      result.conflicts.push({
+        field: "assignedState revision",
+        base: operation.base.sharedStatus?.revision ?? 0,
+        local: patch.assignedState,
+        remote: remote.sharedStatus?.revision,
+      });
     if (result.conflicts.length) {
       await commit((data) => {
         recordDelivery(data, operation.opId, {
@@ -54,6 +72,10 @@ export const deliverExisting = async (
     }
   }
   const { assignedState, ...nativePatch } = patch;
+  const metadata =
+    cloudData(snapshot()).sharedStatuses && assignedState !== undefined
+      ? sharedWrite(operation, remote, "assign", assignedState)
+      : undefined;
   const finish = async (verified: TaskItem) => {
     await commit((data) => {
       const observed = observeStatus(data, verified);
@@ -72,29 +94,47 @@ export const deliverExisting = async (
       );
     });
   };
-  if (operation.type === "edit" && !Object.keys(nativePatch).length) {
+  if (
+    operation.type === "edit" &&
+    !metadata &&
+    !Object.keys(nativePatch).length
+  ) {
     await finish(received);
     return;
   }
-  await attemptDelivery(operation, commit, async () => {
-    if (operation.type === "edit")
-      await port.update(operation.issueId, nativePatch, remote);
-    else {
-      const receipt = await port.comment(operation.issueId, operation.text);
-      if (!receipt.id) throw Error("Missing comment receipt.");
-      await commit((data) => {
-        recordDelivery(data, operation.opId, { remoteId: receipt.id });
-      });
-    }
-    const verified = await port.get(operation.issueId);
-    if (!verified) throw Error("Readback unavailable.");
-    if (
-      operation.type === "edit" &&
-      !Object.entries(nativePatch).every(([key, value]) => {
-        return equal(verified[key as keyof TaskItem], value);
-      })
-    )
-      throw Error("Readback differs.");
-    await finish(verified);
-  });
+  await attemptDelivery(
+    operation,
+    commit,
+    async () => {
+      if (metadata) {
+        if (!port.metadata)
+          throw Error("Shared-status delivery is unavailable.");
+        await port.metadata.write(operation.issueId, metadata);
+      }
+      if (operation.type === "edit" && Object.keys(nativePatch).length)
+        await port.update(operation.issueId, nativePatch, remote);
+      else if (operation.type === "comment") {
+        const receipt = await port.comment(operation.issueId, operation.text);
+        if (!receipt.id) throw Error("Missing comment receipt.");
+        await commit((data) => {
+          recordDelivery(data, operation.opId, { remoteId: receipt.id });
+        });
+      }
+      const verified = await port.get(operation.issueId);
+      if (!verified) throw Error("Readback unavailable.");
+      if (
+        operation.type === "edit" &&
+        !Object.entries(nativePatch).every(([key, value]) => {
+          return equal(verified[key as keyof TaskItem], value);
+        })
+      )
+        throw Error("Readback differs.");
+      confirmStatusAttempt(verified, metadata);
+      await finish(verified);
+    },
+    operation.issueId,
+    (data) => {
+      saveStatusAttempt(data, operation, metadata);
+    },
+  );
 };

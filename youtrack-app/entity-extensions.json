@@ -1,0 +1,12 @@
+{
+  "entityTypeExtensions": [
+    {
+      "entityType": "Issue",
+      "properties": {
+        "assignedStatus": {
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

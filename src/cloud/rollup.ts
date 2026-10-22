@@ -2,6 +2,11 @@ import type { TaskOperation, WorkspaceData } from "@/domain/types";
 import { observeStatus } from "./assigned-status";
 import { acknowledge, attemptDelivery } from "./journal";
 import { readRollupTree } from "./rollup-tree";
+import {
+  confirmStatusAttempt,
+  saveStatusAttempt,
+  sharedWrite,
+} from "./shared-status-delivery";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
 type Edit = Extract<TaskOperation, { type: "edit" }>;
@@ -73,21 +78,32 @@ export const deliverRollup = async (
   if (
     fresh?.state !== current.state ||
     fresh?.parentId !== current.parentId ||
-    fresh.updated !== current.updated
+    fresh.updated !== current.updated ||
+    fresh.sharedStatus?.revision !== current.sharedStatus?.revision ||
+    (current.sharedStatus !== undefined &&
+      fresh.assignedState !== current.assignedState)
   )
     throw Error(
       "The rollup target changed. Refresh before sending its status.",
     );
   const { state } = operation.patch;
   if (!state) throw Error("Missing effective status.");
+  const metadata = cloudData(snapshot()).sharedStatuses
+    ? sharedWrite(operation, fresh, "rollup", state)
+    : undefined;
   await attemptDelivery(
     operation,
     commit,
     async () => {
-      await port.update(current.id, { state }, fresh);
+      if (metadata) {
+        if (!port.metadata)
+          throw Error("Shared-status delivery is unavailable.");
+        await port.metadata.write(current.id, metadata);
+      } else await port.update(current.id, { state }, fresh);
       const received = await port.get(current.id);
       if (!received || received.state !== operation.patch.state)
         throw Error("Effective status was not confirmed.");
+      confirmStatusAttempt(received, metadata);
       await commit((data) => {
         const verified = observeStatus(data, received);
         if (verified.assignedState !== operation.patch.assignedState)
@@ -101,6 +117,7 @@ export const deliverRollup = async (
       if (!record || !operation.patch.state)
         throw Error("Missing status observation.");
       record.pendingState = operation.patch.state;
+      saveStatusAttempt(data, operation, metadata);
     },
   );
 };

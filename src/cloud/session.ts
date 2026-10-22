@@ -5,7 +5,10 @@ import { cloudData } from "./types";
 let client: DeliveryClient | null = null;
 let suspended = false;
 export const connectDelivery = async (token: string) => {
-  const next = new DeliveryClient(token);
+  const next = new DeliveryClient(
+    token,
+    cloudData(workspaceStore.getSnapshot().data).sharedStatuses ?? false,
+  );
   await next.connect();
   const bound = cloudData(workspaceStore.getSnapshot().data).accountId;
   if (bound && bound !== next.accountId)
@@ -61,7 +64,9 @@ export const automaticDelivery = () => {
     state.updating ||
     state.delivering ||
     !cloudData(state.data).autoSync ||
-    (!state.data.operations.length && !cloudData(state.data).rollupPending)
+    (!state.data.operations.length &&
+      !cloudData(state.data).rollupPending &&
+      !cloudData(state.data).sharedStatuses)
   )
     return;
   const failed = (error: unknown) => {

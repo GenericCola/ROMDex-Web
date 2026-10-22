@@ -4,7 +4,12 @@ import type {
   TaskPatch,
   WorkspaceData,
 } from "@/domain/types";
+import type {
+  SharedStatusPort,
+  SharedStatusWrite,
+} from "./shared-status-types";
 export interface DeliveryRecord {
+  metadataWrite?: SharedStatusWrite;
   status: "attempting" | "uncertain" | "conflict" | "confirmed" | "ready";
   message: string;
   remoteId?: string;
@@ -28,6 +33,7 @@ export interface AssignedStatus {
   pendingState: string | null;
 }
 export interface CloudData {
+  sharedStatuses?: boolean;
   assigned?: Record<string, AssignedStatus>;
   rollupPending?: boolean;
   accountId?: string;
@@ -35,6 +41,7 @@ export interface CloudData {
   records: Record<string, DeliveryRecord>;
 }
 export interface DeliveryPort {
+  metadata?: SharedStatusPort;
   accountId: string;
   all: () => Promise<TaskItem[]>;
   get: (id: string) => Promise<TaskItem | null>;
