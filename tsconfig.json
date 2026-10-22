@@ -8,7 +8,6 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@payload-config": ["./src/payload.config.ts"],
       "@components/*": ["./src/components/*"],
       "@styles/*": ["./src/styles/*"],
       "@utils/*": ["./src/utils/*"],
@@ -17,7 +16,8 @@
     "noPropertyAccessFromIndexSignature": false,
     "verbatimModuleSyntax": false,
     "allowUnusedLabels": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "jsx": "react-jsx"
   },
   "include": [
     "next-env.d.ts",

@@ -2,7 +2,7 @@
   "printWidth": 80,
   "singleQuote": false,
   "tabWidth": 2,
-  "endOfLine": "auto",
+  "endOfLine": "lf",
   "bracketSpacing": true,
   "useTabs": false,
   "plugins": ["prettier-plugin-organize-imports"]

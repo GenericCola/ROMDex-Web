@@ -1,7 +1,7 @@
 import Link from "@components/link";
 import StatusPage from "@components/status-page";
 
-/** Shared body of `global-not-found.tsx` and `(frontend)/not-found.tsx`. */
+/** Shared body of `global-not-found.tsx` and `not-found.tsx`. */
 const NotFoundContent = () => {
   return (
     <StatusPage

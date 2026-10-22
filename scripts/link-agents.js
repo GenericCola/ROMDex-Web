@@ -48,7 +48,9 @@ const ensureSource = ({ source, type }) => {
     return;
   }
 
-  console.error(`❌ ${path.relative(root, source)} is missing; cannot link it.`);
+  console.error(
+    `❌ ${path.relative(root, source)} is missing; cannot link it.`,
+  );
   process.exit(1);
 };
 
@@ -85,9 +87,9 @@ const createLink = ({ source, linkPath, label, type }) => {
   } catch (err) {
     if (isWindows && err.code === "EPERM") {
       console.error(
-        `❌ Could not create ${label} on Windows. Enable Developer Mode or run this install as Administrator.`,
+        `Optional agent link skipped: ${label}. Read AGENTS.md and .agents/skills directly.`,
       );
-      process.exit(1);
+      return;
     }
     throw err;
   }

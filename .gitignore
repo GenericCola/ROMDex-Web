@@ -56,3 +56,9 @@ CLAUDE.md
 *.db
 *.db-*
 /media
+
+.pnpm-store/
+.playwright-browsers/
+playwright-report/
+test-results/
+__pycache__/

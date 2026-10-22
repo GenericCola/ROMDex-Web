@@ -2,6 +2,7 @@
 @import "./colors.css";
 @import "./defaults.css";
 @import "./components.css";
+@source "../";
 
 /*
  * Design tokens. Every color here is also a Tailwind utility (`bg-accent-500`, `text-fg`).
@@ -133,3 +134,5 @@
   --color-border: hsl(var(--color-grey-700-base) / 0.3);
   --color-focus: var(--color-accent-500);
 }
+
+body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }

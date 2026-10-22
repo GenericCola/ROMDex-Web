@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "Page not found",
 };
 
-/** 404 for unmatched URLs. The site and the admin have separate root layouts, so it renders its own document. */
+/** 404 for unmatched URLs. It renders its own document for static export. */
 const GlobalNotFound = () => {
   return (
     <html lang="en" className={fontVariables}>

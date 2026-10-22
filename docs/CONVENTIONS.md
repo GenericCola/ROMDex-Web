@@ -7,7 +7,7 @@ How code in this repo is shaped. Principles only — the code is the reference f
 - Everything on disk is `kebab-case`. Identifiers keep normal TS/React casing.
 - One folder per unit: `button/index.tsx`, plus `types.ts`, `styles.ts` or helpers beside it when needed.
 - Shared components go in `src/components/`. Components used by one route live in that route's folder (`src/app/<route>/components/`). Promote a component to `src/components/` only when a second route needs it.
-- `src/app` has two root layouts in route groups: `(frontend)` for the site and `(payload)` for the admin. Its root holds only files that cover both: `global-not-found.tsx`, `global-error.tsx`, `robots.ts` and `sitemap.ts`. Keep route files thin: compose, don't implement. Shared UI goes in `src/components`, fonts in `src/styles`.
+- `src/app` holds the single static-export layout and routes.
 
 ## Code
 
@@ -32,18 +32,12 @@ An inline script in the root layout's `<head>` adds `<meta name="color-scheme">`
 ## Pages, SEO and security
 
 - Site name, description and URL live in `src/site.ts`; metadata, `robots.ts`, `sitemap.ts` and `opengraph-image.tsx` read from it. Give each page its own `metadata.title`, and add public routes to `sitemap.ts`.
-- The 404 and error pages are thin wrappers around `@components/status-page`: `global-not-found.tsx` (unmatched URLs) and `(frontend)/not-found.tsx` (`notFound()` calls) share `@components/not-found-content`, and `error.tsx` and `global-error.tsx` share `@components/error-content`.
-- Security headers, including a static CSP, are set in `next.config.js`. When adding a third-party script, font, image host or API, allow its origin in the CSP.
-- Scrolling is smoothed by Lenis (`@components/smooth-scroll`). Mark nested scroll containers (modals, menus) with `data-lenis-prevent`.
+- The 404 and error pages are thin wrappers around `@components/status-page`: `global-not-found.tsx` (unmatched URLs) and `not-found.tsx` (`notFound()` calls) share `@components/not-found-content`, and `error.tsx` and `global-error.tsx` share `@components/error-content`.
+- Static-host security headers live in public/_headers; the preview server applies them. The eventual host must reproduce them.
 
-## Payload
+## Backend
 
-Payload CMS runs inside the app: the admin is at `/admin` and the REST API under `/api`. It stores data in a local SQLite file (`DATABASE_URL`, default `payload.db`), and needs `PAYLOAD_SECRET` set before it starts.
-
-- All content lives in Payload, so editors can change it without a deploy. Components get structure and styling; the words and images come from a collection (repeating things like posts) or a global (one-off things like the home page or footer).
-- One file per collection in `src/collections`, registered in `src/payload.config.ts`. Use the types in `src/payload-types.ts`.
-- Read data in Server Components with the Local API (`getPayload({ config })` from `payload`, with `config` from `@payload-config`), not over HTTP.
-- In development Payload updates the database schema for you. Production doesn't: create a migration with `pnpm payload migrate:create` and run `pnpm payload migrate` before starting.
+YouTrack is the only future application backend. The foundation has no application data connection.
 
 ## Git
 
