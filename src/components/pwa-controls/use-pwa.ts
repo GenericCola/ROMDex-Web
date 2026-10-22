@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import { requestUpdate } from "./request-update";
 interface InstallPrompt extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: string }>;
 }
-export const usePwa = (beforeUpdate?: () => Promise<void>) => {
+export const usePwa = (beforeUpdate?: () => Promise<void | (() => void)>) => {
   const [install, setInstall] = useState<InstallPrompt | null>(null);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [message, setMessage] = useState(
@@ -87,44 +88,10 @@ export const usePwa = (beforeUpdate?: () => Promise<void>) => {
   const reloadToUpdate = async () => {
     if (!waiting) return;
     try {
-      await beforeUpdate?.();
+      await requestUpdate(waiting, beforeUpdate, setMessage);
     } catch {
       setMessage("Save or export your drafts before applying the update.");
-      return;
     }
-    const channel = new MessageChannel();
-    const controllerChanged = () => {
-      window.location.reload();
-    };
-    navigator.serviceWorker.addEventListener(
-      "controllerchange",
-      controllerChanged,
-    );
-    const timeout = window.setTimeout(() => {
-      channel.port1.close();
-      navigator.serviceWorker.removeEventListener(
-        "controllerchange",
-        controllerChanged,
-      );
-      setMessage("Update did not respond. Reload while online to try again.");
-    }, 10000);
-    const received = (event: MessageEvent<{ blocked: boolean }>) => {
-      window.clearTimeout(timeout);
-      channel.port1.close();
-      if (event.data.blocked) {
-        navigator.serviceWorker.removeEventListener(
-          "controllerchange",
-          controllerChanged,
-        );
-        setMessage(
-          "Close other ROMDex windows, then choose Reload to update again.",
-        );
-      } else {
-        setMessage("Applying update…");
-      }
-    };
-    channel.port1.onmessage = received;
-    waiting.postMessage({ type: "ACTIVATE_UPDATE" }, [channel.port2]);
   };
   return {
     canInstall: Boolean(install),

@@ -73,6 +73,7 @@ export interface WorkspaceData {
 }
 export interface WorkspaceSnapshot {
   ready: boolean;
+  updating: boolean;
   data: WorkspaceData;
   pendingWrites: number;
   error: string;

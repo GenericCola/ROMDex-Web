@@ -1,9 +1,9 @@
-# ROMDex Web foundation
+# ROMDex Web project
 
-The user authorized a fresh start on October 22, 2026 in C:\Users\mrgen\ROMDex. This checkout starts from the requested next-starter-template; it is not a recovery of historical foundation commit e9ef385.
+The user authorized a fresh foundation on October 22, 2026, then supplied PASSKEY to port the current accepted ROMDex app before finishing remaining features. The desktop app and its data remain the fallback. Source baseline and delivery checklist are in PORT.md.
 
-The scope is static React setup, reusable controls and PWA infrastructure with tests. The component preview uses synthetic state. It does not represent the final ROMDex UI. Preserve the original application's latest UI and behavior when the user later authorizes the feature port.
+The current web app has an initial React task workspace with durable browser tasks and drafts, recovery export, and explicit read-only YouTrack loading. Cloud delivery is disabled. NPCDex is a placeholder. The original component showcase is at /foundation/.
 
-YouTrack is the only future application backend. Authentication, durable drafts, offline operations, synchronization, conflict recovery, desktop data migration and real feature parity remain future work. No production data or credentials belong here.
+YouTrack is the only application backend. No Payload, runtime GitHub storage, custom API server or proxy is permitted. No production data or credentials belong in this repository. Tokens currently live only in connection-dialog memory.
 
-Template provenance: 79d05e273dff44b1bba534752aeacb6aee071dc8. The template history remains intact on codex/web-foundation; the template remote cannot be pushed to.
+Template provenance: 79d05e273dff44b1bba534752aeacb6aee071dc8. This is a fresh foundation, not recovery of historical commit e9ef385. The template remote retains its disabled push URL.

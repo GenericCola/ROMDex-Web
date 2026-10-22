@@ -1,6 +1,6 @@
 # ROMDex Web
 
-React and PWA foundation, restarted from theGobindSingh/next-starter-template on October 22, 2026. Application features have not been ported.
+React/PWA port of the accepted ROMDex desktop app, based on theGobindSingh/next-starter-template. The initial task workspace is implemented; the full application port remains in progress. Read docs/PORT.md for scope and docs/PORT-STABILIZATION.md for current verification.
 
 Requires Node.js 24+ and pnpm 11.25.0.
 

@@ -13,6 +13,7 @@ export class WorkspaceStore {
   private listeners = new Set<() => void>();
   private state: WorkspaceSnapshot = {
     ready: false,
+    updating: false,
     data: emptyWorkspace(),
     pendingWrites: 0,
     error: "",
@@ -54,8 +55,13 @@ export class WorkspaceStore {
     }
   };
   change = (update: (data: WorkspaceData) => void) => {
-    if (!this.state.ready || this.state.error)
-      throw Error(this.state.error || "Wait for your workspace to open.");
+    if (!this.state.ready || this.state.error || this.state.updating)
+      throw Error(
+        this.state.error ||
+          (this.state.updating
+            ? "An app update is being prepared."
+            : "Wait for your workspace to open."),
+      );
     const data = structuredClone(this.state.data);
     update(data);
     validateWorkspace(data);
@@ -77,8 +83,25 @@ export class WorkspaceStore {
     return this.writes;
   };
   flush = async () => {
-    await this.writes;
+    let pending;
+    do {
+      pending = this.writes;
+      await pending;
+    } while (pending !== this.writes);
     if (this.state.error) throw Error(this.state.error);
+  };
+  prepareUpdate = async () => {
+    this.publish({ updating: true });
+    const release = () => {
+      return this.publish({ updating: false });
+    };
+    try {
+      await this.flush();
+      return release;
+    } catch (error) {
+      release();
+      throw error;
+    }
   };
   setConnection = (connection: string) => {
     return this.publish({ connection });

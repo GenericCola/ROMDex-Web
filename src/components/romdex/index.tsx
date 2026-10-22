@@ -43,7 +43,7 @@ const Romdex = () => {
   const mode = view.detailsMode;
   const style = { "--work-height": view.workHeight + "%" } as CSSProperties;
   return (
-    <div className="romdex-app">
+    <div className="romdex-app" inert={state.updating}>
       <Header state={state} connect={openConnection} />
       <div className="port-workspace-status">
         <p role="status">
@@ -97,7 +97,7 @@ const Romdex = () => {
               </p>
               <details>
                 <summary>Install and updates</summary>
-                <PwaControls beforeUpdate={workspaceStore.flush} />
+                <PwaControls beforeUpdate={workspaceStore.prepareUpdate} />
               </details>
             </main>
           )}
@@ -109,7 +109,7 @@ const Romdex = () => {
           Task workflow preview · local browser saves · YouTrack reads only ·
           cloud delivery off
         </p>
-        <PwaControls beforeUpdate={workspaceStore.flush} />
+        <PwaControls beforeUpdate={workspaceStore.prepareUpdate} />
       </details>
       {state.data.newTask && <NewItem draft={state.data.newTask} />}{" "}
       {connection && <Connection close={closeConnection} />}

@@ -1,6 +1,6 @@
 # Paused web-port checkpoint
 
-Paused at the user's request on October 22, 2026. Do not resume implementation until the user asks.
+Historical pause checkpoint from October 22, 2026. The user subsequently asked to resume. See PORT-STABILIZATION.md for the subsequent verification; the results below describe the earlier pause only.
 
 The user supplied PASSKEY for porting the current accepted app first, then finishing remaining features on web. The desktop app and its data remain the fallback and were not modified. The source-only reference is C:\Users\mrgen\ROMDex-Desktop-Reference, verified against the migration manifest. Do not run migration/install/sync scripts or copy appdata and credentials into this repo.
 

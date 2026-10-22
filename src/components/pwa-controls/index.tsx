@@ -4,7 +4,7 @@ import { usePwa } from "./use-pwa";
 const PwaControls = ({
   beforeUpdate,
 }: {
-  beforeUpdate?: () => Promise<void>;
+  beforeUpdate?: () => Promise<void | (() => void)>;
 }) => {
   const { canInstall, hasUpdate, message, installApp, reloadToUpdate } =
     usePwa(beforeUpdate);

@@ -110,7 +110,13 @@ const Header = ({ state, connect }: HeaderProps) => {
               Save Changes{" "}
               <Lamp
                 color={
-                  state.error ? "red" : state.pendingWrites ? "yellow" : "green"
+                  state.error
+                    ? "red"
+                    : state.pendingWrites
+                      ? "yellow"
+                      : state.data.operations.length
+                        ? "red"
+                        : "green"
                 }
               />
             </button>
