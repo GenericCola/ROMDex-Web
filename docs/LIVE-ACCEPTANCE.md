@@ -4,6 +4,14 @@ The owner authorized test-only app installation and live testing on October 22, 
 
 The owner subsequently authorized development against live PMON, the current ROMDex task project. PMON field-schema and task reads are verified through MCP. This allows live reads and compatibility development; existing PMON issues are not synthetic acceptance fixtures. The NPCD test app and its fixed fixture allowlist remain separate. No installed app was changed or activated in the PMON compatibility checkpoint. See PMON-DEVELOPMENT.md.
 
+## Current administrator handoff: version 1.0.3
+
+The browser check on October 22 still shows installed version 1.0.1 inactive, with the Active switch disabled for this account. The current acceptance package is artifacts/romdex-status-acceptance-1.0.3.zip. Its SHA-256 is 1a8dea687e94e24bdaa235a04039798c75ac0ff7d9840dcf2cbd068ba2ce6dab. The exact NPCD-872/NPCD-873 and summary-prefix guards remain enforced. Production sharing stays off.
+
+> Please upload romdex-status-acceptance-1.0.3.zip in Administration > Apps to update ROMDex acceptance - synthetic issues only. Enable the system Active switch and keep it attached only to NPCD. The code permits writes only to the private synthetic fixtures NPCD-872 and NPCD-873. Tests run manually. Do not attach it to PMON, change existing issues or broaden permissions. Please confirm when the update and activation are complete.
+
+This current handoff supersedes the historical 1.0.1 upload instructions below. Frozen earlier packages and evidence remain retained.
+
 ## Installed state and blocker
 
 A separate app named romdex-status-acceptance, titled ROMDex acceptance - synthetic issues only, version 1.0.1, is installed and attached only to NPCD. Its YouTrack app ID is 155-84. It is inactive system-wide. GenericCola can upload a new app through NPCD settings but cannot manage its system Active switch. The UI explicitly says the account does not have permission to manage this setting. The project switch is disabled because the app is deactivated system-wide.
@@ -26,7 +34,7 @@ The frozen 1.0.1 handoff ZIP SHA-256 is 623d3c4c6183d51b5d81463772de9ae21cdbc6b2
 
 The normal pnpm package:youtrack command still builds the production app with no widgets or test fault endpoint. The test build cannot be aimed at another project through a command-line argument. Changing its allowlist requires an explicit source change and renewed review.
 
-## Administrator handoff
+## Historical 1.0.1 administrator handoff
 
 Send the administrator the frozen 1.0.1 handoff ZIP and this message:
 

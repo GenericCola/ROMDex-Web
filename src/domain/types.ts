@@ -1,5 +1,9 @@
 import type { SharedStatus } from "@/cloud/shared-status-types";
 import type { CloudData } from "@/cloud/types";
+import type { MigrationRecord } from "@/migration/types";
+import type { NpcdexDraft, NpcdexTarget } from "@/npcdex/model";
+import type { RdxFile } from "@/rdx/types";
+import type { JsonObject } from "./json";
 export type LampColor =
   "grey" | "yellow" | "blue" | "purple" | "amber" | "green" | "red";
 export interface TaskComment {
@@ -64,6 +68,13 @@ export type TaskOperation =
 export type DetailsMode = "default" | "expanded" | "collapsed";
 export interface WorkspaceData {
   schemaVersion: 1;
+  rdxFiles?: RdxFile[];
+  editorRecovery?: JsonObject[];
+  images?: Record<string, string>;
+  npcdex?: JsonObject;
+  npcdexDrafts?: Record<string, NpcdexDraft>;
+  npcdexHistory?: JsonObject[];
+  migration?: MigrationRecord;
   cloud?: CloudData;
   newTask: { title: string; parentId: string | null } | null;
   titleDrafts: Record<string, string>;
@@ -73,6 +84,7 @@ export interface WorkspaceData {
   commentDrafts: Record<string, string>;
   view: {
     workspace: "romdex" | "npcdex";
+    npcdex?: { target: NpcdexTarget; gender: string; stage: string };
     scope: string | null;
     selected: string | null;
     search: string;

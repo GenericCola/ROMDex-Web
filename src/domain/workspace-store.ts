@@ -1,4 +1,6 @@
+import { verifyRetainedAssets } from "@/migration/verify-assets";
 import { WorkspaceStorage } from "@/storage/workspace-storage";
+import { flushDraftEditors, hasDraftEdits } from "./editor-drafts";
 import type { WorkspaceData, WorkspaceSnapshot } from "./types";
 import { emptyWorkspace, validateWorkspace } from "./workspace-data";
 import { exportWorkspace } from "./workspace-recovery";
@@ -33,12 +35,9 @@ export class WorkspaceStore {
       this.listeners.delete(listener);
     };
   };
-  private emit = () => {
-    for (const listener of this.listeners) listener();
-  };
   private publish = (patch: Partial<WorkspaceSnapshot>) => {
     this.state = { ...this.state, ...patch };
-    this.emit();
+    for (const listener of this.listeners) listener();
   };
   start = () => {
     this.loading ??= this.load();
@@ -47,6 +46,7 @@ export class WorkspaceStore {
   private load = async () => {
     try {
       const record = await this.storage.load();
+      if (record) await verifyRetainedAssets(record.data);
       this.revision = record?.revision ?? 0;
       this.publish({ data: record?.data ?? emptyWorkspace(), ready: true });
     } catch (error) {
@@ -122,6 +122,7 @@ export class WorkspaceStore {
     if (this.state.error) throw Error(this.state.error);
   };
   prepareUpdate = async () => {
+    if (hasDraftEdits()) await flushDraftEditors();
     if (this.state.delivering)
       throw Error("Wait for cloud delivery before updating.");
     this.publish({ updating: true });

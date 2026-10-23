@@ -27,7 +27,7 @@ export const completeCreation = (
   remote: TaskItem,
 ) => {
   const old = operation.issueId;
-  for (const map of [data.commentDrafts, data.titleDrafts]) {
+  for (const map of [data.commentDrafts, data.titleDrafts, data.images ?? {}]) {
     if (
       Object.hasOwn(map, old) &&
       Object.hasOwn(map, remote.id) &&
@@ -66,7 +66,12 @@ export const completeCreation = (
         base.parentId = id(base.parentId);
     }
   }
-  for (const map of [data.order, data.commentDrafts, data.titleDrafts]) {
+  for (const map of [
+    data.order,
+    data.commentDrafts,
+    data.titleDrafts,
+    data.images ?? {},
+  ]) {
     if (Object.hasOwn(map, old)) {
       Object.assign(map, { [remote.id]: map[old] });
       delete map[old];

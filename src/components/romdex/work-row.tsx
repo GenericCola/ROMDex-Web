@@ -1,7 +1,9 @@
 import { hasMeaningfulNotes, indexTree } from "@/domain/accepted/core.mjs";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
+import { rasterImage } from "@/npcdex/model";
 import Lamp from "./lamp";
+import TaskOrder from "./task-order";
 const WorkRow = ({
   item,
   data,
@@ -62,6 +64,17 @@ const WorkRow = ({
           ) : (
             <span aria-hidden="true">·</span>
           )}
+          {rasterImage(data.images?.[item.id]) && (
+            <span
+              className="port-task-thumbnail"
+              role="img"
+              aria-label={item.summary + " image"}
+              style={{
+                backgroundImage:
+                  "url(" + JSON.stringify(data.images?.[item.id]) + ")",
+              }}
+            />
+          )}
           <Lamp color={tree.colors.get(item.id) ?? "grey"} />
           <button
             className="port-item-name"
@@ -81,6 +94,7 @@ const WorkRow = ({
       <td>{item.priority.toUpperCase()}</td>
       <td>{item.complexity?.toUpperCase() ?? "—"}</td>
       <td>
+        <TaskOrder item={item} />
         <button aria-label={"Add child to " + item.summary} onClick={addChild}>
           +
         </button>

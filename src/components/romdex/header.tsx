@@ -8,8 +8,9 @@ import WorkspaceMenu from "./workspace-menu";
 interface HeaderProps {
   state: WorkspaceSnapshot;
   connect: () => void;
+  unsavedDrafts?: boolean;
 }
-const Header = ({ state, connect }: HeaderProps) => {
+const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
   const [message, setMessage] = useState("");
   const save = () => {
     setMessage("");
@@ -80,7 +81,8 @@ const Header = ({ state, connect }: HeaderProps) => {
                     ? "red"
                     : state.pendingWrites
                       ? "yellow"
-                      : state.data.operations.length ||
+                      : unsavedDrafts ||
+                          state.data.operations.length ||
                           cloudData(state.data).rollupPending
                         ? "red"
                         : "green"

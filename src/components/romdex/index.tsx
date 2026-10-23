@@ -2,21 +2,44 @@
 import { cloudData } from "@/cloud/types";
 
 import { materialize } from "@/domain/accepted/core.mjs";
+import {
+  hasDraftEdits,
+  noDraftEdits,
+  subscribeDraftEditors,
+} from "@/domain/editor-drafts";
 import { workspaceStore } from "@/domain/workspace-store";
+import Npcdex from "@components/npcdex";
+import NpcdexSidebar from "@components/npcdex/sidebar";
 import PwaControls from "@components/pwa-controls";
 import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Connection from "./connection";
 import Details from "./details";
 import Divider from "./divider";
 import Header from "./header";
+import Migration from "./migration";
 import NewItem from "./new-item";
+import RdxLibrary from "./rdx-library";
 import Selectors from "./selectors";
 import { useWorkspace } from "./use-workspace";
 import WorkTable from "./work-table";
+import WorkspaceStatus from "./workspace-status";
 const Romdex = () => {
   const state = useWorkspace();
+  const draftEdits = useSyncExternalStore(
+    subscribeDraftEditors,
+    hasDraftEdits,
+    noDraftEdits,
+  );
   const [connection, setConnection] = useState(false);
+  const [migration, setMigration] = useState(false);
+  const [rdx, setRdx] = useState(false);
+  const openMigration = () => {
+    setMigration(true);
+  };
+  const closeMigration = () => {
+    setMigration(false);
+  };
   const items = materialize(state.data.remote, state.data.operations);
   const openConnection = () => {
     return setConnection(true);
@@ -29,40 +52,24 @@ const Romdex = () => {
       data.newTask = { title: "", parentId };
     });
   };
-  const exportRecovery = () => {
-    const blob = new Blob([workspaceStore.recover()], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download =
-      "ROMDex-Web-Recovery-" + new Date().toISOString().slice(0, 10) + ".json";
-    link.click();
-    URL.revokeObjectURL(url);
-  };
   const { view } = state.data;
   const mode = view.detailsMode;
   const style = { "--work-height": view.workHeight + "%" } as CSSProperties;
   return (
     <div className="romdex-app" inert={state.updating || state.delivering}>
-      <Header state={state} connect={openConnection} />
-      <div className="port-workspace-status">
-        <p role="status">
-          {state.error
-            ? "Local save needs attention"
-            : state.delivering
-              ? "Delivering supported queued changes..."
-              : !state.ready
-                ? "Opening browser workspace…"
-                : state.pendingWrites
-                  ? "Saving in this browser…"
-                  : "All changes saved in this browser"}
-        </p>
-        <button onClick={exportRecovery} disabled={!state.ready}>
-          Export Recovery Copy
-        </button>
-      </div>
+      <Header
+        state={state}
+        connect={openConnection}
+        unsavedDrafts={draftEdits}
+      />
+      <WorkspaceStatus
+        state={state}
+        drafts={draftEdits}
+        openMigration={openMigration}
+        openRdx={() => {
+          setRdx(true);
+        }}
+      />
       {state.error && (
         <p className="port-recovery" role="alert">
           {state.error}
@@ -78,7 +85,11 @@ const Romdex = () => {
             })
           }
         >
-          <Selectors data={state.data} items={items} add={add} />
+          {view.workspace === "romdex" ? (
+            <Selectors data={state.data} items={items} add={add} />
+          ) : (
+            <NpcdexSidebar data={state.data} />
+          )}
           {view.workspace === "romdex" ? (
             <main
               className={
@@ -101,17 +112,7 @@ const Romdex = () => {
               )}
             </main>
           ) : (
-            <main className="workspace suite-tray port-empty-workspace">
-              <h2>NPCDex</h2>
-              <p>
-                The accepted NPCDex content workflow is next in the port. Your
-                desktop maps have not been imported or changed.
-              </p>
-              <details>
-                <summary>Install and updates</summary>
-                <PwaControls beforeUpdate={workspaceStore.prepareUpdate} />
-              </details>
-            </main>
+            <Npcdex data={state.data} />
           )}
         </div>
       )}
@@ -125,6 +126,15 @@ const Romdex = () => {
       </details>
       {state.data.newTask && <NewItem draft={state.data.newTask} />}{" "}
       {connection && <Connection close={closeConnection} />}
+      {migration && <Migration close={closeMigration} />}
+      {rdx && (
+        <RdxLibrary
+          data={state.data}
+          close={() => {
+            setRdx(false);
+          }}
+        />
+      )}
     </div>
   );
 };

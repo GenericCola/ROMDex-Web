@@ -1,3 +1,4 @@
+import { flushDraftEditors } from "@/domain/editor-drafts";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { deliverQueue } from "./delivery";
@@ -5,6 +6,10 @@ import { cloudData } from "./types";
 let client: DeliveryClient | null = null;
 let suspended = false;
 export const connectDelivery = async (token: string) => {
+  await workspaceStore.start();
+  const opened = workspaceStore.getSnapshot();
+  if (!opened.ready || opened.error)
+    throw Error(opened.error || "Wait for your workspace to open.");
   const next = new DeliveryClient(
     token,
     cloudData(workspaceStore.getSnapshot().data).sharedStatuses ?? false,
@@ -30,6 +35,7 @@ export const deliveryConnected = () => {
   return client !== null;
 };
 export const saveDelivery = async () => {
+  await flushDraftEditors();
   if (!client) {
     await workspaceStore.flush();
     return "Saved in this browser. Connect cloud delivery to send queued changes.";

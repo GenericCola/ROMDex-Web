@@ -5,6 +5,13 @@ export const validateTask: (value: unknown) => asserts value is TaskItem = (
 ) => {
   if (!value || typeof value !== "object") throw Error("Invalid task data.");
   const item = value as TaskItem;
+  if (
+    item.url !== undefined &&
+    (typeof item.url !== "string" ||
+      !/^PMON-[1-9]\d*$/.test(item.id) ||
+      item.url !== "https://thegobindsingh.youtrack.cloud/issue/" + item.id)
+  )
+    throw Error("Task links must point to their verified YouTrack issue.");
   if (item.sharedStatus !== undefined)
     parseSharedStatus(item.sharedStatus, item.id);
   if (

@@ -2,6 +2,7 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
+import TaskImage from "./task-image";
 import TaskProperties from "./task-properties";
 import TaskWriting from "./task-writing";
 const Details = ({
@@ -66,6 +67,7 @@ const Details = ({
         {item ? (
           <div className="detail-scroll">
             <TaskProperties item={item} data={data} remove={askDelete} />
+            <TaskImage id={item.id} data={data} />
             <TaskWriting item={item} data={data} />
           </div>
         ) : (

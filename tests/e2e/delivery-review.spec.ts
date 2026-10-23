@@ -36,3 +36,9 @@ test("opted-in automatic delivery stops after uncertainty and never persists the
   await page.getByRole("button",{name:"Keep YouTrack; archive pending change",exact:true}).click();await expect(page.getByRole("heading",{name:"Uncertain delivery",exact:true})).toHaveCount(0);await page.getByRole("button",{name:"Close Connection Details",exact:true}).click();await page.getByRole("button",{name:/^Save Changes/}).click();await expect(page.getByText("Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.",{exact:true})).toBeVisible();await page.getByRole("button",{name:"Connection Details",exact:true}).click();
   await page.getByRole("button",{name:"Disconnect delivery",exact:true}).click();await page.clock.fastForward(60000);expect(s.posts()).toBe(1);await page.getByRole("button",{name:"Close Connection Details",exact:true}).click();await expect(page.getByRole("switch",{name:"Auto-Sync Data",exact:true})).toBeDisabled();
 });
+
+
+test("connection reading waits for a delayed browser workspace before adopting tasks",async({page})=>{
+ await page.addInitScript(()=>{const open=IDBFactory.prototype.open;IDBFactory.prototype.open=function(name,version){const request=version===undefined?open.call(this,name):open.call(this,name,version);if(name==="romdex-web-workspace"){let held=false;request.addEventListener("success",event=>{if(!held){held=true;event.stopImmediatePropagation();setTimeout(()=>request.dispatchEvent(new Event("success")),1500);}});}return request;};});
+ await fixture(page);await expect(page.getByRole("button",{name:"Synthetic review task",exact:true}).last()).toBeVisible();await expect(page.getByText("Wait for your workspace to open.",{exact:true})).toHaveCount(0);
+});

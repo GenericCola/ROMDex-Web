@@ -29,3 +29,9 @@ Verified on October 22, 2026: pnpm check passed 88 unit tests and 8 worker/build
 - [ ] Full parity checks, real-device PWA and HTTPS deployment acceptance.
 
 Each milestone records fixture tests separately from live checks. Do not enable production writes or import desktop saves as an incidental test. Keep tokens in memory initially. Browser credential persistence requires a separate explicit design. App-shell Cache Storage must never include workspace data or credentials. Any editable workflow must durably save before worker activation.
+
+## Migration and RDX implementation checkpoint
+
+See DESKTOP-MIGRATION.md for the reviewed desktop/recovery importer, separate NPCDex planning journal, persistent map navigation, local task image/order controls and browser RDX validation/merge/export. The full checklist above remains open until authoring, attachment/property parity, cloud content synchronization, live acceptance and hosting are complete. Desktop data has not been migrated as an incidental test.
+
+The explicit behavior/default/message/exception checklist and its separate automated, live and human acceptance evidence are in PORT-ACCEPTANCE.md. A passing subset does not close the port.

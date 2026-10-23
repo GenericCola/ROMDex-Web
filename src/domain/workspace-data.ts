@@ -1,7 +1,9 @@
 import { validateQueue } from "@/cloud/validation";
+import { validateMigration } from "@/migration/validate";
 import { indexTree } from "./accepted/core.mjs";
 import type { WorkspaceData } from "./types";
 import { validateTask } from "./validate-task";
+import { validateView } from "./validate-view";
 export const emptyWorkspace = (): WorkspaceData => {
   return {
     schemaVersion: 1,
@@ -45,6 +47,7 @@ export const validateWorkspace = (value: unknown): WorkspaceData => {
     throw Error(
       "The workspace is incomplete. Your existing browser data has been kept.",
     );
+  validateView(data);
   const ids = new Set<string>();
   for (const item of data.remote) {
     validateTask(item);
@@ -54,6 +57,7 @@ export const validateWorkspace = (value: unknown): WorkspaceData => {
       );
     ids.add(item.id);
   }
+  validateMigration(data);
   validateQueue(data);
   indexTree(data.remote, data.order);
   return data;

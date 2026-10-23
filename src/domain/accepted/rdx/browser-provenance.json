@@ -1,0 +1,72 @@
+[
+  {
+    "file": "content/contracts.mjs",
+    "sourceSha256": "c2d651df99d3cb2f5bed86c2d1b4cd9e357a512c8fea9df6d207e1bbdc60d43f"
+  },
+  {
+    "file": "content/image-bounds.mjs",
+    "sourceSha256": "41e1741dfb93db12b5e03f306f14eafdd78fc86fe4a1895f7190e2e023f3c707"
+  },
+  {
+    "file": "content/view-contract.mjs",
+    "sourceSha256": "737e978e22aa2dcd120bb6bc65868257c6d9f9031627face54289e48f3ffd88d"
+  },
+  {
+    "file": "rdx/schema.mjs",
+    "sourceSha256": "07082cb0a383f83b736e6e66d79f82aee130c0f7da6019bf6256964701c71b99"
+  },
+  {
+    "file": "rdx/document.mjs",
+    "sourceSha256": "ef46f502d3f4aba61d5c898365fa8576ed8159f967dbc46c7d2d1ddf3b8561b5"
+  },
+  {
+    "file": "rdx/limits.mjs",
+    "sourceSha256": "db9bb1aa79c2fd7580e0de939a3b08b81ca9af5460b43f60e80cd56a4bd6b3cd"
+  },
+  {
+    "file": "content/materialize.mjs",
+    "sourceSha256": "3312a97979210110ec5c9b4a70dc87ef01160cc32b009d6f7668962ae81497d9"
+  },
+  {
+    "file": "content/catalog-core.mjs",
+    "sourceSha256": "2263fd37558e6ced50ab753f6e796cac57631823364535bf0ecae15a3486f7fd"
+  },
+  {
+    "file": "content/membership-resolution.mjs",
+    "sourceSha256": "9e773df1ada360a0de99256ff41ff8dd8e5d1cd6affbf59394637ad354072967"
+  },
+  {
+    "file": "content/native-projection.mjs",
+    "sourceSha256": "d73f8ca21697e68d749543c8fe3ada2c84b0cbba30b2315c6c1f14735d448662"
+  },
+  {
+    "file": "rdx/map-import.mjs",
+    "sourceSha256": "6d6238110735303cef6ec3f950b8532dbba63380f3dbfe3fc1ea82c49aecc07f"
+  },
+  {
+    "file": "rdx/container.mjs",
+    "sourceSha256": "49b122986671d10812fac69a70ac0c00a45c822220e5492e1679de4533ba365f"
+  },
+  {
+    "file": "rdx/plan-merge.mjs",
+    "sourceFile": "rdx/plan-import.mjs",
+    "sourceSha256": "dff23d44b5a63855dde985f1eac83d3480259084f674e7f2a22910b5293cf3d8"
+  },
+  {
+    "file": "content/projection.mjs",
+    "sourceSha256": "d57eaa690dca050e97ae93fbdf21765c768236aceb84bdbdaddfbec9ecace710",
+    "adaptation": "Native and record-based projections retained. Legacy original-save projection requires the explicit desktop migration flow."
+  },
+  {
+    "file": "content/contracts-schema.mjs",
+    "sourceFile": "content/contracts.schema.json",
+    "sourceSha256": "af84475e548105095b3d203a51cf3c613b5c9d52560ac169c6f72d5a84fc0295",
+    "adaptation": "Pinned JSON schema imported as a local module; no remote schema resolver."
+  },
+  {
+    "file": "rdx/contracts-schema.mjs",
+    "sourceFile": "rdx/contracts.schema.json",
+    "sourceSha256": "f4bb4c44840057566b1fd6eda07671c8537df4ab83adfda4f403cf80670c5b0e",
+    "adaptation": "Pinned JSON schema imported as a local module; no remote schema resolver."
+  }
+]

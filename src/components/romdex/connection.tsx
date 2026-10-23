@@ -21,6 +21,10 @@ const Connection = ({ close }: { close: () => void }) => {
     setBusy(true);
     setMessage("");
     try {
+      await workspaceStore.start();
+      const opened = workspaceStore.getSnapshot();
+      if (!opened.ready || opened.error)
+        throw Error(opened.error || "Wait for your workspace to open.");
       const items = cloudData(workspaceStore.getSnapshot().data).sharedStatuses
         ? await new DeliveryClient(token, true).all()
         : await readTasks(token);
@@ -43,6 +47,7 @@ const Connection = ({ close }: { close: () => void }) => {
   const savePreview = async () => {
     if (!preview) return;
     try {
+      await workspaceStore.start();
       await workspaceStore.change((data) => {
         adoptTasks(data, preview);
       });
