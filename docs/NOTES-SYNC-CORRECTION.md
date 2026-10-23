@@ -46,3 +46,6 @@ The web preparation-race unit check runs the exported automatic/manual entry poi
 - [x] Final complete frozen browser matrix: 198 passed, two expected mobile layout skips; typed notes remained recoverable after storage failure on all five targets.
 - [ ] Owner-observed desktop use: type a note with pauses, confirm it stays local while focused, then leave the editor or choose Save Changes; the completed note should sync without a self-conflict.
 - [ ] Live YouTrack end-to-end acceptance and physical-device checks remain subject to the existing project/fixture and deployment boundaries. No live PMON issue is a developer mutation fixture.
+
+
+October 23 consolidated QA corrected the fault-injection precondition: wait for navigation/selection to be saved before aborting the editor save. Otherwise the app can correctly lock after a previous view save fails before typing begins. Existing browser behavior and the installed desktop are unchanged. See YOUTRACK-CONSOLIDATED-QA.md for traces, repeated checks and limits.

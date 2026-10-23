@@ -1,7 +1,10 @@
 {
   "project": "NPCD",
-  "issues": ["NPCD-872", "NPCD-873"],
+  "issues": [
+    "NPCD-872",
+    "NPCD-873"
+  ],
   "prefix": "[ROMDex acceptance] ",
   "app": "romdex-status-acceptance",
-  "version": "1.0.6"
+  "version": "1.0.7"
 }

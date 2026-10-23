@@ -1,14 +1,9 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { crc32 } from "node:zlib";
-const acceptance = process.argv.slice(2);
-if (
-  acceptance.length &&
-  (acceptance.length !== 1 || acceptance[0] !== "--acceptance")
-)
-  throw Error(
-    "Only --acceptance is supported; its scope is fixed in youtrack-acceptance/scope.json.",
-  );
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
+export const buildYouTrackArchive = async ({acceptance = false} = {}) => {
 const files = [
   "manifest.json",
   "entity-extensions.json",
@@ -29,7 +24,7 @@ if (
 )
   throw Error("Invalid app manifest.");
 const overrides = new Map();
-if (acceptance.length) {
+if (acceptance) {
   const { acceptanceSources } = await import("./youtrack-acceptance.mjs");
   for (const [name, source] of await acceptanceSources(manifest))
     overrides.set(name, Buffer.from(source));
@@ -75,19 +70,26 @@ end.writeUInt32LE(central.length, 12);
 end.writeUInt32LE(offset, 16);
 const zip = Buffer.concat([...entries, central, end]),
   filename = manifest.name + "-" + manifest.version + ".zip";
-await mkdir(new URL("../artifacts/", import.meta.url), { recursive: true });
-await writeFile(new URL("../artifacts/" + filename, import.meta.url), zip);
 const checksum = createHash("sha256").update(zip).digest("hex");
-await writeFile(
-  new URL("../artifacts/" + filename + ".sha256", import.meta.url),
-  checksum + "  " + filename + "\n",
-);
-console.log(
-  "Packaged artifacts/" +
-    filename +
-    " (" +
-    files.length +
-    " files, SHA-256 " +
-    checksum +
-    ")",
-);
+return {filename, zip, checksum, manifest};
+};
+export const writeFrozen = async (name, bytes) => {
+  const url = new URL("../artifacts/" + name, import.meta.url);
+  let previous;
+  try { previous = await readFile(url); } catch (error) { if (error.code !== "ENOENT") throw error; }
+  if (previous) {
+    if (!previous.equals(bytes)) throw Error("Refusing to overwrite a different archive or checksum: " + name + ". Increment its version.");
+    return;
+  }
+  await writeFile(url, bytes, {flag: "wx"});
+};
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const args = process.argv.slice(2);
+  if (args.length && (args.length !== 1 || args[0] !== "--acceptance"))
+    throw Error("Only --acceptance is supported; its scope is fixed in youtrack-acceptance/scope.json.");
+  const {filename, zip, checksum} = await buildYouTrackArchive({acceptance: args.length === 1});
+  await mkdir(new URL("../artifacts/", import.meta.url), {recursive: true});
+  await writeFrozen(filename, zip);
+  await writeFrozen(filename + ".sha256", Buffer.from(checksum + "  " + filename + "\n"));
+  console.log("Packaged artifacts/" + filename + " (SHA-256 " + checksum + ")");
+}

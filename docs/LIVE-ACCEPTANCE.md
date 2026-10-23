@@ -4,7 +4,11 @@ The owner authorized test-only app installation and live testing on October 22, 
 
 The owner subsequently authorized development against live PMON, the current ROMDex task project. PMON field-schema and task reads are verified through MCP. This allows live reads and compatibility development; existing PMON issues are not synthetic acceptance fixtures. The NPCD test app and its fixed fixture allowlist remain separate. No installed app was changed or activated in the PMON compatibility checkpoint. See PMON-DEVELOPMENT.md.
 
-## Current continuation: installed 1.0.5, candidate 1.0.6
+## Consolidated QA: no new installation request
+
+The earlier acceptance 1.0.6 handoff is withdrawn. All local fixes are consolidated and tested before another installation is considered. Acceptance 1.0.7 and production 1.0.6 are frozen local-only QA candidates, not deployment instructions. The installed app remains 1.0.5, production sharing stays off, and this follow-up leaves desktop files/data intact. See YOUTRACK-CONSOLIDATED-QA.md for current evidence and pending native checks.
+
+## Historical continuation: installed 1.0.5, candidate 1.0.6
 
 The administrator updated app 155-84 in place to 1.0.5 and retained activation, storage, NPCD-only attachment and Auto-attach OFF. No extra account permissions were granted; future ZIPs go through that administrator. Live browser verification confirms the version and that both fixture widgets now load. Both read-only metadata requests fail with HTTP 500; the exported app log is empty. A separate capability probe exposes a deployed Host API error when its options object is omitted. No issue write stage was reached.
 

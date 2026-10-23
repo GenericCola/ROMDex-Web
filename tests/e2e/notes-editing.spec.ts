@@ -23,6 +23,8 @@ test("a longer independent YouTrack note still shows the real conflict and prese
 });
 test("typed notes remain exportable after interrupted local storage and no cloud request is sent",async({page})=>{
  const s=await structuralFixture(page);await s.connect();await select(page,"Fixture Root");
+ // Let the selection save finish so the injected failure belongs to the note edit.
+ await expect(page.getByText("All changes saved in this browser",{exact:true})).toBeVisible();
  await page.evaluate(()=>{const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(value,key){const result=key===undefined?put.call(this,value):put.call(this,value,key);if(this.name==="workspace")this.transaction.abort();return result;};});
  const notes=page.getByRole("textbox",{name:"Notes and Instructions",exact:true});await notes.fill("Keep this complete note after disk failure");
  await expect(page.getByText("Local save needs attention",{exact:true})).toBeVisible();await expect(notes).toHaveValue("Keep this complete note after disk failure");expect(s.writes).toHaveLength(0);

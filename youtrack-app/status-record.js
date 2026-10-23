@@ -94,7 +94,7 @@ const sameRequest = (a, b) =>
   Object.keys(base(a.expected)).every(
     (key) => a.expected[key] === b.expected[key],
   );
-module.exports = {
+Object.assign(exports, {
   StatusError,
   text,
   fail,
@@ -103,4 +103,4 @@ module.exports = {
   base,
   request,
   sameRequest,
-};
+});

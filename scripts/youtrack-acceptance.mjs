@@ -77,13 +77,6 @@ try {
     ["status.js", status],
     ["capabilities.js", capabilities],
   ]);
-  // The documented server loader exposes exports; do not depend on Node's module.
-  for (const name of ["status-record.js", "status-rules.js"]) {
-    const source = await readFile(new URL("../youtrack-app/" + name, import.meta.url), "utf8");
-    if ((source.match(/module\.exports = \{/g) ?? []).length !== 1 || !/};\s*$/.test(source))
-      throw Error("Review changed utility exports before acceptance packaging.");
-    result.set(name, source.replace("module.exports = {", "Object.assign(exports, {").replace(/};\s*$/, "});\n"));
-  }
   for (const name of ["index.html", "panel.js", "fault.js"]) {
     const source = await readFile(
       new URL("../youtrack-acceptance/" + name, import.meta.url),

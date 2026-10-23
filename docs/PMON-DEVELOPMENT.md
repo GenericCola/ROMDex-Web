@@ -10,7 +10,7 @@ Any testing child makes its parent display amber, regardless of other sibling st
 
 PMON uses Minor, Normal, Major, Critical and Show-stopper priorities. The picker now offers these values. Existing native values outside the standard status or priority choices remain visible and are preserved until the user changes them. Older queued unsupported priorities require normal delivery review; the app does not silently rewrite them.
 
-The packaged YouTrack app is source version 1.0.5 and advertises statusRules 4. The browser refuses shared-status delivery through an older app, even if its metadata schema is otherwise compatible. The app maps an Awaiting Testing assignment to the existing native State for validation, stores the exact assignment and receipt, and writes only the calculated native State. It never creates a field or State value.
+The packaged YouTrack app is source version 1.0.6 and advertises statusRules 4. The browser refuses shared-status delivery through an older app, even if its metadata schema is otherwise compatible. The app maps an Awaiting Testing assignment to the existing native State for validation, stores the exact assignment and receipt, and writes only the calculated native State. It never creates a field or State value.
 
 ## Development boundaries
 

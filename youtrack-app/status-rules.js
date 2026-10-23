@@ -34,4 +34,4 @@ const rollup = (colors) => {
   if (colors.includes("blue")) return "yellow";
   return "green";
 };
-module.exports = { states, statusOf, rollup, youTrackState };
+Object.assign(exports, { states, statusOf, rollup, youTrackState });
