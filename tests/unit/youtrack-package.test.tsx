@@ -6,6 +6,8 @@ import {createHash} from "node:crypto";
 import {crc32} from "node:zlib";
 import {createRequire} from "node:module";
 const {version}=JSON.parse(readFileSync("youtrack-app/manifest.json","utf8"));
+const {version:acceptanceVersion}=JSON.parse(readFileSync("youtrack-acceptance/scope.json","utf8"));
+
 test("installable app ZIP contains only the exact backend sources with valid CRCs and deterministic checksum",()=>{
   execFileSync(process.execPath,["scripts/package-youtrack.mjs"],{stdio:"pipe"});const path=`artifacts/romdex-status-${version}.zip`,zip=readFileSync(path);let at=0;const names:string[]=[];
   while(zip.readUInt32LE(at)===0x04034b50){assert.equal(zip.readUInt16LE(at+8),0);const size=zip.readUInt32LE(at+18),length=zip.readUInt16LE(at+26),name=zip.subarray(at+30,at+30+length).toString();names.push(name);const bytes=zip.subarray(at+30+length,at+30+length+size);assert.equal(crc32(bytes),zip.readUInt32LE(at+14));assert.deepEqual(bytes,readFileSync("youtrack-app/"+name));at+=30+length+size;}
@@ -14,9 +16,11 @@ test("installable app ZIP contains only the exact backend sources with valid CRC
 
 test("acceptance package isolates the two explicitly authorized NPCD fixtures and rejects production",()=>{
   execFileSync(process.execPath,["scripts/package-youtrack.mjs","--acceptance"],{stdio:"pipe"});
-  const zip=readFileSync(`artifacts/romdex-status-acceptance-${version}.zip`),files=new Map<string,Buffer>();let at=0;
+  const zip=readFileSync(`artifacts/romdex-status-acceptance-${acceptanceVersion}.zip`),files=new Map<string,Buffer>();let at=0;
   while(zip.readUInt32LE(at)===0x04034b50){const size=zip.readUInt32LE(at+18),length=zip.readUInt16LE(at+26),name=zip.subarray(at+30,at+30+length).toString();files.set(name,zip.subarray(at+30+length,at+30+length+size));at+=30+length+size;}
-  const manifest=JSON.parse(files.get("manifest.json")!.toString());assert.equal(manifest.name,"romdex-status-acceptance");assert.equal(manifest.widgets.length,1);assert.ok(files.has("fault.js"));assert.ok(files.has("acceptance/panel.js"));
+  const manifest=JSON.parse(files.get("manifest.json")!.toString());assert.equal(manifest.name,"romdex-status-acceptance");assert.equal(manifest.widgets.length,1);assert.ok(files.has("fault.js"));assert.equal(manifest.version,acceptanceVersion);assert.ok(files.has("widgets/acceptance/panel.js"));
+  for(const widget of manifest.widgets){assert.ok(files.has("widgets/"+widget.indexPath),"widget index resolves relative to widgets/");}
+  assert.ok(files.get("widgets/acceptance/index.html")!.toString().includes('src="panel.js"'));assert.ok(!files.has("acceptance/index.html"));
   for(const name of ["status-record.js","status-rules.js","entity-extensions.json"])assert.deepEqual(files.get(name),readFileSync("youtrack-app/"+name));
   const exported:{httpHandler?:{endpoints:{scope:string;method:string;handle:(ctx:unknown)=>void}[]}}={};
   const require=createRequire(new URL("../../youtrack-app/status.js",import.meta.url));
@@ -43,5 +47,22 @@ test("live rollback acceptance cannot pass on an early permission failure or a c
     const host={fetchApp:async(path:string)=>{if(path==="status/assigned")return {...snapshot,...(kind==="changed"&&after?{state:"Open"}:{})};after=true;throw {status:kind==="permission"?403:500,message:kind==="permission"?"Forbidden":"ROMDex acceptance forced rollback"};}};
     const panel=new Function("host","document","crypto",source+";return {rollback};")(host,{getElementById:()=>output,querySelectorAll:()=>buttons},crypto) as {rollback:()=>Promise<void>};
     if(kind==="intended")await panel.rollback();else await assert.rejects(panel.rollback(),kind==="permission"?/intended post-mutation exception/:/unchanged/);
+  }
+});
+
+
+test("the selected live test button refuses incompatible capabilities before any issue request and displays the failure",async()=>{
+  const source=readFileSync("youtrack-acceptance/panel.js","utf8").replace(/^const host = await YTApp.register\(\);\r?\n/,"");
+  const valid={app:"romdex-status-acceptance",project:"NPCD",schema:1,statusRules:3};
+  for(const patch of [{app:"romdex-status"},{project:"PMON"},{schema:2},{statusRules:2}]){
+    const output={textContent:""},read={disabled:false,onclick:async()=>{}},run={disabled:false,onclick:async()=>{}},rollback={disabled:false,onclick:async()=>{}};
+    const requests:string[]=[];
+    const host={fetchApp:async(path:string)=>{requests.push(path);assert.equal(path,"capabilities/check");return {...valid,...patch};}};
+    const elements={result:output,read,run,rollback};
+    new Function("host","document","crypto",source)(host,{getElementById:(id:keyof typeof elements)=>elements[id],querySelectorAll:()=>[read,run,rollback]},crypto);
+    assert.equal(output.textContent,"Ready. No request is sent until you choose a test.");assert.deepEqual(requests,[]);
+    await run.onclick();
+    assert.deepEqual(requests,["capabilities/check"]);assert.equal(output.textContent,"FAIL test app identity, protocol and status rules 3\n");
+    for(const button of [read,run,rollback])assert.equal(button.disabled,false);
   }
 });

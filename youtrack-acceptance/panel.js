@@ -50,8 +50,10 @@ const run = async () => {
   const capability = await host.fetchApp("capabilities/check");
   assert(
     capability.app === "romdex-status-acceptance" &&
-      capability.project === "NPCD",
-    "test app identity",
+      capability.project === "NPCD" &&
+      capability.schema === 1 &&
+      capability.statusRules === 3,
+    "test app identity, protocol and status rules 3",
   );
   let before = await safeRead();
   const assignment = request(before, "assign", "In Progress");

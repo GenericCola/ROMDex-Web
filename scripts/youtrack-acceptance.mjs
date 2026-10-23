@@ -9,6 +9,7 @@ export const acceptanceSources = async (manifest) => {
   if (
     scope.project !== "NPCD" ||
     scope.app !== "romdex-status-acceptance" ||
+    !/^\d+\.\d+\.\d+$/.test(scope.version) ||
     scope.prefix !== "[ROMDex acceptance] " ||
     !Array.isArray(scope.issues) ||
     !scope.issues.length ||
@@ -34,6 +35,7 @@ export const acceptanceSources = async (manifest) => {
     );
   status += "\nexports.checkAcceptanceIssue = check;\n";
   manifest.name = scope.app;
+  manifest.version = scope.version;
   manifest.title = "ROMDex acceptance - synthetic issues only";
   manifest.description =
     "Restricted to NPCD-872 and NPCD-873. No production access.";
@@ -65,7 +67,7 @@ export const acceptanceSources = async (manifest) => {
       new URL("../youtrack-acceptance/" + name, import.meta.url),
       "utf8",
     );
-    result.set(name === "fault.js" ? name : "acceptance/" + name, source);
+    result.set(name === "fault.js" ? name : "widgets/acceptance/" + name, source);
   }
   return result;
 };

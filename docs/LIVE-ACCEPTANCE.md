@@ -4,7 +4,15 @@ The owner authorized test-only app installation and live testing on October 22, 
 
 The owner subsequently authorized development against live PMON, the current ROMDex task project. PMON field-schema and task reads are verified through MCP. This allows live reads and compatibility development; existing PMON issues are not synthetic acceptance fixtures. The NPCD test app and its fixed fixture allowlist remain separate. No installed app was changed or activated in the PMON compatibility checkpoint. See PMON-DEVELOPMENT.md.
 
-## Current administrator handoff: version 1.0.4
+## Current live check: October 23, 2026
+
+The owner reports version 1.0.4 was activated and full permissions were granted. Live browser inspection confirms app ID 155-84, version 1.0.4, system Active and NPCD as the only attached project, also Active. Its row has no auto-attach tag; explicit Auto-attach OFF remains administrator-reported. Both fixture widgets fail before loading test controls: "There was a problem loading the widget" / "Error: Failed to load frame content:". No live write tests ran. MCP before/after results for both fixtures match exactly.
+
+The acceptance archive put the widget outside the required widgets/ directory. Test-only version 1.0.5 corrects those paths and requires schema 1/statusRules 3 before writes. The production app remains 1.0.4, with its ZIP byte-identical to the preceding checkpoint. Historical acceptance ZIPs are retained. Full checklist, evidence and pending acceptance are in LIVE-ACCEPTANCE-2026-10-23.md.
+
+The corrected package is artifacts/romdex-status-acceptance-1.0.5.zip, SHA-256 2d08fc65891ae39fd18217640c38cfb9141d6446d57930630d3757345d316103. A live upload attempt was rejected: "Could not import app. You don't have the necessary permissions to update an app with global-level modules." Reloading administration still shows the system switch disabled for this account. An administrator must update existing app 155-84 in place, retaining NPCD-only attachment, Active ON and Auto-attach OFF. No permissions or app settings were changed by the developer. See artifacts/romdex-admin-followup-2026-10-23.txt for the concise message to forward.
+
+## Historical administrator handoff: version 1.0.4
 
 Version 1.0.4 supersedes the earlier 1.0.3 handoff. Standby is never inherited from children: all-Standby and mixed Done/Standby children produce In Progress. The app advertises statusRules 3, which the web client now requires. Earlier rule sets stop shared delivery rather than calculate a different parent State.
 
@@ -14,7 +22,7 @@ The browser check on October 22 last showed installed version 1.0.1 inactive, wi
 
 The complete owner-to-administrator checklist is artifacts/romdex-admin-checklist.txt. This handoff supersedes earlier package instructions below; frozen earlier packages remain retained.
 
-## Installed state and blocker
+## Historical installed state and blocker, October 22
 
 A separate app named romdex-status-acceptance, titled ROMDex acceptance - synthetic issues only, version 1.0.1, is installed and attached only to NPCD. Its YouTrack app ID is 155-84. It is inactive system-wide. GenericCola can upload a new app through NPCD settings but cannot manage its system Active switch. The UI explicitly says the account does not have permission to manage this setting. The project switch is disabled because the app is deactivated system-wide.
 
