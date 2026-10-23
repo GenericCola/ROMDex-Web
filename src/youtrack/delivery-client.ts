@@ -12,7 +12,7 @@ import type { YouTrackRequest } from "./request";
 import { issueId, sessionRequest } from "./request";
 import { SharedStatusClient } from "./shared-status-client";
 const fields =
-  "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(id,name,$type,value(name)),commentsCount,comments(id,text,created,author(login,fullName))";
+  "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(id,name,$type,value(name,id,login,fullName)),commentsCount,comments(id,text,created,author(login,fullName))";
 export class DeliveryClient implements DeliveryPort {
   accountId = "";
   metadata?: SharedStatusClient;

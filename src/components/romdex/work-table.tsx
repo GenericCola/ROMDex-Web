@@ -1,7 +1,10 @@
-import { descendants, indexTree } from "@/domain/accepted/core.mjs";
+import { indexTree } from "@/domain/accepted/core.mjs";
+import { emptyFilters, filtersActive } from "@/domain/task-filters";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { workRows } from "@/domain/work-rows";
 import { workspaceStore } from "@/domain/workspace-store";
-import type { ChangeEvent } from "react";
+import { useState, type ChangeEvent } from "react";
+import TaskFilterControl from "./task-filters";
 import WorkRow from "./work-row";
 interface WorkTableProps {
   data: WorkspaceData;
@@ -9,31 +12,12 @@ interface WorkTableProps {
   add: (parentId: string | null) => void;
 }
 const WorkTable = ({ data, items, add }: WorkTableProps) => {
+  const [filters, setFilters] = useState(emptyFilters);
+  const filtering = filtersActive(filters);
   const tree = indexTree(items, data.order);
   const { scope } = data.view;
-  const allowed = scope ? new Set(descendants(items, scope)) : null;
-  const query = data.view.search.trim().toLowerCase();
-  const rows: TaskItem[] = [];
-  const collect = (parentId: string | null) => {
-    for (const item of tree.children.get(parentId) ?? []) {
-      const visible =
-        (!allowed || allowed.has(item.id)) &&
-        (!data.view.hideCompleted || tree.colors.get(item.id) !== "green") &&
-        (!query ||
-          (item.summary + " " + item.id + " " + item.description)
-            .toLowerCase()
-            .includes(query));
-      if (visible) rows.push(item);
-      if (
-        query ||
-        data.view.expanded.includes(item.id) ||
-        item.id === scope ||
-        (allowed && !allowed.has(item.id))
-      )
-        collect(item.id);
-    }
-  };
-  collect(null);
+  const query = data.view.search.trim();
+  const rows = workRows(items, data, filters);
   const search = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     void workspaceStore.change((next) => {
@@ -93,6 +77,11 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
                 onChange={search}
               />
             </label>
+            <TaskFilterControl
+              items={items}
+              filters={filters}
+              change={setFilters}
+            />
             <button onClick={expand}>Expand All</button>
             <button onClick={collapse}>Collapse All</button>
             <button onClick={addItem}>+ Add Item</button>
@@ -118,8 +107,16 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
             </table>
             {rows.length === 0 && (
               <div className="empty">
-                <h3>No Items Here Yet</h3>
-                <p>Add an item to start organizing this section.</p>
+                <h3>
+                  {filtering || query
+                    ? "No Matching Items"
+                    : "No Items Here Yet"}
+                </h3>
+                <p>
+                  {filtering || query
+                    ? "Change the filters or search to show more tasks."
+                    : "Add an item to start organizing this section."}
+                </p>
               </div>
             )}
           </div>

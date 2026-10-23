@@ -18,3 +18,5 @@ Read docs/PROJECT.md, docs/PWA.md, docs/CONVENTIONS.md and docs/DESIGN.md. The t
 No deployment has been configured. Production hosting needs HTTPS, root-origin paths and the headers from public/_headers. Real iOS installation and HTTPS hosting require separate acceptance checks.
 
 The YouTrack repair has completed consolidated local QA. No further administrator installation is requested; the earlier 1.0.6 acceptance handoff is withdrawn. See docs/YOUTRACK-CONSOLIDATED-QA.md for frozen-candidate evidence and native verification limits.
+
+The task toolbar filter popup is available in the web/PWA port and installed desktop client. See docs/TASK-FILTERS.md for matching rules and verification.

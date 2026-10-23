@@ -1,5 +1,11 @@
 import type { TaskItem } from "@/domain/types";
 export const YOUTRACK_ORIGIN = "https://thegobindsingh.youtrack.cloud";
+interface RawValue {
+  name?: string;
+  id?: string;
+  login?: string;
+  fullName?: string;
+}
 export interface RawIssue {
   id: string;
   idReadable: string;
@@ -8,7 +14,7 @@ export interface RawIssue {
   updated: number;
   project: { shortName: string };
   parent?: { issues?: { idReadable: string }[] };
-  customFields?: { name: string; value?: { name?: string } | null }[];
+  customFields?: { name: string; value?: RawValue | RawValue[] | null }[];
   commentsCount?: number;
 }
 export const normalize = (raw: RawIssue): TaskItem => {
@@ -26,11 +32,30 @@ export const normalize = (raw: RawIssue): TaskItem => {
       "A task has multiple parents. Resolve its hierarchy in YouTrack before importing.",
     );
   const value = (name: string) => {
-    return raw.customFields?.find((field) => {
+    const value = raw.customFields?.find((field) => {
       return field.name === name;
-    })?.value?.name;
+    })?.value;
+    return Array.isArray(value) ? undefined : value?.name;
   };
   return {
+    assignees: (() => {
+      const person = raw.customFields?.find((field) => {
+        return field.name === "Assignee";
+      })?.value;
+      return (Array.isArray(person) ? person : person ? [person] : []).flatMap(
+        (person) => {
+          return person.id
+            ? [
+                {
+                  id: person.id,
+                  name:
+                    person.fullName ?? person.login ?? person.name ?? person.id,
+                },
+              ]
+            : [];
+        },
+      );
+    })(),
     id: raw.idReadable,
     dbId: raw.id,
     summary: raw.summary,
@@ -54,7 +79,7 @@ export const readTasks = async (token: string): Promise<TaskItem[]> => {
     const query = new URLSearchParams({
       query: "project: PMON sort by: created asc",
       fields:
-        "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(name,value(name)),commentsCount",
+        "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(name,value(name,id,login,fullName)),commentsCount",
       $top: "100",
       $skip: String(skip),
     });

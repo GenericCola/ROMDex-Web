@@ -13,6 +13,7 @@ export interface TaskComment {
   created: number;
 }
 export interface TaskItem {
+  assignees?: { id: string; name: string }[];
   id: string;
   dbId?: string;
   summary: string;

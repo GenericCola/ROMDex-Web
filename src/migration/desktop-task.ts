@@ -14,6 +14,15 @@ export const desktopTask = (value: JsonValue): TaskItem => {
   if (!/^PMON-[1-9]\d*$/.test(id))
     throw Error("The desktop baseline contains a task outside PMON.");
   const result: TaskItem = {
+    assignees:
+      typeof raw.assignee === "string" && raw.assignee
+        ? [
+            {
+              id: raw.assignee,
+              name: desktopText(raw.assigneeName, raw.assignee),
+            },
+          ]
+        : [],
     id,
     summary: desktopText(raw.summary),
     description: desktopText(raw.description),

@@ -1,0 +1,24 @@
+{
+  "files": {
+    "app.mjs": {
+      "before": "43603523de3c952e8ce5cdc71e2b336cad3f6019b7e76edb3dce27741c02d001",
+      "after": "b16f95f4250461f27c112014ad6b3d6150df73c4fc408e58388e234bfba10b7a"
+    },
+    "work-view.mjs": {
+      "before": "58f47e9b4eb0e3d948b910bf5e1eb56be15b1b3d9fc09a64561e91499ad9ab3c",
+      "after": "eef0769f9db502bb229df404ae9caa2100274b725df40eeffdef4e33575c7bd0"
+    },
+    "tasks.html": {
+      "before": "1a846bd7ef318fb826b80ac379035a3f202f704af8ed421a17360f1d8cddaa18",
+      "after": "5186b8bf56cc258a9d74bd05c3ac9ad1ce159d92be4b28419291d0f83fd0d19d"
+    },
+    "task-filters.mjs": {
+      "before": null,
+      "after": "917e4d5b09eab4a736629305f822a8025c20a4a32015b9e296c33382e6507eba"
+    },
+    "task-filters.css": {
+      "before": null,
+      "after": "1b288cf2baedf6f0d31d751d451d4157e8c30d536cc527a7f32528e574a2aade"
+    }
+  }
+}

@@ -6,6 +6,19 @@ export const validateTask: (value: unknown) => asserts value is TaskItem = (
   if (!value || typeof value !== "object") throw Error("Invalid task data.");
   const item = value as TaskItem;
   if (
+    item.assignees !== undefined &&
+    (!Array.isArray(item.assignees) ||
+      !item.assignees.every((person) => {
+        return (
+          person &&
+          typeof person.id === "string" &&
+          !!person.id &&
+          typeof person.name === "string"
+        );
+      }))
+  )
+    throw Error("Invalid assignee data. Existing browser data has been kept.");
+  if (
     item.url !== undefined &&
     (typeof item.url !== "string" ||
       !/^PMON-[1-9]\d*$/.test(item.id) ||
