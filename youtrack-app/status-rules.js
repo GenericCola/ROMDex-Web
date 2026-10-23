@@ -29,7 +29,8 @@ const rollup = (colors) => {
   if (colors.every((color) => color === "grey")) return "grey";
   if (colors.some((color) => color === "grey" || color === "yellow"))
     return "yellow";
-  // Standby children leave their parent in progress.
+  // A single Standby child stays in progress; two or more all-Standby children inherit it.
+  if (colors.length > 1 && colors.every((color) => color === "blue")) return "blue";
   if (colors.includes("blue")) return "yellow";
   return "green";
 };

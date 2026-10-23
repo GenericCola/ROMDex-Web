@@ -1,0 +1,23 @@
+--- a/public/core.mjs
++++ b/public/core.mjs
+@@ -32,7 +32,8 @@
+   if(colors.includes('purple'))return 'purple';
+   if(colors.every(x=>x==='grey')) return 'grey';
+   if(colors.some(x=>x==='grey'||x==='yellow')) return 'yellow';
+-  // Standby is assigned locally; children never pass it to a parent.
++  // Standby inherits only from at least two all-Standby immediate children.
++  if(colors.length>1&&colors.every(x=>x==='blue')) return 'blue';
+   if(colors.includes('blue')) return 'yellow';
+   return 'green';
+ }
+--- a/cloud/github-store.mjs
++++ b/cloud/github-store.mjs
+@@ -48,7 +48,7 @@
+  async verifyAccess(){
+   const me=await this.request('/user'),repo=await this.request(this.prefix),collaborators=await this.request(this.prefix+'/collaborators?per_page=100');
+   requireThat(me.status===200&&String(me.data?.id)==='32021766'&&repo.status===200&&String(repo.data?.id)==='1421625633'&&repo.data?.private===true&&String(repo.data?.owner?.id)==='32021766','Private Cloud Account or Repository Changed.');
+-  requireThat(collaborators.status===200&&!collaborators.next&&Array.isArray(collaborators.data)&&collaborators.data.length<100&&collaborators.data.every(x=>String(x.id)==='32021766'),'Cloud Collaborators Require an Authorization Review.');
++  requireThat(collaborators.status===200&&!collaborators.next&&Array.isArray(collaborators.data)&&collaborators.data.length<100&&collaborators.data.every(x=>['32021766','58527382'].includes(String(x.id))),'Cloud Collaborators Require an Authorization Review.');
+   const head=await this.head(),anchor='d923d7546fb2ab968c89f4bc9e86c133a7bdc95f';
+   await this.descendant(anchor,head);
+   const inventory=await this.inventory(head),id=inventory.entries.get(this.connection.bootstrapPath);requireThat(id,'Cloud Bootstrap Is Missing.');const bytes=await this.readBlob(id,DESCRIPTOR_BYTES);

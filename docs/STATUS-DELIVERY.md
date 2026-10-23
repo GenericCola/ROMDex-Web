@@ -20,7 +20,7 @@ New tasks are created with their assigned status as initial native State. Their 
 
 ## Calculation and delivery
 
-The current precedence starts with any Awaiting Testing child, then Critical, then In Development; all untouched children produce To do, any remaining untouched or In Progress child produces In Progress, then any Standby child produces In Progress, otherwise Done. Standby is never inherited from children: all-Standby children and mixed Done/Standby children produce In Progress. A task with no children still uses its own assigned choice, including Standby. A parent's own choice stays saved while children determine its effective status.
+The current precedence starts with any Awaiting Testing child, then Critical, then In Development; all untouched children produce To do, any remaining untouched or In Progress child produces In Progress, then at least two all-Standby children produce Standby, any remaining Standby child produces In Progress, otherwise Done. Exactly one Standby child and mixed Done/Standby children produce In Progress. This October 23 correction supersedes the October 22 rule; see STANDBY-METADATA-REPAIR.md. A task with no children still uses its own assigned choice, including Standby. A parent's own choice stays saved while children determine its effective status.
 
 A durable pending-rollup flag survives even when the user queue is empty. Save Changes and opted-in Auto-Sync process this work. The Save lamp stays red while it remains. A failed cycle suspends automatic delivery. Reconnecting or a successful explicit Save can resume it after any required review. Reload requires reconnecting the session token and preserves the sync preference.
 

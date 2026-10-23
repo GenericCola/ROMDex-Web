@@ -47,13 +47,13 @@ const rejected = async (body) => {
   throw Error("Rejected request was accepted");
 };
 const run = async () => {
-  const capability = await host.fetchApp("capabilities/check");
+  const capability = await host.fetchApp("capabilities/check", { scope: false });
   assert(
     capability.app === "romdex-status-acceptance" &&
       capability.project === "NPCD" &&
       capability.schema === 1 &&
-      capability.statusRules === 3,
-    "test app identity, protocol and status rules 3",
+      capability.statusRules === 4,
+    "test app identity, protocol and status rules 4",
   );
   let before = await safeRead();
   const assignment = request(before, "assign", "In Progress");

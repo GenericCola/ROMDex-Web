@@ -33,6 +33,21 @@ export const acceptanceSources = async (manifest) => {
         JSON.stringify(scope.prefix) +
         ") ||",
     );
+  const imports = 'const records = require("./status-record");\nconst rules = require("./status-rules");';
+  const unexpected = "if (!(error instanceof records.StatusError)) throw error;";
+  if (!status.startsWith(imports) || !status.includes(unexpected))
+    throw Error("Review changed imports and error handling before acceptance packaging.");
+  status = status.replace(imports, `let records, rules;
+try {
+  records = require("./status-record");
+  rules = require("./status-rules");
+} catch (error) {
+  console.error("ROMDex acceptance module load failure: " + String(error?.stack ?? error));
+  throw error;
+}`).replace(unexpected, `if (!(error instanceof records.StatusError)) {
+      console.error("ROMDex acceptance status failure: " + String(error?.stack ?? error));
+      throw error;
+    }`);
   status += "\nexports.checkAcceptanceIssue = check;\n";
   manifest.name = scope.app;
   manifest.version = scope.version;
@@ -62,6 +77,13 @@ export const acceptanceSources = async (manifest) => {
     ["status.js", status],
     ["capabilities.js", capabilities],
   ]);
+  // The documented server loader exposes exports; do not depend on Node's module.
+  for (const name of ["status-record.js", "status-rules.js"]) {
+    const source = await readFile(new URL("../youtrack-app/" + name, import.meta.url), "utf8");
+    if ((source.match(/module\.exports = \{/g) ?? []).length !== 1 || !/};\s*$/.test(source))
+      throw Error("Review changed utility exports before acceptance packaging.");
+    result.set(name, source.replace("module.exports = {", "Object.assign(exports, {").replace(/};\s*$/, "});\n"));
+  }
   for (const name of ["index.html", "panel.js", "fault.js"]) {
     const source = await readFile(
       new URL("../youtrack-acceptance/" + name, import.meta.url),

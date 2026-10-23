@@ -6,11 +6,11 @@ The owner authorized continuing web development against live PMON on October 22,
 
 Live MCP reads confirmed the State bundle includes Needs Testing and excludes Awaiting Testing. ROMDex keeps Awaiting Testing as its display and assigned-choice label. Native status payloads, creation verification, leaf calculations and parent rollups use Needs Testing. Both names display amber. Reading an existing Needs Testing task does not queue a conversion or change its stored assignment.
 
-Any testing child makes its parent display amber, regardless of other sibling statuses. This propagates through higher ancestors. Once no child awaits testing, the previous precedence applies. Parent assigned choices remain separate from their calculated State. Standby is never inherited from children: all-Standby and mixed Done/Standby children produce In Progress, recursively. A leaf keeps its own assignment, including Standby.
+Any testing child makes its parent display amber, regardless of other sibling statuses. This propagates through higher ancestors. Once no child awaits testing, the previous precedence applies. Parent assigned choices remain separate from their calculated State. Standby is inherited only when at least two immediate children are all effectively Standby. Exactly one Standby child and mixed Done/Standby children produce In Progress. A leaf retains its own assignment. Recursive calculations use each immediate child's effective status.
 
 PMON uses Minor, Normal, Major, Critical and Show-stopper priorities. The picker now offers these values. Existing native values outside the standard status or priority choices remain visible and are preserved until the user changes them. Older queued unsupported priorities require normal delivery review; the app does not silently rewrite them.
 
-The packaged YouTrack app is version 1.0.4 and advertises statusRules 3. The browser refuses shared-status delivery through an older app, even if its metadata schema is otherwise compatible. The app maps an Awaiting Testing assignment to the existing native State for validation, stores the exact assignment and receipt, and writes only the calculated native State. It never creates a field or State value.
+The packaged YouTrack app is source version 1.0.5 and advertises statusRules 4. The browser refuses shared-status delivery through an older app, even if its metadata schema is otherwise compatible. The app maps an Awaiting Testing assignment to the existing native State for validation, stores the exact assignment and receipt, and writes only the calculated native State. It never creates a field or State value.
 
 ## Development boundaries
 

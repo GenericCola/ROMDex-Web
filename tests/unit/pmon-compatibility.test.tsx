@@ -49,7 +49,7 @@ test("the shared app stores the display assignment but rolls parents into PMON N
 test("the web client rejects older status rules before reading issue metadata",async()=>{
   const {SharedStatusClient}=await import("../../src/youtrack/shared-status-client");
   const calls:string[]=[];
-  for(const statusRules of [undefined,1,2]){
+  for(const statusRules of [undefined,1,2,3]){
     calls.length=0;const legacy=new SharedStatusClient(async path=>{calls.push(path);return {schema:1,app:"romdex-status",project:"PMON",statusRules};});
     await assert.rejects(legacy.get(root),/unavailable or incompatible/);
     assert.deepEqual(calls,["extensionEndpoints/romdex-status/capabilities/check"]);

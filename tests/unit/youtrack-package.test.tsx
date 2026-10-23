@@ -5,6 +5,7 @@ import {readFileSync} from "node:fs";
 import {createHash} from "node:crypto";
 import {crc32} from "node:zlib";
 import {createRequire} from "node:module";
+import {runInNewContext} from "node:vm";
 const {version}=JSON.parse(readFileSync("youtrack-app/manifest.json","utf8"));
 const {version:acceptanceVersion}=JSON.parse(readFileSync("youtrack-acceptance/scope.json","utf8"));
 
@@ -21,7 +22,12 @@ test("acceptance package isolates the two explicitly authorized NPCD fixtures an
   const manifest=JSON.parse(files.get("manifest.json")!.toString());assert.equal(manifest.name,"romdex-status-acceptance");assert.equal(manifest.widgets.length,1);assert.ok(files.has("fault.js"));assert.equal(manifest.version,acceptanceVersion);assert.ok(files.has("widgets/acceptance/panel.js"));
   for(const widget of manifest.widgets){assert.ok(files.has("widgets/"+widget.indexPath),"widget index resolves relative to widgets/");}
   assert.ok(files.get("widgets/acceptance/index.html")!.toString().includes('src="panel.js"'));assert.ok(!files.has("acceptance/index.html"));
-  for(const name of ["status-record.js","status-rules.js","entity-extensions.json"])assert.deepEqual(files.get(name),readFileSync("youtrack-app/"+name));
+  assert.deepEqual(files.get("entity-extensions.json"),readFileSync("youtrack-app/entity-extensions.json"));
+  for(const name of ["status-record.js","status-rules.js"]){
+    const source=files.get(name)!.toString();assert.ok(!source.includes("module.exports"));
+    assert.equal(source,readFileSync("youtrack-app/"+name,"utf8").replace("module.exports = {","Object.assign(exports, {").replace(/};\s*$/,"});\n"));
+    const exported={};runInNewContext(source,{exports:exported},{filename:name});assert.ok(Object.keys(exported).length>0);
+  }
   const exported:{httpHandler?:{endpoints:{scope:string;method:string;handle:(ctx:unknown)=>void}[]}}={};
   const require=createRequire(new URL("../../youtrack-app/status.js",import.meta.url));
   new Function("require","exports",files.get("status.js")!.toString())(require,exported);
@@ -53,8 +59,8 @@ test("live rollback acceptance cannot pass on an early permission failure or a c
 
 test("the selected live test button refuses incompatible capabilities before any issue request and displays the failure",async()=>{
   const source=readFileSync("youtrack-acceptance/panel.js","utf8").replace(/^const host = await YTApp.register\(\);\r?\n/,"");
-  const valid={app:"romdex-status-acceptance",project:"NPCD",schema:1,statusRules:3};
-  for(const patch of [{app:"romdex-status"},{project:"PMON"},{schema:2},{statusRules:2}]){
+  const valid={app:"romdex-status-acceptance",project:"NPCD",schema:1,statusRules:4};
+  for(const patch of [{app:"romdex-status"},{project:"PMON"},{schema:2},{statusRules:2},{statusRules:3}]){
     const output={textContent:""},read={disabled:false,onclick:async()=>{}},run={disabled:false,onclick:async()=>{}},rollback={disabled:false,onclick:async()=>{}};
     const requests:string[]=[];
     const host={fetchApp:async(path:string)=>{requests.push(path);assert.equal(path,"capabilities/check");return {...valid,...patch};}};
@@ -62,7 +68,20 @@ test("the selected live test button refuses incompatible capabilities before any
     new Function("host","document","crypto",source)(host,{getElementById:(id:keyof typeof elements)=>elements[id],querySelectorAll:()=>[read,run,rollback]},crypto);
     assert.equal(output.textContent,"Ready. No request is sent until you choose a test.");assert.deepEqual(requests,[]);
     await run.onclick();
-    assert.deepEqual(requests,["capabilities/check"]);assert.equal(output.textContent,"FAIL test app identity, protocol and status rules 3\n");
+    assert.deepEqual(requests,["capabilities/check"]);assert.equal(output.textContent,"FAIL test app identity, protocol and status rules 4\n");
     for(const button of [read,run,rollback])assert.equal(button.disabled,false);
   }
+});
+
+
+test("the Run button supplies explicit global Host API options and stops at a failed metadata GET",async()=>{
+  const source=readFileSync("youtrack-acceptance/panel.js","utf8").replace(/^const host = await YTApp.register\(\);\r?\n/,"");
+  const output={textContent:""},read={disabled:false,onclick:async()=>{}},run={disabled:false,onclick:async()=>{}},rollback={disabled:false,onclick:async()=>{}};
+  const requests:string[]=[];
+  const host={fetchApp:async(path:string,options:{scope:boolean;method?:string})=>{assert.ok(options,"the deployed SDK reads options.scope");requests.push(path);if(path==="capabilities/check"){assert.deepEqual(options,{scope:false});return {app:"romdex-status-acceptance",project:"NPCD",schema:1,statusRules:4};}assert.deepEqual(options,{scope:true});throw Error("synthetic metadata failure");}};
+  const elements={result:output,read,run,rollback};
+  new Function("host","document","crypto",source)(host,{getElementById:(id:keyof typeof elements)=>elements[id],querySelectorAll:()=>[read,run,rollback]},crypto);
+  await run.onclick();assert.deepEqual(requests,["capabilities/check","status/assigned"]);
+  assert.equal(output.textContent,"PASS test app identity, protocol and status rules 4\nFAIL synthetic metadata failure\n");
+  for(const button of [read,run,rollback])assert.equal(button.disabled,false);
 });

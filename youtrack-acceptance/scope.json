@@ -3,5 +3,5 @@
   "issues": ["NPCD-872", "NPCD-873"],
   "prefix": "[ROMDex acceptance] ",
   "app": "romdex-status-acceptance",
-  "version": "1.0.5"
+  "version": "1.0.6"
 }

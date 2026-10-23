@@ -31,7 +31,8 @@ export function rollup(colors){
   if(colors.includes('purple'))return 'purple';
   if(colors.every(x=>x==='grey')) return 'grey';
   if(colors.some(x=>x==='grey'||x==='yellow')) return 'yellow';
-  // Standby remains an assigned choice; children never pass it to a parent.
+  // Standby rolls up only when all children are on standby and there are at least two.
+  if(colors.length>1&&colors.every(x=>x==='blue')) return 'blue';
   if(colors.includes('blue')) return 'yellow';
   return 'green';
 }

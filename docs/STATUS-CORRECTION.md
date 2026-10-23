@@ -1,5 +1,7 @@
 # Standby inheritance correction
 
+Historical October 22 record. Superseded October 23: at least two all-Standby children inherit Standby; exactly one stays In Progress. See STANDBY-METADATA-REPAIR.md for current behavior, installation and evidence.
+
 Requested October 22, 2026: Standby is not inherited from children; a parent whose children are all Standby becomes In Progress. This correction also treats mixed Done/Standby children as In Progress, because outstanding Standby work is incomplete. The existing Awaiting Testing, Critical and In Development precedence stays intact.
 
 ## Behavior and acceptance checklist

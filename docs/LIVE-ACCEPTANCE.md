@@ -4,7 +4,13 @@ The owner authorized test-only app installation and live testing on October 22, 
 
 The owner subsequently authorized development against live PMON, the current ROMDex task project. PMON field-schema and task reads are verified through MCP. This allows live reads and compatibility development; existing PMON issues are not synthetic acceptance fixtures. The NPCD test app and its fixed fixture allowlist remain separate. No installed app was changed or activated in the PMON compatibility checkpoint. See PMON-DEVELOPMENT.md.
 
-## Current live check: October 23, 2026
+## Current continuation: installed 1.0.5, candidate 1.0.6
+
+The administrator updated app 155-84 in place to 1.0.5 and retained activation, storage, NPCD-only attachment and Auto-attach OFF. No extra account permissions were granted; future ZIPs go through that administrator. Live browser verification confirms the version and that both fixture widgets now load. Both read-only metadata requests fail with HTTP 500; the exported app log is empty. A separate capability probe exposes a deployed Host API error when its options object is omitted. No issue write stage was reached.
+
+Test-only 1.0.6 supplies explicit global options, converts utility exports to the documented exports object and logs unexpected errors while rethrowing them. The export change is a compatibility candidate; the server's HTTP 500 cause remains unconfirmed. The historical production 1.0.4 package and all earlier acceptance archives remain intact. The latest user correction adds the two-child Standby threshold to production source 1.0.5 and acceptance candidate 1.0.6, advertising statusRules 4. No production package is installed or shared. The separately authorized desktop repair and real-work sync are recorded in STANDBY-METADATA-REPAIR.md. Its ZIP is artifacts/romdex-status-acceptance-1.0.6.zip, SHA-256 7ff2b4c4fa9d34592cdcd8c6cce25e63025ab7960e8668bd2894f53dd8bfb659. See LIVE-ACCEPTANCE-1.0.5.md for the current checklist, evidence and pending live checks. Administrator message: artifacts/romdex-admin-followup-1.0.6.txt.
+
+## Earlier live check: October 23, 2026
 
 The owner reports version 1.0.4 was activated and full permissions were granted. Live browser inspection confirms app ID 155-84, version 1.0.4, system Active and NPCD as the only attached project, also Active. Its row has no auto-attach tag; explicit Auto-attach OFF remains administrator-reported. Both fixture widgets fail before loading test controls: "There was a problem loading the widget" / "Error: Failed to load frame content:". No live write tests ran. MCP before/after results for both fixtures match exactly.
 

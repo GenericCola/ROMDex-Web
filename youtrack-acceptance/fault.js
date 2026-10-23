@@ -20,6 +20,7 @@ exports.httpHandler = {
         ctx.issue.fields.State = value;
         ctx.issue.extensionProperties.assignedStatus =
           "forced-rollback-must-not-persist";
+        console.error("ROMDex acceptance forced rollback");
         throw Error("ROMDex acceptance forced rollback");
       },
     },
