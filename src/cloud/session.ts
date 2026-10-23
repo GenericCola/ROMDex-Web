@@ -1,4 +1,5 @@
 import { flushDraftEditors } from "@/domain/editor-drafts";
+import { hasTaskTextEditing } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { deliverQueue } from "./delivery";
@@ -34,8 +35,14 @@ export const disconnectDelivery = () => {
 export const deliveryConnected = () => {
   return client !== null;
 };
-export const saveDelivery = async () => {
+export const saveDelivery = async (automatic = false) => {
   await flushDraftEditors();
+  if (
+    automatic &&
+    (hasTaskTextEditing() ||
+      !cloudData(workspaceStore.getSnapshot().data).autoSync)
+  )
+    return "Saved in this browser. Automatic delivery is waiting.";
   if (!client) {
     await workspaceStore.flush();
     return "Saved in this browser. Connect cloud delivery to send queued changes.";
@@ -65,6 +72,7 @@ export const automaticDelivery = () => {
   const state = workspaceStore.getSnapshot();
   if (
     !client ||
+    hasTaskTextEditing() ||
     suspended ||
     state.error ||
     state.updating ||
@@ -83,7 +91,7 @@ export const automaticDelivery = () => {
           : "Cloud delivery needs review"),
     );
   };
-  void saveDelivery().catch(failed);
+  void saveDelivery(true).catch(failed);
 };
 export const requireDelivery = () => {
   if (!client)

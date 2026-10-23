@@ -10,7 +10,7 @@ export const planNeedsReview=state=>Object.values(state?.rdxImports||{}).some(le
 export function saveNeedsAttention(state, connection, dirtyFields = {}) {
   const pending = !!(planNeedsReview(state)||state?.operations?.length || state?.blocked || dirtyFields.summary || dirtyFields.description);
   const unavailable = connection?.connected !== true || connection?.automaticSyncEnabled === false
-    || connection?.mode === 'manual' || connection?.failures > 0 || connection?.missingStates?.length || state?.blocked||planNeedsReview(state);
+    || ['manual','editing'].includes(connection?.mode) || connection?.failures > 0 || connection?.missingStates?.length || state?.blocked||planNeedsReview(state);
   return pending && !!unavailable;
 }
 export const hasMeaningfulNotes = text => Boolean(String(text||'').replace(/^_Migrated from ClickUp:.*_\s*$/gm,'').replace(/^\s*---\s*$/gm,'').trim());

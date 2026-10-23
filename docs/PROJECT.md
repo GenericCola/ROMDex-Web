@@ -7,3 +7,5 @@ The current web app has an initial React task workspace with durable browser tas
 YouTrack is the only application backend. No Payload, runtime GitHub storage, custom API server or proxy is permitted. No production data or credentials belong in this repository. Reader tokens live only in dialog memory; delivery tokens live only in the enabled page session.
 
 Template provenance: 79d05e273dff44b1bba534752aeacb6aee071dc8. This is a fresh foundation, not recovery of historical commit e9ef385. The template remote retains its disabled push URL.
+
+Notes editing now holds automatic task delivery while a text editor is focused, with a second check after asynchronous preparation. Each input still saves locally and explicit Save Changes can send a snapshot. The installed desktop also preserves predecessor baselines for continued typing during in-flight saves. See NOTES-SYNC-CORRECTION.md for preservation, exact behavior and acceptance evidence.

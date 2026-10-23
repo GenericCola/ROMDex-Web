@@ -4,6 +4,7 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
 import TaskParent from "./task-parent";
+import { useTaskTextEditing } from "./use-task-text-editing";
 const option = (value: string) => {
   return <option key={value}>{value}</option>;
 };
@@ -16,6 +17,7 @@ const TaskProperties = ({
   data: WorkspaceData;
   remove: () => void;
 }) => {
+  const editing = useTaskTextEditing(item.id, "title");
   const title = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     void workspaceStore.change((next) => {
@@ -23,6 +25,7 @@ const TaskProperties = ({
     });
   };
   const commitTitle = () => {
+    editing.blur();
     if (data.titleDrafts[item.id]?.trim())
       void workspaceStore.change((next) => {
         editTask(next, item.id, {
@@ -60,6 +63,7 @@ const TaskProperties = ({
         aria-label="Task Title"
         value={data.titleDrafts[item.id] ?? item.summary}
         onChange={title}
+        onFocus={editing.focus}
         onBlur={commitTitle}
       />
       {data.titleDrafts[item.id] !== undefined &&

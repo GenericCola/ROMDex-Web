@@ -3,6 +3,7 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
+import { useTaskTextEditing } from "./use-task-text-editing";
 const renderComment = (entry: { id: string; text: string; author: string }) => {
   return (
     <article key={entry.id}>
@@ -18,6 +19,7 @@ const TaskWriting = ({
   item: TaskItem;
   data: WorkspaceData;
 }) => {
+  const editing = useTaskTextEditing(item.id, "notes");
   const [tab, setTab] = useState<"notes" | "comments">("notes");
   const description = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target;
@@ -70,10 +72,13 @@ const TaskWriting = ({
             aria-label="Notes and Instructions"
             value={item.description}
             onChange={description}
+            onFocus={editing.focus}
+            onBlur={editing.blur}
             placeholder="Notes, Instructions, or a Development Prompt…"
           />
           <p className="editor-hint">
-            Edits save automatically in this browser.
+            Edits save locally. When connected, Auto-Sync waits until you leave
+            this editor. Save Changes can send the current version.
           </p>
         </section>
       ) : (
