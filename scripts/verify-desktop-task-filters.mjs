@@ -44,17 +44,25 @@ try{
  await test('desktop filter popup renders, matches inherited status and metadata, clears and preserves tasks',async()=>{
  const s=await fixture();try{
  const rows=s.view.locator('#rows .task-row'),button=s.view.getByRole('button',{name:'Filters',exact:true});
- await button.click();const dialog=s.view.getByRole('dialog',{name:'Filters',exact:true});await expect(dialog).toBeVisible();
+ await s.view.locator('#expand-all').click();await button.click();const dialog=s.view.getByRole('dialog',{name:'Filters',exact:true});await expect(dialog).toBeVisible();
  await dialog.getByLabel('Filter Status',{exact:true}).selectOption('green');await expect(rows).toHaveCount(2);
  await expect(button).toHaveAttribute('aria-pressed','true');assert.equal(await button.evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(129, 199, 154)');
  await dialog.getByLabel('Filter Assignee',{exact:true}).selectOption('1-1');await dialog.getByLabel('Filter Priority',{exact:true}).selectOption('Major');await dialog.getByLabel('Filter Complexity',{exact:true}).selectOption('HIGH');await expect(rows).toHaveCount(1);await expect(rows.first()).toContainText('Synthetic Done Child');
  await s.page.screenshot({path:resolve('artifacts/desktop-task-filters/popup.png')});
  const clear=dialog.getByRole('button',{name:'Clear All',exact:true}),close=dialog.getByRole('button',{name:'Close',exact:true});const a=await clear.boundingBox(),b=await close.boundingBox();assert.ok(a.x>b.x);
  await clear.click();await expect(button).toHaveAttribute('aria-pressed','false');await dialog.getByLabel('Filter Status',{exact:true}).selectOption('amber');await expect(rows).toHaveCount(0);await expect(s.view.locator('#empty h3')).toHaveText('No Matching Items');
- await s.page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(button).toBeFocused();await button.click();await dialog.getByRole('button',{name:'Clear All',exact:true}).click();await close.click();await expect(rows).toHaveCount(1);assert.deepEqual(s.mutations,[]);assert.deepEqual(s.errors,[]);
+ await s.page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(button).toBeFocused();await button.click();await dialog.getByRole('button',{name:'Clear All',exact:true}).click();await close.click();await s.view.locator('#collapse-all').click();await expect(rows).toHaveCount(1);assert.deepEqual(s.mutations,[]);assert.deepEqual(s.errors,[]);
  }finally{await s.context.close();}
  });
  await test('desktop filter refuses an unfinished inline task without hiding its draft',async()=>{
  const s=await fixture();try{await s.view.locator('#add-work').click();await s.view.locator('#draft-title').fill('Unfinished synthetic title');await s.view.getByRole('button',{name:'Filters',exact:true}).click();await expect(s.view.locator('#toast')).toHaveText('Finish the current task editor before filtering.');await expect(s.view.locator('#task-filter-dialog')).not.toBeVisible();await expect(s.view.locator('#draft-title')).toHaveValue('Unfinished synthetic title');assert.deepEqual(s.mutations,[]);assert.deepEqual(s.errors,[]);}finally{await s.context.close();}
+ });
+ await test('desktop active filter respects row toggles and bulk expansion, with search and hidden ancestors',async()=>{
+ const s=await fixture();try{
+ const rows=s.view.locator('#rows .task-row'),button=s.view.getByRole('button',{name:'Filters',exact:true}),dialog=s.view.getByRole('dialog',{name:'Filters',exact:true});await button.click();await dialog.getByLabel('Filter Status',{exact:true}).selectOption('green');await dialog.getByRole('button',{name:'Close',exact:true}).click();await expect(rows).toHaveCount(1);
+ const expand=()=>s.view.locator('#rows').getByRole('button',{name:'Expand Synthetic Notes Task',exact:true}),collapse=()=>s.view.locator('#rows').getByRole('button',{name:'Collapse Synthetic Notes Task',exact:true});await expand().click();await expect(rows).toHaveCount(2);await collapse().click();await expect(rows).toHaveCount(1);
+ await s.view.locator('#expand-all').click();await expect(rows).toHaveCount(2);await s.view.locator('#collapse-all').click();await expect(rows).toHaveCount(1);await s.view.locator('#search').fill('Synthetic');await expect(rows).toHaveCount(1);await expand().click();await expect(rows).toHaveCount(2);await collapse().click();await expect(rows).toHaveCount(1);
+ await button.click();await dialog.getByLabel('Filter Priority',{exact:true}).selectOption('Major');await dialog.getByRole('button',{name:'Close',exact:true}).click();await expect(rows).toHaveCount(1);await expect(rows.first()).toContainText('Synthetic Done Child');await button.click();await dialog.getByRole('button',{name:'Clear All',exact:true}).click();await dialog.getByRole('button',{name:'Close',exact:true}).click();await s.view.locator('#search').fill('');await expect(rows).toHaveCount(1);await expect(expand()).toBeVisible();assert.deepEqual(s.mutations,[]);assert.deepEqual(s.errors,[]);
+ }finally{await s.context.close();}
  });
 }finally{await browser.close();}

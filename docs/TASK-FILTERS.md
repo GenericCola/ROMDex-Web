@@ -2,17 +2,19 @@
 
 The filter button sits next to Search in the task toolbar. Its three-row slider icon fills light green while any filter is active. Filters apply immediately; Close or Escape dismisses the popup and restores focus to the launcher.
 
-Status uses the displayed effective status, including inherited parent rollups and the Needs Testing/Awaiting Testing alias. Hidden tasks still contribute to rollups. Only matching rows appear: a nonmatching ancestor is not inserted as context, and collapsed ancestors cannot conceal a matching descendant. Priority, Complexity and Assignee combine with Status using AND. Complexity includes Not Set; Assignee includes Unassigned. Assignees use stable user IDs, including multi-user fields. Desktop Priority labels retain LOW/NORMAL/HIGH/URGENT presentation.
+Status uses the displayed effective status, including inherited parent rollups and the Needs Testing/Awaiting Testing alias. Hidden tasks still contribute to rollups. Only matching rows appear: a nonmatching ancestor is not inserted as context, and hidden nonmatching ancestors do not conceal a matching descendant. Visible matching parents respect their expand/collapse controls, including Expand All and Collapse All. Priority, Complexity and Assignee combine with Status using AND. Complexity includes Not Set; Assignee includes Unassigned. Assignees use stable user IDs, including multi-user fields. Desktop Priority labels retain LOW/NORMAL/HIGH/URGENT presentation.
 
 Search and project scope intersect filters. An explicit Status overrides Hide Completed, so choosing Done can show completed rows. Clear All sits at the bottom right and resets the four popup fields while preserving search, scope and Hide Completed. Filters are local view choices; reopening the Work Tray or restarting the app resets them. Existing browser snapshots need a fresh task read or reviewed desktop import to populate Assignee metadata. Filtering never creates a cloud operation or changes task properties.
 
-## Requirement evidence
+The parent-expansion defect reported after this initial delivery is corrected in [FILTER-EXPANSION-FIX.md](FILTER-EXPANSION-FIX.md). The verification counts below describe the initial filter delivery.
+
+## Initial delivery evidence
 
 | Requirement | Verification |
 | --- | --- |
 | Slider graphic in the existing button row; matching controls and popup style | Desktop and iPhone screenshots visually inspected; focused test passes in Chromium, Firefox, WebKit, Android Chromium and iPhone WebKit profiles. |
 | Status shows only matching rows | Browser and installed-desktop renderer tests assert exact rows; domain regression checks inherited parents and the testing alias. |
-| Hidden ancestors and collapse do not conceal matching children | Browser test starts collapsed; domain test intersects project scope. |
+| Hidden ancestors do not conceal matching children | Initial tests verified discovery but missed visible-parent collapse. The follow-up adds actual row-toggle and bulk-control checks. |
 | Other fields narrow together | Browser tests select all four fields and assert one exact row; real reader path imports single/multi-user synthetic Assignees and switches identities. Desktop renderer selects a named Assignee with Priority and Complexity. |
 | Clear All at bottom right; normal fill when cleared | Relative button positions, all-field reset and pressed state asserted through native controls. Search preservation verified. |
 | Light-green active fill | Exact computed RGB 129,199,154 asserted in web and desktop. |
@@ -33,6 +35,6 @@ No YouTrack app ZIP, administrator installation, PMON change, CORS setting, prod
 
 Official field reference: [YouTrack custom fields and user values](https://www.jetbrains.com/help/youtrack/devportal/api-howto-get-issues-with-all-values.html).
 
-Review: traced both full-tree visibility paths, parent rollups, Assignee import/readback and delivery allowlists, local view state, modal lifecycle, active CSS specificity, desktop editor flush and source-only installation. No unresolved filter defect found. Full worktree browser regression: 223 passed, two expected mobile desktop-layout skips, in 7.4 minutes. The independent checkpoint check and build pass.
+Review: traced both full-tree visibility paths, parent rollups, Assignee import/readback and delivery allowlists, local view state, modal lifecycle, active CSS specificity, desktop editor flush and source-only installation. That initial review missed the forced-traversal defect; see the correction above. Full worktree browser regression: 223 passed, two expected mobile desktop-layout skips, in 7.4 minutes. The independent checkpoint check and build pass.
 
 Independent filter-only PWA browser acceptance also passes all 10 checks across the five profiles in 19.0 seconds. This uses the staged checkpoint build, excluding unfinished attachment work.

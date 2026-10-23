@@ -1,0 +1,7 @@
+diff --git a/work-view.mjs b/work-view.mjs
+index 096ec1a..5d05060 100644
+--- a/work-view.mjs
++++ b/work-view.mjs
+@@ -4 +4 @@ export function workRows({tree,selected=null,search='',expanded=new Set(),hideCo
+- if(filtersActive(filters)){const rows=[];function visit(parent){for(const item of tree.children.get(parent)||[]){if(matchesFilters(item,tree,filters)&&(!hideCompleted||filters.status||tree.colors.get(item.id)!=="green")&&(!search.trim()||[item.summary,item.id,item.description].join(" ").toLowerCase().includes(search.trim().toLowerCase())))rows.push(item);visit(item.id);}}visit(selected);return rows;}
++ if(filtersActive(filters)){const rows=[];function visit(parent){for(const item of tree.children.get(parent)||[]){const visible=matchesFilters(item,tree,filters)&&(!hideCompleted||filters.status||tree.colors.get(item.id)!=="green")&&(!search.trim()||[item.summary,item.id,item.description].join(" ").toLowerCase().includes(search.trim().toLowerCase()));if(visible)rows.push(item);if(!visible||expanded.has(item.id))visit(item.id);}}visit(selected);return rows;}

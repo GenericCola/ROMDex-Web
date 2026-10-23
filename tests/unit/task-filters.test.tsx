@@ -30,3 +30,12 @@ test("row filters intersect scope and search, override Hide Completed for explic
  assert.deepEqual(workRows(items,data,{...emptyFilters(),status:"green"}).map(item=>item.id),[child]);
  data.view.search="Elsewhere";assert.equal(workRows(items,data,{...emptyFilters(),status:"green"}).length,0);assert.deepEqual(data.view.expanded,[]);
 });
+
+test("active filters honor matching parents' expansion while traversing hidden ancestors",()=>{
+ const data=emptyWorkspace(),parent=createTask(data,null,"Matching parent"),child=createTask(data,parent,"Matching child");editTask(data,child,{assignedState:"Needs Testing",priority:"Major"});const items=materialize([],data.operations),filter={...emptyFilters(),status:"amber"};
+ const rows=()=>workRows(items,data,filter).map(item=>item.id);
+ assert.deepEqual(rows(),[parent]);data.view.expanded=[parent];assert.deepEqual(rows(),[parent,child]);data.view.expanded=[];assert.deepEqual(rows(),[parent]);
+ data.view.search="Matching";assert.deepEqual(rows(),[parent]);data.view.expanded=[parent];assert.deepEqual(rows(),[parent,child]);data.view.expanded=[];
+ assert.deepEqual(workRows(items,data,{...filter,priority:"Major"}).map(item=>item.id),[child]);
+ data.view.search="";assert.deepEqual(workRows(items,data,emptyFilters()).map(item=>item.id),[parent]);
+});

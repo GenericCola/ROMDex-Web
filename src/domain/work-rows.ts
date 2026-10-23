@@ -30,8 +30,7 @@ export const workRows = (
             .includes(query));
       if (visible) rows.push(item);
       if (
-        filtering ||
-        query ||
+        (filtering ? !visible : !!query) ||
         data.view.expanded.includes(item.id) ||
         item.id === scope ||
         (allowed && !allowed.has(item.id))
