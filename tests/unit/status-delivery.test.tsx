@@ -83,7 +83,7 @@ test("a mixed-field timeout can be confirmed without losing its saved assignment
 });
 
 test("parent State delivery matches every accepted rollup color",async()=>{
-  for(const [states,expected] of [[['To do','To do'],'To do'],[['Done','To do'],'In Progress'],[['Done','Standby'],'Standby'],[['Done','Done'],'Done'],[['Critical / Debugging','In Development'],'Critical / Debugging'],[['In Development','Standby'],'In Development']] as const){const s=await setup([task(root),task(child,states[0],root),task(other,states[1],root)]);await s.store.change(data=>editTask(data,root,{assignedState:"Standby"}));await s.run();assert.equal(s.remote.get(root)?.state,expected);assert.equal(s.saved().cloud?.assigned?.[root]?.assignedState,"Standby");}
+  for(const [states,expected] of [[['To do','To do'],'To do'],[['Done','To do'],'In Progress'],[['Done','Standby'],'In Progress'],[['Standby','Standby'],'In Progress'],[['Done','Done'],'Done'],[['Critical / Debugging','In Development'],'Critical / Debugging'],[['In Development','Standby'],'In Development']] as const){const s=await setup([task(root),task(child,states[0],root),task(other,states[1],root)]);await s.store.change(data=>editTask(data,root,{assignedState:"Standby"}));await s.run();assert.equal(s.remote.get(root)?.state,expected);assert.equal(s.saved().cloud?.assigned?.[root]?.assignedState,"Standby");}
 });
 
 test("legacy state aliases deliver as assignments while parent effective State remains derived",async()=>{

@@ -31,7 +31,8 @@ export function rollup(colors){
   if(colors.includes('purple'))return 'purple';
   if(colors.every(x=>x==='grey')) return 'grey';
   if(colors.some(x=>x==='grey'||x==='yellow')) return 'yellow';
-  if(colors.includes('blue')) return 'blue';
+  // Standby remains an assigned choice; children never pass it to a parent.
+  if(colors.includes('blue')) return 'yellow';
   return 'green';
 }
 export function indexTree(items,order={}){

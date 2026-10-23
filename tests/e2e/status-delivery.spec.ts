@@ -40,3 +40,31 @@ test("PMON native testing reads keep the display label and priority, then delive
   await expect(page.getByText("All changes saved in this browser",{exact:true})).toBeVisible();
   await page.reload();await expect(page.getByRole("combobox",{name:"Assigned Status",exact:true})).toHaveValue("Awaiting Testing");
 });
+
+test("Standby children keep parents In Progress in lamps and native delivery, through nested trees",async({page})=>{
+ const s=await structuralFixture(page);
+ for(const task of s.tasks.values())task.state="Standby";
+ s.tasks.get("PMON-900002")!.parentId="PMON-900001";
+ await page.getByRole("button",{name:"Connection Details",exact:true}).click();
+ await page.getByLabel("YouTrack Permanent Token",{exact:true}).fill("fixture-read-token");
+ await page.getByRole("button",{name:"Read YouTrack Tasks",exact:true}).click();
+ await page.getByRole("button",{name:"Save 3 Tasks in This Browser",exact:true}).click();
+ const row=(name:string)=>page.getByRole("row").filter({has:page.getByRole("button",{name,exact:true})});
+ await expect(row("Fixture Root").getByRole("img",{name:"In Progress",exact:true})).toHaveClass("bulb yellow");
+ await select(page,"Fixture Root");await expect(page.getByRole("combobox",{name:"Assigned Status",exact:true})).toHaveValue("Standby");
+ await page.getByRole("button",{name:"Expand Fixture Root",exact:true}).last().click();
+ await expect(row("Fixture Child").getByRole("img",{name:"Standby",exact:true})).toHaveClass("bulb blue");
+ await s.connect();await s.save();await s.confirmed();expect(s.tasks.get("PMON-900001")?.state).toBe("In Progress");
+ const count=s.writes.length;await s.save();await s.confirmed();expect(s.writes).toHaveLength(count);
+ await select(page,"Fixture Other");await page.getByRole("combobox",{name:"Assigned Status",exact:true}).selectOption("Done");
+ await s.save();await s.confirmed();expect(s.tasks.get("PMON-900001")?.state).toBe("In Progress");
+ await expect(row("Fixture Root").getByRole("img",{name:"In Progress",exact:true})).toBeVisible();
+ await page.getByRole("combobox",{name:"Task Parent",exact:true}).selectOption("PMON-900003");
+ await s.save();await s.confirmed();expect(s.tasks.get("PMON-900001")?.state).toBe("Done");
+ await page.getByRole("combobox",{name:"Assigned Status",exact:true}).selectOption("Standby");
+ await s.save();await s.confirmed();expect(s.tasks.get("PMON-900003")?.state).toBe("In Progress");expect(s.tasks.get("PMON-900001")?.state).toBe("In Progress");
+ await expect(row("Fixture Root").getByRole("img",{name:"In Progress",exact:true})).toHaveClass("bulb yellow");
+ await select(page,"Fixture Root");await expect(page.getByRole("combobox",{name:"Assigned Status",exact:true})).toHaveValue("Standby");
+ await page.reload();await expect(row("Fixture Root").getByRole("img",{name:"In Progress",exact:true})).toHaveClass("bulb yellow");
+ await expect(page.getByRole("combobox",{name:"Assigned Status",exact:true})).toHaveValue("Standby");
+});

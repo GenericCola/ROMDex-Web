@@ -4,7 +4,7 @@ The subsequent web status extension restores Awaiting Testing after In Developme
 
 This records the browser-only checkpoint at commit 65f541a. Current opt-in YouTrack-backed metadata and its setup are documented in SHARED-STATUS.md.
 
-The Assigned Status control now preserves a task's own choice separately from its effective YouTrack State. A leaf uses its assigned status. A parent uses its children's calculated colors, through the unchanged accepted desktop core. Removing or moving its last child restores the parent's assigned choice.
+The Assigned Status control now preserves a task's own choice separately from its effective YouTrack State. A leaf uses its assigned status. A parent uses its children's calculated colors, through the shared desktop/web core with the owner-requested rollup corrections. Removing or moving its last child restores the parent's assigned choice.
 
 For example, a parent assigned Standby with a Done child has native State Done and assigned status Standby. Moving that child elsewhere restores State Standby. Creating, deleting or moving children schedules the same calculation for the affected hierarchy.
 
@@ -20,7 +20,7 @@ New tasks are created with their assigned status as initial native State. Their 
 
 ## Calculation and delivery
 
-The current precedence starts with any Awaiting Testing child, then Critical, then In Development; all untouched children produce To do, any remaining untouched or In Progress child produces In Progress, then Standby, otherwise Done. A parent's own choice stays saved while children determine its effective status.
+The current precedence starts with any Awaiting Testing child, then Critical, then In Development; all untouched children produce To do, any remaining untouched or In Progress child produces In Progress, then any Standby child produces In Progress, otherwise Done. Standby is never inherited from children: all-Standby children and mixed Done/Standby children produce In Progress. A task with no children still uses its own assigned choice, including Standby. A parent's own choice stays saved while children determine its effective status.
 
 A durable pending-rollup flag survives even when the user queue is empty. Save Changes and opted-in Auto-Sync process this work. The Save lamp stays red while it remains. A failed cycle suspends automatic delivery. Reconnecting or a successful explicit Save can resume it after any required review. Reload requires reconnecting the session token and preserves the sync preference.
 

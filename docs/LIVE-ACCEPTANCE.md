@@ -4,13 +4,15 @@ The owner authorized test-only app installation and live testing on October 22, 
 
 The owner subsequently authorized development against live PMON, the current ROMDex task project. PMON field-schema and task reads are verified through MCP. This allows live reads and compatibility development; existing PMON issues are not synthetic acceptance fixtures. The NPCD test app and its fixed fixture allowlist remain separate. No installed app was changed or activated in the PMON compatibility checkpoint. See PMON-DEVELOPMENT.md.
 
-## Current administrator handoff: version 1.0.3
+## Current administrator handoff: version 1.0.4
 
-The browser check on October 22 still shows installed version 1.0.1 inactive, with the Active switch disabled for this account. The current acceptance package is artifacts/romdex-status-acceptance-1.0.3.zip. Its SHA-256 is 1a8dea687e94e24bdaa235a04039798c75ac0ff7d9840dcf2cbd068ba2ce6dab. The exact NPCD-872/NPCD-873 and summary-prefix guards remain enforced. Production sharing stays off.
+Version 1.0.4 supersedes the earlier 1.0.3 handoff. Standby is never inherited from children: all-Standby and mixed Done/Standby children produce In Progress. The app advertises statusRules 3, which the web client now requires. Earlier rule sets stop shared delivery rather than calculate a different parent State.
 
-> Please upload romdex-status-acceptance-1.0.3.zip in Administration > Apps to update ROMDex acceptance - synthetic issues only. Enable the system Active switch and keep it attached only to NPCD. The code permits writes only to the private synthetic fixtures NPCD-872 and NPCD-873. Tests run manually. Do not attach it to PMON, change existing issues or broaden permissions. Please confirm when the update and activation are complete.
+The browser check on October 22 last showed installed version 1.0.1 inactive, with the Active switch disabled for this account. The current acceptance package is artifacts/romdex-status-acceptance-1.0.4.zip. Its SHA-256 is 4b2635a7c47ce2d431d51502f7b6666825745e50f9b9232f7012f90daa670c5a. Independent ZIP verification checked all nine entries, CRCs, version, rule version and exact NPCD-872/NPCD-873 guards. Production sharing stays off.
 
-This current handoff supersedes the historical 1.0.1 upload instructions below. Frozen earlier packages and evidence remain retained.
+> Please upload romdex-status-acceptance-1.0.4.zip in Administration > Apps to update ROMDex acceptance - synthetic issues only. Enable the system Active switch and keep it attached only to NPCD, with Auto-attach off. The code permits writes only to the private synthetic fixtures NPCD-872 and NPCD-873. Tests run manually. Do not attach it to PMON, change existing issues or broaden permissions. Please confirm the version and both activation states when complete.
+
+The complete owner-to-administrator checklist is artifacts/romdex-admin-checklist.txt. This handoff supersedes earlier package instructions below; frozen earlier packages remain retained.
 
 ## Installed state and blocker
 

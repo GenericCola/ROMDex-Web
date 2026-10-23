@@ -35,3 +35,18 @@ test("lost shared assignment response requires exact readback after reload witho
 test("an unavailable metadata app blocks shared delivery without native State fallback",async({page,context})=>{
   const backend=sharedBackend([item()]);await routeBackend(context,backend);await read(page,1);await shared(page);await save(page);await confirmed(page);await selectRoot(page);await page.getByRole("combobox",{name:"Assigned Status",exact:true}).selectOption("Standby");backend.options.appMissing=true;await save(page);await expect(page.getByText("Invalid shared-status response. Nothing was replaced.",{exact:true})).toBeVisible();expect(backend.writes).toHaveLength(0);expect(backend.ordinaryWrites).toHaveLength(0);backend.options.appMissing=false;await save(page);await confirmed(page);expect(backend.tasks.get(root)?.state).toBe("Standby");
 });
+
+test("older Standby rollup rules display the compatibility refusal before metadata access",async({page,context})=>{
+ const backend=sharedBackend([item()]),fetcher=backend.fetcher;let metadataReads=0;
+ backend.fetcher=async(input,init)=>{
+  const path=new URL(String(input)).pathname;
+  if(path.endsWith("/capabilities/check"))return Response.json({schema:1,app:"romdex-status",project:"PMON",statusRules:2});
+  if(path.endsWith("/status/assigned"))metadataReads++;
+  return fetcher(input,init);
+ };
+ await routeBackend(context,backend);await read(page,1);await connect(page);await open(page);
+ await page.getByRole("button",{name:"Preview shared assigned status",exact:true}).click();
+ await expect(page.getByText("The ROMDex status app is unavailable or incompatible. Shared status was stopped.",{exact:true})).toBeVisible();
+ await expect(page.getByRole("table",{name:"Assigned-status comparison",exact:true})).toHaveCount(0);
+ expect(metadataReads).toBe(0);expect(backend.writes).toHaveLength(0);expect(backend.ordinaryWrites).toHaveLength(0);
+});

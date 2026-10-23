@@ -29,7 +29,8 @@ const rollup = (colors) => {
   if (colors.every((color) => color === "grey")) return "grey";
   if (colors.some((color) => color === "grey" || color === "yellow"))
     return "yellow";
-  if (colors.includes("blue")) return "blue";
+  // Standby children leave their parent in progress.
+  if (colors.includes("blue")) return "yellow";
   return "green";
 };
 module.exports = { states, statusOf, rollup, youTrackState };

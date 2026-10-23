@@ -35,11 +35,13 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 
 ## Status corrections requested by the owner
 
+- [x] Standby never rolls up from children. All-Standby and Done/Standby children produce In Progress, recursively. Own assignments and leaf Standby remain intact. Code, installed-desktop synthetic checks and all five browser targets pass; actual desktop visual acceptance and deployed YouTrack checks remain pending. Evidence is tracked in STATUS-CORRECTION.md.
+
 - [x] Picker order is To do, In Progress, Standby, In Development, Awaiting Testing, Done, Critical / Debugging. Awaiting Testing displays flashing amber after development. Evidence: task-port browser selection/reload/reduced-motion scenario and accepted core tests.
 - [x] Map displayed Awaiting Testing to native PMON Needs Testing. Never create or rename a State bundle value to make a test pass. Evidence: issue-body tests, PMON MCP schema and status-delivery browser tests.
 - [x] Any testing child gives its parent amber precedence, recursively through ancestors, while retaining the parent's own assignment. Evidence: core combinations, rollup tests and status-delivery/shared-status browser scenarios.
 - [x] Shared assigned metadata requires explicit migration preview, revision checking and exact receipt recovery. Unavailable storage blocks shared delivery without native fallback. Evidence: shared-status tests with two independent browser stores.
-- [ ] Activate/update the installed acceptance app and execute live handler, concurrency, rollback and fresh-page tests. Browser inspection still shows version 1.0.1 inactive and the account's Active switch disabled. Current administrator package is version 1.0.3.
+- [ ] Activate/update the installed acceptance app and execute live handler, concurrency, rollback and fresh-page tests. Browser inspection still shows version 1.0.1 inactive and the account's Active switch disabled. Current administrator package is version 1.0.4.
 - [ ] Install/enable the accepted production metadata app only after isolated acceptance. Production sharing stays off.
 - [ ] Verify cross-device behavior on actual separate devices. Independent synthetic browser stores are not physical-device acceptance.
 
@@ -80,4 +82,6 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 - [ ] Accept real iPhone/iPad installation, storage quota, offline reopening, suspension and update behavior. WebKit/iPhone emulation is automated browser evidence only.
 - [ ] Run final complete checks, publish the private checkpoint, provide the tested build and a concise manual acceptance list, then accept cutover. Current test counts and live blockers are recorded in DESKTOP-MIGRATION.md and LIVE-ACCEPTANCE.md.
 
-Current checkpoint verification: pnpm check passed type checking, zero-warning lint, 116 unit tests and eight worker/build checks. pnpm build passed. The complete frozen browser run passed 173 checks with two expected mobile desktop-layout skips. The independent desktop reader accepted browser-repacked synthetic map/plan files. These results close only the verified rows above; production migration, remaining feature implementation and human/device acceptance stay open.
+Migration/RDX checkpoint 47a7df8 verification: pnpm check passed type checking, zero-warning lint, 116 unit tests and eight worker/build checks. pnpm build passed. The complete frozen browser run passed 173 checks with two expected mobile desktop-layout skips. The independent desktop reader accepted browser-repacked synthetic map/plan files. These results close only the verified rows above; production migration, remaining feature implementation and human/device acceptance stay open.
+
+Standby correction verification: current worktree pnpm check passed (126 unit tests, eight worker/build checks), pnpm build passed, and the frozen browser matrix passed 183 checks with two expected mobile layout skips. The status-only checkpoint leaves attachment work uncommitted. Desktop code was backed up and all 131 data-file hashes stayed unchanged. See STATUS-CORRECTION.md for each requirement, package checksums and pending human/live acceptance.
