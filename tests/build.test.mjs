@@ -23,6 +23,7 @@ test("worker inventory covers nested shells and changes with public content", as
     await writeFile(path.join(fixture, "out/index.html"), "home");
     await writeFile(path.join(fixture, "out/nested/index.html"), "nested");
     await writeFile(path.join(fixture, "out/_headers"), "private policy");
+    await writeFile(path.join(fixture, "out/debug.js.map"), "debug map");
     const build = () => {
       const result = spawnSync(
         process.execPath,
@@ -34,7 +35,7 @@ test("worker inventory covers nested shells and changes with public content", as
     build();
     const first = await readFile(path.join(fixture, "out/sw.js"), "utf8");
     assert.match(first, /\/nested\/index.html/);
-    assert.doesNotMatch(first, /private policy|"\/_headers"/);
+    assert.doesNotMatch(first, /private policy|"\/_headers"|debug.js.map/);
     build();
     assert.equal(
       await readFile(path.join(fixture, "out/sw.js"), "utf8"),

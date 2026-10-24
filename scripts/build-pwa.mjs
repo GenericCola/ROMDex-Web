@@ -12,7 +12,7 @@ const walk = async (directory) => {
   return files;
 };
 const files = (await walk(root))
-  .filter((file) => !["sw.js", "_headers"].includes(path.basename(file)))
+  .filter((file) => !["sw.js", "_headers"].includes(path.basename(file)) && !file.endsWith(".map"))
   .sort();
 const assets = files.map(
   (file) => "/" + path.relative(root, file).split(path.sep).join("/"),

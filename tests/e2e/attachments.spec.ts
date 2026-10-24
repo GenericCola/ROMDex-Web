@@ -4,7 +4,7 @@ import {structuralFixture,addTask} from './structural-fixture';
 test.use({serviceWorkers:'block'});
 const content=Buffer.from('ROMDex attachment: durable bytes \u00e9\n');
 const attachmentFixture=async(page:Page,mode:'normal'|'lost-upload'|'lost-delete'='normal')=>{
- const nativeWire=test.info().project.name==='iphone';
+ const nativeWire=['webkit','iphone'].includes(test.info().project.name);
  if(nativeWire)await page.addInitScript(()=>{const send=window.fetch.bind(window);window.fetch=async(input,init)=>{if(String(input).includes('/attachments?')&&init?.method==='POST'&&init.body instanceof FormData){const response=await send('/__attachment-transport',{method:'POST',body:init.body});const {body}=await response.json();const text=new TextDecoder().decode(Uint8Array.from(atob(body),c=>c.charCodeAt(0)));if(!text.includes('ROMDex attachment: durable bytes \u00e9\n')||!text.includes('filename="fixture.txt"'))throw Error('Native attachment multipart bytes differ.');}return send(input,init);};});
  const s=await structuralFixture(page);await page.getByRole('button',{name:'Fixture Root',exact:true}).last().click();const files=new Map<string,{id:string;name:string;size:number;mimeType:string;created:number;updated:number;author:{id:string};url:string}>();let uploads=0,deletions=0,lost=false;
  await page.route('https://thegobindsingh.youtrack.cloud/api/files/**',async route=>{await route.fulfill({status:200,contentType:'application/octet-stream',body:content,headers:{'access-control-allow-origin':'*'}});});

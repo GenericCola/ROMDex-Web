@@ -10,6 +10,7 @@ test('Vercel serves only the static export with the accepted security and worker
   if(!line.startsWith('  ')){group=config.headers.find(rule=>rule.source===(line==='/*'?'/:path*':line));assert.ok(group,'Deployment policy covers '+line);continue;}
   const at=line.indexOf(':'),key=line.slice(2,at),value=line.slice(at+1).trim();assert.equal(group.headers.find(header=>header.key===key)?.value,value,key);
  }
+ assert.deepEqual(config.headers.find(rule=>rule.source==='/').headers,config.headers.find(rule=>rule.source==='/:path*').headers);
  const worker=config.headers.find(rule=>rule.source==='/sw.js');assert.equal(worker.headers.find(header=>header.key==='Cache-Control').value,'no-cache');assert.equal(worker.headers.find(header=>header.key==='Service-Worker-Allowed').value,'/');
  const exclusions=(await readFile('.vercelignore','utf8')).split(/\r?\n/);for(const entry of ['.env*','artifacts','docs','tests','.git','.codex','*.pem','*.db','node_modules','out'])assert.ok(exclusions.includes(entry),entry+' is excluded from source uploads');
 });
