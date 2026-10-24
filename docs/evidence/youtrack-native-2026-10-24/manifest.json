@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-24",
+  "nativeAcceptance": "failed concurrency release gate",
+  "installedAcceptance": "1.0.12",
+  "appId": "155-84",
+  "allowedFixtures": [
+    "NPCD-872",
+    "NPCD-873"
+  ],
+  "productionSource": "1.0.8 WITHHELD",
+  "files": [
+    {
+      "name": "acceptance-1.0.12.zip",
+      "bytes": 22676,
+      "sha256": "6f3cc6881dbbdccd51c98407d85da03119e45269f19ed7cd67bf43b53dfdd063"
+    },
+    {
+      "name": "child-race.png",
+      "bytes": 103821,
+      "sha256": "269969181a849362a2d10ff4a787a214b96f204053d49bb92c5cb43081308b71"
+    },
+    {
+      "name": "child-race.txt",
+      "bytes": 621,
+      "sha256": "a06e367b43e604e360cef61cd4535979b6ddfb1103c6e9aab44f1b55a17294ea"
+    },
+    {
+      "name": "final-acceptance-validation.txt",
+      "bytes": 28,
+      "sha256": "ca62c1057729f2e6e89c40571e0ab7ac5e4257dd859724072284fb265d0ffe7a"
+    },
+    {
+      "name": "final-browser.txt",
+      "bytes": 36566,
+      "sha256": "5cf3f158c796ba5117bb251fed20549e7601e63814a28ea21ffa1b405b877686"
+    },
+    {
+      "name": "final-build.txt",
+      "bytes": 9228,
+      "sha256": "08e84b98bb6bcd7c72e8728e1688e82438b352da5932b61aa7a25f61b5efa64c"
+    },
+    {
+      "name": "final-check.txt",
+      "bytes": 15967,
+      "sha256": "527f24c5532dd5dd5000401024f91294f0b99970ec2b62a2814cd52927c6b0d9"
+    },
+    {
+      "name": "final-production-validation.txt",
+      "bytes": 28,
+      "sha256": "ca62c1057729f2e6e89c40571e0ab7ac5e4257dd859724072284fb265d0ffe7a"
+    },
+    {
+      "name": "final-widget.txt",
+      "bytes": 3287,
+      "sha256": "257521dbb01b0d919e3934f3edbe717f368f17bea402ea68dbd0162ca9feefa5"
+    },
+    {
+      "name": "installed-1.0.12.png",
+      "bytes": 88859,
+      "sha256": "6c5b9b943cb2ea9b83a3d37c38ba11ddb2b5553ca306577844b4499ecc058dfc"
+    },
+    {
+      "name": "native-app.log",
+      "bytes": 1232,
+      "sha256": "d6825256152a66aff3a588a522d31b33a199a4ca9b4f1a013e1732e6e6f883ab"
+    },
+    {
+      "name": "native-results.json",
+      "bytes": 6017,
+      "sha256": "494add477496dca1d72971109d4c0369b89639e5fc2ada8c9864dae880af0704"
+    },
+    {
+      "name": "production-1.0.8-withheld.zip",
+      "bytes": 10668,
+      "sha256": "07d936f6751f99ae2067abd01f8d4e54c62400c1300a4d0d0dbd1938b9f342fb"
+    },
+    {
+      "name": "root-rollback.txt",
+      "bytes": 760,
+      "sha256": "dee450e2621426846d95cf93b040cb9f96792b878d6c3e73c27635bf189fc598"
+    },
+    {
+      "name": "root-run.png",
+      "bytes": 109609,
+      "sha256": "ca55ebdac00a32bfbd203c444172cb09475cf8d89241f239e7665c145a65ad44"
+    },
+    {
+      "name": "root-run.txt",
+      "bytes": 1159,
+      "sha256": "603c37c78672ae5c14baaef19451d5d1337a4566d0beb71905daee510da9f0f5"
+    },
+    {
+      "name": "verification.json",
+      "bytes": 1331,
+      "sha256": "1fd577ffe650b338863dcdd88bd7d34e958addc101625c13754dda82ac2af0ec"
+    }
+  ],
+  "desktopChanges": 0,
+  "productionChanges": 0,
+  "cleanup": {
+    "branchStillActive": true,
+    "movedFiles": 0,
+    "deletedFiles": 0,
+    "prunedBranches": 0
+  },
+  "excluded": "Credentials, authenticated sessions, desktop profiles, unrelated unfinished attachment work, public vendor bundle downloads and full ROM work are not part of this checkpoint."
+}

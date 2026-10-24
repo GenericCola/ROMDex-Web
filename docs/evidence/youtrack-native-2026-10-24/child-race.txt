@@ -1,0 +1,11 @@
+PASS test app identity, protocol and status rules 4
+PASS allowlisted live fixture and protocol
+PASS allowlisted live fixture and protocol
+PASS assignment stored separately from native State
+PASS exact receipt survives a fresh request
+PASS exact replay performs no write
+PASS stale or reused request rejected with HTTP 409 (received 409)
+PASS server rollup preserves own assignment
+PASS stale or reused request rejected with HTTP 409 (received 409)
+Concurrent results: [{"status":"fulfilled"},{"status":"fulfilled"}]
+FAIL same-revision concurrent requests admit exactly one writer with an exact receipt and HTTP 409 loser

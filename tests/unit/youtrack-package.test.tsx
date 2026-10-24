@@ -35,7 +35,7 @@ test("acceptance package isolates the two explicitly authorized NPCD fixtures an
   const endpoints=exported.httpHandler!.endpoints;
   for(const [id,summary,project,expected] of [["NPCD-872","[ROMDex acceptance] Root","NPCD",200],["NPCD-873","[ROMDex acceptance] Child","NPCD",200],["NPCD-874","[ROMDex acceptance] Other","NPCD",403],["NPCD-872","Existing NPCD task","NPCD",403],["PMON-1","[ROMDex acceptance] Root","PMON",403]]){
     let result:unknown;const response={code:200,addHeader:()=>{},json:(value:unknown)=>{result=value;}};
-    const issue={id,summary,updated:1,isReported:true,isVisibleTo:()=>true,project:{shortName:project,canBeReadBy:()=>true,findFieldByName:()=>({typeName:"state[1]",isVisibleInIssue:()=>true})},fields:{State:{name:"Open"}},extensionProperties:{assignedStatus:null}};
+    const issue={id,summary,updated:1,isReported:true,isVisibleTo:()=>true,project:{shortName:project,findFieldByName:()=>({typeName:"state[1]",isVisibleInIssue:()=>true})},fields:{canBeReadBy:()=>true,State:{name:"Open"}},extensionProperties:{assignedStatus:null}};
     endpoints.find(entry=>entry.scope==="issue"&&entry.method==="GET")!.handle({issue,currentUser:{},response});
     assert.equal(response.code,expected,id+" guard");assert.ok(result);
   }

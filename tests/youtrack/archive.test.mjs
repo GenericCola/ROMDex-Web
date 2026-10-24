@@ -50,3 +50,26 @@ test("the earlier Node-only exports and missing SDK options are caught by execut
  const server=createBackend(),panel=await mountPanel(server,{source:broken});
  assert.match(await panel.click("run"),/FAIL Deployed SDK requires explicit scope options/);assert.equal(server.commits.length,0);
 });
+
+test("native Project.State failure is reproduced and custom-field permissions use Fields",async()=>{
+ const source=archiveFiles.get("status.js"),broken=source.replaceAll('issue.fields.canBeReadBy("State", user)','issue.project.canBeReadBy("State", user)');
+ assert.notEqual(broken,source);
+ const prior=createBackend({statusSource:broken}),failed=prior.dispatch("status/assigned",{scope:true});
+ assert.equal(failed.status,500);assert.match(failed.error.message,/Cannot resolve property Project.State/);assert.equal(prior.commits.length,0);
+ const fixed=createBackend(),panel=await mountPanel(fixed);
+ assert.match(await panel.click("read"),/"initialized": false/);assert.equal(fixed.commits.length,0);
+ for(const option of ["fieldReadable","fieldWritable"]){
+  const denied=createBackend();denied.options[option]=false;
+  const editor=await mountPanel(denied),output=await editor.click(option==="fieldReadable"?"read":"run");
+  assert.match(output,/FAIL HTTP 403: Task or State access is required\./);assert.equal(denied.commits.length,0);
+ }
+});
+
+test("request stream is read once; the former body guard consumes it before json parsing",async()=>{
+ const source=archiveFiles.get("status.js"),broken=source.replace(/const rawBody = ctx.request.body;\r?\n  if \(typeof rawBody !== "string" \|\| rawBody.length > 5000\)/,'if (typeof ctx.request.body !== "string" || ctx.request.body.length > 5000)').replace('body = JSON.parse(rawBody);','body = ctx.request.json();');
+ assert.notEqual(broken,source);
+ const prior=createBackend({statusSource:broken}),panel=await mountPanel(prior);
+ assert.match(await panel.click("run"),/FAIL HTTP 400: Invalid status request\./);assert.equal(prior.commits.length,0);
+ const fixed=createBackend(),editor=await mountPanel(fixed);
+ assert.ok(!(await editor.click("run")).includes("FAIL"));assert.equal(fixed.tasks.get("NPCD-872").state,"Done");
+});

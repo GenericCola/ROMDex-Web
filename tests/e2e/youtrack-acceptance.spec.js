@@ -17,6 +17,7 @@ const mount = async(page,server,registerFailure=false)=>{
    if(registerFailure)throw Error("Synthetic SDK unavailable");
    const send=async(path,options,id="NPCD-872")=>{
     if(!options||typeof options.scope!=="boolean")throw Error("Missing SDK scope options");
+    if(options.method==="POST"&&options.headers?.["Content-Type"]!=="application/json")throw Error("Missing JSON content type");
     const response=await fetch("/yt-qa/rpc",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path,options,id})}),result=await response.json();
     if(result.status>=400)throw {status:result.status,message:result.body?.error??""};return result.body;
    };

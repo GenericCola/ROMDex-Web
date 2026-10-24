@@ -1,5 +1,7 @@
 # Consolidated YouTrack repair and QA
 
+Current native result (October 24): system privileges now permit self-installation. Acceptance 1.0.12 is installed in place as app 155-84 on NPCD only. Native reads, assignment/rollup, receipts, fresh-page persistence and correlated rollback pass after the API/body-stream repairs. The child concurrency test accepted both same-revision writers, so production sharing remains blocked. See [LIVE-ACCEPTANCE-2026-10-24.md](LIVE-ACCEPTANCE-2026-10-24.md) for evidence and pending work. Earlier version, permission and withheld-package paragraphs below are historical. Vercel is the selected eventual host.
+
 Requested October 23, 2026 after repeated administrator updates. The earlier 1.0.6 acceptance handoff is withdrawn. No new installation request will be made in this task. Preserve the installed desktop app, profiles, credentials and normal sync. Existing attachment work stays separate.
 
 ## Requirement checklist

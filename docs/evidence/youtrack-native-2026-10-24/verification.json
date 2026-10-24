@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-24",
+  "local": {
+    "types": "passed",
+    "lint": "passed",
+    "applicationTests": 133,
+    "nodeTests": 29,
+    "build": "passed",
+    "shellAssets": 75,
+    "shellInventory": "cef338923e480f9c768f",
+    "focusedWidgetTests": 15,
+    "browserTests": 233,
+    "browserExpectedSkips": 2,
+    "browserDuration": "7.6 minutes",
+    "officialManifests": "both passed"
+  },
+  "native": {
+    "installation": "1.0.12, same app 155-84, Active, NPCD only",
+    "reads": "passed",
+    "assignmentAndRollup": "passed",
+    "receiptsReplayStaleRejection": "passed",
+    "freshPageExactReceipt": "passed",
+    "rollback": "passed; unchanged snapshot plus exact post-mutation log nonce",
+    "externalEdit": "passed; child restored to Done",
+    "upgradeStorage": "both exact snapshots preserved",
+    "concurrency": "FAILED: root one success/one409; child both fulfilled"
+  },
+  "productionRelease": "BLOCKED by native concurrency",
+  "pending": [
+    "atomic concurrency repair and sustained real overlapping tests",
+    "compatible-schema positive Standby/testing",
+    "other-user and hidden-link behavior",
+    "physical-device and real-origin CORS",
+    "Vercel hosting after acceptance gates"
+  ],
+  "cleanup": {
+    "branchActive": true,
+    "movedFiles": 0,
+    "deletedFiles": 0,
+    "prunedBranches": 0
+  }
+}

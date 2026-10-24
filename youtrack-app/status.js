@@ -7,8 +7,8 @@ const check = (issue, user, write = false) => {
     issue.project?.shortName !== "PMON" ||
     !issue.isReported ||
     !issue.isVisibleTo(user) ||
-    !issue.project.canBeReadBy("State", user) ||
-    (write && !issue.project.canBeWrittenBy("State", user))
+    !issue.fields.canBeReadBy("State", user) ||
+    (write && !issue.fields.canBeWrittenBy("State", user))
   )
     records.fail(403, "Task or State access is required.");
   const field = issue.project.findFieldByName("State");
@@ -48,11 +48,12 @@ const read = (ctx) => {
 };
 const write = (ctx) => {
   const field = check(ctx.issue, ctx.currentUser, true);
-  if (typeof ctx.request.body !== "string" || ctx.request.body.length > 5000)
+  const rawBody = ctx.request.body;
+  if (typeof rawBody !== "string" || rawBody.length > 5000)
     records.fail(400, "Invalid status request.");
   let body;
   try {
-    body = ctx.request.json();
+    body = JSON.parse(rawBody);
   } catch {
     records.fail(400, "Invalid status request.");
   }

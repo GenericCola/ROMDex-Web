@@ -12,7 +12,7 @@ test("acceptance modules load without Node module globals and retain guards and 
   type Endpoint={method:string;handle:(ctx:unknown)=>void};
   const handler=load("./status").httpHandler as {endpoints:Endpoint[]};
   const read=handler.endpoints.find(endpoint=>endpoint.method==="GET")!.handle;
-  const issue={id:"NPCD-872",summary:"[ROMDex acceptance] Root",updated:1,isReported:true,isVisibleTo:()=>true,project:{shortName:"NPCD",canBeReadBy:()=>true,canBeWrittenBy:()=>true,findFieldByName:()=>({typeName:"state[1]",isVisibleInIssue:()=>true,values:[{name:"Open"}]})},fields:{State:{name:"Done"}},extensionProperties:{assignedStatus:null as string|null}};
+  const issue={id:"NPCD-872",summary:"[ROMDex acceptance] Root",updated:1,isReported:true,isVisibleTo:()=>true,project:{shortName:"NPCD",findFieldByName:()=>({typeName:"state[1]",isVisibleInIssue:()=>true,values:[{name:"Open"}]})},fields:{canBeReadBy:()=>true,canBeWrittenBy:()=>true,State:{name:"Done"}},extensionProperties:{assignedStatus:null as string|null}};
   let result:unknown;const response={code:200,addHeader:()=>{},json:(value:unknown)=>{result=value;}};
   read({issue,currentUser:{},response});assert.equal(response.code,200);assert.equal((result as {initialized:boolean}).initialized,false);assert.equal(issue.extensionProperties.assignedStatus,null);assert.deepEqual(logs,[]);
   read({issue:{...issue,id:"NPCD-999"},currentUser:{},response});assert.equal(response.code,403);assert.deepEqual(logs,[]);

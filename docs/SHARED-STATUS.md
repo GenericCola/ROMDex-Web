@@ -1,5 +1,7 @@
 # YouTrack-backed assigned status
 
+October 24 native acceptance gate: GenericCola now has verified app-update access. Acceptance 1.0.12 is installed as app 155-84, Active on NPCD only. API access, request-stream parsing, receipts, persistence and correlated rollback are verified, but the child race accepted two same-revision writers. Keep production sharing OFF and production source 1.0.8 withheld until supported atomic concurrency is implemented and natively retested. Preserve both synthetic fixtures and their receipts, all PMON tasks and the desktop app/data. See [LIVE-ACCEPTANCE-2026-10-24.md](LIVE-ACCEPTANCE-2026-10-24.md). The owner selected Vercel for eventual hosting; no deployment is performed by this checkpoint.
+
 ROMDex Web can store assigned status in YouTrack app-owned issue properties. Each enabled web device reads the same assigned choice, while native State continues to represent the leaf or parent calculation. Existing browser-only workspaces stay unchanged until the user previews and enables sharing.
 
 The production app source is in youtrack-app. It has no widgets, automatic workflows, external requests or separate server. All storage and endpoints run inside YouTrack. A separate fixture-restricted test app is installed in NPCD but inactive; see LIVE-ACCEPTANCE.md for the administrator blocker and current results. No production installation, production-data write or desktop-data import was performed.

@@ -1,0 +1,14 @@
+PASS test app identity, protocol and status rules 4
+PASS allowlisted live fixture and protocol
+PASS root test requires the child fixture restored to Done; no request was written
+PASS allowlisted live fixture and protocol
+PASS assignment stored separately from native State
+PASS exact receipt survives a fresh request
+PASS exact replay performs no write
+PASS stale or reused request rejected with HTTP 409 (received 409)
+PASS server rollup preserves own assignment
+PASS stale or reused request rejected with HTTP 409 (received 409)
+Concurrent results: [{"status":"fulfilled"},{"status":"rejected","code":409}]
+PASS same-revision concurrent requests admit exactly one writer with an exact receipt and HTTP 409 loser
+FINAL {"schema":1,"id":"NPCD-872","revision":3,"initialized":true,"assignedState":"Open","state":"Done","updated":1792858372027,"receipt":{"schema":1,"opId":"16c37555-02e1-451b-88db-6170729a272d","kind":"assign","value":"Open","expected":{"revision":2,"initialized":true,"assignedState":"In Progress","state":"Done","updated":1792858372027}}}
+Complete. Reload this issue or open it in another tab, then Read live metadata to verify persistence.

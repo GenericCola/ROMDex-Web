@@ -23,20 +23,20 @@ const nativeSet = (values) => strict("Set", {
   forEach: (visitor) => values().forEach(visitor),
   isEmpty: () => values().length === 0,
 });
-export const createBackend = () => {
+export const createBackend = ({statusSource} = {}) => {
   const tasks = new Map([
     ["NPCD-872", {id:"NPCD-872", state:"Open", summary:"[ROMDex acceptance] Root", updated:1, parent:null}],
     ["NPCD-873", {id:"NPCD-873", state:"Done", summary:"[ROMDex acceptance] Child", updated:1, parent:"NPCD-872"}],
   ]);
   const logs = [], requests = [], commits = [];
-  const options = {readable:true, writable:true, fieldReadable:true, fieldVisible:true, fieldType:"state[1]", missingState:false, throwAfterState:false, throwOnRead:false};
+  const options = {readable:true, writable:true, fieldReadable:true, fieldWritable:true, fieldVisible:true, fieldType:"state[1]", missingState:false, throwAfterState:false, throwOnRead:false};
   const cache = new Map();
   const load = (name) => {
     const key = name.replace(/^\.\//, "") + ".js";
     if (cache.has(key)) return cache.get(key);
     const value = {}; cache.set(key,value);
     assert.ok(archiveFiles.has(key), "Only archive-local imports are allowed: " + key);
-    runInNewContext(archiveFiles.get(key), {exports:value,require:load,console:{error:(message)=>logs.push(String(message))}}, {filename:key,timeout:1000});
+    runInNewContext(key === "status.js" && statusSource ? statusSource : archiveFiles.get(key), {exports:value,require:load,console:{error:(message)=>logs.push(String(message))}}, {filename:key,timeout:1000});
     return value;
   };
   const wrappers = (id, draft) => {
@@ -45,13 +45,15 @@ export const createBackend = () => {
     const states = ["Open","In Progress","In Review","On hold","Done","Canceled"].filter((name)=>!options.missingState || name!=="In Progress");
     const field = strict("BundleProjectCustomField", {typeName:options.fieldType,values:nativeSet(()=>states.map((name)=>({name}))),isVisibleInIssue:()=>options.fieldVisible});
     const fields = strict("Fields", {
+      canBeReadBy:(name)=>{assert.equal(name,"State");return options.fieldReadable;},
+      canBeWrittenBy:(name)=>{assert.equal(name,"State");return options.fieldWritable;},
       get State(){if(options.throwOnRead)throw Error("synthetic read failure");return {name:task.state};},
       set State(value){assert.ok(states.includes(value.name));task.state=value.name;if(options.throwAfterState)throw Error("synthetic workflow failure");},
     });
     return strict("Issue", {
       id:task.id, summary:task.summary, updated:task.updated, isReported:true,
       isVisibleTo:()=>options.readable,
-      project:strict("Project", {shortName:"NPCD",canBeReadBy:()=>options.fieldReadable,canBeWrittenBy:()=>options.writable,findFieldByName:()=>field}),
+      project:strict("Project", {shortName:"NPCD",canBeReadBy:(name)=>{throw Error("Cannot resolve property Project."+name);},canBeWrittenBy:(name)=>{throw Error("Cannot resolve property Project."+name);},findFieldByName:()=>field}),
       fields,
       extensionProperties:strict("ExtensionProperties", {get assignedStatus(){return task.metadata??null;},set assignedStatus(value){task.metadata=value;}}),
       links:strict("Links", {"parent for":nativeSet(()=>[...draft.values()].filter((child)=>child.parent===id).map((child)=>wrappers(child.id,draft)))}),
@@ -67,9 +69,11 @@ export const createBackend = () => {
     assert.equal(params.scope,endpoint.scope==="issue");
     if (!options.readable || (method==="POST" && !options.writable)) return {status:403,body:null};
     const draft = structuredClone(tasks);let responseBody=null;
+    let rawBody=params.body===undefined?"":JSON.stringify(params.body);
+    const takeBody=()=>{const value=rawBody;rawBody="";return value;};
     const response = strict("HttpResponse",{code:200,addHeader:(name,value)=>assert.equal(value,"no-store"),json:(value)=>{responseBody=structuredClone(value);}});
     try {
-      endpoint.handle({issue:params.scope?wrappers(id,draft):undefined,currentUser:{login:"fixture-owner"},request:{body:params.body===undefined?"":JSON.stringify(params.body),json:()=>structuredClone(params.body)},response});
+      endpoint.handle({issue:params.scope?wrappers(id,draft):undefined,currentUser:{login:"fixture-owner"},request:{get body(){return takeBody();},json:()=>JSON.parse(takeBody())},response});
       if (response.code<400) {
         for (const [key,task] of draft) if (JSON.stringify(task)!==JSON.stringify(tasks.get(key))) {
           assert.equal(method,"POST","GET cannot initialize or mutate storage");
@@ -84,6 +88,7 @@ export const createBackend = () => {
   };
   const host = (id="NPCD-872") => {
     const send = async (path,params,target=id) => {
+      if(params?.method === "POST")assert.equal(params.headers?.["Content-Type"],"application/json","Widget writes explicitly declare JSON content");
       const result = dispatch(path,params,target);
       if (result.status>=400) throw {status:result.status,message:result.body?.error??""};
       return result.body;

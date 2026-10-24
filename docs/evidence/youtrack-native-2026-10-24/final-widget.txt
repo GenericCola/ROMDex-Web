@@ -1,0 +1,30 @@
+
+Running 15 tests using 1 worker
+
+(node:46368) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (428ms)
+  ok  2 [chromium] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (160ms)
+  ok  3 [chromium] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (102ms)
+(node:50880) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  4 [firefox] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (1.3s)
+  ok  5 [firefox] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (266ms)
+  ok  6 [firefox] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (201ms)
+(node:13464) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  7 [webkit] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (1.1s)
+  ok  8 [webkit] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (362ms)
+  ok  9 [webkit] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (227ms)
+(node:80336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 10 [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (422ms)
+  ok 11 [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (161ms)
+  ok 12 [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (100ms)
+(node:36964) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 13 [iphone] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (1.0s)
+  ok 14 [iphone] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (343ms)
+  ok 15 [iphone] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (207ms)
+
+  15 passed (9.0s)

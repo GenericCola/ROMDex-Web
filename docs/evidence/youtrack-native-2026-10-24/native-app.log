@@ -1,0 +1,7 @@
+24/10/2026 15:59:47,889Z ERROR [status.js      ] [GenericCola         ] ROMDex acceptance status failure: jetbrains.youtrack.core.l10n.LocalizedLogicException: Cannot resolve property Project.State
+24/10/2026 16:06:49,020Z ERROR [status.js      ] [GenericCola         ] ROMDex acceptance rejected request: 400 Invalid status request.; body type=string; body length=0
+24/10/2026 16:09:24,101Z ERROR [status.js      ] [GenericCola         ] ROMDex acceptance rejected request: 400 Invalid status request.; body type=string; body length=0
+24/10/2026 16:12:51,660Z ERROR [status.js      ] [GenericCola         ] ROMDex acceptance rejected request: 409 A status operation ID was reused.; body type=string; body length=0
+24/10/2026 16:12:52,744Z ERROR [status.js      ] [GenericCola         ] ROMDex acceptance rejected request: 409 Assigned status or task revision changed.; body type=string; body length=0
+24/10/2026 16:12:53,110Z ERROR [status.js      ] [GenericCola         ] ROMDex acceptance rejected request: 409 Assigned status or task revision changed.; body type=string; body length=0
+24/10/2026 16:13:05,984Z ERROR [fault.js       ] [GenericCola         ] ROMDex acceptance forced rollback d5210887-ebff-4795-adcf-79ad91c7ea27

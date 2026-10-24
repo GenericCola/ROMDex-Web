@@ -61,7 +61,7 @@ test("a concurrency loser with HTTP 500 cannot count as a CAS pass",async()=>{
  assert.match(output,/FAIL same-revision concurrent requests/);
 });
 test("archive backend refuses permission, field and malformed storage failures without commits",()=>{
- for(const kind of ["readable","writable","fieldReadable","fieldVisible","fieldType","missingState","corrupt"]){
+ for(const kind of ["readable","writable","fieldReadable","fieldWritable","fieldVisible","fieldType","missingState","corrupt"]){
   const s=createBackend(),before=structuredClone(s.tasks);
   if(kind==="corrupt")s.tasks.get("NPCD-872").metadata="{bad";else if(kind==="fieldType")s.options.fieldType="enum[1]";else s.options[kind]=kind==="missingState";
   const snapshot=s.dispatch("status/assigned",{scope:true}).body;

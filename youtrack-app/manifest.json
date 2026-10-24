@@ -3,6 +3,6 @@
   "name": "romdex-status",
   "title": "ROMDex assigned status",
   "description": "Revision-checked assigned status and effective State for ROMDex Web.",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "minYouTrackVersion": "2026.2.0"
 }

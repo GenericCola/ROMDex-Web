@@ -1,0 +1,7 @@
+PASS test app identity, protocol and status rules 4
+PASS allowlisted live fixture and protocol
+PASS rollback starts with initialized metadata and a non-Open native State
+PASS failed request left metadata, State and timestamp unchanged
+PASS rollback request returned a server failure
+PENDING verify this exact post-mutation marker in the app log: ROMDex acceptance forced rollback d5210887-ebff-4795-adcf-79ad91c7ea27
+FINAL {"schema":1,"id":"NPCD-872","revision":3,"initialized":true,"assignedState":"Open","state":"Done","updated":1792858372027,"receipt":{"schema":1,"opId":"16c37555-02e1-451b-88db-6170729a272d","kind":"assign","value":"Open","expected":{"revision":2,"initialized":true,"assignedState":"In Progress","state":"Done","updated":1792858372027}}}

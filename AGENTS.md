@@ -1,5 +1,7 @@
 # ROMDex Web
 
+October 24 native acceptance gate: GenericCola now has verified app-update access. Acceptance 1.0.12 is installed as app 155-84, Active on NPCD only. API access, request-stream parsing, receipts, persistence and correlated rollback are verified, but the child race accepted two same-revision writers. Keep production sharing OFF and production source 1.0.8 withheld until supported atomic concurrency is implemented and natively retested. Preserve both synthetic fixtures and their receipts, all PMON tasks and the desktop app/data. See [docs/LIVE-ACCEPTANCE-2026-10-24.md](docs/LIVE-ACCEPTANCE-2026-10-24.md). The owner selected Vercel for eventual hosting; no deployment is performed by this checkpoint.
+
 React and PWA foundation restarted on October 22, 2026. On October 22, 2026 the user supplied PASSKEY and authorized porting the current accepted desktop app first, then finishing remaining features on web. Keep the desktop app and its data intact as the fallback.
 
 On October 22, 2026 the user authorized test-only YouTrack app installation and live acceptance testing, then selected existing NPCD because no disposable project is available. Restrict mutations to the new private fixtures NPCD-872 and NPCD-873. Preserve all existing NPCD issues and settings; production PMON sharing remains off. See docs/LIVE-ACCEPTANCE.md for the administrator activation blocker.

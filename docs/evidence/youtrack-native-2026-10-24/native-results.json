@@ -1,0 +1,143 @@
+{
+  "installedVersion": "1.0.12",
+  "appId": "155-84",
+  "rootBaseline": {
+    "schema": 1,
+    "id": "NPCD-872",
+    "revision": 0,
+    "initialized": false,
+    "assignedState": "Open",
+    "state": "Open",
+    "updated": 1792699461655,
+    "receipt": null
+  },
+  "rootRun": "PASS test app identity, protocol and status rules 4\nPASS allowlisted live fixture and protocol\nPASS root test requires the child fixture restored to Done; no request was written\nPASS allowlisted live fixture and protocol\nPASS assignment stored separately from native State\nPASS exact receipt survives a fresh request\nPASS exact replay performs no write\nPASS stale or reused request rejected with HTTP 409 (received 409)\nPASS server rollup preserves own assignment\nPASS stale or reused request rejected with HTTP 409 (received 409)\nConcurrent results: [{\"status\":\"fulfilled\"},{\"status\":\"rejected\",\"code\":409}]\nPASS same-revision concurrent requests admit exactly one writer with an exact receipt and HTTP 409 loser\nFINAL {\"schema\":1,\"id\":\"NPCD-872\",\"revision\":3,\"initialized\":true,\"assignedState\":\"Open\",\"state\":\"Done\",\"updated\":1792858372027,\"receipt\":{\"schema\":1,\"opId\":\"16c37555-02e1-451b-88db-6170729a272d\",\"kind\":\"assign\",\"value\":\"Open\",\"expected\":{\"revision\":2,\"initialized\":true,\"assignedState\":\"In Progress\",\"state\":\"Done\",\"updated\":1792858372027}}}\nComplete. Reload this issue or open it in another tab, then Read live metadata to verify persistence.\n",
+  "rootFinal": {
+    "schema": 1,
+    "id": "NPCD-872",
+    "revision": 3,
+    "initialized": true,
+    "assignedState": "Open",
+    "state": "Done",
+    "updated": 1792858372027,
+    "receipt": {
+      "schema": 1,
+      "opId": "16c37555-02e1-451b-88db-6170729a272d",
+      "kind": "assign",
+      "value": "Open",
+      "expected": {
+        "revision": 2,
+        "initialized": true,
+        "assignedState": "In Progress",
+        "state": "Done",
+        "updated": 1792858372027
+      }
+    }
+  },
+  "freshPageExactMatch": true,
+  "rollback": "PASS test app identity, protocol and status rules 4\nPASS allowlisted live fixture and protocol\nPASS rollback starts with initialized metadata and a non-Open native State\nPASS failed request left metadata, State and timestamp unchanged\nPASS rollback request returned a server failure\nPENDING verify this exact post-mutation marker in the app log: ROMDex acceptance forced rollback d5210887-ebff-4795-adcf-79ad91c7ea27\nFINAL {\"schema\":1,\"id\":\"NPCD-872\",\"revision\":3,\"initialized\":true,\"assignedState\":\"Open\",\"state\":\"Done\",\"updated\":1792858372027,\"receipt\":{\"schema\":1,\"opId\":\"16c37555-02e1-451b-88db-6170729a272d\",\"kind\":\"assign\",\"value\":\"Open\",\"expected\":{\"revision\":2,\"initialized\":true,\"assignedState\":\"In Progress\",\"state\":\"Done\",\"updated\":1792858372027}}}\n",
+  "rollbackMarker": "d5210887-ebff-4795-adcf-79ad91c7ea27",
+  "childBefore": {
+    "schema": 1,
+    "id": "NPCD-873",
+    "revision": 0,
+    "initialized": false,
+    "assignedState": "Done",
+    "state": "Done",
+    "updated": 1792699461635,
+    "receipt": null
+  },
+  "childRun": "PASS test app identity, protocol and status rules 4\nPASS allowlisted live fixture and protocol\nPASS allowlisted live fixture and protocol\nPASS assignment stored separately from native State\nPASS exact receipt survives a fresh request\nPASS exact replay performs no write\nPASS stale or reused request rejected with HTTP 409 (received 409)\nPASS server rollup preserves own assignment\nPASS stale or reused request rejected with HTTP 409 (received 409)\nConcurrent results: [{\"status\":\"fulfilled\"},{\"status\":\"fulfilled\"}]\nFAIL same-revision concurrent requests admit exactly one writer with an exact receipt and HTTP 409 loser\n",
+  "childRaceSnapshot": {
+    "schema": 1,
+    "id": "NPCD-873",
+    "revision": 3,
+    "initialized": true,
+    "assignedState": "Open",
+    "state": "In Progress",
+    "updated": 1792858478122,
+    "receipt": {
+      "schema": 1,
+      "opId": "e4d23393-66f8-4e88-920e-096e7258af1d",
+      "kind": "assign",
+      "value": "Open",
+      "expected": {
+        "revision": 2,
+        "initialized": true,
+        "assignedState": "In Progress",
+        "state": "In Progress",
+        "updated": 1792858478122
+      }
+    }
+  },
+  "childRestored": {
+    "schema": 1,
+    "id": "NPCD-873",
+    "revision": 3,
+    "initialized": true,
+    "assignedState": "Done",
+    "state": "Done",
+    "updated": 1792858537639,
+    "receipt": {
+      "schema": 1,
+      "opId": "e4d23393-66f8-4e88-920e-096e7258af1d",
+      "kind": "assign",
+      "value": "Open",
+      "expected": {
+        "revision": 2,
+        "initialized": true,
+        "assignedState": "In Progress",
+        "state": "In Progress",
+        "updated": 1792858478122
+      }
+    }
+  },
+  "rootAfterUpgrade": {
+    "schema": 1,
+    "id": "NPCD-872",
+    "revision": 3,
+    "initialized": true,
+    "assignedState": "Open",
+    "state": "Done",
+    "updated": 1792858372027,
+    "receipt": {
+      "schema": 1,
+      "opId": "16c37555-02e1-451b-88db-6170729a272d",
+      "kind": "assign",
+      "value": "Open",
+      "expected": {
+        "revision": 2,
+        "initialized": true,
+        "assignedState": "In Progress",
+        "state": "Done",
+        "updated": 1792858372027
+      }
+    }
+  },
+  "childAfterUpgrade": {
+    "schema": 1,
+    "id": "NPCD-873",
+    "revision": 3,
+    "initialized": true,
+    "assignedState": "Done",
+    "state": "Done",
+    "updated": 1792858537639,
+    "receipt": {
+      "schema": 1,
+      "opId": "e4d23393-66f8-4e88-920e-096e7258af1d",
+      "kind": "assign",
+      "value": "Open",
+      "expected": {
+        "revision": 2,
+        "initialized": true,
+        "assignedState": "In Progress",
+        "state": "In Progress",
+        "updated": 1792858478122
+      }
+    }
+  },
+  "rootUpgradePreserved": true,
+  "childUpgradePreserved": true,
+  "productionSharing": false,
+  "desktopTouched": false
+}

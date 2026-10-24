@@ -24,7 +24,7 @@ const base = ({ revision, initialized, assignedState, state, updated }) => ({
 });
 const read = () => host.fetchApp("status/assigned", { scope: true });
 const write = (body) =>
-  host.fetchApp("status/assigned", { scope: true, method: "POST", body });
+  host.fetchApp("status/assigned", { scope: true, method: "POST", headers: { "Content-Type": "application/json" }, body });
 const request = (snapshot, kind, value) => ({
   schema: 1,
   opId: crypto.randomUUID(),
@@ -164,6 +164,7 @@ const rollback = async () => {
     await host.fetchApp("fault/rollback", {
       scope: true,
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: { schema: 1, opId },
     });
   } catch (error) {
