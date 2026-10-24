@@ -1,0 +1,27 @@
+{
+  "origin": "https://romdex-web.vercel.app",
+  "requests": "anonymous OPTIONS only; no tokens or mutations",
+  "results": [
+    {
+      "method": "GET",
+      "status": 200,
+      "allowOrigin": null,
+      "allowMethods": "GET",
+      "allowHeaders": null
+    },
+    {
+      "method": "POST",
+      "status": 200,
+      "allowOrigin": null,
+      "allowMethods": "POST",
+      "allowHeaders": null
+    },
+    {
+      "method": "DELETE",
+      "status": 200,
+      "allowOrigin": null,
+      "allowMethods": "DELETE",
+      "allowHeaders": null
+    }
+  ]
+}

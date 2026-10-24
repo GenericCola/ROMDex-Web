@@ -24,3 +24,9 @@ The YouTrack repair has completed consolidated local QA. No further administrato
 The task toolbar filter popup is available in the web/PWA port and installed desktop client. See docs/TASK-FILTERS.md for matching rules and verification.
 
 Desktop Status popups retain working close controls while metadata preparation is pending. See docs/STATUS-DIALOG-REPAIR.md for the repair and verification.
+
+The Vercel preview is live at https://romdex-web.vercel.app. All 26 hosted
+Chrome/Firefox checks pass. YouTrack CORS and the native shared-status race
+still block daily-work cutover. Keep the desktop for current work. Current
+hosted evidence and the one-origin administrator note are linked from
+[the migration checklist](docs/TASK-FIRST-MIGRATION.md).

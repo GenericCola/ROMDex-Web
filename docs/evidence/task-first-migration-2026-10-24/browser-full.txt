@@ -1,0 +1,575 @@
+$ node scripts/playwright.mjs test
+
+Running 290 tests using 1 worker
+
+(node:58544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   1 [chromium] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception (182ms)
+  ok   2 [chromium] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (1.5s)
+  ok   3 [chromium] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending (1.2s)
+  ok   4 [chromium] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity (844ms)
+  ok   5 [chromium] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading (1.1s)
+  ok   6 [chromium] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (1.5s)
+  ok   7 [chromium] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE (889ms)
+  ok   8 [chromium] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (1.1s)
+  ok   9 [chromium] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload (401ms)
+  ok  10 [chromium] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false (889ms)
+  ok  11 [chromium] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true (927ms)
+  ok  12 [chromium] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend (936ms)
+  ok  13 [chromium] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token (1.1s)
+  ok  14 [chromium] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks (2.1s)
+  ok  15 [chromium] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false (704ms)
+  ok  16 [chromium] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true (897ms)
+  ok  17 [chromium] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export (792ms)
+  ok  18 [chromium] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data (232ms)
+  ok  19 [chromium] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text (1.1s)
+  ok  20 [chromium] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states (1.8s)
+  ok  21 [chromium] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import (234ms)
+  ok  22 [chromium] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (22ms)
+  ok  23 [chromium] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (230ms)
+  ok  24 [chromium] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (397ms)
+  ok  25 [chromium] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.7s)
+  ok  26 [chromium] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots (1.3s)
+  ok  27 [chromium] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions (668ms)
+  ok  28 [chromium] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent (645ms)
+  ok  29 [chromium] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (206ms)
+  ok  30 [chromium] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (223ms)
+  ok  31 [chromium] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export (672ms)
+  ok  32 [chromium] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged (233ms)
+  ok  33 [chromium] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery (988ms)
+  ok  34 [chromium] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict (2.6s)
+  ok  35 [chromium] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay (1.5s)
+  ok  36 [chromium] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback (954ms)
+  ok  37 [chromium] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access (596ms)
+  ok  38 [chromium] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement (1.9s)
+  ok  39 [chromium] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload (1.2s)
+  ok  40 [chromium] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status (1.1s)
+  ok  41 [chromium] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress (1.7s)
+  ok  42 [chromium] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits (774ms)
+  ok  43 [chromium] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload (1.8s)
+  ok  44 [chromium] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice (1.2s)
+  ok  45 [chromium] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent (1.0s)
+  ok  46 [chromium] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent (1.0s)
+  ok  47 [chromium] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears (986ms)
+  ok  48 [chromium] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status (427ms)
+  ok  49 [chromium] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors (977ms)
+  ok  50 [chromium] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening (675ms)
+  ok  51 [chromium] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save (537ms)
+  ok  52 [chromium] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token (355ms)
+  ok  53 [chromium] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes (181ms)
+  ok  54 [chromium] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion (416ms)
+  ok  55 [chromium] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (1.8s)
+  ok  56 [chromium] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (395ms)
+  ok  57 [chromium] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (151ms)
+  ok  58 [chromium] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (96ms)
+(node:72084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  59 [firefox] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception (766ms)
+  ok  60 [firefox] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (2.4s)
+  ok  61 [firefox] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending (1.7s)
+  ok  62 [firefox] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity (1.2s)
+  ok  63 [firefox] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading (879ms)
+  ok  64 [firefox] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (2.1s)
+  ok  65 [firefox] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE (1.3s)
+  ok  66 [firefox] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (1.4s)
+  ok  67 [firefox] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload (1.2s)
+  ok  68 [firefox] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false (1.3s)
+  ok  69 [firefox] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true (1.4s)
+  ok  70 [firefox] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend (1.3s)
+  ok  71 [firefox] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token (1.5s)
+  ok  72 [firefox] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks (2.3s)
+  ok  73 [firefox] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false (989ms)
+  ok  74 [firefox] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true (1.2s)
+  ok  75 [firefox] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export (997ms)
+  ok  76 [firefox] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data (319ms)
+  ok  77 [firefox] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text (2.0s)
+  ok  78 [firefox] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states (2.1s)
+  ok  79 [firefox] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import (345ms)
+  ok  80 [firefox] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (21ms)
+  ok  81 [firefox] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (434ms)
+  ok  82 [firefox] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (699ms)
+  ok  83 [firefox] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.9s)
+  ok  84 [firefox] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots (1.8s)
+  ok  85 [firefox] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions (932ms)
+  ok  86 [firefox] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent (824ms)
+  ok  87 [firefox] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (356ms)
+  ok  88 [firefox] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (1.1s)
+  ok  89 [firefox] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export (896ms)
+  ok  90 [firefox] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged (350ms)
+  ok  91 [firefox] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery (1.2s)
+  ok  92 [firefox] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict (3.7s)
+  ok  93 [firefox] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay (2.2s)
+  ok  94 [firefox] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback (1.6s)
+  ok  95 [firefox] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access (828ms)
+  ok  96 [firefox] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement (2.8s)
+  ok  97 [firefox] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload (2.1s)
+  ok  98 [firefox] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status (1.4s)
+  ok  99 [firefox] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress (2.4s)
+  ok 100 [firefox] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits (1.0s)
+  ok 101 [firefox] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload (2.9s)
+  ok 102 [firefox] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice (1.7s)
+  ok 103 [firefox] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent (1.5s)
+  ok 104 [firefox] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent (1.4s)
+  ok 105 [firefox] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears (1.5s)
+  ok 106 [firefox] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status (574ms)
+  ok 107 [firefox] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors (2.2s)
+  ok 108 [firefox] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening (1.1s)
+  ok 109 [firefox] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save (904ms)
+  ok 110 [firefox] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token (483ms)
+  ok 111 [firefox] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes (354ms)
+  ok 112 [firefox] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion (698ms)
+  ok 113 [firefox] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (2.2s)
+  ok 114 [firefox] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (545ms)
+  ok 115 [firefox] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (257ms)
+  ok 116 [firefox] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (208ms)
+(node:28816) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 117 [webkit] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception (275ms)
+  x  118 [webkit] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (3.3s)
+(node:44168) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  119 [webkit] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending (2.6s)
+(node:50080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  120 [webkit] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity (3.3s)
+(node:51196) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 121 [webkit] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading (1.5s)
+  x  122 [webkit] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (2.5s)
+(node:76252) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  123 [webkit] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE (2.5s)
+(node:42396) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 124 [webkit] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (3.7s)
+  ok 125 [webkit] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload (1.3s)
+  ok 126 [webkit] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false (3.4s)
+  ok 127 [webkit] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true (3.7s)
+  ok 128 [webkit] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend (3.5s)
+  ok 129 [webkit] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token (4.2s)
+  ok 130 [webkit] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks (2.4s)
+  ok 131 [webkit] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false (2.4s)
+  ok 132 [webkit] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true (3.3s)
+  ok 133 [webkit] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export (3.1s)
+  ok 134 [webkit] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data (538ms)
+  ok 135 [webkit] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text (4.4s)
+  ok 136 [webkit] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states (4.4s)
+  ok 137 [webkit] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import (600ms)
+  ok 138 [webkit] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (22ms)
+  ok 139 [webkit] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (603ms)
+  ok 140 [webkit] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (653ms)
+  ok 141 [webkit] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.3s)
+  ok 142 [webkit] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots (5.4s)
+  ok 143 [webkit] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions (2.5s)
+  ok 144 [webkit] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent (2.1s)
+  ok 145 [webkit] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (545ms)
+  ok 146 [webkit] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (555ms)
+  ok 147 [webkit] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export (1.9s)
+  ok 148 [webkit] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged (575ms)
+  ok 149 [webkit] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery (2.8s)
+  ok 150 [webkit] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict (12.9s)
+  ok 151 [webkit] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay (7.3s)
+  ok 152 [webkit] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback (5.0s)
+  ok 153 [webkit] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access (2.1s)
+  ok 154 [webkit] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement (11.1s)
+  ok 155 [webkit] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload (5.1s)
+  ok 156 [webkit] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status (4.5s)
+  ok 157 [webkit] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress (11.9s)
+  ok 158 [webkit] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits (3.6s)
+  ok 159 [webkit] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload (10.2s)
+  ok 160 [webkit] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice (4.6s)
+  ok 161 [webkit] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent (4.2s)
+  ok 162 [webkit] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent (5.0s)
+  ok 163 [webkit] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears (3.8s)
+  ok 164 [webkit] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status (1.3s)
+  ok 165 [webkit] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors (4.7s)
+  ok 166 [webkit] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening (2.7s)
+  ok 167 [webkit] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save (1.6s)
+  ok 168 [webkit] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token (892ms)
+  ok 169 [webkit] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes (490ms)
+  ok 170 [webkit] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion (1.1s)
+  ok 171 [webkit] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (1.9s)
+  ok 172 [webkit] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (1.0s)
+  ok 173 [webkit] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (350ms)
+  ok 174 [webkit] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (199ms)
+(node:48544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 175 [mobile-chromium] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception (176ms)
+  ok 176 [mobile-chromium] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (1.5s)
+  ok 177 [mobile-chromium] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending (1.2s)
+  ok 178 [mobile-chromium] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity (834ms)
+  ok 179 [mobile-chromium] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading (1.1s)
+  ok 180 [mobile-chromium] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (1.4s)
+  ok 181 [mobile-chromium] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE (891ms)
+  ok 182 [mobile-chromium] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (1.1s)
+  ok 183 [mobile-chromium] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload (411ms)
+  ok 184 [mobile-chromium] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false (928ms)
+  ok 185 [mobile-chromium] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true (913ms)
+  ok 186 [mobile-chromium] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend (912ms)
+  ok 187 [mobile-chromium] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token (1.1s)
+  ok 188 [mobile-chromium] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks (2.1s)
+  ok 189 [mobile-chromium] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false (707ms)
+  ok 190 [mobile-chromium] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true (866ms)
+  ok 191 [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export (761ms)
+  ok 192 [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data (225ms)
+  ok 193 [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text (1.1s)
+  ok 194 [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states (1.8s)
+  ok 195 [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import (229ms)
+  ok 196 [mobile-chromium] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (22ms)
+  ok 197 [mobile-chromium] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (229ms)
+  ok 198 [mobile-chromium] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (379ms)
+  ok 199 [mobile-chromium] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.7s)
+  ok 200 [mobile-chromium] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots (1.3s)
+  ok 201 [mobile-chromium] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions (699ms)
+  ok 202 [mobile-chromium] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent (658ms)
+  ok 203 [mobile-chromium] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (196ms)
+  ok 204 [mobile-chromium] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (194ms)
+  ok 205 [mobile-chromium] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export (677ms)
+  ok 206 [mobile-chromium] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged (221ms)
+  ok 207 [mobile-chromium] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery (992ms)
+  ok 208 [mobile-chromium] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict (2.7s)
+  ok 209 [mobile-chromium] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay (1.4s)
+  ok 210 [mobile-chromium] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback (964ms)
+  ok 211 [mobile-chromium] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access (601ms)
+  ok 212 [mobile-chromium] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement (1.8s)
+  ok 213 [mobile-chromium] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload (1.2s)
+  ok 214 [mobile-chromium] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status (1.1s)
+  ok 215 [mobile-chromium] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress (1.7s)
+  ok 216 [mobile-chromium] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits (807ms)
+  ok 217 [mobile-chromium] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload (1.9s)
+  ok 218 [mobile-chromium] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice (1.2s)
+  ok 219 [mobile-chromium] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent (1.1s)
+  ok 220 [mobile-chromium] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent (1.0s)
+  ok 221 [mobile-chromium] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears (1.0s)
+  ok 222 [mobile-chromium] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status (412ms)
+  ok 223 [mobile-chromium] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors (997ms)
+  ok 224 [mobile-chromium] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening (711ms)
+  ok 225 [mobile-chromium] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save (513ms)
+  ok 226 [mobile-chromium] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token (345ms)
+  -  227 [mobile-chromium] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes
+  ok 228 [mobile-chromium] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion (407ms)
+  ok 229 [mobile-chromium] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (1.8s)
+  ok 230 [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (353ms)
+  ok 231 [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (150ms)
+  ok 232 [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (94ms)
+(node:14924) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 233 [iphone] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception (241ms)
+  ok 234 [iphone] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (4.8s)
+  ok 235 [iphone] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending (4.0s)
+  ok 236 [iphone] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity (3.1s)
+  ok 237 [iphone] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading (1.3s)
+  ok 238 [iphone] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (5.3s)
+  ok 239 [iphone] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE (3.7s)
+  ok 240 [iphone] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (3.2s)
+  ok 241 [iphone] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload (1.2s)
+  ok 242 [iphone] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false (2.9s)
+  ok 243 [iphone] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true (3.1s)
+  ok 244 [iphone] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend (2.9s)
+  ok 245 [iphone] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token (3.7s)
+  ok 246 [iphone] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks (2.3s)
+  ok 247 [iphone] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false (2.3s)
+  ok 248 [iphone] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true (2.8s)
+  ok 249 [iphone] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export (2.3s)
+  ok 250 [iphone] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data (493ms)
+  ok 251 [iphone] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text (3.6s)
+  ok 252 [iphone] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states (5.9s)
+  ok 253 [iphone] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import (509ms)
+  ok 254 [iphone] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (23ms)
+  ok 255 [iphone] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (643ms)
+  ok 256 [iphone] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (596ms)
+  ok 257 [iphone] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.1s)
+  ok 258 [iphone] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots (4.7s)
+  ok 259 [iphone] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions (2.1s)
+  ok 260 [iphone] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent (1.8s)
+  ok 261 [iphone] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (468ms)
+  ok 262 [iphone] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (465ms)
+  ok 263 [iphone] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export (1.6s)
+  ok 264 [iphone] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged (462ms)
+  ok 265 [iphone] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery (2.3s)
+  ok 266 [iphone] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict (10.8s)
+  ok 267 [iphone] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay (6.2s)
+  ok 268 [iphone] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback (4.3s)
+  ok 269 [iphone] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access (1.7s)
+  ok 270 [iphone] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement (9.0s)
+  ok 271 [iphone] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload (4.3s)
+  ok 272 [iphone] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status (3.8s)
+  ok 273 [iphone] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress (8.8s)
+  ok 274 [iphone] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits (2.8s)
+  ok 275 [iphone] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload (8.6s)
+  ok 276 [iphone] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice (3.7s)
+  ok 277 [iphone] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent (3.5s)
+  ok 278 [iphone] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent (3.8s)
+  ok 279 [iphone] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears (3.2s)
+  ok 280 [iphone] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status (1.1s)
+  ok 281 [iphone] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors (4.0s)
+  ok 282 [iphone] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening (2.1s)
+  ok 283 [iphone] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save (1.5s)
+  ok 284 [iphone] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token (843ms)
+  -  285 [iphone] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes
+  ok 286 [iphone] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion (1.0s)
+  ok 287 [iphone] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (2.0s)
+  ok 288 [iphone] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons (1.0s)
+  ok 289 [iphone] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls (339ms)
+  ok 290 [iphone] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled (205ms)
+
+
+  1) [webkit] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      16 |   if(method==='GET'){await reply(fileId?files.get(fileId)??null:[...files.values()],fileId&&!files.has(fileId)?404:200);return;}
+      17 |   if(method==='POST'){
+    > 18 |    expect(r.headers()['content-type']).toContain('multipart/form-data; boundary=');const body=r.postDataBuffer()!;if(!nativeWire)expect(body.includes(content)).toBe(true);expect(body.toString()).toContain('filename="fixture.txt"');
+         |                                                                                                                                                                 ^
+      19 |    const key='134-'+(++uploads);files.set(key,{id:key,name:'fixture.txt',size:content.length,mimeType:'text/plain',created:1,updated:1,author:{id:'fixture-owner'},url:'/api/files/'+key});s.tasks.get(id)!.updated++;
+      20 |    if(mode==='lost-upload'&&!lost){lost=true;await route.abort();return;}await reply([{id:key}]);return;
+      21 |   }
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:18:161
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true })
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true }) with timeout 5000ms
+      - waiting for getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true })
+      - Test ended.
+
+
+       at structural-fixture.ts:38
+
+      36 |   const connect=async()=>{await page.getByRole("button",{name:"Connection Details",exact:true}).click();await page.getByLabel("Session token for delivery",{exact:true}).fill("fixture-session-token");await page.getByRole("button",{name:"Enable delivery for this session",exact:true}).click();await expect(page.getByText("Saved. Use Save Changes to run one delivery cycle.",{exact:true})).toBeVisible();await page.getByRole("button",{name:"Close Connection Details",exact:true}).click();};
+      37 |   const save=async()=>{await page.getByRole("button",{name:/^Save Changes/}).click();};
+    > 38 |   const confirmed=async()=>{await expect(page.getByText("Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.",{exact:true})).toBeVisible();};
+         |                                                                                                                                                          ^
+      39 |   const uncertain=async()=>{await expect(page.getByText("The delivery result is uncertain. Your queued change is preserved for review.",{exact:true})).toBeVisible();};
+      40 |   return {tasks,writes,connect,save,confirmed,uncertain};
+      41 | };
+        at Object.confirmed (C:\Users\mrgen\ROMDex\tests\e2e\structural-fixture.ts:38:154)
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:35:225
+
+    Error Context: test-results\attachments-attachments-st-10afe-te-only-after-reviewed-Save-webkit\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\attachments-attachments-st-10afe-te-only-after-reviewed-Save-webkit\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\attachments-attachments-st-10afe-te-only-after-reviewed-Save-webkit\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [webkit] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      16 |   if(method==='GET'){await reply(fileId?files.get(fileId)??null:[...files.values()],fileId&&!files.has(fileId)?404:200);return;}
+      17 |   if(method==='POST'){
+    > 18 |    expect(r.headers()['content-type']).toContain('multipart/form-data; boundary=');const body=r.postDataBuffer()!;if(!nativeWire)expect(body.includes(content)).toBe(true);expect(body.toString()).toContain('filename="fixture.txt"');
+         |                                                                                                                                                                 ^
+      19 |    const key='134-'+(++uploads);files.set(key,{id:key,name:'fixture.txt',size:content.length,mimeType:'text/plain',created:1,updated:1,author:{id:'fixture-owner'},url:'/api/files/'+key});s.tasks.get(id)!.updated++;
+      20 |    if(mode==='lost-upload'&&!lost){lost=true;await route.abort();return;}await reply([{id:key}]);return;
+      21 |   }
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:18:161
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('The delivery result is uncertain. Your queued change is preserved for review.', { exact: true })
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('The delivery result is uncertain. Your queued change is preserved for review.', { exact: true }) with timeout 5000ms
+      - waiting for getByText('The delivery result is uncertain. Your queued change is preserved for review.', { exact: true })
+      - Test ended.
+
+
+       at structural-fixture.ts:39
+
+      37 |   const save=async()=>{await page.getByRole("button",{name:/^Save Changes/}).click();};
+      38 |   const confirmed=async()=>{await expect(page.getByText("Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.",{exact:true})).toBeVisible();};
+    > 39 |   const uncertain=async()=>{await expect(page.getByText("The delivery result is uncertain. Your queued change is preserved for review.",{exact:true})).toBeVisible();};
+         |                                                                                                                                                        ^
+      40 |   return {tasks,writes,connect,save,confirmed,uncertain};
+      41 | };
+      42 | export const addTask=async(page:Page,title:string,parent?:string)=>{
+        at Object.uncertain (C:\Users\mrgen\ROMDex\tests\e2e\structural-fixture.ts:39:152)
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:42:111
+
+    Error Context: test-results\attachments-lost-upload-re-b11d3-r-restart-without-resending-webkit\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\attachments-lost-upload-re-b11d3-r-restart-without-resending-webkit\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\attachments-lost-upload-re-b11d3-r-restart-without-resending-webkit\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      16 |   if(method==='GET'){await reply(fileId?files.get(fileId)??null:[...files.values()],fileId&&!files.has(fileId)?404:200);return;}
+      17 |   if(method==='POST'){
+    > 18 |    expect(r.headers()['content-type']).toContain('multipart/form-data; boundary=');const body=r.postDataBuffer()!;if(!nativeWire)expect(body.includes(content)).toBe(true);expect(body.toString()).toContain('filename="fixture.txt"');
+         |                                                                                                                                                                 ^
+      19 |    const key='134-'+(++uploads);files.set(key,{id:key,name:'fixture.txt',size:content.length,mimeType:'text/plain',created:1,updated:1,author:{id:'fixture-owner'},url:'/api/files/'+key});s.tasks.get(id)!.updated++;
+      20 |    if(mode==='lost-upload'&&!lost){lost=true;await route.abort();return;}await reply([{id:key}]);return;
+      21 |   }
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:18:161
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true })
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true }) with timeout 5000ms
+      - waiting for getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true })
+      - Test ended.
+
+
+       at structural-fixture.ts:38
+
+      36 |   const connect=async()=>{await page.getByRole("button",{name:"Connection Details",exact:true}).click();await page.getByLabel("Session token for delivery",{exact:true}).fill("fixture-session-token");await page.getByRole("button",{name:"Enable delivery for this session",exact:true}).click();await expect(page.getByText("Saved. Use Save Changes to run one delivery cycle.",{exact:true})).toBeVisible();await page.getByRole("button",{name:"Close Connection Details",exact:true}).click();};
+      37 |   const save=async()=>{await page.getByRole("button",{name:/^Save Changes/}).click();};
+    > 38 |   const confirmed=async()=>{await expect(page.getByText("Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.",{exact:true})).toBeVisible();};
+         |                                                                                                                                                          ^
+      39 |   const uncertain=async()=>{await expect(page.getByText("The delivery result is uncertain. Your queued change is preserved for review.",{exact:true})).toBeVisible();};
+      40 |   return {tasks,writes,connect,save,confirmed,uncertain};
+      41 | };
+        at Object.confirmed (C:\Users\mrgen\ROMDex\tests\e2e\structural-fixture.ts:38:154)
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:46:134
+
+    Error Context: test-results\attachments-a-file-queued--0fb5d-xact-returned-PMON-identity-webkit\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\attachments-a-file-queued--0fb5d-xact-returned-PMON-identity-webkit\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\attachments-a-file-queued--0fb5d-xact-returned-PMON-identity-webkit\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [webkit] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      16 |   if(method==='GET'){await reply(fileId?files.get(fileId)??null:[...files.values()],fileId&&!files.has(fileId)?404:200);return;}
+      17 |   if(method==='POST'){
+    > 18 |    expect(r.headers()['content-type']).toContain('multipart/form-data; boundary=');const body=r.postDataBuffer()!;if(!nativeWire)expect(body.includes(content)).toBe(true);expect(body.toString()).toContain('filename="fixture.txt"');
+         |                                                                                                                                                                 ^
+      19 |    const key='134-'+(++uploads);files.set(key,{id:key,name:'fixture.txt',size:content.length,mimeType:'text/plain',created:1,updated:1,author:{id:'fixture-owner'},url:'/api/files/'+key});s.tasks.get(id)!.updated++;
+      20 |    if(mode==='lost-upload'&&!lost){lost=true;await route.abort();return;}await reply([{id:key}]);return;
+      21 |   }
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:18:161
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true })
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true }) with timeout 5000ms
+      - waiting for getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true })
+      - Test ended.
+
+
+       at structural-fixture.ts:38
+
+      36 |   const connect=async()=>{await page.getByRole("button",{name:"Connection Details",exact:true}).click();await page.getByLabel("Session token for delivery",{exact:true}).fill("fixture-session-token");await page.getByRole("button",{name:"Enable delivery for this session",exact:true}).click();await expect(page.getByText("Saved. Use Save Changes to run one delivery cycle.",{exact:true})).toBeVisible();await page.getByRole("button",{name:"Close Connection Details",exact:true}).click();};
+      37 |   const save=async()=>{await page.getByRole("button",{name:/^Save Changes/}).click();};
+    > 38 |   const confirmed=async()=>{await expect(page.getByText("Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.",{exact:true})).toBeVisible();};
+         |                                                                                                                                                          ^
+      39 |   const uncertain=async()=>{await expect(page.getByText("The delivery result is uncertain. Your queued change is preserved for review.",{exact:true})).toBeVisible();};
+      40 |   return {tasks,writes,connect,save,confirmed,uncertain};
+      41 | };
+        at Object.confirmed (C:\Users\mrgen\ROMDex\tests\e2e\structural-fixture.ts:38:154)
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:54:111
+
+    Error Context: test-results\attachments-lost-deletion--273d8-ent-without-a-second-DELETE-webkit\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\attachments-lost-deletion--273d8-ent-without-a-second-DELETE-webkit\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\attachments-lost-deletion--273d8-ent-without-a-second-DELETE-webkit\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [webkit] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      16 |   if(method==='GET'){await reply(fileId?files.get(fileId)??null:[...files.values()],fileId&&!files.has(fileId)?404:200);return;}
+      17 |   if(method==='POST'){
+    > 18 |    expect(r.headers()['content-type']).toContain('multipart/form-data; boundary=');const body=r.postDataBuffer()!;if(!nativeWire)expect(body.includes(content)).toBe(true);expect(body.toString()).toContain('filename="fixture.txt"');
+         |                                                                                                                                                                 ^
+      19 |    const key='134-'+(++uploads);files.set(key,{id:key,name:'fixture.txt',size:content.length,mimeType:'text/plain',created:1,updated:1,author:{id:'fixture-owner'},url:'/api/files/'+key});s.tasks.get(id)!.updated++;
+      20 |    if(mode==='lost-upload'&&!lost){lost=true;await route.abort();return;}await reply([{id:key}]);return;
+      21 |   }
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:18:161
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true })
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true }) with timeout 5000ms
+      - waiting for getByText('Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.', { exact: true })
+      - Test ended.
+
+
+       at structural-fixture.ts:38
+
+      36 |   const connect=async()=>{await page.getByRole("button",{name:"Connection Details",exact:true}).click();await page.getByLabel("Session token for delivery",{exact:true}).fill("fixture-session-token");await page.getByRole("button",{name:"Enable delivery for this session",exact:true}).click();await expect(page.getByText("Saved. Use Save Changes to run one delivery cycle.",{exact:true})).toBeVisible();await page.getByRole("button",{name:"Close Connection Details",exact:true}).click();};
+      37 |   const save=async()=>{await page.getByRole("button",{name:/^Save Changes/}).click();};
+    > 38 |   const confirmed=async()=>{await expect(page.getByText("Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.",{exact:true})).toBeVisible();};
+         |                                                                                                                                                          ^
+      39 |   const uncertain=async()=>{await expect(page.getByText("The delivery result is uncertain. Your queued change is preserved for review.",{exact:true})).toBeVisible();};
+      40 |   return {tasks,writes,connect,save,confirmed,uncertain};
+      41 | };
+        at Object.confirmed (C:\Users\mrgen\ROMDex\tests\e2e\structural-fixture.ts:38:154)
+        at C:\Users\mrgen\ROMDex\tests\e2e\attachments.spec.ts:60:97
+
+    Error Context: test-results\attachments-changed-deleti-b5c1f-message-and-sends-no-DELETE-webkit\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\attachments-changed-deleti-b5c1f-message-and-sends-no-DELETE-webkit\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\attachments-changed-deleti-b5c1f-message-and-sends-no-DELETE-webkit\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5 failed
+    [webkit] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save 
+    [webkit] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending 
+    [webkit] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity 
+    [webkit] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE 
+    [webkit] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE 
+  2 skipped
+  283 passed (8.9m)
+[ELIFECYCLE] Command failed with exit code 1.

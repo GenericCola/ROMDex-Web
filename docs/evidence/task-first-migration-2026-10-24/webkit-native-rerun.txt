@@ -1,0 +1,27 @@
+
+Running 18 tests using 1 worker
+
+(node:27192) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [webkit] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception (252ms)
+  ok  2 [webkit] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (5.5s)
+  ok  3 [webkit] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending (4.5s)
+  ok  4 [webkit] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity (3.6s)
+  ok  5 [webkit] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading (1.4s)
+  ok  6 [webkit] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (6.2s)
+  ok  7 [webkit] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE (4.2s)
+  ok  8 [webkit] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (3.5s)
+  ok  9 [webkit] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload (1.4s)
+(node:79432) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 10 [iphone] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception (237ms)
+  ok 11 [iphone] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (5.1s)
+  ok 12 [iphone] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending (4.1s)
+  ok 13 [iphone] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity (3.1s)
+  ok 14 [iphone] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading (1.3s)
+  ok 15 [iphone] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (5.4s)
+  ok 16 [iphone] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE (3.5s)
+  ok 17 [iphone] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (3.0s)
+  ok 18 [iphone] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload (1.1s)
+
+  18 passed (58.5s)

@@ -1,0 +1,17 @@
+✔ worker inventory covers nested shells and changes with public content (177.826ms)
+✔ Vercel serves only the static export with the accepted security and worker policy (7.474ms)
+✔ worker bypasses non-shell and private requests (15.0439ms)
+✔ nested navigations use exported index files (0.5212ms)
+✔ failed installation removes only incomplete new cache (0.914ms)
+✔ complete precache waits for consent (0.5039ms)
+✔ activation preserves unrelated caches (0.6484ms)
+✔ update consent with other windows: true (0.6358ms)
+✔ update consent with other windows: false (0.4779ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 248.4814

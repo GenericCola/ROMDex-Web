@@ -1,0 +1,27 @@
+
+Running 18 tests using 1 worker
+
+(node:80332) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\attachments.spec.ts:26:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (1.6s)
+  ok  2 [chromium] › tests\e2e\attachments.spec.ts:35:1 › lost upload requires an exact receipt and byte readback after restart without resending (1.3s)
+  ok  3 [chromium] › tests\e2e\attachments.spec.ts:39:1 › a file queued for a newly created task follows the exact returned PMON identity (865ms)
+  ok  4 [chromium] › tests\e2e\attachments.spec.ts:43:1 › oversized file selection shows the actual tenant limit without queuing or uploading (1.1s)
+  ok  5 [chromium] › tests\e2e\attachments.spec.ts:47:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (1.5s)
+  ok  6 [chromium] › tests\e2e\attachments.spec.ts:53:1 › changed deletion metadata selects the conflict message and sends no DELETE (925ms)
+  ok  7 [chromium] › tests\e2e\attachments.spec.ts:58:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (1.2s)
+  ok  8 [chromium] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (223ms)
+  ok  9 [chromium] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (211ms)
+(node:71188) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 10 [firefox] › tests\e2e\attachments.spec.ts:26:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save (2.7s)
+  ok 11 [firefox] › tests\e2e\attachments.spec.ts:35:1 › lost upload requires an exact receipt and byte readback after restart without resending (1.9s)
+  ok 12 [firefox] › tests\e2e\attachments.spec.ts:39:1 › a file queued for a newly created task follows the exact returned PMON identity (1.5s)
+  ok 13 [firefox] › tests\e2e\attachments.spec.ts:43:1 › oversized file selection shows the actual tenant limit without queuing or uploading (999ms)
+  ok 14 [firefox] › tests\e2e\attachments.spec.ts:47:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE (2.2s)
+  ok 15 [firefox] › tests\e2e\attachments.spec.ts:53:1 › changed deletion metadata selects the conflict message and sends no DELETE (1.7s)
+  ok 16 [firefox] › tests\e2e\attachments.spec.ts:58:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected (1.8s)
+  ok 17 [firefox] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (473ms)
+  ok 18 [firefox] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (1.2s)
+
+  18 passed (25.0s)

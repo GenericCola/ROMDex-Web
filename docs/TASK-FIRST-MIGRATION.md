@@ -26,12 +26,16 @@ preference; no reduced-safety cutover choice was approved.
   application server, credentials or billing settings are added.
 - [x] Confirm the owner's existing Vercel account is signed in. PMON is the
   selected Vercel account/team. The installed connector exposes no account tools.
-- [ ] Finish final complete checks/build/browser matrix and record exact output.
-- [ ] Deploy and verify a static shell on Vercel. Private GitHub repository
-  import currently has no access; a static-only upload avoids granting repository
-  permissions. A hosted shell is a preview, not a completed data migration.
-- [ ] Verify real-origin response headers, service worker, HTTPS, routing and
-  YouTrack CORS. Confirm native attachment delivery only on the NPCD allowlist.
+- [x] Finish local checks/build/browser verification and record exact output.
+  The full invocation plus affected WebKit rerun accounts for 288 unique passes
+  and two expected platform skips. The hosting-only repair adds 35 PWA checks.
+- [x] Deploy and verify the Vercel shell. The approved repository connection is
+  restricted to ROMDex-Web and tracks the tested port branch. The 26 real-origin
+  Chrome/Firefox checks pass; this is a preview, not a completed data migration.
+- [x] Verify real-origin headers, service worker, HTTPS, routing, all 74 cached
+  assets and offline note recovery on the actual hosted build.
+- [ ] Configure YouTrack CORS and confirm native attachment delivery only on
+  the NPCD fixture allowlist. Keep PMON out of developer acceptance mutations.
 - [ ] Verify actual Windows installation/launch from Chrome and Firefox. The
   automated standalone test emulates the display-mode signal; it is not OS-level
   installation acceptance. Chrome uses its install prompt/icon; recent Firefox
@@ -41,7 +45,8 @@ preference; no reduced-safety cutover choice was approved.
 - [ ] Once the safety gates pass, fully quit the desktop, preserve a complete
   backup, create a verified portable export and preview the import. Keep original
   desktop queues/files; never replay them as web requests.
-- [ ] Verify source/packages/evidence on the private remote. Keep this branch
+- [x] Preserve source/packages/evidence on the private remote with the source
+  branch and dated QA tag. Keep this branch
   open while migration is incomplete; no cleanup pruning.
 
 ## Current findings
@@ -97,13 +102,13 @@ migration or YouTrack mutation was performed.
 The hosting repair explicitly covers root-page headers, excludes debug maps
 from the offline cache and disables the ROMDex project's Vercel Toolbar for
 new deployments. Nine worker/hosting tests and 35 affected PWA/update/install
-browser cases pass. The static repair archive is `romdex-web-shell-e9cc7b96a67580c0b9d0.zip`,
-SHA-256 `639ac50eefa16629b77ad706a421245284f2fb59b9c7690d50cde0aa63804a1d`.
+browser cases pass. The static repair archive is`romdex-web-shell-e9cc7b96a67580c0b9d0.zip`,
+SHA-256`639ac50eefa16629b77ad706a421245284f2fb59b9c7690d50cde0aa63804a1d`.
 
 The owner explicitly approved Vercel's GitHub application for only
 GenericCola/ROMDex-Web and completed GitHub's identity check. The existing
 Vercel project is connected to that repository; other private repositories
-remain excluded. PR comments are disabled. Track `codex/accepted-app-port`
+remain excluded. PR comments are disabled. Track`codex/accepted-app-port`
 for this preview; do not deploy the older main foundation by mistake.
 
 Git source builds produce a new Next build identity. Hosted verification must
@@ -116,3 +121,37 @@ Access-Control-Allow-Origin or authorization header permission. CORS is still
 blocked. Resource Sharing was not exposed in this account's Global Settings UI;
 a plain API page does not authenticate with browser cookies. No credentials were
 extracted and no CORS settings were changed.
+
+## Verified hosted preview
+
+The owner's repository-only approval and identity verification completed. Vercel
+is connected only to GenericCola/ROMDex-Web, with production branch tracking set
+to`codex/accepted-app-port`. No billing changes, analytics or production
+YouTrack sharing were enabled. The first Git build's nested pnpm invocation
+selected Vercel's older 11.22.0 instead of the pinned 11.25.0; invoking the lint
+script directly from prebuild repaired this without weakening version checks.
+
+Successful deployment:`FSKqw4QpiYHd5UrgqBRmnRnA2Y5s`, source
+`76fa8990e7d0cdac2d273e452dc7d5b66da98b50`, at
+https://romdex-web.vercel.app. GitHub's Vercel status is success. All 26 hosted
+Chrome/Firefox cases pass, including headers, worker policy, exact content
+inventory, zero automatic YouTrack access, offline note recovery and synthetic
+attachment/recovery/error paths. Both browsers independently verified worker
+inventory`42c42d7e7149f040f502` and all 74 cached assets against the committed
+worker template. Source-map debug files are excluded; the toolbar is disabled.
+
+The actual hosted bytes are independently archived as
+`hosted-shell-42c42d7e7149f040f502.zip`, SHA-256
+`b2899b0bfc3cf73150d29bd333b9d640719484a034d05e214b996cafa617a385`.
+The complete evidence is retained in this folder's dated evidence directory.
+A private QA tag`romdex-web-hosted-qa-2026-10-24` preserves these final records
+without advancing the live deployment branch solely for documentation. The
+local branch's documentation/evidence commit is retained through that tag; the
+remote application branch intentionally remains at the tested deployed commit.
+
+Remaining gates: [CORS origin setup](CORS-ORIGIN-HANDOFF.md), native attachment
+acceptance, shared-status concurrency repair, actual Windows installation and
+reviewed desktop export/import. No real PMON task was mutated, no desktop file
+was replaced, and no live desktop export/import was performed. Desktop remains
+the daily-work client and fallback. No new administrator app installation is
+requested by this checkpoint.

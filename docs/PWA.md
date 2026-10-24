@@ -39,3 +39,9 @@ GitHub connection is configured.
 Browser installation references:
 - https://support.mozilla.org/en-US/kb/web-apps-firefox-windows
 - https://vercel.com/docs/project-configuration/vercel-json
+
+Hosted acceptance on October 24 passed all 26 Chrome/Firefox checks. The exact
+worker inventory and template hash were verified against every cached response.
+The cloud build serves no application server or proxy. Vercel Toolbar injection
+is disabled for ROMDex. Source maps are excluded from precaching because Vercel
+blocks debug map responses; they are not runtime shell dependencies.

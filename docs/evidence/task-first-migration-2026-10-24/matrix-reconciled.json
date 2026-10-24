@@ -1,0 +1,46 @@
+{
+  "fullRun": {
+    "ok": 283,
+    "x": 5,
+    "-": 2
+  },
+  "fullRunExit": "five WebKit intercepted-file-body assertions failed; exact native-wire verification then applied to both WebKit profiles",
+  "affectedProfileRerun": {
+    "pass": 18,
+    "fail": 0
+  },
+  "resolvedCases": [
+    [
+      "webkit",
+      "tests\\e2e\\attachments.spec.ts",
+      "attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save"
+    ],
+    [
+      "webkit",
+      "tests\\e2e\\attachments.spec.ts",
+      "lost upload requires an exact receipt and byte readback after restart without resending"
+    ],
+    [
+      "webkit",
+      "tests\\e2e\\attachments.spec.ts",
+      "a file queued for a newly created task follows the exact returned PMON identity"
+    ],
+    [
+      "webkit",
+      "tests\\e2e\\attachments.spec.ts",
+      "lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE"
+    ],
+    [
+      "webkit",
+      "tests\\e2e\\attachments.spec.ts",
+      "changed deletion metadata selects the conflict message and sends no DELETE"
+    ]
+  ],
+  "finalUniqueMatrix": {
+    "ok": 288,
+    "-": 2
+  },
+  "appUnchangedAfterBuild": true,
+  "archiveAndCurrentExportByteMatch": true,
+  "interpretation": "288 unique cases passed and 2 expected platform skips across the full run and focused fixture correction; not a claim of one all-green full-run invocation"
+}

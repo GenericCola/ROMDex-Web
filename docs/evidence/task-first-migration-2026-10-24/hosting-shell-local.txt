@@ -1,0 +1,50 @@
+
+Running 35 tests using 1 worker
+
+(node:60500) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (35ms)
+  ok  2 [chromium] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (265ms)
+  ok  3 [chromium] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (408ms)
+  ok  4 [chromium] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.8s)
+  ok  5 [chromium] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (210ms)
+  ok  6 [chromium] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (210ms)
+  ok  7 [chromium] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (1.8s)
+(node:63304) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  8 [firefox] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (32ms)
+  ok  9 [firefox] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (1.0s)
+  ok 10 [firefox] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (845ms)
+  ok 11 [firefox] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.9s)
+  ok 12 [firefox] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (382ms)
+  ok 13 [firefox] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (397ms)
+  ok 14 [firefox] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (2.2s)
+(node:9836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 15 [webkit] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (32ms)
+  ok 16 [webkit] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (643ms)
+  ok 17 [webkit] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (641ms)
+  ok 18 [webkit] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.3s)
+  ok 19 [webkit] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (535ms)
+  ok 20 [webkit] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (521ms)
+  ok 21 [webkit] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (2.0s)
+(node:78440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 22 [mobile-chromium] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (32ms)
+  ok 23 [mobile-chromium] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (276ms)
+  ok 24 [mobile-chromium] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (395ms)
+  ok 25 [mobile-chromium] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.7s)
+  ok 26 [mobile-chromium] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (199ms)
+  ok 27 [mobile-chromium] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (210ms)
+  ok 28 [mobile-chromium] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (1.8s)
+(node:77552) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 29 [iphone] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404 (32ms)
+  ok 30 [iphone] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow (683ms)
+  ok 31 [iphone] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window (597ms)
+  ok 32 [iphone] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows (1.1s)
+  ok 33 [iphone] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls (470ms)
+  ok 34 [iphone] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status (459ms)
+  ok 35 [iphone] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload (1.8s)
+
+  35 passed (30.0s)

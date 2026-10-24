@@ -1,0 +1,18 @@
+✔ attachment bytes and attempt are durable before upload; exact receipt and hash precede acknowledgement (8.6319ms)
+✔ failed file attempt journal prevents all upload mutations (1.413ms)
+✔ lost upload receipt survives restart and requires exact new ID and bytes, never another upload (3.6265ms)
+✔ an already-existing receipt and a changed author cannot acknowledge an uncertain upload (1.6585ms)
+✔ changed attachment deletion baseline sends nothing and retains the exact request for review (3.2196ms)
+✔ lost attachment deletion is confirmed only with explicit missing/access acknowledgement and no resend (1.3239ms)
+✔ recovery transfers exact staged bytes and rejects corruption before staging or changing the queue (4.1934ms)
+✔ missing staged bytes remain recoverable metadata and cannot cause a network mutation (1.5739ms)
+✔ 10 MiB uploads are allowed; oversized legacy bytes remain recoverable without a delivery attempt (58.5205ms)
+✔ attachment bytes reject foreign origins and credentials before fetch and enforce exact byte counts (12.6797ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 345.9925
