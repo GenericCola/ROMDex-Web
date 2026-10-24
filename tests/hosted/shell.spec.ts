@@ -1,0 +1,23 @@
+import {test,expect} from '@playwright/test';
+import {readFile,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+
+test('hosted static bytes, security headers, manifest and root routing match the reviewed build',async({request})=>{
+ const receipt=JSON.parse(await readFile('artifacts/task-first-migration/deployment-artifact.json','utf8'));
+ const config=JSON.parse(await readFile('vercel.json','utf8'));
+ const home=await request.get('/');expect(home.status()).toBe(200);
+ for(const header of config.headers.find((rule:{source:string})=>rule.source==='/:path*').headers)expect(home.headers()[header.key.toLowerCase()]).toBe(header.value);
+ const sw=await request.get('/sw.js');expect(sw.headers()['cache-control']).toBe('no-cache');expect(sw.headers()['service-worker-allowed']).toBe('/');expect(await sw.text()).toContain('romdex-shell-'+receipt.workerVersion);
+ expect((await request.get('/missing-romdex-acceptance-route/')).status()).toBe(404);
+ const manifest=await (await request.get('/manifest.webmanifest')).json();expect(manifest.display).toBe('standalone');expect(manifest.start_url).toBe('/');
+ for(const [name,digest] of Object.entries(receipt.files)){if(name==='vercel.json')continue;const response=await request.get('/'+name);expect(response.status(),name).toBe(200);expect(createHash('sha256').update(await response.body()).digest('hex'),name).toBe(digest);}
+});
+
+test('hosted app renders without reading YouTrack or importing desktop data',async({page},info)=>{
+ let requests=0;await page.route('https://thegobindsingh.youtrack.cloud/**',async route=>{requests++;await route.abort();});await page.goto('/');await expect(page.getByRole('heading',{name:'ROMDex',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'All Tasks 0',exact:true})).toBeVisible();await expect(page.getByText('All changes saved in this browser',{exact:true})).toBeVisible();expect(requests).toBe(0);
+ await mkdir('artifacts/task-first-migration',{recursive:true});await page.screenshot({path:'artifacts/task-first-migration/hosted-'+info.project.name+'.png',fullPage:true});
+});
+
+test('hosted app preserves a local note across offline reopening',async({page,context})=>{
+ await page.goto('/');await page.getByRole('button',{name:'Add Epic',exact:true}).click();await page.getByRole('dialog').getByLabel('Name',{exact:true}).fill('Hosted synthetic local task');await page.getByRole('button',{name:'Create Item',exact:true}).click();await page.getByRole('textbox',{name:'Notes and Instructions',exact:true}).fill('Offline note fixture; no cloud request.');await expect(page.getByText('All changes saved in this browser',{exact:true})).toBeVisible();await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}));});await context.setOffline(true);await page.reload();await expect(page.getByRole('textbox',{name:'Notes and Instructions',exact:true})).toHaveValue('Offline note fixture; no cloud request.');await context.setOffline(false);
+});

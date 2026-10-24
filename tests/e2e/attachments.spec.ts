@@ -4,6 +4,8 @@ import {structuralFixture,addTask} from './structural-fixture';
 test.use({serviceWorkers:'block'});
 const content=Buffer.from('ROMDex attachment: durable bytes \u00e9\n');
 const attachmentFixture=async(page:Page,mode:'normal'|'lost-upload'|'lost-delete'='normal')=>{
+ const nativeWire=test.info().project.name==='iphone';
+ if(nativeWire)await page.addInitScript(()=>{const send=window.fetch.bind(window);window.fetch=async(input,init)=>{if(String(input).includes('/attachments?')&&init?.method==='POST'&&init.body instanceof FormData){const response=await send('/__attachment-transport',{method:'POST',body:init.body});const {body}=await response.json();const text=new TextDecoder().decode(Uint8Array.from(atob(body),c=>c.charCodeAt(0)));if(!text.includes('ROMDex attachment: durable bytes \u00e9\n')||!text.includes('filename="fixture.txt"'))throw Error('Native attachment multipart bytes differ.');}return send(input,init);};});
  const s=await structuralFixture(page);await page.getByRole('button',{name:'Fixture Root',exact:true}).last().click();const files=new Map<string,{id:string;name:string;size:number;mimeType:string;created:number;updated:number;author:{id:string};url:string}>();let uploads=0,deletions=0,lost=false;
  await page.route('https://thegobindsingh.youtrack.cloud/api/files/**',async route=>{await route.fulfill({status:200,contentType:'application/octet-stream',body:content,headers:{'access-control-allow-origin':'*'}});});
  await page.route('https://thegobindsingh.youtrack.cloud/api/issues/*/attachments**',async route=>{
@@ -13,7 +15,7 @@ const attachmentFixture=async(page:Page,mode:'normal'|'lost-upload'|'lost-delete
   expect(id).toMatch(/^PMON-/);
   if(method==='GET'){await reply(fileId?files.get(fileId)??null:[...files.values()],fileId&&!files.has(fileId)?404:200);return;}
   if(method==='POST'){
-   expect(r.headers()['content-type']).toContain('multipart/form-data; boundary=');const body=r.postDataBuffer()!;expect(body.includes(content)).toBe(true);expect(body.toString()).toContain('filename="fixture.txt"');
+   expect(r.headers()['content-type']).toContain('multipart/form-data; boundary=');const body=r.postDataBuffer()!;if(!nativeWire)expect(body.includes(content)).toBe(true);expect(body.toString()).toContain('filename="fixture.txt"');
    const key='134-'+(++uploads);files.set(key,{id:key,name:'fixture.txt',size:content.length,mimeType:'text/plain',created:1,updated:1,author:{id:'fixture-owner'},url:'/api/files/'+key});s.tasks.get(id)!.updated++;
    if(mode==='lost-upload'&&!lost){lost=true;await route.abort();return;}await reply([{id:key}]);return;
   }
@@ -25,7 +27,10 @@ const attachmentFixture=async(page:Page,mode:'normal'|'lost-upload'|'lost-delete
 };
 
 test('attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save',async({page})=>{
- const s=await attachmentFixture(page);await s.stage();expect(s.uploads()).toBe(0);await page.reload();await expect(page.getByRole('button',{name:'Export Staged fixture.txt',exact:true})).toBeVisible();
+ const s=await attachmentFixture(page);await s.stage();expect(s.uploads()).toBe(0);
+ const legacy=['chromium','firefox'].includes(test.info().project.name);
+ await page.evaluate(async(legacy)=>{const db=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open('romdex-web-upload-bytes',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});try{await new Promise<void>((resolve,reject)=>{const tx=db.transaction('files',legacy?'readwrite':'readonly'),store=tx.objectStore('files'),r=store.getAll();r.onsuccess=()=>{const value=r.result[0];if(!(value.bytes instanceof ArrayBuffer)||value.blob){tx.abort();return;}if(legacy)store.put({id:value.id,file:value.file,blob:new Blob([value.bytes],{type:value.file.mimeType})},value.id);};tx.oncomplete=()=>resolve();tx.onabort=()=>reject(Error('Expected a portable byte record before legacy compatibility check.'));});}finally{db.close();}},legacy);
+ await page.reload();await expect(page.getByRole('button',{name:'Export Staged fixture.txt',exact:true})).toBeVisible();
  const saved=page.waitForEvent('download');await page.getByRole('button',{name:'Export Staged fixture.txt',exact:true}).click();const local=await saved;expect(await readFile((await local.path())!)).toEqual(content);
  await s.connect();await page.getByRole('button',{name:'Read Attachments',exact:true}).click();await expect(page.getByText('0 attachments read. No file mutation was sent.',{exact:true})).toBeVisible();await s.save();await s.confirmed();expect(s.uploads()).toBe(1);
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Download fixture.txt',exact:true}).click();expect(await readFile((await (await download).path())!)).toEqual(content);
@@ -59,4 +64,9 @@ test('changed deletion metadata selects the conflict message and sends no DELETE
 test('recovery imports exact staged bytes into a separate browser workspace with delivery disconnected',async({page,browser,baseURL})=>{
  const s=await attachmentFixture(page);await s.stage();const pending=page.waitForEvent('download');await page.getByRole('button',{name:'Export Recovery Copy',exact:true}).click();const bytes=await readFile((await (await pending).path())!);const root=JSON.parse(bytes.toString());expect(Buffer.from(root.uploads[0].data,'base64')).toEqual(content);
  const context=await browser.newContext({baseURL});try{const other=await context.newPage();let requests=0;await other.route('https://thegobindsingh.youtrack.cloud/**',async route=>{requests++;await route.abort();});await other.goto('/');await other.getByRole('button',{name:'Import Desktop or Recovery Data',exact:true}).click();await other.getByLabel('Export or recovery JSON',{exact:true}).setInputFiles({name:'recovery.json',mimeType:'application/json',buffer:bytes});await expect(other.getByText('File verified locally. No cloud request was made.',{exact:true})).toBeVisible();await other.getByRole('checkbox',{name:/I have preserved my current recovery copy/}).check();await other.getByRole('button',{name:'Import Reviewed Data',exact:true}).click();await expect(other.getByRole('dialog',{name:'Import Desktop or Recovery Data',exact:true})).toHaveCount(0);await other.reload();const local=other.waitForEvent('download');await other.getByRole('button',{name:'Export Staged fixture.txt',exact:true}).click();expect(await readFile((await (await local).path())!)).toEqual(content);await other.getByRole('button',{name:/^Save Changes/}).click();expect(requests).toBe(0);expect(s.uploads()).toBe(0);}finally{await context.close();}
+});
+
+
+test('failed staged-file storage shows refusal and queues no upload',async({page})=>{
+ const s=await attachmentFixture(page);await page.evaluate(()=>{const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(value,key){const r=key===undefined?put.call(this,value):put.call(this,value,key);if(this.name==='files')this.transaction.abort();return r;};});await page.getByLabel('Stage a file',{exact:true}).setInputFiles({name:'fixture.txt',mimeType:'text/plain',buffer:content});await expect(page.getByText('Staged file could not be saved. Keep the original file.',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Export Staged fixture.txt',exact:true})).toHaveCount(0);expect(s.uploads()).toBe(0);
 });
