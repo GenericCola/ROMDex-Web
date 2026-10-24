@@ -1,3 +1,8 @@
+import {
+  readRecoveryUploads,
+  stageRecoveryUploads,
+} from "@/attachments/recovery";
+import type { StoredUpload } from "@/attachments/types";
 import { disconnectDelivery } from "@/cloud/session";
 import { flushDraftEditors } from "@/domain/editor-drafts";
 import { jsonObject, parseJson } from "@/domain/json";
@@ -12,6 +17,7 @@ import { verifyRetainedAssets } from "@/migration/verify-assets";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 export const useMigration = (close: () => void) => {
+  const [uploads, setUploads] = useState<StoredUpload[]>([]);
   const [preview, setPreview] = useState<DesktopPreview | null>(null);
   const [recovery, setRecovery] = useState<WorkspaceData | null>(null);
   const [baseline, setBaseline] = useState("");
@@ -23,20 +29,22 @@ export const useMigration = (close: () => void) => {
     setBusy(true);
     setPreview(null);
     setRecovery(null);
+    setUploads([]);
     setChoices([]);
     setConfirmed(false);
     setMessage("");
     try {
-      if (file.size > 128 * 1024 * 1024)
-        throw Error("The selected file exceeds 128 MiB.");
+      if (file.size > 512 * 1024 * 1024)
+        throw Error("The selected file exceeds 512 MiB.");
       await flushDraftEditors();
       await workspaceStore.flush();
       const content = await readMigrationText(file),
         current = workspaceStore.getSnapshot().data;
-      const value = jsonObject(parseJson(content, 128 * 1024 * 1024));
+      const value = jsonObject(parseJson(content, 512 * 1024 * 1024));
       if (value.format === "ROMDexWebRecovery/1") {
         const data = validateWorkspace(value.data);
         await verifyRetainedAssets(data);
+        setUploads(await readRecoveryUploads(value.uploads, data));
         setRecovery(data);
         setBaseline(JSON.stringify(current));
       } else
@@ -65,6 +73,7 @@ export const useMigration = (close: () => void) => {
     setBusy(true);
     try {
       disconnectDelivery();
+      await stageRecoveryUploads(uploads);
       await workspaceStore.change((data) => {
         if (preview) applyDesktop(data, preview, new Set(choices));
         else if (recovery) {
@@ -115,6 +124,16 @@ export const useMigration = (close: () => void) => {
   return {
     preview,
     recovery,
+    uploads,
+    missingUploads:
+      recovery?.operations.filter((op) => {
+        return (
+          op.type === "attachment" &&
+          !uploads.some((file) => {
+            return file.id === op.uploadId;
+          })
+        );
+      }).length ?? 0,
     choices,
     confirmed,
     busy,

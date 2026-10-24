@@ -1,3 +1,4 @@
+import { validateAttachmentLists } from "@/attachments/actions";
 import { validateQueue } from "@/cloud/validation";
 import { validateMigration } from "@/migration/validate";
 import { indexTree } from "./accepted/core.mjs";
@@ -58,6 +59,7 @@ export const validateWorkspace = (value: unknown): WorkspaceData => {
     ids.add(item.id);
   }
   validateMigration(data);
+  validateAttachmentLists(data);
   validateQueue(data);
   indexTree(data.remote, data.order);
   return data;

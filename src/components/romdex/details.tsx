@@ -2,6 +2,7 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
+import TaskAttachments from "./task-attachments";
 import TaskImage from "./task-image";
 import TaskProperties from "./task-properties";
 import TaskWriting from "./task-writing";
@@ -69,6 +70,7 @@ const Details = ({
             <TaskProperties item={item} data={data} remove={askDelete} />
             <TaskImage id={item.id} data={data} />
             <TaskWriting item={item} data={data} />
+            <TaskAttachments key={item.id} item={item} data={data} />
           </div>
         ) : (
           <div className="detail-placeholder">

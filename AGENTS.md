@@ -1,6 +1,6 @@
 # ROMDex Web
 
-October 24 native acceptance gate: GenericCola now has verified app-update access. Acceptance 1.0.12 is installed as app 155-84, Active on NPCD only. API access, request-stream parsing, receipts, persistence and correlated rollback are verified, but the child race accepted two same-revision writers. Keep production sharing OFF and production source 1.0.8 withheld until supported atomic concurrency is implemented and natively retested. Preserve both synthetic fixtures and their receipts, all PMON tasks and the desktop app/data. See [docs/LIVE-ACCEPTANCE-2026-10-24.md](docs/LIVE-ACCEPTANCE-2026-10-24.md). The owner selected Vercel for eventual hosting; no deployment is performed by this checkpoint.
+October 24 native acceptance gate: GenericCola now has verified app-update access. Acceptance 1.0.12 is installed as app 155-84, Active on NPCD only. API access, request-stream parsing, receipts, persistence and correlated rollback are verified, but the child race accepted two same-revision writers. Keep production sharing OFF and production source 1.0.8 withheld until supported atomic concurrency is implemented and natively retested. Preserve both synthetic fixtures and their receipts, all PMON tasks and the desktop app/data. See [docs/LIVE-ACCEPTANCE-2026-10-24.md](docs/LIVE-ACCEPTANCE-2026-10-24.md). The owner selected Vercel hosting and confirmed the existing Vercel account is signed in. Static shell hosting setup is authorized; see docs/TASK-FIRST-MIGRATION.md for the deployment checkpoint and unresolved migration gates.
 
 React and PWA foundation restarted on October 22, 2026. On October 22, 2026 the user supplied PASSKEY and authorized porting the current accepted desktop app first, then finishing remaining features on web. Keep the desktop app and its data intact as the fallback.
 
@@ -16,7 +16,7 @@ Use named callbacks, strict TypeScript, token-based styles and accessible React 
 
 Run pnpm check, pnpm build and pnpm test:e2e. Do not call historical test results current verification. Keep dev on 3001 and preview on 3000. Preserve production data and the original app separately. Never resume cloud queues as a test.
 
-The template remote has push URL DISABLED. Verify private visibility before publishing. No deployment, public release, billing changes or Actions enablement are authorized.
+The template remote has push URL DISABLED. Verify private visibility before publishing. The owner subsequently authorized Vercel hosting for the installed web app. Deploy only the reviewed static shell, with no desktop data or credentials. Billing changes and Actions enablement remain unauthorized.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

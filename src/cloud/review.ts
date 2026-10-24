@@ -1,3 +1,4 @@
+import type { UploadStore } from "@/attachments/types";
 import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { abandonCreation } from "./abandon-creation";
@@ -6,6 +7,7 @@ import { completeCreation, matchesCreation } from "./creation";
 import { replaceRemote } from "./delivery-helpers";
 import { acknowledge } from "./journal";
 import { rebaseEdit } from "./rebase-edit";
+import { reviewAttachment } from "./review-attachment";
 import { reviewDeletion } from "./review-deletion";
 import { confirmEdit, reviewedEdit } from "./review-edit";
 import { requireDelivery } from "./session";
@@ -22,6 +24,7 @@ export const reviewQueue = async (
   choice: "cloud" | "local" | "confirm",
   receipt = "",
   missingAcknowledged = false,
+  uploads?: UploadStore,
 ) => {
   if (cloudData(data).accountId !== port.accountId)
     throw Error("The queue belongs to a different account.");
@@ -30,6 +33,17 @@ export const reviewQueue = async (
   });
   if (!operation || !cloudData(data).records[opId])
     throw Error("Operation no longer awaiting review.");
+  if (operation.type === "attachment" || operation.type === "attachment-delete")
+    return reviewAttachment(
+      data,
+      operation,
+      choice,
+      commit,
+      port,
+      receipt,
+      missingAcknowledged,
+      uploads,
+    );
   if (operation.type === "delete")
     return reviewDeletion(
       data,

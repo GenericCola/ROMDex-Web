@@ -1,3 +1,4 @@
+import { draftMessage } from "@/domain/editor-drafts";
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { exportRecovery } from "./recovery-export";
 const WorkspaceStatus = ({
@@ -23,7 +24,7 @@ const WorkspaceStatus = ({
               : state.pendingWrites
                 ? "Saving in this browser…"
                 : drafts
-                  ? "Unsaved NPCDex draft"
+                  ? draftMessage()
                   : "All changes saved in this browser"}
       </p>
       <button onClick={openRdx} disabled={!state.ready || state.delivering}>

@@ -1,3 +1,4 @@
+import type { Attachment, AttachmentOperation } from "@/attachments/types";
 import type { SharedStatus } from "@/cloud/shared-status-types";
 import type { CloudData } from "@/cloud/types";
 import type { MigrationRecord } from "@/migration/types";
@@ -43,6 +44,7 @@ export type TaskPatch = Partial<
   >
 >;
 export type TaskOperation =
+  | AttachmentOperation
   | { opId: string; type: "create"; issueId: string; item: TaskItem }
   | {
       opId: string;
@@ -69,6 +71,7 @@ export type TaskOperation =
 export type DetailsMode = "default" | "expanded" | "collapsed";
 export interface WorkspaceData {
   schemaVersion: 1;
+  attachmentLists?: Record<string, Attachment[]>;
   rdxFiles?: RdxFile[];
   editorRecovery?: JsonObject[];
   images?: Record<string, string>;

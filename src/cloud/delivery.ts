@@ -1,5 +1,7 @@
+import type { UploadStore } from "@/attachments/types";
 import type { WorkspaceData } from "@/domain/types";
 import { seedAssigned } from "./assigned-status";
+import { deliverAttachment } from "./attachment-delivery";
 import { cancelLocalDeletions } from "./cancel-local-deletions";
 import { deliverCreation } from "./creation";
 import { creationDependency } from "./creation-dependency";
@@ -14,6 +16,7 @@ export const deliverQueue = async (
   snapshot: () => WorkspaceData,
   commit: Commit,
   port: DeliveryPort,
+  uploads?: UploadStore,
 ) => {
   validateQueue(snapshot());
   const blocked = Object.values(cloudData(snapshot()).records).find(
@@ -73,6 +76,13 @@ export const deliverQueue = async (
       await commit((data) => {
         data.cloud = { ...cloudData(data), rollupPending: true };
       });
+    if (
+      operation.type === "attachment" ||
+      operation.type === "attachment-delete"
+    ) {
+      await deliverAttachment(operation, commit, port, uploads);
+      continue;
+    }
     if (operation.type === "create") {
       await deliverCreation(operation, commit, port);
       continue;

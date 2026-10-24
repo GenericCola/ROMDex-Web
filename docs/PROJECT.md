@@ -13,3 +13,11 @@ Template provenance: 79d05e273dff44b1bba534752aeacb6aee071dc8. This is a fresh f
 Notes editing now holds automatic task delivery while a text editor is focused, with a second check after asynchronous preparation. Each input still saves locally and explicit Save Changes can send a snapshot. The installed desktop also preserves predecessor baselines for continued typing during in-flight saves. See NOTES-SYNC-CORRECTION.md for preservation, exact behavior and acceptance evidence.
 
 The October 23 Standby correction requires at least two all-Standby children for inherited Standby; exactly one stays In Progress. Web and backend source use statusRules 4. The installed desktop has the same correction and the approved @theGobindSingh metadata collaborator. A complete private backup preceded the code-only install. Normal Save Changes reports all services Up to Date with zero pending; the three formerly blocked metadata records are confirmed in the private cloud repository. See STANDBY-METADATA-REPAIR.md.
+
+October 24 task-first migration: the owner wants an installed app on Chrome and
+Firefox on Windows, hosted on Vercel. PMON tasks, notes, status, hierarchy and
+attachments are the initial daily-work scope. The existing Vercel account is
+signed in under PMON. A static-only shell deployment to Vercel is authorized by
+the owner's hosting instructions; billing changes and repository-access grants
+are not implied. Preserve all desktop data. See TASK-FIRST-MIGRATION.md for
+actual checks and the remaining shared-status concurrency gate.

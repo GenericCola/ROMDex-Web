@@ -4,7 +4,7 @@ Current native result (October 24): system privileges now permit self-installati
 
 React/PWA port of the accepted ROMDex desktop app, based on theGobindSingh/next-starter-template. The task workspace, reviewed desktop import, NPCDex browsing/planning drafts and local RDX library are implemented. The full application port remains in progress. See docs/DESKTOP-MIGRATION.md for migration and remaining cutover work. Read docs/PORT.md for scope and docs/SHARED-STATUS.md for the current YouTrack-backed assigned-status checkpoint and app installation instructions. Live PMON compatibility and development boundaries are in docs/PMON-DEVELOPMENT.md. Test-only installation status and administrator steps are in docs/LIVE-ACCEPTANCE.md. Structural delivery is documented in docs/STRUCTURAL-DELIVERY.md.
 
-Requires Node.js 24+ and pnpm 11.25.0.
+Requires Node.js 24.x and pnpm 11.25.0.
 
     pnpm install --frozen-lockfile
     pnpm check
@@ -17,7 +17,7 @@ Run pnpm dev at http://localhost:3001. Run pnpm build followed by pnpm start for
 
 Read docs/PROJECT.md, docs/PWA.md, docs/CONVENTIONS.md and docs/DESIGN.md. The template components, styling tokens and tooling are retained where compatible. Payload and Lenis are removed. YouTrack is the only application backend. Optional session delivery supports task creation, explicit deletion lists, hierarchy, assigned choices with calculated parent State, edits and comments; opt-in shared assigned status requires the included YouTrack app. The full port remains in progress.
 
-No deployment has been configured. Production hosting needs HTTPS, root-origin paths and the headers from public/_headers. Real iOS installation and HTTPS hosting require separate acceptance checks.
+Vercel static hosting is configured in vercel.json. See docs/TASK-FIRST-MIGRATION.md for the installed-app cutover gates and docs/ATTACHMENTS.md for staged file delivery and recovery. Hosted-origin and actual Windows installation acceptance remain separate checks.
 
 The YouTrack repair has completed consolidated local QA. No further administrator installation is requested; the earlier 1.0.6 acceptance handoff is withdrawn. See docs/YOUTRACK-CONSOLIDATED-QA.md for frozen-candidate evidence and native verification limits.
 

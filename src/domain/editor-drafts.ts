@@ -1,5 +1,6 @@
 import type { JsonObject } from "./json";
 interface EditorDraft {
+  label?: string;
   dirty: () => boolean;
   capture?: () => JsonObject;
   flush: () => Promise<void>;
@@ -40,4 +41,10 @@ export const captureDraftEditors = () => {
   for (const editor of editors)
     if (editor.dirty() && editor.capture) recovered.push(editor.capture());
   return recovered;
+};
+
+export const draftMessage = () => {
+  for (const editor of editors)
+    if (editor.dirty()) return editor.label ?? "Unsaved NPCDex draft";
+  return "";
 };

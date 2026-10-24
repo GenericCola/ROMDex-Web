@@ -1,6 +1,7 @@
 import type { DeliveryPort } from "@/cloud/types";
 import type { TaskItem, TaskPatch } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
+import { AttachmentClient } from "./attachment-client";
 import { postComment, verifyComment } from "./comments";
 import { readDeliveryTasks } from "./delivery-read";
 import { changeParent, childrenOf } from "./hierarchy";
@@ -15,12 +16,14 @@ const fields =
   "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(id,name,$type,value(name,id,login,fullName)),commentsCount,comments(id,text,created,author(login,fullName))";
 export class DeliveryClient implements DeliveryPort {
   accountId = "";
+  files: AttachmentClient;
   metadata?: SharedStatusClient;
   private request: YouTrackRequest;
   private fields = new Map<string, Field[]>();
   private creations = new Map<string, unknown>();
   constructor(token: string, shared = false) {
     this.request = sessionRequest(token);
+    this.files = new AttachmentClient(this.request, token.trim());
     if (shared) this.metadata = new SharedStatusClient(this.request);
   }
   connect = async () => {

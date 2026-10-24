@@ -1,3 +1,4 @@
+import { recoveryWithUploads } from "@/attachments/recovery";
 import { flushDraftEditors } from "@/domain/editor-drafts";
 import { workspaceStore } from "@/domain/workspace-store";
 const downloadRecovery = async () => {
@@ -9,7 +10,7 @@ const downloadRecovery = async () => {
       "Recovery exported from memory; local saving still needs attention.",
     );
   }
-  const blob = new Blob([workspaceStore.recover()], {
+  const blob = new Blob([await recoveryWithUploads(workspaceStore.recover())], {
     type: "application/json",
   });
   const url = URL.createObjectURL(blob);

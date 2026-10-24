@@ -18,7 +18,7 @@
     "lint:fix": "node scripts/lint.mjs --fix",
     "browser:install": "node scripts/playwright.mjs install chromium firefox webkit",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --tsconfig tests/tsconfig.json --test tests/unit/*.test.tsx && node --test tests/worker.test.mjs tests/build.test.mjs tests/youtrack/*.test.mjs",
+    "test": "tsx --tsconfig tests/tsconfig.json --test tests/unit/*.test.tsx && node --test tests/worker.test.mjs tests/build.test.mjs tests/hosting.test.mjs tests/youtrack/*.test.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "test:e2e": "node scripts/playwright.mjs test",
     "icons:build": "node scripts/build-icons.mjs",
@@ -57,7 +57,7 @@
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
   },
   "packageManager": "pnpm@11.25.0",
   "description": "ROMDex React and PWA foundation"

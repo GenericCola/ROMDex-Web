@@ -1,3 +1,4 @@
+import type { AttachmentPort } from "@/attachments/types";
 import type {
   TaskItem,
   TaskOperation,
@@ -10,6 +11,7 @@ import type {
 } from "./shared-status-types";
 export interface DeliveryRecord {
   metadataWrite?: SharedStatusWrite;
+  attachmentBeforeIds?: string[];
   status: "attempting" | "uncertain" | "conflict" | "confirmed" | "ready";
   message: string;
   remoteId?: string;
@@ -41,6 +43,7 @@ export interface CloudData {
   records: Record<string, DeliveryRecord>;
 }
 export interface DeliveryPort {
+  files?: AttachmentPort;
   metadata?: SharedStatusPort;
   accountId: string;
   all: () => Promise<TaskItem[]>;

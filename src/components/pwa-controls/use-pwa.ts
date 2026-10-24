@@ -9,9 +9,11 @@ export const usePwa = (beforeUpdate?: () => Promise<void | (() => void)>) => {
   const [install, setInstall] = useState<InstallPrompt | null>(null);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [message, setMessage] = useState(
-    "Use your browser menu to install. On iPhone or iPad, choose Share, then Add to Home Screen.",
+    "Chrome: use Install ROMDex or the address-bar install icon. Firefox on Windows: use the address-bar web apps button. On iPhone or iPad, choose Share, then Add to Home Screen.",
   );
   useEffect(() => {
+    if (window.matchMedia("(display-mode: standalone)").matches)
+      setMessage("ROMDex is running as an installed app.");
     const listeners = new AbortController();
     const options = { signal: listeners.signal };
     let disposed = false;

@@ -1,6 +1,6 @@
 import { checkImageBounds } from "@/domain/accepted/content/image-bounds.mjs";
+import { encodeBytes } from "@/domain/bytes";
 import { Buffer } from "buffer/index.js";
-import { encodeBytes } from "./library";
 export const taskImage = async (file: File) => {
   if (
     file.size > 2 * 1024 * 1024 ||

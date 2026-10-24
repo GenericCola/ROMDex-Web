@@ -8,18 +8,23 @@ export const sessionRequest = (value: string): YouTrackRequest => {
   const token = value.trim();
   if (!token) throw Error("Enter a YouTrack token.");
   const request: YouTrackRequest = async (route, method = "GET", body) => {
+    const form = body instanceof FormData;
     const response = await fetch(YOUTRACK_ORIGIN + "/api/" + route, {
       method,
       headers: {
         Authorization: "Bearer " + token,
         Accept: "application/json",
-        ...(body ? { "Content-Type": "application/json" } : {}),
+        ...(body !== undefined && !form
+          ? { "Content-Type": "application/json" }
+          : {}),
       },
       credentials: "omit",
       cache: "no-store",
       redirect: "error",
       signal: AbortSignal.timeout(30000),
-      ...(body ? { body: JSON.stringify(body) } : {}),
+      ...(body !== undefined
+        ? { body: form ? body : JSON.stringify(body) }
+        : {}),
     });
     if (response.status === 404 && method === "GET") return null;
     if (!response.ok)

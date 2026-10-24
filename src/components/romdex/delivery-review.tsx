@@ -3,6 +3,8 @@ import type { DeliveryRecord } from "@/cloud/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
+import AttachmentReview from "./attachment-review";
+import DeliveryReceipt, { StopDeliveryLabel } from "./delivery-receipt";
 const DeliveryReview = ({
   id,
   record,
@@ -76,21 +78,31 @@ const DeliveryReview = ({
           </pre>
         </details>
       )}
-      <label>
-        {operation?.type === "create"
-          ? "Exact created issue ID (PMON-number)"
-          : "Exact comment ID, if needed"}
-        <input value={receipt} onChange={changeReceipt} />
-      </label>
-      {operation?.type === "delete" && (
+      {operation &&
+        (operation.type === "attachment" ||
+          operation.type === "attachment-delete") && (
+          <AttachmentReview operation={operation} busy={busy} />
+        )}
+      <DeliveryReceipt
+        type={operation?.type}
+        value={receipt}
+        change={changeReceipt}
+      />
+
+      {(operation?.type === "delete" ||
+        operation?.type === "attachment-delete") && (
         <label>
           <input
             type="checkbox"
             checked={missing}
             onChange={acknowledgeMissing}
           />
-          I checked {record.targetId ?? operation.issueId} in YouTrack. Missing
-          can mean lost access; confirming will never resend its deletion.
+          I checked{" "}
+          {operation.type === "attachment-delete"
+            ? operation.attachmentId
+            : (record.targetId ?? operation.issueId)}{" "}
+          in YouTrack. Missing can mean lost access; confirming will never
+          resend its deletion.
         </label>
       )}
       {operation?.type === "create" && (
@@ -103,7 +115,11 @@ const DeliveryReview = ({
       <div className="port-actions">
         <button
           onClick={confirm}
-          disabled={busy || (operation?.type === "delete" && !missing)}
+          disabled={
+            busy ||
+            (["delete", "attachment-delete"].includes(operation?.type ?? "") &&
+              !missing)
+          }
         >
           Read back and confirm; do not resend
         </button>
@@ -118,11 +134,7 @@ const DeliveryReview = ({
           </button>
         )}
         <button onClick={cloud} disabled={busy}>
-          {operation?.type === "create"
-            ? "Stop creation and dependent changes; archive"
-            : operation?.type === "delete"
-              ? "Stop remaining deletions; archive"
-              : "Keep YouTrack; archive pending change"}
+          <StopDeliveryLabel type={operation?.type} />
         </button>
       </div>
     </section>

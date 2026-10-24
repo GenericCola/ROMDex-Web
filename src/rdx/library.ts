@@ -1,3 +1,4 @@
+import { encodeBytes } from "@/domain/bytes";
 import { base64Bytes, jsonObject, parseJson } from "@/domain/json";
 import type { WorkspaceData } from "@/domain/types";
 import { validateNpcdex } from "@/npcdex/validate";
@@ -10,12 +11,6 @@ export const rdxKey = (document: {
 };
 export const fileBytes = (file: RdxFile) => {
   return base64Bytes(file.data);
-};
-export const encodeBytes = (bytes: Uint8Array) => {
-  let text = "";
-  for (let index = 0; index < bytes.length; index += 8192)
-    text += String.fromCharCode(...bytes.subarray(index, index + 8192));
-  return btoa(text);
 };
 export const rdxFile = (name: string, value: RdxInspection): RdxFile => {
   const { document } = value;

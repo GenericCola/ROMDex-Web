@@ -4,6 +4,8 @@ const Migration = ({ close }: { close: () => void }) => {
   const {
     preview,
     recovery,
+    uploads,
+    missingUploads,
     choices,
     confirmed,
     busy,
@@ -85,12 +87,19 @@ const Migration = ({ close }: { close: () => void }) => {
           )}
         </>
       )}
+      {!!missingUploads && (
+        <p role="alert">
+          {missingUploads} queued files need their original bytes restored. They
+          cannot be delivered without verified bytes.
+        </p>
+      )}
       {recovery && (
         <p>
           Restore {recovery.remote.length} tasks and{" "}
-          {recovery.operations.length} queued operations from the web recovery
-          file. Uncertain requests retain their review requirements. Export the
-          current browser workspace before replacing it.
+          {recovery.operations.length} queued operations and {uploads.length}{" "}
+          verified staged files from the web recovery file. Uncertain requests
+          retain their review requirements. Export the current browser workspace
+          before replacing it.
         </p>
       )}
       {(preview ?? recovery) && (
