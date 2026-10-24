@@ -1,0 +1,18 @@
+{
+  "archive": "byte-exact-evidence.zip",
+  "sha256": "c980acbfa610a63ea441deb21e90c7bc1e33f39c8a3ddcc2efcc844850ac1dc3",
+  "bytes": 296018,
+  "members": 18,
+  "all_members_verified_byte_for_byte": true,
+  "source_checkpoint": "e6b68966243157b43d6feeba18269dff1f458905",
+  "source_remote_verified": true,
+  "reason": "Preserve raw evidence bytes independently of Git text line-ending conversion.",
+  "restore": "Verify this ZIP SHA-256, extract into an empty directory, then verify members against the contained manifest.json.",
+  "native_gate": "Concurrency failed; production sharing remains OFF.",
+  "cleanup": {
+    "moved": 0,
+    "deleted": 0,
+    "pruned": 0,
+    "branch_active": true
+  }
+}
