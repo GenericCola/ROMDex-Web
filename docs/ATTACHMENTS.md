@@ -43,3 +43,16 @@ missing bytes, upload limits and token-origin protection. See
 Browser tests use intercepted synthetic PMON IDs, never live PMON tasks. Native
 YouTrack attachment delivery and real hosted-origin CORS remain pending. The
 shared-status concurrency failure is separate and still blocks daily cutover.
+
+New staged files are stored as ArrayBuffer byte records, then reconstructed and
+hash-verified when read. This fixes the iPhone browser runtime's rejected File
+records. Existing Blob records remain readable; Chrome and Firefox explicitly
+exercise that legacy read path in the offline/reload test. No desktop store or
+source file changes.
+
+Mobile Playwright interception omits multipart file contents. The iPhone fixture
+therefore sends the actual app-generated FormData to a bounded local-only test
+receiver and checks its complete wire bytes before completing the intercepted
+YouTrack fixture. The receiver exists only in test global setup and is never
+included in the Vercel artifact. A separate native multipart check confirms this
+transport behavior. Physical iPhone acceptance remains pending.

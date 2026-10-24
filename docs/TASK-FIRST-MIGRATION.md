@@ -57,3 +57,62 @@ The desktop remains authoritative and untouched. No live export/import or PMON
 mutation has been performed. See [ATTACHMENTS.md](ATTACHMENTS.md) for file-delivery
 behavior and [LIVE-ACCEPTANCE-2026-10-24.md](LIVE-ACCEPTANCE-2026-10-24.md) for the
 separate native metadata failure.
+
+## Portable-file repair checkpoint
+
+The broader matrix reproduced a staging failure in the emulated iPhone runtime
+before deployment. The old prebuilt archive was only uploaded to an undeployed
+Vercel draft and was never published. The repair stores new files as byte buffers
+and reads legacy Blob records. Nine focused iPhone transport/attachment checks
+pass, and desktop browser legacy reads pass. A complete fresh matrix is required
+before deploying the repaired artifact.
+
+Repaired shell inventory:`4fdac68c7e01e658a764`, 75 cached assets, 78 upload
+archive entries. ZIP SHA-256:
+`64ec789ffcc6b1c3e54b4c29971797ad1165236198f87fabcb3e6dbee02df4b5`.
+Source checkpoint:`ca80a48ad9f402e6c8983716b1b5aecdc4f910ba`.
+The source checkpoint is not a completed production data migration.
+
+## Final local matrix
+
+`pnpm check` passes: 135 application tests and 30 Node/worker/YouTrack/hosting
+tests. The final build contains the portable-byte repair. The full 290-case
+browser invocation recorded 283 passes, two expected platform skips and five
+WebKit file-interception assertion failures. A fixture-only correction routes
+the actual generated FormData through the local native-byte receiver for both
+WebKit profiles. All 18 affected-profile cases then pass. Case-by-case
+reconciliation establishes 288 unique passes and two expected skips across
+these runs, not one all-green full invocation. App source and every exported
+asset remain byte-identical to the frozen deployment archive. Evidence is in
+`docs/evidence/task-first-migration-2026-10-24/`.
+
+## Vercel hosting acceptance and update path
+
+The first static shell was deployed to https://romdex-web.vercel.app under
+PMON Hobby. Hosted checks passed 22 cases and exposed four failures: root-page
+headers were absent, and the offline worker attempted a Vercel-blocked debug
+map. Vercel also appended its toolbar bootstrap to a runtime file. No daily-work
+migration or YouTrack mutation was performed.
+
+The hosting repair explicitly covers root-page headers, excludes debug maps
+from the offline cache and disables the ROMDex project's Vercel Toolbar for
+new deployments. Nine worker/hosting tests and 35 affected PWA/update/install
+browser cases pass. The static repair archive is `romdex-web-shell-e9cc7b96a67580c0b9d0.zip`,
+SHA-256 `639ac50eefa16629b77ad706a421245284f2fb59b9c7690d50cde0aa63804a1d`.
+
+The owner explicitly approved Vercel's GitHub application for only
+GenericCola/ROMDex-Web and completed GitHub's identity check. The existing
+Vercel project is connected to that repository; other private repositories
+remain excluded. PR comments are disabled. Track `codex/accepted-app-port`
+for this preview; do not deploy the older main foundation by mistake.
+
+Git source builds produce a new Next build identity. Hosted verification must
+hash every asset from the actual worker inventory against the exact committed
+worker template, then test the rendered client. Do not falsely claim that an
+independent cloud build is byte-identical to the earlier local archive.
+
+Anonymous GET/POST/DELETE preflights for the exact Vercel origin returned no
+Access-Control-Allow-Origin or authorization header permission. CORS is still
+blocked. Resource Sharing was not exposed in this account's Global Settings UI;
+a plain API page does not authenticate with browser cookies. No credentials were
+extracted and no CORS settings were changed.

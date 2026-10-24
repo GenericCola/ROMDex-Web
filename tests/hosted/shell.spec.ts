@@ -1,16 +1,20 @@
 import {test,expect} from '@playwright/test';
-import {readFile,mkdir} from 'node:fs/promises';
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 
-test('hosted static bytes, security headers, manifest and root routing match the reviewed build',async({request})=>{
- const receipt=JSON.parse(await readFile('artifacts/task-first-migration/deployment-artifact.json','utf8'));
+test('hosted headers and every cached asset match the worker content inventory',async({request},info)=>{
  const config=JSON.parse(await readFile('vercel.json','utf8'));
  const home=await request.get('/');expect(home.status()).toBe(200);
- for(const header of config.headers.find((rule:{source:string})=>rule.source==='/:path*').headers)expect(home.headers()[header.key.toLowerCase()]).toBe(header.value);
- const sw=await request.get('/sw.js');expect(sw.headers()['cache-control']).toBe('no-cache');expect(sw.headers()['service-worker-allowed']).toBe('/');expect(await sw.text()).toContain('romdex-shell-'+receipt.workerVersion);
- expect((await request.get('/missing-romdex-acceptance-route/')).status()).toBe(404);
- const manifest=await (await request.get('/manifest.webmanifest')).json();expect(manifest.display).toBe('standalone');expect(manifest.start_url).toBe('/');
- for(const [name,digest] of Object.entries(receipt.files)){if(name==='vercel.json')continue;const response=await request.get('/'+name);expect(response.status(),name).toBe(200);expect(createHash('sha256').update(await response.body()).digest('hex'),name).toBe(digest);}
+ for(const header of config.headers.find((rule:{source:string})=>rule.source==='/').headers)expect(home.headers()[header.key.toLowerCase()]).toBe(header.value);
+ const sw=await request.get('/sw.js');expect(sw.headers()['cache-control']).toBe('no-cache');expect(sw.headers()['service-worker-allowed']).toBe('/');
+ const text=await sw.text(),version=/const CACHE = "romdex-shell-([a-f0-9]{20})";/.exec(text)?.[1],inventory=/const ASSETS = (\[[^\n]+\]);/.exec(text)?.[1];expect(version).toBeTruthy();expect(inventory).toBeTruthy();
+ const assets=JSON.parse(inventory!) as string[];expect(assets.length).toBeGreaterThan(60);expect(assets).toContain('/index.html');expect(assets.some(path=>path.endsWith('.map'))).toBe(false);
+ const template=execFileSync('git',['show','HEAD:scripts/service-worker.js']);const hash=createHash('sha256').update(template),files:Record<string,string>={};
+ for(const path of assets){expect(path.startsWith('/')&&!path.startsWith('//')&&!path.includes('..')&&!/[?#]/.test(path),path).toBe(true);const response=await request.get(path);expect(response.status(),path).toBe(200);const bytes=await response.body();hash.update(path).update(bytes);files[path]=createHash('sha256').update(bytes).digest('hex');}
+ expect(hash.digest('hex').slice(0,20)).toBe(version);expect(text).toBe(template.toString().replace('__VERSION__',version!).replace('__ASSETS__',JSON.stringify(assets)));
+ expect((await request.get('/missing-romdex-acceptance-route/')).status()).toBe(404);const manifest=await (await request.get('/manifest.webmanifest')).json();expect(manifest.display).toBe('standalone');expect(manifest.start_url).toBe('/');
+ await mkdir('artifacts/task-first-migration',{recursive:true});await writeFile('artifacts/task-first-migration/hosted-inventory-'+info.project.name+'.json',JSON.stringify({version,files,sourceWorkerSha256:createHash('sha256').update(template).digest('hex')},null,2)+'\n');
 });
 
 test('hosted app renders without reading YouTrack or importing desktop data',async({page},info)=>{
