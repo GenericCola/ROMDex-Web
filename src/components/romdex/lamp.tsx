@@ -1,5 +1,6 @@
 import { STATUS } from "@/domain/accepted/core.mjs";
 import type { LampColor } from "@/domain/types";
+import { tw } from "@utils/tw";
 const classes = {
   grey: "bulb grey",
   yellow: "bulb yellow",
@@ -9,9 +10,19 @@ const classes = {
   green: "bulb green",
   red: "bulb red",
 };
-const Lamp = ({ color }: { color: LampColor }) => {
+const Lamp = ({
+  color,
+  className,
+}: {
+  color: LampColor;
+  className?: string;
+}) => {
   return (
-    <span className={classes[color]} role="img" aria-label={STATUS[color]} />
+    <span
+      className={tw(classes[color], className)}
+      role="img"
+      aria-label={STATUS[color]}
+    />
   );
 };
 export default Lamp;

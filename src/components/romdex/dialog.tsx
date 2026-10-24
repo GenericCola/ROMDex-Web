@@ -10,9 +10,12 @@ const Dialog = ({ title, close, children, className = "" }: DialogProps) => {
   const ref = useRef<HTMLDialogElement>(null);
   const show = () => {
     const dialog = ref.current;
+    const opener = document.activeElement;
     if (dialog && !dialog.open) dialog.showModal();
     const hide = () => {
-      return dialog?.close();
+      dialog?.close();
+      if (opener instanceof HTMLElement && opener.isConnected)
+        opener.focus({ preventScroll: true });
     };
     return hide;
   };

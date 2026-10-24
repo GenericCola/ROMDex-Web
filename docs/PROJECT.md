@@ -25,6 +25,7 @@ actual checks and the remaining shared-status concurrency gate.
 The hosted preview is available at https://romdex-web.vercel.app. Vercel is linked
 only to the approved private ROMDex-Web repository and tracks the accepted port
 branch. Hosted Chrome/Firefox shell, headers, asset integrity, offline notes and
-synthetic attachment checks pass. Daily-work cutover still requires YouTrack
-CORS setup and safe shared-status concurrency; see TASK-FIRST-MIGRATION.md and
+synthetic attachment checks pass. The administrator completed the exact-origin CORS allowance; anonymous
+preflights pass. Daily-work cutover still requires authenticated browser
+acceptance and safe shared-status concurrency; see TASK-FIRST-MIGRATION.md and
 CORS-ORIGIN-HANDOFF.md. The desktop remains untouched and authoritative.

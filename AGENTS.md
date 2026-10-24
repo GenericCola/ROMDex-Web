@@ -1,6 +1,16 @@
+# Paused at owner request — October 24, 2026
+
+Migration is paused for a model switch. Local UI repairs pass all checks/build
+and the final complete browser run (303 passed, two expected skips). They are
+backed up through the private annotated tag `romdex-web-ui-pause-2026-10-24` but
+are not deployed. Read docs/PAUSED-MODEL-SWITCH-2026-10-24.md before resuming.
+The administrator's exact-origin CORS preflights now pass; authenticated browser
+acceptance and shared-status concurrency remain open. Preserve the hosted shell,
+desktop/data and all live projects until the owner resumes.
+
 # ROMDex Web
 
-October 24 native acceptance gate: GenericCola now has verified app-update access. Acceptance 1.0.12 is installed as app 155-84, Active on NPCD only. API access, request-stream parsing, receipts, persistence and correlated rollback are verified, but the child race accepted two same-revision writers. Keep production sharing OFF and production source 1.0.8 withheld until supported atomic concurrency is implemented and natively retested. Preserve both synthetic fixtures and their receipts, all PMON tasks and the desktop app/data. See [docs/LIVE-ACCEPTANCE-2026-10-24.md](docs/LIVE-ACCEPTANCE-2026-10-24.md). The owner selected Vercel hosting and confirmed the existing Vercel account is signed in. Static hosting is live at https://romdex-web.vercel.app, with 26 hosted Chrome/Firefox checks passing. The approved Vercel integration is restricted to GenericCola/ROMDex-Web and tracks codex/accepted-app-port. Daily cutover remains blocked by YouTrack CORS and shared-status concurrency. See docs/TASK-FIRST-MIGRATION.md and docs/CORS-ORIGIN-HANDOFF.md.
+October 24 native acceptance gate: GenericCola now has verified app-update access. Acceptance 1.0.12 is installed as app 155-84, Active on NPCD only. API access, request-stream parsing, receipts, persistence and correlated rollback are verified, but the child race accepted two same-revision writers. Keep production sharing OFF and production source 1.0.8 withheld until supported atomic concurrency is implemented and natively retested. Preserve both synthetic fixtures and their receipts, all PMON tasks and the desktop app/data. See [docs/LIVE-ACCEPTANCE-2026-10-24.md](docs/LIVE-ACCEPTANCE-2026-10-24.md). The owner selected Vercel hosting and confirmed the existing Vercel account is signed in. Static hosting is live at https://romdex-web.vercel.app, with 26 hosted Chrome/Firefox checks passing. The approved Vercel integration is restricted to GenericCola/ROMDex-Web and tracks codex/accepted-app-port. The administrator has completed the Vercel CORS allowance and exact-origin anonymous preflights pass. Daily cutover still requires authenticated browser/native attachment acceptance and safe shared-status concurrency. See docs/TASK-FIRST-MIGRATION.md and docs/CORS-ORIGIN-HANDOFF.md.
 
 React and PWA foundation restarted on October 22, 2026. On October 22, 2026 the user supplied PASSKEY and authorized porting the current accepted desktop app first, then finishing remaining features on web. Keep the desktop app and its data intact as the fallback.
 

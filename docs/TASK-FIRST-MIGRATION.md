@@ -34,8 +34,12 @@ preference; no reduced-safety cutover choice was approved.
   Chrome/Firefox checks pass; this is a preview, not a completed data migration.
 - [x] Verify real-origin headers, service worker, HTTPS, routing, all 74 cached
   assets and offline note recovery on the actual hosted build.
-- [ ] Configure YouTrack CORS and confirm native attachment delivery only on
-  the NPCD fixture allowlist. Keep PMON out of developer acceptance mutations.
+- [x] Configure YouTrack CORS for the exact Vercel origin. After the owner's
+  administrator-completion message, anonymous GET/POST/DELETE preflights return
+  that origin and authorization/content-type permission. Authenticated reading
+  remains a separate check; see CORS-ORIGIN-HANDOFF.md.
+- [ ] Confirm authenticated browser reads and native attachment delivery only
+  on the NPCD fixture allowlist. Keep PMON out of developer acceptance mutations.
 - [ ] Verify actual Windows installation/launch from Chrome and Firefox. The
   automated standalone test emulates the display-mode signal; it is not OS-level
   installation acceptance. Chrome uses its install prompt/icon; recent Firefox
@@ -116,9 +120,10 @@ hash every asset from the actual worker inventory against the exact committed
 worker template, then test the rendered client. Do not falsely claim that an
 independent cloud build is byte-identical to the earlier local archive.
 
-Anonymous GET/POST/DELETE preflights for the exact Vercel origin returned no
-Access-Control-Allow-Origin or authorization header permission. CORS is still
-blocked. Resource Sharing was not exposed in this account's Global Settings UI;
+Before the administrator's latest update, anonymous GET/POST/DELETE preflights
+for the exact Vercel origin returned no Access-Control-Allow-Origin or
+authorization header permission. That preflight blocker is now resolved; see
+CORS-ORIGIN-HANDOFF.md. Resource Sharing was not exposed in this account's Global Settings UI;
 a plain API page does not authenticate with browser cookies. No credentials were
 extracted and no CORS settings were changed.
 
@@ -149,9 +154,19 @@ without advancing the live deployment branch solely for documentation. The
 local branch's documentation/evidence commit is retained through that tag; the
 remote application branch intentionally remains at the tested deployed commit.
 
-Remaining gates: [CORS origin setup](CORS-ORIGIN-HANDOFF.md), native attachment
-acceptance, shared-status concurrency repair, actual Windows installation and
+Remaining gates: authenticated browser reading, native attachment acceptance, shared-status concurrency repair, actual Windows installation and
 reviewed desktop export/import. No real PMON task was mutated, no desktop file
 was replaced, and no live desktop export/import was performed. Desktop remains
 the daily-work client and fallback. No new administrator app installation is
 requested by this checkpoint.
+
+## UI repair, October 24
+
+The owner requested repairs to the visible web controls as part of migration.
+The selected-task pane's four direct grid children compressed properties into
+an implicit row and placed notes in the narrow column. The React markup now
+keeps properties on the left and notes, images and attachments together on the
+right. Header save-light spacing, centered dialogs, sticky close controls and
+workspace-menu keyboard/pointer dismissal are also repaired. The accepted
+desktop and its profile are unchanged. Verification and hosted delivery are
+tracked in [UI-REPAIR-2026-10-24.md](UI-REPAIR-2026-10-24.md).

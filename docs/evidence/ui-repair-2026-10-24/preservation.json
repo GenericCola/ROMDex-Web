@@ -1,0 +1,16 @@
+{
+  "desktopFilesUnchanged": true,
+  "profileWritten": false,
+  "livePMONMutated": false,
+  "productionSharingEnabled": false,
+  "files": [
+    {
+      "path": "C:\\Users\\mrgen\\AppData\\Local\\ROMDexDesktop\\app-0.5.15\\resources\\app\\public\\core.mjs",
+      "sha256": "b4242431b32a998e4d3e09bcc4b9f8dee91f7ab89c1fba28e3271dc709256a0c"
+    },
+    {
+      "path": "C:\\Users\\mrgen\\AppData\\Local\\ROMDexDesktop\\app-0.5.15\\resources\\app\\cloud\\github-store.mjs",
+      "sha256": "29e4f2d74e28b236761337b3aaff55c77371bbd35d59beebe5b7773383ad4707"
+    }
+  ]
+}

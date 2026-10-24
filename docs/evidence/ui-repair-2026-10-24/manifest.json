@@ -1,0 +1,295 @@
+{
+  "archive": "LOCAL-UI-EVIDENCE.zip",
+  "sha256": "0870dbc043bcc4d94a6e567e7b4f6a50a7594cca17123b2269b442fb50a7d3cf",
+  "members": {
+    "artifacts/ui-repair/before-chromium-1280.png": {
+      "sha256": "b9c08f27074f2e661b0bfbfd7967d6baf21949869739c11020351b283b4d4762",
+      "bytes": 179920
+    },
+    "artifacts/ui-repair/before-chromium-390.png": {
+      "sha256": "4a7d166cc0c598e2b63080f2721373e608ff6fb5b318908d303e4d1c32b54741",
+      "bytes": 84156
+    },
+    "artifacts/ui-repair/before-chromium-800.png": {
+      "sha256": "c7692df2fc5f83944906918a151cb89251f28158eccbddef1fed3b31d3327396",
+      "bytes": 142591
+    },
+    "artifacts/ui-repair/before-chromium-dialog.png": {
+      "sha256": "64f64a514c38ba6ef94a8c5ad6c9cd1cfb39e6d82439e80031dbf8f512e01a64",
+      "bytes": 50351
+    },
+    "artifacts/ui-repair/before-firefox-1280.png": {
+      "sha256": "ec5e9560a1d56d5055bbe97e87798a9d3e0b02d457803c16dcb8a750694950b7",
+      "bytes": 117874
+    },
+    "artifacts/ui-repair/before-firefox-390.png": {
+      "sha256": "f29614bbf635cb49b77d48a20cc7c88ddfe2db26d382278c550ee20329016275",
+      "bytes": 62278
+    },
+    "artifacts/ui-repair/before-firefox-800.png": {
+      "sha256": "802af83a1f97a3699986f53a8d3d66b8ef3d9cf3ad171f766e40ea22c85b30bc",
+      "bytes": 100582
+    },
+    "artifacts/ui-repair/before-firefox-dialog.png": {
+      "sha256": "826ced6f9ea8ca8d9fe7b991cbd9ae87e76932e2c7c0e124d5abe4a129a5a500",
+      "bytes": 48947
+    },
+    "artifacts/ui-repair/chromium-connection-error-1280.png": {
+      "sha256": "0a3b099912936481a41b09fa04a8ff313efcd7b30964fcbc6df3de626751ad5f",
+      "bytes": 122610
+    },
+    "artifacts/ui-repair/chromium-connection-error-390.png": {
+      "sha256": "929d6c3093afa5431ba28b4ce4d91d3cdc0cc5b3fe8b720996cb9a5c9e84463c",
+      "bytes": 49171
+    },
+    "artifacts/ui-repair/chromium-details-1280.png": {
+      "sha256": "e7e547ad28263142d2729555c7d9eef6fc52d07032cccc452398179ccf74a6cd",
+      "bytes": 170715
+    },
+    "artifacts/ui-repair/chromium-details-320.png": {
+      "sha256": "f697f2bd1e8a5251e7dee8f2572299ac6f36ef0196337a8899abd19e29c8b94c",
+      "bytes": 49669
+    },
+    "artifacts/ui-repair/chromium-details-390.png": {
+      "sha256": "32b3a4ee07bb7d1601a815ac1ecdb0e47b4d9f79a8564911a6d5e9b8aec51a09",
+      "bytes": 54724
+    },
+    "artifacts/ui-repair/chromium-details-800.png": {
+      "sha256": "541fdfa726baa790d56af1f0fb593d781af7dc140dc265bdd984d64e327add65",
+      "bytes": 134319
+    },
+    "artifacts/ui-repair/chromium-menu-1280.png": {
+      "sha256": "8001af0beee5ad14ea935315ffbebbca2df94fa173e156ca7adf50f9323b270c",
+      "bytes": 153177
+    },
+    "artifacts/ui-repair/chromium-menu-320.png": {
+      "sha256": "1c125264263291418be6e84134c424ecab3770a1bc52f08bcefcd38d76dc5d6d",
+      "bytes": 65740
+    },
+    "artifacts/ui-repair/chromium-menu-390.png": {
+      "sha256": "b9abe56c93612bea5522bd0d38e56aa7b4a117d9c6903a2477d63706eda7c084",
+      "bytes": 67743
+    },
+    "artifacts/ui-repair/chromium-menu-800.png": {
+      "sha256": "046de5b35479bebba3c10ef580dc44f6a6975d27f92bdd1bc2404b37a0a325bd",
+      "bytes": 117540
+    },
+    "artifacts/ui-repair/cors-after-admin.json": {
+      "sha256": "80b7feea03a422c192f0aff7cd90ec14a34e5810f26d34bdbccba1983401e105",
+      "bytes": 792
+    },
+    "artifacts/ui-repair/firefox-connection-error-1280.png": {
+      "sha256": "b47fd7ec368535239d0e831fa0c4dc3375304fd556b2555adc95808c7b6f5ad4",
+      "bytes": 123212
+    },
+    "artifacts/ui-repair/firefox-connection-error-390.png": {
+      "sha256": "4cbd050c51bbdeb24ffb50bed9afb64ffe74473ba2ba81e5fa86430c49c66ee3",
+      "bytes": 43295
+    },
+    "artifacts/ui-repair/firefox-details-1280.png": {
+      "sha256": "08b5592cb882cb955bc15a6a381e3aa2a53c64b329f7a7208d8b6cec1da15603",
+      "bytes": 110402
+    },
+    "artifacts/ui-repair/firefox-details-320.png": {
+      "sha256": "54842b2fb7f87cf37826338e7fdd65f64517b7fdc01255ef9233f4c5f35abc00",
+      "bytes": 37696
+    },
+    "artifacts/ui-repair/firefox-details-390.png": {
+      "sha256": "de88de68c73ec9672de5d3ebeff175dd2523cd1557a0c8ef5f64b144818e2b89",
+      "bytes": 41295
+    },
+    "artifacts/ui-repair/firefox-details-800.png": {
+      "sha256": "68a0df20c458720290997d3f8c6f534d253a42fd0fb88c428823b2c102ade982",
+      "bytes": 95069
+    },
+    "artifacts/ui-repair/firefox-menu-1280.png": {
+      "sha256": "180ec1b234485a8a41865dd5a87bc66ae7622fa3ca320f176bd177f1f928398b",
+      "bytes": 100022
+    },
+    "artifacts/ui-repair/firefox-menu-320.png": {
+      "sha256": "49ce51d419420c68f0d656b23b37218ec027899d326173ac610333dcb8721be3",
+      "bytes": 54086
+    },
+    "artifacts/ui-repair/firefox-menu-390.png": {
+      "sha256": "63cf907ec79308dda5cd4167d8301457ec16bbc7b49abd1ae75ee737b75a86f9",
+      "bytes": 54229
+    },
+    "artifacts/ui-repair/firefox-menu-800.png": {
+      "sha256": "d66b1419728ae13a6df97a62ee4554f409fbfabca8de5ac997d7e494bb0839cd",
+      "bytes": 85698
+    },
+    "artifacts/ui-repair/iphone-connection-error-1280.png": {
+      "sha256": "e7a54288bc3d24a9551e2693a7ffe0e4f3cc102796f80787d0b4e56c675565d1",
+      "bytes": 386014
+    },
+    "artifacts/ui-repair/iphone-connection-error-390.png": {
+      "sha256": "179c80ae44ff56948e6e6b9f92b19e1e42a3f88f1817688b65103911e3b46b1f",
+      "bytes": 167287
+    },
+    "artifacts/ui-repair/iphone-details-1280.png": {
+      "sha256": "aea4412525f0ad74d104e098d283c285fabb1d6b5d455608c883f9ec32d3ec6d",
+      "bytes": 347333
+    },
+    "artifacts/ui-repair/iphone-details-320.png": {
+      "sha256": "68ba5d33138d2531cd9a675ba2788eb16732297aeb435ae1653806ee9ae95374",
+      "bytes": 122898
+    },
+    "artifacts/ui-repair/iphone-details-390.png": {
+      "sha256": "31351cd6e5cd53443ad9c56930877d1a01f57e06e5b7b652be68e49359a28c19",
+      "bytes": 136598
+    },
+    "artifacts/ui-repair/iphone-details-800.png": {
+      "sha256": "88f1842301d3bc638cbd410b642a58fa222736f764b4139217e096d47381b5da",
+      "bytes": 302806
+    },
+    "artifacts/ui-repair/iphone-menu-1280.png": {
+      "sha256": "8052e718685cfe5855d272d241fda43862ba04d5add32705fd4c2cb1aa94a128",
+      "bytes": 298438
+    },
+    "artifacts/ui-repair/iphone-menu-320.png": {
+      "sha256": "f1238c01e239f72605c33e216e30384a6d537c227a2ecbe3dd8f073986d78c65",
+      "bytes": 165772
+    },
+    "artifacts/ui-repair/iphone-menu-390.png": {
+      "sha256": "4e2936f0ca0bc8a1e41a0cf6ea524ada404b8accc1d45239f3a6aa7da751b87a",
+      "bytes": 171854
+    },
+    "artifacts/ui-repair/iphone-menu-800.png": {
+      "sha256": "2ee458862d2accf3898ae0bfc32d8ae477fd152c83848ff325e224bfaa5c7d7c",
+      "bytes": 256347
+    },
+    "artifacts/ui-repair/mobile-chromium-connection-error-1280.png": {
+      "sha256": "1b62c0010d3ea400c1a7a36cdccf597b8d5bad71e6801dd308c966550aa2b662",
+      "bytes": 533914
+    },
+    "artifacts/ui-repair/mobile-chromium-connection-error-390.png": {
+      "sha256": "8372b2fb485e5db26a530ba5855e3999163a8c9b905dc75237e6cbfb81db5081",
+      "bytes": 238405
+    },
+    "artifacts/ui-repair/mobile-chromium-details-1280.png": {
+      "sha256": "7b74c3866d731938fbca2ee9e94bd195e3a5966114ea1653dfb89970104a9b92",
+      "bytes": 798920
+    },
+    "artifacts/ui-repair/mobile-chromium-details-320.png": {
+      "sha256": "5bc0fc77a718b299e937bae4a86c81391ff07cb01beb8c31e3f19add6a7cb04d",
+      "bytes": 225996
+    },
+    "artifacts/ui-repair/mobile-chromium-details-390.png": {
+      "sha256": "0b88470f6d4a8ab709858cb7ff04a0d76a8d3be1e54d8bcc363acc370224d61c",
+      "bytes": 251133
+    },
+    "artifacts/ui-repair/mobile-chromium-details-800.png": {
+      "sha256": "747d6f07ac3dbf7990c0db43f476f7cc2fabff30ac0e041c0a1e56c6bf4951ab",
+      "bytes": 615366
+    },
+    "artifacts/ui-repair/mobile-chromium-menu-1280.png": {
+      "sha256": "fc34a189e30a27478846c4db057e8231b8f315853ca7b2a98c7f76ed405d1ace",
+      "bytes": 718147
+    },
+    "artifacts/ui-repair/mobile-chromium-menu-320.png": {
+      "sha256": "a4843098bd411667d9e2bf19b3cc630778abcf4fb65ca0efb5aab6e1349c186c",
+      "bytes": 304121
+    },
+    "artifacts/ui-repair/mobile-chromium-menu-390.png": {
+      "sha256": "c8797ef5e33d9ced840cfa02b96098814e22150473c41decf00f29ce203237b3",
+      "bytes": 317345
+    },
+    "artifacts/ui-repair/mobile-chromium-menu-800.png": {
+      "sha256": "3c5f7da7fd55b561b19d144f615271e4af75d51db722b4371a264d2992f690b3",
+      "bytes": 529661
+    },
+    "artifacts/ui-repair/preservation.json": {
+      "sha256": "41c8401ce15d63c9acb3671d278a33c0c9d92de89f855102f1c171b33eed2f91",
+      "bytes": 582
+    },
+    "artifacts/ui-repair/webkit-connection-error-1280.png": {
+      "sha256": "3b50fb7eb2bb0e37a97560b9c954d67b4844742f4ec2b8c16ce6db263833b3cf",
+      "bytes": 240671
+    },
+    "artifacts/ui-repair/webkit-connection-error-390.png": {
+      "sha256": "787074393d96a2f8cc7212cf4ec73e70b08defc0302864b1d9659d8357bf09cb",
+      "bytes": 104126
+    },
+    "artifacts/ui-repair/webkit-details-1280.png": {
+      "sha256": "8351bdfacc09a62b5692f74e0a0480c6e09c5e34732549837e64171e53d24446",
+      "bytes": 217894
+    },
+    "artifacts/ui-repair/webkit-details-320.png": {
+      "sha256": "71fc117d35ab423bfa86022863d1cabf0942265d874decbb9a4d25829f5bd435",
+      "bytes": 77965
+    },
+    "artifacts/ui-repair/webkit-details-390.png": {
+      "sha256": "5d6cb62341ccc9b0c81b684b39a1eb6eaaae7c93db018bf70ac4e6533059f3a6",
+      "bytes": 85343
+    },
+    "artifacts/ui-repair/webkit-details-800.png": {
+      "sha256": "c8ff886310e56dd3cb7f96490cca1249baa81a5a2355e7ed31948dfa4fac9d19",
+      "bytes": 191559
+    },
+    "artifacts/ui-repair/webkit-menu-1280.png": {
+      "sha256": "f871f594370888c90d76c012a61fdcb71540f26e5cc7bb656d85bda72d20d6e8",
+      "bytes": 184834
+    },
+    "artifacts/ui-repair/webkit-menu-320.png": {
+      "sha256": "ac852cb9b4cb2316d1d869fef4c5d43dbb80876bd89194d582e6d604c17aecc5",
+      "bytes": 102137
+    },
+    "artifacts/ui-repair/webkit-menu-390.png": {
+      "sha256": "b59eb0d3413f50d76e2316e828fca516bcfd490d4c76f6a3a2a0c4dc95677779",
+      "bytes": 105937
+    },
+    "artifacts/ui-repair/webkit-menu-800.png": {
+      "sha256": "ebad47eff2784fa4d3d8403917c7580bbfd9c9e13212a6f2e6d31939cc78be3a",
+      "bytes": 160803
+    },
+    "artifacts/ui-repair-audit.txt": {
+      "sha256": "0267dfe9e3bc2a2af37126bab528379bc8b8cbf6bb01105918900e8ac797073e",
+      "bytes": 20918
+    },
+    "artifacts/ui-repair-browser-full.txt": {
+      "sha256": "ddbea2e3959f424fa2082a3680036d3335a0dc257f6e9e7f45048202b5925342",
+      "bytes": 45431
+    },
+    "artifacts/ui-repair-browser-interrupted.txt": {
+      "sha256": "514d4d5756150dbf444c0131765a4509b2ddd0116db8c7d5150a6ccb0df6c994",
+      "bytes": 3859
+    },
+    "artifacts/ui-repair-build-final.txt": {
+      "sha256": "f329fecec98926059dbf83f667377ac167ffe4aa439622af92d38bb9c5a06e9d",
+      "bytes": 9204
+    },
+    "artifacts/ui-repair-build.txt": {
+      "sha256": "afe70c7bbcf1a62d01dffe30cf3eb772d47a8daffc02eb737e4b5c65fd9a8a4e",
+      "bytes": 9198
+    },
+    "artifacts/ui-repair-check-final.txt": {
+      "sha256": "f1632a2f0efac3ae49befd74987e37fef20d7d8bc529823485e49fd11fd06e57",
+      "bytes": 16331
+    },
+    "artifacts/ui-repair-check.txt": {
+      "sha256": "f593f408a2b8fe23a9b74ffd838767e8066d64f9aa57675f656e499868ed20b4",
+      "bytes": 16316
+    },
+    "artifacts/ui-repair-focused.txt": {
+      "sha256": "24b1d5aae4e10d9a0c41c55f39cddfd0a990f5bd10222af2207dbfec5fe414e0",
+      "bytes": 32872
+    },
+    "artifacts/ui-repair-keyboard-dialog.txt": {
+      "sha256": "b956f66f4cd210f77828fb3a325f211f781da5f0157ab379433d4a8e5fa7f256",
+      "bytes": 713
+    },
+    "artifacts/ui-repair-layout-corrected.txt": {
+      "sha256": "e3b1efc415e0aca857294f77a3cf263f873c0ffc2a0ec5aa14aad86c43802a3d",
+      "bytes": 8704
+    },
+    "artifacts/ui-repair-layout-final.txt": {
+      "sha256": "fe0470355b534df015d2d35e8ca29837f8e2b1eee0b38b791f61818d92f327c4",
+      "bytes": 22727
+    },
+    "artifacts/ui-repair-lint-fix.txt": {
+      "sha256": "3627a83f1c2abf7c468363c3a025cc12031f2db206ae899703ff7a4d475d644a",
+      "bytes": 8668
+    }
+  },
+  "verification": "Every member independently decompressed and SHA-256 checked."
+}

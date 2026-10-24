@@ -330,3 +330,44 @@ dialog.port-dialog input[type=checkbox]{width:18px;height:18px;flex:none}dialog.
 dialog.rdx-browser-dialog{top:16px;bottom:auto;margin-block:0}.rdx-browser-dialog .dialog-head{flex:none;margin-bottom:0}.rdx-library-body{flex:1;min-height:0;overflow:auto}.rdx-browser-dialog footer label{display:flex;flex-direction:row;align-items:flex-start;width:100%;gap:8px}.rdx-browser-dialog footer input[type=checkbox]{margin-top:2px}
 
 .port-attachments{display:flex;flex-direction:column;gap:10px;padding-block:12px}.port-attachments label{display:flex;flex-direction:column;gap:6px}.port-attachments ul{padding-left:18px}.port-attachments li{overflow-wrap:anywhere;margin-block:8px}
+
+/* React task details have one properties column and one scrolling content column.
+   Keep supplements in that content column rather than creating implicit grid rows. */
+@scope (.romdex-app) {
+  .detail-scroll { grid-template-rows: minmax(0, 1fr); }
+  .port-detail-content { min-width: 0; min-height: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: #718171 #142d27; display: flex; flex-direction: column; gap: 16px; }
+  .port-detail-content .detail-writing { overflow: visible; flex: none; }
+  .port-detail-content textarea { display: block; width: 100%; min-height: 160px; }
+  .detail-properties { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .detail-properties label { display: flex; flex-direction: column; align-items: stretch; gap: 5px; min-width: 0; }
+  .detail-properties select { width: 100%; }
+  .port-detail-content input[type=file] { width: 100%; }
+  .port-detail-content input[type=file]::file-selector-button { color: var(--ink); background: var(--screen-light); border: 1px solid var(--line); border-radius: 4px; padding: 5px 8px; margin-right: 8px; font: inherit; }
+  .port-attachments { border-top: 1px solid var(--line); }
+  .device-header .save-controls { gap: 4px; }
+  .device-header #connect-open.header-connection { width: var(--header-control-height); min-width: var(--header-control-height); }
+  .device-header #workspace-switcher { width: var(--header-control-height); height: var(--header-control-height); flex-basis: var(--header-control-height); display: grid; place-items: center; border: 0; background: transparent; position: relative; }
+  .device-header #workspace-switcher::before { content: ""; position: absolute; width: var(--workspace-switch-size); height: var(--workspace-switch-size); border: 1px solid #681421; border-radius: 50%; background: var(--red-light); }
+  .workspace-switcher svg { width: 12px; height: 12px; position: relative; }
+  .suite-popover { left: auto; right: 0; }
+  .port-workspace-status { justify-content: flex-start; }
+  .port-workspace-status > p { flex: 1 1 240px; }
+  dialog.port-dialog { margin: auto; max-width: calc(100vw - 32px); padding: 0 20px 20px; scroll-padding-top: 70px; }
+  dialog.port-dialog.rdx-browser-dialog { margin-block: 0; }
+  .port-dialog > .dialog-head { position: sticky; top: 0; z-index: 3; background: var(--screen); padding: 16px 0 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .port-dialog > .dialog-head h2 { min-width: 0; overflow-wrap: anywhere; }
+  .port-dialog > .dialog-head > button { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; padding: 0; }
+  .port-dialog input:not([type=checkbox]):not([type=radio]), .port-dialog select, .port-dialog textarea { max-width: 100%; }
+  .port-dialog p, .port-dialog li { overflow-wrap: anywhere; }
+  @media (max-width: 700px) {
+    .port-detail-content { overflow: visible; }
+    .device-header .header-actions { margin-right: 0; gap: 6px; position: relative; }
+    .suite-menu-anchor { position: static; }
+    .suite-popover { left: 0; right: auto; }
+    .port-workspace-status { padding-inline: 2px; gap: 8px; }
+    .port-workspace-status > p { flex-basis: 100%; }
+    .port-workspace-status > button { flex: 1 1 auto; }
+    .work-footer { flex-wrap: wrap; }
+    dialog.port-dialog { padding-inline: 14px; }
+  }
+}

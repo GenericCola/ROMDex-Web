@@ -26,7 +26,13 @@ The task toolbar filter popup is available in the web/PWA port and installed des
 Desktop Status popups retain working close controls while metadata preparation is pending. See docs/STATUS-DIALOG-REPAIR.md for the repair and verification.
 
 The Vercel preview is live at https://romdex-web.vercel.app. All 26 hosted
-Chrome/Firefox checks pass. YouTrack CORS and the native shared-status race
-still block daily-work cutover. Keep the desktop for current work. Current
+Chrome/Firefox checks pass. Authenticated browser acceptance and the native shared-status race
+still block daily-work cutover. The administrator has completed the exact-origin
+CORS allowance, and its anonymous preflights pass. Keep the desktop for current work. Current
 hosted evidence and the one-origin administrator note are linked from
 [the migration checklist](docs/TASK-FIRST-MIGRATION.md).
+
+The web UI repair restores usable task-property and note columns, save-light
+spacing, centered scrollable dialogs and keyboard/pointer workspace-menu
+controls. See [UI-REPAIR-2026-10-24.md](docs/UI-REPAIR-2026-10-24.md) for
+current rendered verification and delivery evidence.

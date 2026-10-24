@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-24T18:07:53.851Z",
+  "checks": [
+    {
+      "origin": "https://romdex-web.vercel.app",
+      "method": "GET",
+      "status": 200,
+      "allowOrigin": "https://romdex-web.vercel.app",
+      "allowMethods": "GET",
+      "allowHeaders": "authorization,content-type"
+    },
+    {
+      "origin": "https://romdex-web.vercel.app",
+      "method": "POST",
+      "status": 200,
+      "allowOrigin": "https://romdex-web.vercel.app",
+      "allowMethods": "POST",
+      "allowHeaders": "authorization,content-type"
+    },
+    {
+      "origin": "https://romdex-web.vercel.app",
+      "method": "DELETE",
+      "status": 200,
+      "allowOrigin": "https://romdex-web.vercel.app",
+      "allowMethods": "DELETE",
+      "allowHeaders": "authorization,content-type"
+    }
+  ]
+}

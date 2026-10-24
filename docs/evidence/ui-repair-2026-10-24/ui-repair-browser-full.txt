@@ -1,0 +1,331 @@
+$ node scripts/playwright.mjs test "--reporter=line"
+
+Running 305 tests using 1 worker
+
+
+(node:57348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/305] [chromium] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception
+[2/305] [chromium] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save
+[3/305] [chromium] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending
+[4/305] [chromium] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity
+[5/305] [chromium] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading
+[6/305] [chromium] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE
+[7/305] [chromium] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE
+[8/305] [chromium] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected
+[9/305] [chromium] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload
+[10/305] [chromium] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false
+[11/305] [chromium] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true
+[12/305] [chromium] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend
+[13/305] [chromium] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token
+[14/305] [chromium] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks
+[15/305] [chromium] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false
+[16/305] [chromium] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true
+[17/305] [chromium] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export
+[18/305] [chromium] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data
+[19/305] [chromium] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text
+[20/305] [chromium] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states
+[21/305] [chromium] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import
+[22/305] [chromium] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404
+[23/305] [chromium] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow
+[24/305] [chromium] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window
+[25/305] [chromium] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows
+[26/305] [chromium] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots
+[27/305] [chromium] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions
+[28/305] [chromium] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent
+[29/305] [chromium] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls
+[30/305] [chromium] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status
+[31/305] [chromium] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export
+[32/305] [chromium] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged
+[33/305] [chromium] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery
+[34/305] [chromium] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict
+[35/305] [chromium] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay
+[36/305] [chromium] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback
+[37/305] [chromium] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access
+[38/305] [chromium] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement
+[39/305] [chromium] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload
+[40/305] [chromium] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status
+[41/305] [chromium] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress
+[42/305] [chromium] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits
+[43/305] [chromium] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload
+[44/305] [chromium] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice
+[45/305] [chromium] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent
+[46/305] [chromium] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent
+[47/305] [chromium] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears
+[48/305] [chromium] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status
+[49/305] [chromium] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors
+[50/305] [chromium] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening
+[51/305] [chromium] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save
+[52/305] [chromium] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token
+[53/305] [chromium] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes
+[54/305] [chromium] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion
+[55/305] [chromium] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload
+[56/305] [chromium] › tests\e2e\ui-layout.spec.ts:8:1 › task properties and notes use separate usable columns and narrow windows scroll without overlap
+[57/305] [chromium] › tests\e2e\ui-layout.spec.ts:38:1 › workspace menu has a visible symbol and dismisses with Escape, Tab and outside click
+[58/305] [chromium] › tests\e2e\ui-layout.spec.ts:54:1 › connection dialog is centered and keeps its close control reachable through read errors and scrolling
+[59/305] [chromium] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons
+[60/305] [chromium] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls
+[61/305] [chromium] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled
+
+(node:27148) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[62/305] [firefox] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception
+[63/305] [firefox] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save
+[64/305] [firefox] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending
+[65/305] [firefox] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity
+[66/305] [firefox] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading
+[67/305] [firefox] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE
+[68/305] [firefox] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE
+[69/305] [firefox] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected
+[70/305] [firefox] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload
+[71/305] [firefox] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false
+[72/305] [firefox] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true
+[73/305] [firefox] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend
+[74/305] [firefox] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token
+[75/305] [firefox] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks
+[76/305] [firefox] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false
+[77/305] [firefox] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true
+[78/305] [firefox] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export
+[79/305] [firefox] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data
+[80/305] [firefox] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text
+[81/305] [firefox] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states
+[82/305] [firefox] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import
+[83/305] [firefox] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404
+[84/305] [firefox] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow
+[85/305] [firefox] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window
+[86/305] [firefox] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows
+[87/305] [firefox] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots
+[88/305] [firefox] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions
+[89/305] [firefox] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent
+[90/305] [firefox] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls
+[91/305] [firefox] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status
+[92/305] [firefox] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export
+[93/305] [firefox] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged
+[94/305] [firefox] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery
+[95/305] [firefox] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict
+[96/305] [firefox] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay
+[97/305] [firefox] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback
+[98/305] [firefox] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access
+[99/305] [firefox] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement
+[100/305] [firefox] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload
+[101/305] [firefox] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status
+[102/305] [firefox] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress
+[103/305] [firefox] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits
+[104/305] [firefox] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload
+[105/305] [firefox] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice
+[106/305] [firefox] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent
+[107/305] [firefox] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent
+[108/305] [firefox] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears
+[109/305] [firefox] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status
+[110/305] [firefox] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors
+[111/305] [firefox] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening
+[112/305] [firefox] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save
+[113/305] [firefox] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token
+[114/305] [firefox] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes
+[115/305] [firefox] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion
+[116/305] [firefox] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload
+[117/305] [firefox] › tests\e2e\ui-layout.spec.ts:8:1 › task properties and notes use separate usable columns and narrow windows scroll without overlap
+[118/305] [firefox] › tests\e2e\ui-layout.spec.ts:38:1 › workspace menu has a visible symbol and dismisses with Escape, Tab and outside click
+[119/305] [firefox] › tests\e2e\ui-layout.spec.ts:54:1 › connection dialog is centered and keeps its close control reachable through read errors and scrolling
+[120/305] [firefox] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons
+[121/305] [firefox] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls
+[122/305] [firefox] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled
+
+(node:24244) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[123/305] [webkit] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception
+[124/305] [webkit] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save
+[125/305] [webkit] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending
+[126/305] [webkit] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity
+[127/305] [webkit] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading
+[128/305] [webkit] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE
+[129/305] [webkit] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE
+[130/305] [webkit] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected
+[131/305] [webkit] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload
+[132/305] [webkit] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false
+[133/305] [webkit] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true
+[134/305] [webkit] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend
+[135/305] [webkit] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token
+[136/305] [webkit] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks
+[137/305] [webkit] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false
+[138/305] [webkit] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true
+[139/305] [webkit] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export
+[140/305] [webkit] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data
+[141/305] [webkit] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text
+[142/305] [webkit] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states
+[143/305] [webkit] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import
+[144/305] [webkit] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404
+[145/305] [webkit] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow
+[146/305] [webkit] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window
+[147/305] [webkit] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows
+[148/305] [webkit] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots
+[149/305] [webkit] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions
+[150/305] [webkit] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent
+[151/305] [webkit] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls
+[152/305] [webkit] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status
+[153/305] [webkit] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export
+[154/305] [webkit] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged
+[155/305] [webkit] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery
+[156/305] [webkit] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict
+[157/305] [webkit] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay
+[158/305] [webkit] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback
+[159/305] [webkit] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access
+[160/305] [webkit] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement
+[161/305] [webkit] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload
+[162/305] [webkit] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status
+[163/305] [webkit] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress
+[164/305] [webkit] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits
+[165/305] [webkit] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload
+[166/305] [webkit] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice
+[167/305] [webkit] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent
+[168/305] [webkit] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent
+[169/305] [webkit] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears
+[170/305] [webkit] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status
+[171/305] [webkit] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors
+[172/305] [webkit] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening
+[173/305] [webkit] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save
+[174/305] [webkit] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token
+[175/305] [webkit] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes
+[176/305] [webkit] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion
+[177/305] [webkit] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload
+[178/305] [webkit] › tests\e2e\ui-layout.spec.ts:8:1 › task properties and notes use separate usable columns and narrow windows scroll without overlap
+[179/305] [webkit] › tests\e2e\ui-layout.spec.ts:38:1 › workspace menu has a visible symbol and dismisses with Escape, Tab and outside click
+[180/305] [webkit] › tests\e2e\ui-layout.spec.ts:54:1 › connection dialog is centered and keeps its close control reachable through read errors and scrolling
+[181/305] [webkit] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons
+[182/305] [webkit] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls
+[183/305] [webkit] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled
+
+(node:29356) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[184/305] [mobile-chromium] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception
+[185/305] [mobile-chromium] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save
+[186/305] [mobile-chromium] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending
+[187/305] [mobile-chromium] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity
+[188/305] [mobile-chromium] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading
+[189/305] [mobile-chromium] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE
+[190/305] [mobile-chromium] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE
+[191/305] [mobile-chromium] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected
+[192/305] [mobile-chromium] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload
+[193/305] [mobile-chromium] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false
+[194/305] [mobile-chromium] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true
+[195/305] [mobile-chromium] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend
+[196/305] [mobile-chromium] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token
+[197/305] [mobile-chromium] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks
+[198/305] [mobile-chromium] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false
+[199/305] [mobile-chromium] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true
+[200/305] [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export
+[201/305] [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data
+[202/305] [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text
+[203/305] [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states
+[204/305] [mobile-chromium] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import
+[205/305] [mobile-chromium] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404
+[206/305] [mobile-chromium] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow
+[207/305] [mobile-chromium] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window
+[208/305] [mobile-chromium] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows
+[209/305] [mobile-chromium] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots
+[210/305] [mobile-chromium] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions
+[211/305] [mobile-chromium] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent
+[212/305] [mobile-chromium] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls
+[213/305] [mobile-chromium] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status
+[214/305] [mobile-chromium] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export
+[215/305] [mobile-chromium] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged
+[216/305] [mobile-chromium] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery
+[217/305] [mobile-chromium] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict
+[218/305] [mobile-chromium] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay
+[219/305] [mobile-chromium] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback
+[220/305] [mobile-chromium] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access
+[221/305] [mobile-chromium] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement
+[222/305] [mobile-chromium] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload
+[223/305] [mobile-chromium] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status
+[224/305] [mobile-chromium] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress
+[225/305] [mobile-chromium] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits
+[226/305] [mobile-chromium] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload
+[227/305] [mobile-chromium] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice
+[228/305] [mobile-chromium] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent
+[229/305] [mobile-chromium] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent
+[230/305] [mobile-chromium] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears
+[231/305] [mobile-chromium] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status
+[232/305] [mobile-chromium] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors
+[233/305] [mobile-chromium] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening
+[234/305] [mobile-chromium] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save
+[235/305] [mobile-chromium] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token
+[236/305] [mobile-chromium] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes
+[237/305] [mobile-chromium] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion
+[238/305] [mobile-chromium] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload
+[239/305] [mobile-chromium] › tests\e2e\ui-layout.spec.ts:8:1 › task properties and notes use separate usable columns and narrow windows scroll without overlap
+[240/305] [mobile-chromium] › tests\e2e\ui-layout.spec.ts:38:1 › workspace menu has a visible symbol and dismisses with Escape, Tab and outside click
+[241/305] [mobile-chromium] › tests\e2e\ui-layout.spec.ts:54:1 › connection dialog is centered and keeps its close control reachable through read errors and scrolling
+[242/305] [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons
+[243/305] [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls
+[244/305] [mobile-chromium] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled
+
+(node:12460) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[245/305] [iphone] › tests\e2e\attachment-transport.spec.ts:2:1 › native multipart transport carries Blob bytes without request interception
+[246/305] [iphone] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save
+[247/305] [iphone] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending
+[248/305] [iphone] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity
+[249/305] [iphone] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading
+[250/305] [iphone] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE
+[251/305] [iphone] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE
+[252/305] [iphone] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected
+[253/305] [iphone] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload
+[254/305] [iphone] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=false
+[255/305] [iphone] › tests\e2e\delivery-review.spec.ts:21:37 › conflict review preserves local work; keepLocal=true
+[256/305] [iphone] › tests\e2e\delivery-review.spec.ts:27:1 › an accepted comment with a lost receipt needs exact readback, never a resend
+[257/305] [iphone] › tests\e2e\delivery-review.spec.ts:31:1 › opted-in automatic delivery stops after uncertainty and never persists the session token
+[258/305] [iphone] › tests\e2e\delivery-review.spec.ts:41:1 › connection reading waits for a delayed browser workspace before adopting tasks
+[259/305] [iphone] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=false
+[260/305] [iphone] › tests\e2e\delivery.spec.ts:3:37 › manual save retains Auto-Sync off; uncertainty=true
+[261/305] [iphone] › tests\e2e\desktop-migration.spec.ts:18:1 › desktop migration retains pending work in recovery and NPCDex drafts survive save, reload and export
+[262/305] [iphone] › tests\e2e\desktop-migration.spec.ts:28:1 › a corrupted desktop export cannot replace browser data
+[263/305] [iphone] › tests\e2e\desktop-migration.spec.ts:34:1 › recovery export stays available after failed browser saving and retains editor text
+[264/305] [iphone] › tests\e2e\desktop-migration.spec.ts:48:1 › dirty, saving and saved messages select their actual editor and I/O states
+[265/305] [iphone] › tests\e2e\desktop-migration.spec.ts:55:1 › invalid recovery layout and spoofed YouTrack links show refusal and offer no import
+[266/305] [iphone] › tests\e2e\foundation.spec.ts:2:1 › manifest, headers, icons and 404
+[267/305] [iphone] › tests\e2e\foundation.spec.ts:13:1 › React controls work without horizontal overflow
+[268/305] [iphone] › tests\e2e\foundation.spec.ts:27:1 › cached shell reopens offline in another window
+[269/305] [iphone] › tests\e2e\foundation.spec.ts:54:1 › updates require consent and protect other windows
+[270/305] [iphone] › tests\e2e\notes-editing.spec.ts:5:1 › notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots
+[271/305] [iphone] › tests\e2e\notes-editing.spec.ts:18:1 › a longer independent YouTrack note still shows the real conflict and preserves both versions
+[272/305] [iphone] › tests\e2e\notes-editing.spec.ts:24:1 › typed notes remain exportable after interrupted local storage and no cloud request is sent
+[273/305] [iphone] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls
+[274/305] [iphone] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status
+[275/305] [iphone] › tests\e2e\rdx.spec.ts:8:1 › RDX worker validates a native map and retains the exact file across reload and export
+[276/305] [iphone] › tests\e2e\rdx.spec.ts:18:1 › malformed RDX bytes leave the local library unchanged
+[277/305] [iphone] › tests\e2e\rdx.spec.ts:24:1 › RDX plan conflicts show both versions and save only the reviewed choice without task delivery
+[278/305] [iphone] › tests\e2e\shared-status.spec.ts:23:1 › independent devices share parent assignments and explicitly resolve an offline conflict
+[279/305] [iphone] › tests\e2e\shared-status.spec.ts:32:1 › lost shared assignment response requires exact readback after reload without replay
+[280/305] [iphone] › tests\e2e\shared-status.spec.ts:35:1 › an unavailable metadata app blocks shared delivery without native State fallback
+[281/305] [iphone] › tests\e2e\shared-status.spec.ts:39:1 › older Standby rollup rules display the compatibility refusal before metadata access
+[282/305] [iphone] › tests\e2e\status-delivery.spec.ts:5:1 › a parent's own status survives child rollup, reload, refresh and last-child movement
+[283/305] [iphone] › tests\e2e\status-delivery.spec.ts:12:1 › an interrupted parent rollup preserves the assignment and cannot be replayed after reload
+[284/305] [iphone] › tests\e2e\status-delivery.spec.ts:17:1 › PMON native testing reads keep the display label and priority, then deliver mapped parent status
+[285/305] [iphone] › tests\e2e\status-delivery.spec.ts:44:1 › multiple all-Standby children inherit Standby; single and mixed children stay In Progress
+[286/305] [iphone] › tests\e2e\status-dialog-sync.spec.ts:4:1 › web popup X remains usable during automatic delivery without unlocking task edits
+[287/305] [iphone] › tests\e2e\structural-delivery.spec.ts:4:1 › new task IDs, child links, native status, parent changes and exact-list deletion survive reload
+[288/305] [iphone] › tests\e2e\structural-delivery.spec.ts:12:1 › a lost creation response requires exact-ID confirmation and never creates twice
+[289/305] [iphone] › tests\e2e\structural-delivery.spec.ts:15:1 › a lost deletion response requires missing/access acknowledgement and is never resent
+[290/305] [iphone] › tests\e2e\structural-delivery.spec.ts:18:1 › a detached move needs explicit rebase before only the remaining parent link is sent
+[291/305] [iphone] › tests\e2e\task-filters.spec.ts:2:1 › filter popup strictly narrows rows, combines fields and clears
+[292/305] [iphone] › tests\e2e\task-filters.spec.ts:19:1 › assigned filters with direct reader › Assignee filter uses imported single and multi-user identities and combines with status
+[293/305] [iphone] › tests\e2e\task-filters.spec.ts:25:1 › active filters preserve parent toggles, Expand All and Collapse All with search and hidden ancestors
+[294/305] [iphone] › tests\e2e\task-port.spec.ts:2:1 › task notes and comment drafts survive switching, restart and offline reopening
+[295/305] [iphone] › tests\e2e\task-port.spec.ts:15:1 › a stale second window cannot overwrite a newer browser save
+[296/305] [iphone] › tests\e2e\task-port.spec.ts:23:1 › direct reader without a worker › YouTrack read uses only direct GET and never persists the token
+[297/305] [iphone] › tests\e2e\task-port.spec.ts:33:1 › desktop hierarchy stays beside the work panes
+[298/305] [iphone] › tests\e2e\task-port.spec.ts:44:1 › Awaiting Testing follows development, flashes amber, survives reload and respects reduced motion
+[299/305] [iphone] › tests\e2e\task-update.spec.ts:3:1 › task drafts survive a blocked update and the consenting reload
+[300/305] [iphone] › tests\e2e\ui-layout.spec.ts:8:1 › task properties and notes use separate usable columns and narrow windows scroll without overlap
+[301/305] [iphone] › tests\e2e\ui-layout.spec.ts:38:1 › workspace menu has a visible symbol and dismisses with Escape, Tab and outside click
+[302/305] [iphone] › tests\e2e\ui-layout.spec.ts:54:1 › connection dialog is centered and keeps its close control reachable through read errors and scrolling
+[303/305] [iphone] › tests\e2e\youtrack-acceptance.spec.js:33:1 › packaged widget completes root checks, reload and honest pending rollback through rendered buttons
+[304/305] [iphone] › tests\e2e\youtrack-acceptance.spec.js:50:1 › packaged widget displays empty HTTP failures and restores its controls
+[305/305] [iphone] › tests\e2e\youtrack-acceptance.spec.js:57:1 › registration failure is visible and keeps all mutation buttons disabled
+  2 skipped
+  303 passed (10.8m)

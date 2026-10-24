@@ -76,6 +76,7 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
             >
               Save Changes{" "}
               <Lamp
+                className="save-light"
                 color={
                   state.error
                     ? "red"

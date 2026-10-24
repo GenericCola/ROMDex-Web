@@ -68,9 +68,11 @@ const Details = ({
         {item ? (
           <div className="detail-scroll">
             <TaskProperties item={item} data={data} remove={askDelete} />
-            <TaskImage id={item.id} data={data} />
-            <TaskWriting item={item} data={data} />
-            <TaskAttachments key={item.id} item={item} data={data} />
+            <div className="port-detail-content">
+              <TaskWriting item={item} data={data} />
+              <TaskImage id={item.id} data={data} />
+              <TaskAttachments key={item.id} item={item} data={data} />
+            </div>
           </div>
         ) : (
           <div className="detail-placeholder">
