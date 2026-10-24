@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {test} from 'node:test';
 test('Vercel serves only the static export with the accepted security and worker policy',async()=>{
  const config=JSON.parse(await readFile('vercel.json','utf8')),pkg=JSON.parse(await readFile('package.json','utf8'));
- assert.equal(config.framework,null);assert.equal(config.outputDirectory,'out');assert.equal(config.trailingSlash,true);assert.equal(pkg.engines.node,'24.x');assert.equal(pkg.packageManager,'pnpm@11.25.0');assert.equal(config.installCommand,'corepack pnpm install --frozen-lockfile');assert.equal(config.buildCommand,'corepack pnpm build');
+ assert.equal(config.framework,null);assert.equal(config.outputDirectory,'out');assert.equal(config.trailingSlash,true);assert.equal(pkg.engines.node,'24.x');assert.equal(pkg.packageManager,'pnpm@11.25.0');assert.equal(pkg.scripts.prebuild,'node scripts/lint.mjs --fix');assert.equal(config.installCommand,'corepack pnpm install --frozen-lockfile');assert.equal(config.buildCommand,'corepack pnpm build');
  for(const key of ['functions','proxy','rewrites','env','builds'])assert.equal(key in config,false,key+' must not add a backend or credentials');
  let group;
  for(const line of (await readFile('public/_headers','utf8')).trim().split(/\r?\n/)){

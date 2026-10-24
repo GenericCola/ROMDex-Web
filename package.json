@@ -10,7 +10,7 @@
   "private": true,
   "scripts": {
     "prepare": "husky && node scripts/link-agents.js",
-    "prebuild": "pnpm run lint:fix",
+    "prebuild": "node scripts/lint.mjs --fix",
     "dev": "node scripts/next.mjs dev --port 3001",
     "build": "node scripts/next.mjs build && node scripts/build-pwa.mjs",
     "start": "node scripts/serve.mjs",
