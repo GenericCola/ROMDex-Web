@@ -1,6 +1,5 @@
 import { flushDraftEditors } from "@/domain/editor-drafts";
 import { workspaceStore } from "@/domain/workspace-store";
-import { ChevronsUpDown } from "lucide-react";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 const WorkspaceMenu = ({ workspace }: { workspace: "romdex" | "npcdex" }) => {
   const [menu, setMenu] = useState(false);
@@ -108,9 +107,7 @@ const WorkspaceMenu = ({ workspace }: { workspace: "romdex" | "npcdex" }) => {
         aria-expanded={menu}
         aria-controls={menu ? menuId : undefined}
         onClick={toggle}
-      >
-        <ChevronsUpDown aria-hidden="true" />
-      </button>
+      />
       {menu && (
         <div
           id={menuId}

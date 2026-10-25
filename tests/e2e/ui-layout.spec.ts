@@ -35,10 +35,9 @@ test("task properties and notes use separate usable columns and narrow windows s
  }
 });
 
-test("workspace menu has a visible symbol and dismisses with Escape, Tab and outside click",async({page})=>{
+test("workspace menu dismisses with Escape, Tab and outside click",async({page})=>{
  await page.goto('/');
  const trigger=page.getByRole('button',{name:'Switch Workspace',exact:true}),menu=page.getByRole('menu',{name:'Workspaces',exact:true});
- await expect(trigger.locator('svg')).toBeVisible();
  for(const width of [1280,800,390,320]){
   await page.setViewportSize({width,height:800});await trigger.focus();await page.keyboard.press('ArrowDown');await expect(menu).toBeVisible();await expect(menu.getByRole('menuitemradio',{name:'ROMDex',exact:true})).toBeFocused();
   const rect=await box(menu);expect(rect.x).toBeGreaterThanOrEqual(0);expect(rect.x+rect.width).toBeLessThanOrEqual(width);

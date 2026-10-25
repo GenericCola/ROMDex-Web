@@ -348,7 +348,6 @@ dialog.rdx-browser-dialog{top:16px;bottom:auto;margin-block:0}.rdx-browser-dialo
   .device-header #connect-open.header-connection { width: var(--header-control-height); min-width: var(--header-control-height); }
   .device-header #workspace-switcher { width: var(--header-control-height); height: var(--header-control-height); flex-basis: var(--header-control-height); display: grid; place-items: center; border: 0; background: transparent; position: relative; }
   .device-header #workspace-switcher::before { content: ""; position: absolute; width: var(--workspace-switch-size); height: var(--workspace-switch-size); border: 1px solid #681421; border-radius: 50%; background: var(--red-light); }
-  .workspace-switcher svg { width: 12px; height: 12px; position: relative; }
   .suite-popover { left: auto; right: 0; }
   .port-workspace-status { justify-content: flex-start; }
   .port-workspace-status > p { flex: 1 1 240px; }

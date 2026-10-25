@@ -24,7 +24,7 @@ Main Agent owns deployment and the final checklist. Test-QA Agent: GPT-6.1 Sol /
 - [x] Existing attachment/recovery/offline/install-message checks pass with synthetic data.
 - [x] Real invalid-token CORS refusal is visible through the app; no authenticated acceptance inferred.
 - [x] Candidate source identity is unchanged before/after QA; produced evidence retained separately.
-- [ ] Private evidence backup is verified.
+- [x] Private evidence backup is verified: romdex-web-hosted-ui-qa-2026-10-25 peels to 0d7494209205ea6190880ba4eac515b6cc5d4dd4; live branch remains the tested 3e8c0db source.
 
 Keep desktop app/profile, PMON tasks and production sharing intact. YouTrack remains the only application backend. No credentials, .env files, browser cookies, real queues or native YouTrack mutations are part of this hosted assignment. The previous full local matrix is evidence for this unchanged source, not a newly executed test run.
 
@@ -32,4 +32,20 @@ Keep desktop app/profile, PMON tasks and production sharing intact. YouTrack rem
 
 Test-QA Agent completed one invocation: 34 passes, no failures/skips/retries, exit 0, 53.9 seconds. Actual hosted worker b539cd50619d899150bd has 74 verified assets. Representative rendered screenshots pass. Exact source remains 3e8c0dbf1092ff68867b91216d49494b302b1ea3. Token usage is unavailable; no savings estimate is claimed. See evidence/ui-hosted-2026-10-25/QA-REPORT.md and the independently decompressed/hash-verified archive.
 
-Authenticated browser acceptance is pending owner token entry in the actual app. The owner was asked only to read PMON and report the result, leaving delivery disabled and preview unimported; no secret is requested in chat. This is a recorded external prerequisite, allowing the next queued concurrency investigation while waiting. Native attachment acceptance remains unrun.
+At the end of the first hosted run, authenticated reading was pending token entry. The subsequent owner-authorized Chrome read passed as recorded below. Native attachment acceptance remains unrun.
+
+## Owner decisions and authenticated read
+
+The owner selected preparing a JetBrains support request first. SC-001 remains blocked on a supported conditional-update guarantee; the bounded audit and exact question are recorded in SHARED-STATUS-CONCURRENCY-AUDIT-2026-10-25.md. The draft and 17 KB source/synthetic-evidence ZIP are prepared but not sent. No native app update or protocol change occurred.
+
+The owner explicitly requested loading the saved token on their behalf. Only the known desktop connection ciphertext and its Windows-protected key were read; no desktop file was changed, no credential value was printed or written to disk. The in-app browser's isolated clipboard prevented transfer, so native Chrome was used. The existing opaque token was entered in the masked read-only form; Chrome visibly reported: "396 tasks read. Review before saving a browser copy." The form cleared its token. Chrome's save-password offer was declined, the temporary clipboard restored, delivery remains disabled and the preview was not imported. This proves the authenticated PMON read path; native attachment writes and Firefox authenticated reading remain unrun. Chrome offered Install ROMDex, but actual installation has not run. Initial Chrome access approval timed out; a later authorized attempt succeeded.
+
+## Owner UI correction: remove the chevron
+
+The owner supplied a screenshot and stated that the chevron icon does not belong on the workspace control. Main Agent handles this small BUILD edit directly to avoid unnecessary assignment overhead: remove the icon/import and its unused CSS, retain the accessible red workspace control, hit area and all menu behavior. The existing browser test no longer requires the rejected icon. No backend, storage, desktop or status changes are in scope.
+
+Checklist: icon absent in rendered UI; workspace pointer/keyboard switching and dismissal preserved; local checks/build and the affected 15-case UI suite across all five profiles pass; exact-source Vercel deployment and the 34-case hosted suite pass. The earlier full 303-pass matrix remains historical; it is not rerun or relabeled as current for this icon-only change. Test-QA Agent is reused at Sol medium because its preceding bounded hosted assignment completed correctly without retries. No new Build-Audit/Repair Agent is needed for this three-file visual edit. Full acceptance is pending until these checks finish.
+
+BUILD formatting check initially stopped on the empty-button JSX style. The repository formatter corrected that one file before the final check/build. This was not a runtime or native-data failure.
+
+Final chevron BUILD verification passed: pnpm check and pnpm build, worker 753850fbfff5595104e9 with 74 assets. The affected browser QA remains pending.
