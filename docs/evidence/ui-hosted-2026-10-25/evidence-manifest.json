@@ -1,0 +1,292 @@
+[
+  {
+    "path": "docs/evidence/ui-hosted-2026-10-25/hosted-suite.log",
+    "bytes": 5608,
+    "sha256": "4b19dee1e8af8771b761d715a442dabb6ab545a488f91569f2808b0cd9f6d6c8"
+  },
+  {
+    "path": "docs/evidence/ui-hosted-2026-10-25/QA-REPORT.md",
+    "bytes": 6346,
+    "sha256": "d133c0aea3c8830f5147f3544552c71de436a133165f098f85477cc391d1bc1e"
+  },
+  {
+    "path": "docs/evidence/ui-hosted-2026-10-25/run-result.json",
+    "bytes": 228,
+    "sha256": "758a889640b2febc87dccf5a7c34f1f427923c2da06725b2a6669622f2b7142d"
+  },
+  {
+    "path": "docs/evidence/ui-hosted-2026-10-25/source-after.json",
+    "bytes": 421,
+    "sha256": "55151e4d606db0c86638928077cea114b2970c2416d414f1420e85092c6187ee"
+  },
+  {
+    "path": "docs/evidence/ui-hosted-2026-10-25/source-before.json",
+    "bytes": 328,
+    "sha256": "6f05199d4e73a877a9f58f7d495f6127f2e738c5203fbe52bc2ddeda09db9c2e"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/task-first-migration/hosted-chromium.png",
+    "bytes": 147832,
+    "sha256": "108d73f879ec3fd982b08a7f235adaf9c650ee245e4c4714d401a2ffaea7c27e"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/task-first-migration/hosted-firefox.png",
+    "bytes": 92112,
+    "sha256": "0b844cac968a4db3e30597efcbafd8f15fb2a161dc758d3eb8280179f0a2a282"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/task-first-migration/hosted-inventory-chromium.json",
+    "bytes": 8494,
+    "sha256": "422113f11b61771d5002b031bee2d5a746bc8bc2f63713ef0d6609139483f249"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/task-first-migration/hosted-inventory-firefox.json",
+    "bytes": 8494,
+    "sha256": "422113f11b61771d5002b031bee2d5a746bc8bc2f63713ef0d6609139483f249"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-connection-error-1280.png",
+    "bytes": 122603,
+    "sha256": "30f2c2bf8e01441a22bf9bc92e67c4e3cbc284a8897fa4f216dbc90211962d4b"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-connection-error-390.png",
+    "bytes": 49171,
+    "sha256": "929d6c3093afa5431ba28b4ce4d91d3cdc0cc5b3fe8b720996cb9a5c9e84463c"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-details-1280.png",
+    "bytes": 170715,
+    "sha256": "73fe55f7d5b9d36b5d4ac0d317dfc475572297da44daf80e8c127b354dc284b6"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-details-320.png",
+    "bytes": 49669,
+    "sha256": "f697f2bd1e8a5251e7dee8f2572299ac6f36ef0196337a8899abd19e29c8b94c"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-details-390.png",
+    "bytes": 54724,
+    "sha256": "32b3a4ee07bb7d1601a815ac1ecdb0e47b4d9f79a8564911a6d5e9b8aec51a09"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-details-800.png",
+    "bytes": 134314,
+    "sha256": "9b520a3585faec950753194088dbd3f91887966e19ca303ed09156472a9b6fc9"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-menu-1280.png",
+    "bytes": 153176,
+    "sha256": "d3094c095f7f7cc03be585c2572da88a0d50b02c938b09927e0880a170c2809f"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-menu-320.png",
+    "bytes": 65732,
+    "sha256": "c28f3e429ac8374f7aaf09e739b7fda6a594e81d8fdea3a1e0e9a11f99216514"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-menu-390.png",
+    "bytes": 67751,
+    "sha256": "f0cb796be308fada207804e4a42d9ef61ed8631578e5f1bff90e9cd21359c396"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/chromium-menu-800.png",
+    "bytes": 117518,
+    "sha256": "56aa3f7e80e9538292d5141b3381344dc39b3765957d89359ef3a92f7f334c10"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-connection-error-1280.png",
+    "bytes": 123200,
+    "sha256": "482395539d920b700bab50db55b3787d97cd8e0e8022d788afe3ee2c3151b7d4"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-connection-error-390.png",
+    "bytes": 43295,
+    "sha256": "4cbd050c51bbdeb24ffb50bed9afb64ffe74473ba2ba81e5fa86430c49c66ee3"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-details-1280.png",
+    "bytes": 110402,
+    "sha256": "08b5592cb882cb955bc15a6a381e3aa2a53c64b329f7a7208d8b6cec1da15603"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-details-320.png",
+    "bytes": 37696,
+    "sha256": "54842b2fb7f87cf37826338e7fdd65f64517b7fdc01255ef9233f4c5f35abc00"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-details-390.png",
+    "bytes": 41295,
+    "sha256": "de88de68c73ec9672de5d3ebeff175dd2523cd1557a0c8ef5f64b144818e2b89"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-details-800.png",
+    "bytes": 95069,
+    "sha256": "68a0df20c458720290997d3f8c6f534d253a42fd0fb88c428823b2c102ade982"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-menu-1280.png",
+    "bytes": 100021,
+    "sha256": "2a149c8c61dfd62f9e30a22604e2cf3f5b340678b9d6412b085956582ac0049c"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-menu-320.png",
+    "bytes": 54078,
+    "sha256": "541e4b98b2b3601efd49dec02871a400062aa462c9ab41833d840a0dc023b7b5"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-menu-390.png",
+    "bytes": 54237,
+    "sha256": "0b757cd7cb26b32fc5d48fb5aca366259dd467865071c45c763f3bb424d0e49b"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/firefox-menu-800.png",
+    "bytes": 85697,
+    "sha256": "36bfc959a8abf8f8bf1f52dd00447a259c2bdfa015612a9ccbabcd7834571512"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/hosted-cors-chromium.json",
+    "bytes": 200,
+    "sha256": "9c91a1fa6f3d3f3d28362324e381c1b1ac37451bb11993639db8dfa9658c2056"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/hosted-cors-chromium.png",
+    "bytes": 113383,
+    "sha256": "090afcf3d34770d1dc9f0d99024b0cf0316d5727fa4167e27a47dd10b2a43e56"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/hosted-cors-firefox.json",
+    "bytes": 200,
+    "sha256": "9c91a1fa6f3d3f3d28362324e381c1b1ac37451bb11993639db8dfa9658c2056"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/after/ui-repair/hosted-cors-firefox.png",
+    "bytes": 112622,
+    "sha256": "363be79ef6792c102cd454ef2bad8081adb064cb56d46076471babf4459ef913"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/task-first-migration/hosted-chromium.png",
+    "bytes": 148668,
+    "sha256": "79438c55c455732bee02852804f9536e1166bc3938c7550005e5f547164a7cee"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/task-first-migration/hosted-firefox.png",
+    "bytes": 92743,
+    "sha256": "cd831c52e65bd793376d07b17a1a2dcd9c2ffb7aab268c39fcef4657c168e053"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/task-first-migration/hosted-inventory-chromium.json",
+    "bytes": 8494,
+    "sha256": "cbfe0e717ae675d2171ebee8b149546dbd6c07155360aace0dda52080674f50d"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/task-first-migration/hosted-inventory-firefox.json",
+    "bytes": 8494,
+    "sha256": "cbfe0e717ae675d2171ebee8b149546dbd6c07155360aace0dda52080674f50d"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-connection-error-1280.png",
+    "bytes": 122610,
+    "sha256": "0a3b099912936481a41b09fa04a8ff313efcd7b30964fcbc6df3de626751ad5f"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-connection-error-390.png",
+    "bytes": 49171,
+    "sha256": "929d6c3093afa5431ba28b4ce4d91d3cdc0cc5b3fe8b720996cb9a5c9e84463c"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-details-1280.png",
+    "bytes": 170715,
+    "sha256": "e7e547ad28263142d2729555c7d9eef6fc52d07032cccc452398179ccf74a6cd"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-details-320.png",
+    "bytes": 49669,
+    "sha256": "f697f2bd1e8a5251e7dee8f2572299ac6f36ef0196337a8899abd19e29c8b94c"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-details-390.png",
+    "bytes": 54724,
+    "sha256": "32b3a4ee07bb7d1601a815ac1ecdb0e47b4d9f79a8564911a6d5e9b8aec51a09"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-details-800.png",
+    "bytes": 134319,
+    "sha256": "541fdfa726baa790d56af1f0fb593d781af7dc140dc265bdd984d64e327add65"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-menu-1280.png",
+    "bytes": 153177,
+    "sha256": "8001af0beee5ad14ea935315ffbebbca2df94fa173e156ca7adf50f9323b270c"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-menu-320.png",
+    "bytes": 65740,
+    "sha256": "1c125264263291418be6e84134c424ecab3770a1bc52f08bcefcd38d76dc5d6d"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-menu-390.png",
+    "bytes": 67743,
+    "sha256": "b9abe56c93612bea5522bd0d38e56aa7b4a117d9c6903a2477d63706eda7c084"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/chromium-menu-800.png",
+    "bytes": 117540,
+    "sha256": "046de5b35479bebba3c10ef580dc44f6a6975d27f92bdd1bc2404b37a0a325bd"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-connection-error-1280.png",
+    "bytes": 123212,
+    "sha256": "b47fd7ec368535239d0e831fa0c4dc3375304fd556b2555adc95808c7b6f5ad4"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-connection-error-390.png",
+    "bytes": 43295,
+    "sha256": "4cbd050c51bbdeb24ffb50bed9afb64ffe74473ba2ba81e5fa86430c49c66ee3"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-details-1280.png",
+    "bytes": 110402,
+    "sha256": "08b5592cb882cb955bc15a6a381e3aa2a53c64b329f7a7208d8b6cec1da15603"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-details-320.png",
+    "bytes": 37696,
+    "sha256": "54842b2fb7f87cf37826338e7fdd65f64517b7fdc01255ef9233f4c5f35abc00"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-details-390.png",
+    "bytes": 41295,
+    "sha256": "de88de68c73ec9672de5d3ebeff175dd2523cd1557a0c8ef5f64b144818e2b89"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-details-800.png",
+    "bytes": 95069,
+    "sha256": "68a0df20c458720290997d3f8c6f534d253a42fd0fb88c428823b2c102ade982"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-menu-1280.png",
+    "bytes": 100022,
+    "sha256": "180ec1b234485a8a41865dd5a87bc66ae7622fa3ca320f176bd177f1f928398b"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-menu-320.png",
+    "bytes": 54086,
+    "sha256": "49ce51d419420c68f0d656b23b37218ec027899d326173ac610333dcb8721be3"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-menu-390.png",
+    "bytes": 54229,
+    "sha256": "63cf907ec79308dda5cd4167d8301457ec16bbc7b49abd1ae75ee737b75a86f9"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/before/ui-repair/firefox-menu-800.png",
+    "bytes": 85698,
+    "sha256": "d66b1419728ae13a6df97a62ee4554f409fbfabca8de5ac997d7e494bb0839cd"
+  },
+  {
+    "path": "artifacts/ui-hosted-2026-10-25/results/.last-run.json",
+    "bytes": 45,
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+  }
+]

@@ -170,3 +170,5 @@ right. Header save-light spacing, centered dialogs, sticky close controls and
 workspace-menu keyboard/pointer dismissal are also repaired. The accepted
 desktop and its profile are unchanged. Verification and hosted delivery are
 tracked in [UI-REPAIR-2026-10-24.md](UI-REPAIR-2026-10-24.md).
+
+October 25: the owner resumed migration. UI source 3e8c0db is deployed at https://romdex-web.vercel.app and all 34 hosted Chrome/Firefox checks pass, including actual CORS refusal messages. See docs/MIGRATION-RESUME-2026-10-25.md (relative to repository root) for the active queue and evidence. Authenticated native acceptance, concurrent shared-status safety and desktop cutover remain pending.

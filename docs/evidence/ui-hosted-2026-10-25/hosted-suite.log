@@ -1,0 +1,53 @@
+$ node scripts/playwright.mjs test "--config=playwright.hosted.config.ts" "--reporter=line" "--output=artifacts/ui-hosted-2026-10-25/results"
+
+Running 34 tests using 1 worker
+
+
+(node:33020) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/34] [chromium] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save
+[2/34] [chromium] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending
+[3/34] [chromium] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity
+[4/34] [chromium] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading
+[5/34] [chromium] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE
+[6/34] [chromium] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE
+[7/34] [chromium] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected
+[8/34] [chromium] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload
+[9/34] [chromium] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls
+[10/34] [chromium] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status
+[11/34] [chromium] › tests\e2e\ui-layout.spec.ts:8:1 › task properties and notes use separate usable columns and narrow windows scroll without overlap
+[12/34] [chromium] › tests\e2e\ui-layout.spec.ts:38:1 › workspace menu has a visible symbol and dismisses with Escape, Tab and outside click
+[13/34] [chromium] › tests\e2e\ui-layout.spec.ts:54:1 › connection dialog is centered and keeps its close control reachable through read errors and scrolling
+[14/34] [chromium] › tests\hosted\cors.spec.ts:4:1 › the real hosted UI receives a YouTrack authentication refusal through CORS
+[15/34] [chromium] › tests\hosted\shell.spec.ts:6:1 › hosted headers and every cached asset match the worker content inventory
+[chromium] › tests\hosted\shell.spec.ts:6:1 › hosted headers and every cached asset match the worker content inventory
+
+
+[16/34] [chromium] › tests\hosted\shell.spec.ts:20:1 › hosted app renders without reading YouTrack or importing desktop data
+[17/34] [chromium] › tests\hosted\shell.spec.ts:25:1 › hosted app preserves a local note across offline reopening
+
+(node:42380) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[18/34] [firefox] › tests\e2e\attachments.spec.ts:29:1 › attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save
+[19/34] [firefox] › tests\e2e\attachments.spec.ts:41:1 › lost upload requires an exact receipt and byte readback after restart without resending
+[20/34] [firefox] › tests\e2e\attachments.spec.ts:45:1 › a file queued for a newly created task follows the exact returned PMON identity
+[21/34] [firefox] › tests\e2e\attachments.spec.ts:49:1 › oversized file selection shows the actual tenant limit without queuing or uploading
+[22/34] [firefox] › tests\e2e\attachments.spec.ts:53:1 › lost deletion stays blocked until exact missing-file acknowledgement, without a second DELETE
+[23/34] [firefox] › tests\e2e\attachments.spec.ts:59:1 › changed deletion metadata selects the conflict message and sends no DELETE
+[24/34] [firefox] › tests\e2e\attachments.spec.ts:64:1 › recovery imports exact staged bytes into a separate browser workspace with delivery disconnected
+[25/34] [firefox] › tests\e2e\attachments.spec.ts:70:1 › failed staged-file storage shows refusal and queues no upload
+[26/34] [firefox] › tests\e2e\pwa-install.spec.ts:3:1 › Chrome and Firefox install instructions are visible through the actual app controls
+[27/34] [firefox] › tests\e2e\pwa-install.spec.ts:7:1 › standalone launch displays installed-app status
+[28/34] [firefox] › tests\e2e\ui-layout.spec.ts:8:1 › task properties and notes use separate usable columns and narrow windows scroll without overlap
+[29/34] [firefox] › tests\e2e\ui-layout.spec.ts:38:1 › workspace menu has a visible symbol and dismisses with Escape, Tab and outside click
+[30/34] [firefox] › tests\e2e\ui-layout.spec.ts:54:1 › connection dialog is centered and keeps its close control reachable through read errors and scrolling
+[31/34] [firefox] › tests\hosted\cors.spec.ts:4:1 › the real hosted UI receives a YouTrack authentication refusal through CORS
+[32/34] [firefox] › tests\hosted\shell.spec.ts:6:1 › hosted headers and every cached asset match the worker content inventory
+
+[firefox] › tests\hosted\shell.spec.ts:6:1 › hosted headers and every cached asset match the worker content inventory
+
+[33/34] [firefox] › tests\hosted\shell.spec.ts:20:1 › hosted app renders without reading YouTrack or importing desktop data
+[34/34] [firefox] › tests\hosted\shell.spec.ts:25:1 › hosted app preserves a local note across offline reopening
+  34 passed (53.9s)

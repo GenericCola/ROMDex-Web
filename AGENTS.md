@@ -1,3 +1,13 @@
+# Resumed on October 25, 2026
+
+The owner resumed migration under the updated subagent/token-efficiency guidelines.
+Use sequential, bounded Build-Audit Agent, Test-QA Agent and Repair Agent assignments
+only where needed; Main Agent owns the complete checklist. Prefer proven lower-cost
+model/effort pairs, narrow file-backed context and reuse of exact-candidate evidence.
+Record model selection, uncertainty, retries and actual outcomes. Work on one issue
+at a time; preserve all acceptance gates. Read docs/MIGRATION-RESUME-2026-10-25.md.
+The historical model-switch pause below is superseded by this direct resume.
+
 # Paused at owner request — October 24, 2026
 
 Migration is paused for a model switch. Local UI repairs pass all checks/build

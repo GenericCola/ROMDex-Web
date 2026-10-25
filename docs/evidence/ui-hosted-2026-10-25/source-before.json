@@ -1,0 +1,13 @@
+{
+  "head": "3e8c0dbf1092ff68867b91216d49494b302b1ea3",
+  "branch": "codex/accepted-app-port",
+  "status": [
+    " M AGENTS.md",
+    "?? docs/MIGRATION-RESUME-2026-10-25.md"
+  ],
+  "utc": "2026-10-25T16:22:24.7304444Z",
+  "excludedMainAgentEdits": [
+    "AGENTS.md",
+    "docs/MIGRATION-RESUME-2026-10-25.md"
+  ]
+}
