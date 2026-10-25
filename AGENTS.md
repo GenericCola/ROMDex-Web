@@ -1,3 +1,17 @@
+# Quarantined PMON test authorization — October 25, 2026
+
+The owner explicitly permits creating synthetic disposable tasks in PMON under a
+quarantined Test-only Epic. Main Agent created private Epic PMON-466 and private
+children PMON-467 (Chrome attachments) and PMON-468 (Firefox attachments), visible
+to GenericCola. This supersedes the older NPCD-only mutation restriction only for
+these new quarantined test fixtures and subsequently explicitly identified test
+descendants. Existing production tasks, desktop/data and production sharing stay
+protected. Current attachment browser guard permits only the selected child's
+one synthetic upload and reviewed exact new-file deletion; no status/hierarchy
+writes. Read docs/NATIVE-ATTACHMENT-PLAN-2026-10-25.md for the active amendment.
+The earlier NPCD alias harness was never run and is superseded. Native PMON
+attachment testing uses actual identities/responses and the unchanged hosted app.
+
 # Resumed on October 25, 2026
 
 The owner resumed migration under the updated subagent/token-efficiency guidelines.

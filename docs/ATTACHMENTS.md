@@ -40,9 +40,13 @@ lost-response review, changed-metadata refusal, recovery transfer, corruption,
 missing bytes, upload limits and token-origin protection. See
 [TASK-FIRST-MIGRATION.md](TASK-FIRST-MIGRATION.md) for current final-run evidence.
 
-Browser tests use intercepted synthetic PMON IDs, never live PMON tasks. Native
-YouTrack attachment delivery and real hosted-origin CORS remain pending. The
-shared-status concurrency failure is separate and still blocks daily cutover.
+The automated failure-path suites use intercepted synthetic PMON IDs. Under the
+owner's later authorization, native Chrome and Firefox acceptance also passed on
+private disposable PMON-467/468 beneath test-only Epic PMON-466. Native upload,
+exact-byte download, reviewed deletion and actual CORS passed; interrupted Firefox
+readback recovered without resending. See NATIVE-ATTACHMENT-ACCEPTANCE-2026-10-25.md
+for provenance and unrun native error branches. The separate shared-status
+concurrency failure still blocks daily cutover.
 
 New staged files are stored as ArrayBuffer byte records, then reconstructed and
 hash-verified when read. This fixes the iPhone browser runtime's rejected File

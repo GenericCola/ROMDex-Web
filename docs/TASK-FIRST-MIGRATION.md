@@ -38,8 +38,11 @@ preference; no reduced-safety cutover choice was approved.
   administrator-completion message, anonymous GET/POST/DELETE preflights return
   that origin and authorization/content-type permission. Authenticated reading
   remains a separate check; see CORS-ORIGIN-HANDOFF.md.
-- [ ] Confirm authenticated browser reads and native attachment delivery only
-  on the NPCD fixture allowlist. Keep PMON out of developer acceptance mutations.
+- [x] Confirm authenticated browser reads and native attachment delivery on the
+  owner-authorized private PMON quarantine (Epic466, children467/468). Native
+  Chrome and Firefox cycles pass; interrupted Firefox recovery also passes.
+  Existing production work stayed outside the mutation allowlist. See
+  NATIVE-ATTACHMENT-ACCEPTANCE-2026-10-25.md for exact evidence and limits.
 - [ ] Verify actual Windows installation/launch from Chrome and Firefox. The
   automated standalone test emulates the display-mode signal; it is not OS-level
   installation acceptance. Chrome uses its install prompt/icon; recent Firefox
@@ -176,3 +179,11 @@ October 25: the owner resumed migration. UI source 3e8c0db is deployed at https:
 October 25 authenticated-read follow-up: at the owner's request, the saved token was loaded into native Chrome without disclosure or a desktop file change. The actual hosted UI reported "396 tasks read. Review before saving a browser copy." The read form cleared its token, delivery remains disabled and the preview was not imported. This passes Chrome authenticated reading only; native attachment acceptance, Firefox authenticated reading, shared-status concurrency, actual installation and desktop cutover remain pending. The owner selected a JetBrains support request for the concurrency blocker; the draft and evidence packet are prepared but not sent.
 
 Owner chevron correction: deployed source 36e748eaad7e360974c62c392a61c639ae19f804 removes the added workspace symbol while keeping its red control and behavior. Check/build, 15 affected local and 34 hosted cases pass. See evidence/chevron-removal-2026-10-25/QA-REPORT.md for current dispositions and limits. No desktop or real task data changes were made.
+
+## Latest checkpoint — October 25 native attachments and support
+
+The owner subsequently authorized disposable synthetic PMON tasks in a quarantined Test-only Epic. Private Epic PMON-466 and children PMON-467/468 were created for this scope. Native Chrome and Firefox authenticated reads, upload, exact-byte download, Cancel/reviewed deletion, disconnect/reload and empty final queues now pass on deployed source36e748eaad7e360974c62c392a61c639ae19f804. The earlier NPCD-only attachment restriction is superseded only for these fixtures; production tasks and desktop data remain intact.
+
+Firefox's first upload confirmation exceeded the original harness's five-second assertion window. The original failure is preserved; exact recovery without resending passed, then one fresh cycle with thirty-second assertions passed. Its upload-to-confirmation boundary took5.212seconds, consistent with the timeout hypothesis without proving the original precise cause. No application code was changed for this test repair. Independent Test-QA review passed both recovery and the fresh cycle. Native error/limit/conflict cases beyond the observed interruption retain synthetic evidence; no blanket native failure-path pass is claimed.
+
+JetBrains support was successfully submitted with the prepared source/synthetic evidence ZIP and related open report JT-98787. SC-001 remains awaiting a supported answer and native retest. Production sharing is OFF; no new admin install is needed for this step. Actual Windows installed-app acceptance and reviewed desktop backup/export/import remain pending. Browser movement/minimization prevented a reliable installation check; no install was performed. See WINDOWS-INSTALL-ACCEPTANCE-2026-10-25.md.

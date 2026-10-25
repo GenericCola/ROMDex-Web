@@ -1,0 +1,354 @@
+{
+  "path": "NATIVE-ACCEPTANCE-EVIDENCE.zip",
+  "sha256": "0690d98d3b24bee64b89321a6fdb8dca055b154c3515c3de84f77ec002820a6d",
+  "bytes": 1032750,
+  "membersVerified": true,
+  "fileCount": 69,
+  "files": [
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a/before-delivery-recovery.json",
+      "bytes": 5237,
+      "sha256": "753b4f67286efe1cc298a29fbe8a250b0f75682f8564dcaa17de4b750999f617"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a/deleted-reloaded.png",
+      "bytes": 149394,
+      "sha256": "2fa0b93de86ac0224025c528965c47a77c3a390d6882ab1ea2f0e1317345aed5"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a/final-recovery.json",
+      "bytes": 6025,
+      "sha256": "227ca74f5fed9c7ea65cd7f1c64657f0c81c262864934320115f2b3771fcfc83"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a/native-download.txt",
+      "bytes": 63,
+      "sha256": "13ba0e7d8a2500acde886970a6941b76887db12bd3a9d1eee2375b3dcf32b361"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a/result.json",
+      "bytes": 4444,
+      "sha256": "03bb7584f9c12adfc434bedbef05ba89ae5b95b8a730baea3aee3a119072ed13"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a/romdex-native-pmon-467-chrome-20261025-a.txt",
+      "bytes": 63,
+      "sha256": "13ba0e7d8a2500acde886970a6941b76887db12bd3a9d1eee2375b3dcf32b361"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a/staged-export.txt",
+      "bytes": 63,
+      "sha256": "13ba0e7d8a2500acde886970a6941b76887db12bd3a9d1eee2375b3dcf32b361"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a/uploaded.png",
+      "bytes": 156722,
+      "sha256": "357765757b7c80e00b9fa0157278ec4478ad331b9da3a8d9ecc9285d12061843"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-20261025-a-metadata.json",
+      "bytes": 168,
+      "sha256": "54be2beb7e3749e025bb3307fd838415685583d949b7702a40c760def03743e3"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/chrome-preservation.json",
+      "bytes": 378,
+      "sha256": "4a9d2b2215ac6a02192fd46923550ecad16494cd21ce66a03cf9e88874da9396"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-a/result.json",
+      "bytes": 404,
+      "sha256": "46624f3a4e7ef8d58d7e2cb29136aee282bc4bc088808c24730ecd913c000d1b"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-a/romdex-native-pmon-468-firefox-20261025-a.txt",
+      "bytes": 64,
+      "sha256": "47089a19cfb106f587c2185daf1d786c9a746d08ded7aad3e962ea0c4875cdc0"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-a-metadata.json",
+      "bytes": 167,
+      "sha256": "b07fe546ba050f85dbaa02686204e248424c56f1fa1cd733a740990e0563bcfb"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-b/before-delivery-recovery.json",
+      "bytes": 5243,
+      "sha256": "584ef49f56c3be67dd6ddd4ebad7fa5c23c823853e61c8ea1c3cc7e6eb437259"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-b/result.json",
+      "bytes": 2690,
+      "sha256": "451c9a6a0b99ed1af4bca68cd24a53df4bc011ac358bef89dcf7efe9ebd4145b"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-b/romdex-native-pmon-468-firefox-20261025-b.txt",
+      "bytes": 64,
+      "sha256": "96b32b2ba21f7d946c18a2ad76262ab63bb2b45e8aaa78961f033835bd10f8b6"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-b/staged-export.txt",
+      "bytes": 64,
+      "sha256": "96b32b2ba21f7d946c18a2ad76262ab63bb2b45e8aaa78961f033835bd10f8b6"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-b/stopped-recovery.json",
+      "bytes": 5621,
+      "sha256": "79ef8657d53d40be96fe8e213711c6fe99c6f35cddf8ca7d74891df6a66f7099"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-b/stopped.png",
+      "bytes": 110704,
+      "sha256": "1e903087d0b71f5c5cad10d130d43c6edb071b822d27ce2d8820cfead28649a4"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-b-metadata.json",
+      "bytes": 167,
+      "sha256": "b07fe546ba050f85dbaa02686204e248424c56f1fa1cd733a740990e0563bcfb"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c/before-delivery-recovery.json",
+      "bytes": 5243,
+      "sha256": "1fdea8718bb3cdb94dc2308523656cc1b3348a0d5feca613708e6bc2711b789a"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c/deleted-reloaded.png",
+      "bytes": 104544,
+      "sha256": "88fadec70baa8c6ceddab5c16188409e90e20cabceb36dfc782f3054118e721c"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c/final-recovery.json",
+      "bytes": 6027,
+      "sha256": "1b163a312f71435129aa42878a9759cca613c4bf79f250e315cf2d744f630f63"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c/native-download.txt",
+      "bytes": 64,
+      "sha256": "891745daa299c4971d3a4f30de69cb0c914bea79690c8690003e47f419b975b1"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c/result.json",
+      "bytes": 5341,
+      "sha256": "e68aa5caa96b8064ebd7b218c22e24c1561954fe5086a636404bc4c3455a8f33"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c/romdex-native-pmon-468-firefox-20261025-c.txt",
+      "bytes": 64,
+      "sha256": "891745daa299c4971d3a4f30de69cb0c914bea79690c8690003e47f419b975b1"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c/staged-export.txt",
+      "bytes": 64,
+      "sha256": "891745daa299c4971d3a4f30de69cb0c914bea79690c8690003e47f419b975b1"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c/uploaded.png",
+      "bytes": 120599,
+      "sha256": "869c4185b3bd372cc2422926a877020e07cc231a8401a8bf1a2c77c8056b4690"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-20261025-c-metadata.json",
+      "bytes": 167,
+      "sha256": "4709befb3db64a2c8904098e31d98171181f3f6e47664eba7425f18a404ee9c1"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-preservation.json",
+      "bytes": 649,
+      "sha256": "23a9814a0eeefa7940737fda44bdf45ee24e2d1e85583ebecf7dc26f62afba4f"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a/deleted-reloaded.png",
+      "bytes": 108039,
+      "sha256": "516480d1a968f61f7686516559c15c31acbd11c46eab10cd0298a847cb77c565"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a/final-recovery.json",
+      "bytes": 6059,
+      "sha256": "29d790710741daa850f7b4f33eacc75b86239855b01406862a8f212f9ee8a8a8"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a/imported-uncertain.png",
+      "bytes": 119748,
+      "sha256": "20883c201d6b8e7d1d8bd497cc50720f29a7930b951edaecec09775a681ce227"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a/native-download.txt",
+      "bytes": 64,
+      "sha256": "96b32b2ba21f7d946c18a2ad76262ab63bb2b45e8aaa78961f033835bd10f8b6"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a/readback-confirmed-recovery.json",
+      "bytes": 5553,
+      "sha256": "4f9bb77b84fc65e09ce970ab701dc83b8adb18cc93dd57f87282da62e9a153f9"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a/result.json",
+      "bytes": 4529,
+      "sha256": "36eb344f2b50da08df365abd8fce23e81027050520dff9fd9cfa184a01b0e45d"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a/romdex-native-pmon-468-firefox-20261025-b.txt",
+      "bytes": 64,
+      "sha256": "96b32b2ba21f7d946c18a2ad76262ab63bb2b45e8aaa78961f033835bd10f8b6"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a/uploaded.png",
+      "bytes": 114967,
+      "sha256": "d50ee3c84883ff2c4b97fe2fb1811a7c24cb5391338b5045504d6e57b79f5fac"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/firefox-recovery-20261025-a-metadata.json",
+      "bytes": 167,
+      "sha256": "9670bf1e91eb9db71cfcaef6cdea8d41298156f613991c88fb7baf51d1f46026"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pmon-firefox-final.json",
+      "bytes": 1273,
+      "sha256": "d966b5ce190e240313daec931086fb9672a8d9e27544a0f693caaa7c53276753"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pmon-mcp-after-chrome.json",
+      "bytes": 4184,
+      "sha256": "c13dcd78865cb0d304afe67643a71bd2291ce2a041dae7bf09b1b510c29cd56f"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pmon-mcp-before.json",
+      "bytes": 4184,
+      "sha256": "b4b39bccad8073505ea2e449d3ef435b13f45815ca0c9843a8d934a11f4677d7"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pmon-recovery-after.json",
+      "bytes": 4185,
+      "sha256": "80be2a4a1b1d65177bf0b5ab48fcf9378c799da0a8f9a1319b93ca6e31bef458"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pmon-recovery-before.json",
+      "bytes": 1428,
+      "sha256": "f72b4baad7025410d9fe8a6af16dbed1520b2bd17a696103291ea138a3f165e4"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pre-na001-harness/native-attachment-acceptance.mjs",
+      "bytes": 11391,
+      "sha256": "207cc5a85e964fc2e2a18f888a32a1ad2b783ba5672fe152c0008a71dad9cc92"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pre-na001-harness/NATIVE-ATTACHMENT-BUILD-HANDOFF-2026-10-25.md",
+      "bytes": 8587,
+      "sha256": "8b32c3cb8205e0d2ee2e77a7cd3ac79cdea5175a4ca289d675e15197688e94a9"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pre-na001-harness/native-attachment-guard.mjs",
+      "bytes": 6955,
+      "sha256": "c1c6b68a1576c9e173df39fbee9b6b46af53bf0b486a531ec33d1b65327e2c55"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/pre-na001-harness/native-attachment-guard.test.mjs",
+      "bytes": 7307,
+      "sha256": "4cb610913f847658a150aea85d6e68bfff23c9e0524d45e43332c33a15af62a8"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/recovery-preservation.json",
+      "bytes": 2504,
+      "sha256": "68da0d90465e33a1fb2ce96ec95b9e8acf777fdbfa248cb5375c6739e3f1101f"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/recovery-runner-1a62f497.mjs",
+      "bytes": 15223,
+      "sha256": "1a62f497df4c12495fa4ae5d31d129894e67f8ef1c3f2b7efd0790d38f1bab69"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/run_with_saved_token.py",
+      "bytes": 4046,
+      "sha256": "d4e7c63c572273b32a97c4293900de5bf231adf866f59f1f61ccfcbd9210d7f0"
+    },
+    {
+      "path": "artifacts/native-attachments-2026-10-25/superseded-npcd-credential-wrapper.py",
+      "bytes": 5244,
+      "sha256": "4133090bd2409ce97783570faed9a519b895811d13892ba5201208d0c796be6c"
+    },
+    {
+      "path": "artifacts/jetbrains-support-2026-10-25/submitted-message.txt",
+      "bytes": 4091,
+      "sha256": "412f9fd095bedacbe97e841e3d6aac406dadc5de9a9057afa8209a5187ff455c"
+    },
+    {
+      "path": "artifacts/jetbrains-support-2026-10-25/submitted.png",
+      "bytes": 53268,
+      "sha256": "ded21847a21a5d1415f06bf2147ae4a34c9b33fb8431425a35e74e4ab8c32760"
+    },
+    {
+      "path": "artifacts/superseded-native-attachment-alias-2026-10-25/native-attachment-acceptance.mjs",
+      "bytes": 11634,
+      "sha256": "6769f3871f6a14416dd0202a59253a91e87577537d152e5f2053da13cda8d08f"
+    },
+    {
+      "path": "artifacts/superseded-native-attachment-alias-2026-10-25/NATIVE-ATTACHMENT-BUILD-HANDOFF-2026-10-25.md",
+      "bytes": 8124,
+      "sha256": "2eecd3bfab5e634d3a6d676431a7be6b8edba819c6c1741af27235718e7cf53a"
+    },
+    {
+      "path": "artifacts/superseded-native-attachment-alias-2026-10-25/native-attachment-guard.mjs",
+      "bytes": 4757,
+      "sha256": "0465e665c7cc02943198463587fe68b6a651ec3ccab845a4e6396afa72cf0f43"
+    },
+    {
+      "path": "artifacts/superseded-native-attachment-alias-2026-10-25/native-attachment-guard.test.mjs",
+      "bytes": 4943,
+      "sha256": "c7a6f9838dbf87ad86831c97cf6558106169e86a0894dca51ce5e29783d25c5a"
+    },
+    {
+      "path": "artifacts/superseded-native-attachment-alias-2026-10-25/SUPERSEDED.txt",
+      "bytes": 243,
+      "sha256": "426ddd8465e67c9d2ac3ab83ee37c776670fcada04da22166b90fed82035ddca"
+    },
+    {
+      "path": "docs/NATIVE-ATTACHMENT-ACCEPTANCE-2026-10-25.md",
+      "bytes": 31531,
+      "sha256": "af10922fb1eb3890b3c68f7726814bb9378046dcab23c29311d8e0236fac9615"
+    },
+    {
+      "path": "docs/NATIVE-ATTACHMENT-PLAN-2026-10-25.md",
+      "bytes": 9240,
+      "sha256": "0bcb7a98d7ed5eed6672cb68f052b07490fe84290b20559ab137666edc121ec1"
+    },
+    {
+      "path": "docs/NATIVE-ATTACHMENT-BUILD-HANDOFF-2026-10-25.md",
+      "bytes": 8904,
+      "sha256": "4ab9ae4ded68db2f9bd5bdd8ff8a8dd497a241f6375dfd8b3b2942620d0c01cc"
+    },
+    {
+      "path": "docs/NATIVE-ATTACHMENT-RECOVERY-PLAN-2026-10-25.md",
+      "bytes": 6117,
+      "sha256": "471579119da8951a4179da2290807997be0e5a99c4313191e45383aa516599f6"
+    },
+    {
+      "path": "docs/NATIVE-ATTACHMENT-RECOVERY-HANDOFF-2026-10-25.md",
+      "bytes": 6833,
+      "sha256": "c1fed0da8c4e9319725d5b91e58956ba603ad0aeeb1a2cf3f81ac9e7e748e9c9"
+    },
+    {
+      "path": "docs/JETBRAINS-SUPPORT-SUBMITTED-2026-10-25.md",
+      "bytes": 1377,
+      "sha256": "3715870df829cc14f00d373afd44f0e7b78a303afc15b6ae645da882aa2beb7b"
+    },
+    {
+      "path": "docs/WINDOWS-INSTALL-ACCEPTANCE-2026-10-25.md",
+      "bytes": 2555,
+      "sha256": "4d1e22198a0ec94a793cb21660b7c5ca0c26a14e0a978f37c66c1a02da9d8342"
+    },
+    {
+      "path": "scripts/native-attachment-acceptance.mjs",
+      "bytes": 15194,
+      "sha256": "6427dd3cdb59f3af55e240e7e9a88c23af068c3ed9ff5ed02e177ada09da858c"
+    },
+    {
+      "path": "scripts/native-attachment-guard.mjs",
+      "bytes": 9613,
+      "sha256": "32d8e8f6be80b901ad033e8d7f32cf713c48d25061959208076dfd4ceaee2306"
+    },
+    {
+      "path": "scripts/native-attachment-guard.test.mjs",
+      "bytes": 10027,
+      "sha256": "4771210e6e7c2063cff0082bac8ec02ff1fb7c293b1783b4925e3ad413bc79b3"
+    }
+  ]
+}

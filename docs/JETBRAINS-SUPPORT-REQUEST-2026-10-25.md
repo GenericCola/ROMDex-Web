@@ -1,6 +1,6 @@
 # JetBrains support request
 
-Prepared October 25, 2026. Not sent.
+Submitted October 25, 2026 with owner authorization. See JETBRAINS-SUPPORT-SUBMITTED-2026-10-25.md for confirmation and the exact submitted variant. Original prepared draft follows.
 
 Submit through [YouTrack Support](https://youtrack-support.jetbrains.com/hc/en-us/requests/new?ticket_form_id=66282). Copy the subject and message below and attach `ROMDex-YouTrack-Concurrency-Evidence.zip` from this folder.
 
