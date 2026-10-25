@@ -172,3 +172,7 @@ desktop and its profile are unchanged. Verification and hosted delivery are
 tracked in [UI-REPAIR-2026-10-24.md](UI-REPAIR-2026-10-24.md).
 
 October 25: the owner resumed migration. UI source 3e8c0db is deployed at https://romdex-web.vercel.app and all 34 hosted Chrome/Firefox checks pass, including actual CORS refusal messages. See docs/MIGRATION-RESUME-2026-10-25.md (relative to repository root) for the active queue and evidence. Authenticated native acceptance, concurrent shared-status safety and desktop cutover remain pending.
+
+October 25 authenticated-read follow-up: at the owner's request, the saved token was loaded into native Chrome without disclosure or a desktop file change. The actual hosted UI reported "396 tasks read. Review before saving a browser copy." The read form cleared its token, delivery remains disabled and the preview was not imported. This passes Chrome authenticated reading only; native attachment acceptance, Firefox authenticated reading, shared-status concurrency, actual installation and desktop cutover remain pending. The owner selected a JetBrains support request for the concurrency blocker; the draft and evidence packet are prepared but not sent.
+
+Owner chevron correction: deployed source 36e748eaad7e360974c62c392a61c639ae19f804 removes the added workspace symbol while keeping its red control and behavior. Check/build, 15 affected local and 34 hosted cases pass. See evidence/chevron-removal-2026-10-25/QA-REPORT.md for current dispositions and limits. No desktop or real task data changes were made.

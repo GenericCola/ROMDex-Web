@@ -1,0 +1,15 @@
+{
+  "head": "36e748eaad7e360974c62c392a61c639ae19f804",
+  "branch": "codex/accepted-app-port",
+  "status": [
+    "?? docs/JETBRAINS-SUPPORT-REQUEST-2026-10-25.md",
+    "?? docs/ROMDex-YouTrack-Concurrency-Evidence.zip",
+    "?? docs/SHARED-STATUS-CONCURRENCY-AUDIT-2026-10-25.md",
+    "?? docs/SHARED-STATUS-CONCURRENCY-PLAN-2026-10-25.md",
+    "?? docs/evidence/chevron-removal-2026-10-25/",
+    "?? docs/support-packet-manifest.json"
+  ],
+  "utc": "2026-10-25T17:22:42.3969317Z",
+  "buildIdentity": "753850fbfff5595104e9",
+  "buildReportedBy": "Main Agent: check/build exit0"
+}

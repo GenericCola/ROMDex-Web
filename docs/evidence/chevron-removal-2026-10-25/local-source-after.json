@@ -1,0 +1,17 @@
+{
+  "head": "36e748eaad7e360974c62c392a61c639ae19f804",
+  "branch": "codex/accepted-app-port",
+  "status": [
+    " M docs/TASK-FIRST-MIGRATION.md",
+    "?? docs/JETBRAINS-SUPPORT-REQUEST-2026-10-25.md",
+    "?? docs/ROMDex-YouTrack-Concurrency-Evidence.zip",
+    "?? docs/SHARED-STATUS-CONCURRENCY-AUDIT-2026-10-25.md",
+    "?? docs/SHARED-STATUS-CONCURRENCY-PLAN-2026-10-25.md",
+    "?? docs/evidence/chevron-removal-2026-10-25/",
+    "?? docs/support-packet-manifest.json"
+  ],
+  "trackedChanged": [
+    "docs/TASK-FIRST-MIGRATION.md"
+  ],
+  "utc": "2026-10-25T17:23:34.3673037Z"
+}

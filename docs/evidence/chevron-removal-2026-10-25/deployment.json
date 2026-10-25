@@ -1,0 +1,16 @@
+{
+  "source": "36e748eaad7e360974c62c392a61c639ae19f804",
+  "origin": "https://romdex-web.vercel.app",
+  "deploymentId": "2wVQGaXW2mCoTFXMCvd7cA272wMK",
+  "status": "success",
+  "verification": "GitHub MCP combined status; exact remote branch commit separately verified",
+  "localWorker": "753850fbfff5595104e9",
+  "localAssets": 74,
+  "localCheck": {
+    "applicationTests": 135,
+    "contracts": 30,
+    "typecheck": "pass",
+    "lint": "pass"
+  },
+  "mainAgentPreview": "Existing empty in-app preview reloaded; screenshot shows blank red workspace control. Native Chrome 396-task preview left intact."
+}

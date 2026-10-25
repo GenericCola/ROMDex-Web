@@ -1,0 +1,58 @@
+{
+  "path": "ROMDex-YouTrack-Concurrency-Evidence.zip",
+  "membersVerified": true,
+  "sha256": "180e668ce61bbb8be956a6d488b631ae097dbc3899067ee91564343826de3839",
+  "bytes": 17303,
+  "files": [
+    {
+      "path": "child-race.txt",
+      "bytes": 621,
+      "sha256": "a06e367b43e604e360cef61cd4535979b6ddfb1103c6e9aab44f1b55a17294ea"
+    },
+    {
+      "path": "native-race-excerpt.json",
+      "bytes": 2551,
+      "sha256": "7ed9c1d6794599f35f47d23efd67b45e53e01d1981170e04eee7e3c04dc62d64"
+    },
+    {
+      "path": "acceptance-1.0.12.zip",
+      "bytes": 22676,
+      "sha256": "6f3cc6881dbbdccd51c98407d85da03119e45269f19ed7cd67bf43b53dfdd063"
+    },
+    {
+      "path": "SUPPORT-REQUEST.md",
+      "bytes": 4351,
+      "sha256": "f44a1a6fa68c6f87b7f806a5566ddbb2ddd5564a7c15429b5f831c5738b5f484"
+    },
+    {
+      "path": "source/manifest.json",
+      "bytes": 604,
+      "sha256": "03d6a86c113e177967ec9e12118534fa6023cd546ca6bdcd8a0cc93fe2f8ff4f"
+    },
+    {
+      "path": "source/entity-extensions.json",
+      "bytes": 184,
+      "sha256": "01cef29ee13e592efe644d4dd3ee297e74187fce7d795fb8e3e94b223e4e0557"
+    },
+    {
+      "path": "source/status.js",
+      "bytes": 4844,
+      "sha256": "9cd2b206919926cf9e49e3e66537b91084ea5f2e650c17ac9f687cb52c4774e5"
+    },
+    {
+      "path": "source/status-record.js",
+      "bytes": 3205,
+      "sha256": "90af3893dae93193601140c14024741297a3b72fc7fcd9eceb19dea0f3be7591"
+    },
+    {
+      "path": "source/widgets/acceptance/panel.js",
+      "bytes": 8310,
+      "sha256": "16be7d34dc77512e7a9313788031fac398e10a82991df0293751ba8f10b196a7"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 421,
+      "sha256": "d29ba927ac9a827cea850c422ca8997173d45bc558c3be1c28cc2d29e5a99534"
+    }
+  ]
+}

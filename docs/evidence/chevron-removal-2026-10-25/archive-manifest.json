@@ -1,0 +1,734 @@
+{
+  "archive": "CHEVRON-EVIDENCE.zip",
+  "bytes": 21269707,
+  "sha256": "62269aed44eea9d0cfc61deb52d08abbea6a525b68409fda11364060d7642564",
+  "members": 145,
+  "membersVerified": true,
+  "files": [
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-connection-error-1280.png",
+      "bytes": 122603,
+      "sha256": "30f2c2bf8e01441a22bf9bc92e67c4e3cbc284a8897fa4f216dbc90211962d4b"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-connection-error-390.png",
+      "bytes": 49171,
+      "sha256": "929d6c3093afa5431ba28b4ce4d91d3cdc0cc5b3fe8b720996cb9a5c9e84463c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-details-1280.png",
+      "bytes": 170715,
+      "sha256": "73fe55f7d5b9d36b5d4ac0d317dfc475572297da44daf80e8c127b354dc284b6"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-details-320.png",
+      "bytes": 49669,
+      "sha256": "f697f2bd1e8a5251e7dee8f2572299ac6f36ef0196337a8899abd19e29c8b94c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-details-390.png",
+      "bytes": 54724,
+      "sha256": "32b3a4ee07bb7d1601a815ac1ecdb0e47b4d9f79a8564911a6d5e9b8aec51a09"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-details-800.png",
+      "bytes": 134314,
+      "sha256": "9b520a3585faec950753194088dbd3f91887966e19ca303ed09156472a9b6fc9"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-menu-1280.png",
+      "bytes": 153176,
+      "sha256": "d3094c095f7f7cc03be585c2572da88a0d50b02c938b09927e0880a170c2809f"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-menu-320.png",
+      "bytes": 65732,
+      "sha256": "c28f3e429ac8374f7aaf09e739b7fda6a594e81d8fdea3a1e0e9a11f99216514"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-menu-390.png",
+      "bytes": 67751,
+      "sha256": "f0cb796be308fada207804e4a42d9ef61ed8631578e5f1bff90e9cd21359c396"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/chromium-menu-800.png",
+      "bytes": 117518,
+      "sha256": "56aa3f7e80e9538292d5141b3381344dc39b3765957d89359ef3a92f7f334c10"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-connection-error-1280.png",
+      "bytes": 123200,
+      "sha256": "482395539d920b700bab50db55b3787d97cd8e0e8022d788afe3ee2c3151b7d4"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-connection-error-390.png",
+      "bytes": 43295,
+      "sha256": "4cbd050c51bbdeb24ffb50bed9afb64ffe74473ba2ba81e5fa86430c49c66ee3"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-details-1280.png",
+      "bytes": 110402,
+      "sha256": "08b5592cb882cb955bc15a6a381e3aa2a53c64b329f7a7208d8b6cec1da15603"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-details-320.png",
+      "bytes": 37696,
+      "sha256": "54842b2fb7f87cf37826338e7fdd65f64517b7fdc01255ef9233f4c5f35abc00"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-details-390.png",
+      "bytes": 41295,
+      "sha256": "de88de68c73ec9672de5d3ebeff175dd2523cd1557a0c8ef5f64b144818e2b89"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-details-800.png",
+      "bytes": 95069,
+      "sha256": "68a0df20c458720290997d3f8c6f534d253a42fd0fb88c428823b2c102ade982"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-menu-1280.png",
+      "bytes": 100021,
+      "sha256": "2a149c8c61dfd62f9e30a22604e2cf3f5b340678b9d6412b085956582ac0049c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-menu-320.png",
+      "bytes": 54078,
+      "sha256": "541e4b98b2b3601efd49dec02871a400062aa462c9ab41833d840a0dc023b7b5"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-menu-390.png",
+      "bytes": 54237,
+      "sha256": "0b757cd7cb26b32fc5d48fb5aca366259dd467865071c45c763f3bb424d0e49b"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/firefox-menu-800.png",
+      "bytes": 85697,
+      "sha256": "36bfc959a8abf8f8bf1f52dd00447a259c2bdfa015612a9ccbabcd7834571512"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-connection-error-1280.png",
+      "bytes": 386014,
+      "sha256": "e7a54288bc3d24a9551e2693a7ffe0e4f3cc102796f80787d0b4e56c675565d1"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-connection-error-390.png",
+      "bytes": 167287,
+      "sha256": "179c80ae44ff56948e6e6b9f92b19e1e42a3f88f1817688b65103911e3b46b1f"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-details-1280.png",
+      "bytes": 347333,
+      "sha256": "aea4412525f0ad74d104e098d283c285fabb1d6b5d455608c883f9ec32d3ec6d"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-details-320.png",
+      "bytes": 122898,
+      "sha256": "68ba5d33138d2531cd9a675ba2788eb16732297aeb435ae1653806ee9ae95374"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-details-390.png",
+      "bytes": 136598,
+      "sha256": "31351cd6e5cd53443ad9c56930877d1a01f57e06e5b7b652be68e49359a28c19"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-details-800.png",
+      "bytes": 302806,
+      "sha256": "88f1842301d3bc638cbd410b642a58fa222736f764b4139217e096d47381b5da"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-menu-1280.png",
+      "bytes": 298438,
+      "sha256": "8052e718685cfe5855d272d241fda43862ba04d5add32705fd4c2cb1aa94a128"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-menu-320.png",
+      "bytes": 165772,
+      "sha256": "f1238c01e239f72605c33e216e30384a6d537c227a2ecbe3dd8f073986d78c65"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-menu-390.png",
+      "bytes": 171854,
+      "sha256": "4e2936f0ca0bc8a1e41a0cf6ea524ada404b8accc1d45239f3a6aa7da751b87a"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/iphone-menu-800.png",
+      "bytes": 256347,
+      "sha256": "2ee458862d2accf3898ae0bfc32d8ae477fd152c83848ff325e224bfaa5c7d7c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-connection-error-1280.png",
+      "bytes": 533914,
+      "sha256": "1b62c0010d3ea400c1a7a36cdccf597b8d5bad71e6801dd308c966550aa2b662"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-connection-error-390.png",
+      "bytes": 238405,
+      "sha256": "8372b2fb485e5db26a530ba5855e3999163a8c9b905dc75237e6cbfb81db5081"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-details-1280.png",
+      "bytes": 798920,
+      "sha256": "7b74c3866d731938fbca2ee9e94bd195e3a5966114ea1653dfb89970104a9b92"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-details-320.png",
+      "bytes": 225996,
+      "sha256": "5bc0fc77a718b299e937bae4a86c81391ff07cb01beb8c31e3f19add6a7cb04d"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-details-390.png",
+      "bytes": 251133,
+      "sha256": "0b88470f6d4a8ab709858cb7ff04a0d76a8d3be1e54d8bcc363acc370224d61c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-details-800.png",
+      "bytes": 615366,
+      "sha256": "747d6f07ac3dbf7990c0db43f476f7cc2fabff30ac0e041c0a1e56c6bf4951ab"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-menu-1280.png",
+      "bytes": 718147,
+      "sha256": "fc34a189e30a27478846c4db057e8231b8f315853ca7b2a98c7f76ed405d1ace"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-menu-320.png",
+      "bytes": 304121,
+      "sha256": "a4843098bd411667d9e2bf19b3cc630778abcf4fb65ca0efb5aab6e1349c186c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-menu-390.png",
+      "bytes": 317345,
+      "sha256": "c8797ef5e33d9ced840cfa02b96098814e22150473c41decf00f29ce203237b3"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/mobile-chromium-menu-800.png",
+      "bytes": 529661,
+      "sha256": "3c5f7da7fd55b561b19d144f615271e4af75d51db722b4371a264d2992f690b3"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-connection-error-1280.png",
+      "bytes": 240671,
+      "sha256": "3b50fb7eb2bb0e37a97560b9c954d67b4844742f4ec2b8c16ce6db263833b3cf"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-connection-error-390.png",
+      "bytes": 104126,
+      "sha256": "787074393d96a2f8cc7212cf4ec73e70b08defc0302864b1d9659d8357bf09cb"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-details-1280.png",
+      "bytes": 217894,
+      "sha256": "8351bdfacc09a62b5692f74e0a0480c6e09c5e34732549837e64171e53d24446"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-details-320.png",
+      "bytes": 77965,
+      "sha256": "71fc117d35ab423bfa86022863d1cabf0942265d874decbb9a4d25829f5bd435"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-details-390.png",
+      "bytes": 85343,
+      "sha256": "5d6cb62341ccc9b0c81b684b39a1eb6eaaae7c93db018bf70ac4e6533059f3a6"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-details-800.png",
+      "bytes": 191559,
+      "sha256": "c8ff886310e56dd3cb7f96490cca1249baa81a5a2355e7ed31948dfa4fac9d19"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-menu-1280.png",
+      "bytes": 184834,
+      "sha256": "f871f594370888c90d76c012a61fdcb71540f26e5cc7bb656d85bda72d20d6e8"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-menu-320.png",
+      "bytes": 102137,
+      "sha256": "ac852cb9b4cb2316d1d869fef4c5d43dbb80876bd89194d582e6d604c17aecc5"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-menu-390.png",
+      "bytes": 105937,
+      "sha256": "b59eb0d3413f50d76e2316e828fca516bcfd490d4c76f6a3a2a0c4dc95677779"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/before/webkit-menu-800.png",
+      "bytes": 160803,
+      "sha256": "ebad47eff2784fa4d3d8403917c7580bbfd9c9e13212a6f2e6d31939cc78be3a"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/build.txt",
+      "bytes": 9217,
+      "sha256": "5f3fca111a66b854c2c9ba7032f4582defa48d8d90e969644f701c0c954b592d"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/check-final.txt",
+      "bytes": 16306,
+      "sha256": "babb93efa764ea54e7ceedaf70a494998dc1c911c5aceaa082719319d6e5c3af"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/check.txt",
+      "bytes": 337,
+      "sha256": "684aea5a103dae5710ef24d058ae417a40249d8f9309c3c6cdb76f9382cfde4d"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/task-first-migration/hosted-chromium.png",
+      "bytes": 147899,
+      "sha256": "d03f9a4f33538424b759e784fc06ca1f600a56d8db17809349f839a5efc95111"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/task-first-migration/hosted-firefox.png",
+      "bytes": 92040,
+      "sha256": "1d6fec90491ab9b8edb11092e620fca42cbc72dd1e6fb413851708163a22e037"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/task-first-migration/hosted-inventory-chromium.json",
+      "bytes": 8494,
+      "sha256": "62ea143fb8a9d7eae35715abb72665feb636ce7131b2b93656ee8cabb8720a77"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/task-first-migration/hosted-inventory-firefox.json",
+      "bytes": 8494,
+      "sha256": "62ea143fb8a9d7eae35715abb72665feb636ce7131b2b93656ee8cabb8720a77"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-connection-error-1280.png",
+      "bytes": 122568,
+      "sha256": "ab0431693a1365531ba633e5b7e5ae5a8cef7e75c7f9c547958477002eddf5aa"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-connection-error-390.png",
+      "bytes": 49171,
+      "sha256": "929d6c3093afa5431ba28b4ce4d91d3cdc0cc5b3fe8b720996cb9a5c9e84463c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-details-1280.png",
+      "bytes": 170623,
+      "sha256": "acdf61f4bc900463a41d8c58ab7296cb83f64587328c2e0a9f9e5e9449ca3042"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-details-320.png",
+      "bytes": 49669,
+      "sha256": "f697f2bd1e8a5251e7dee8f2572299ac6f36ef0196337a8899abd19e29c8b94c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-details-390.png",
+      "bytes": 54724,
+      "sha256": "32b3a4ee07bb7d1601a815ac1ecdb0e47b4d9f79a8564911a6d5e9b8aec51a09"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-details-800.png",
+      "bytes": 134214,
+      "sha256": "801edf9cb76d907d9424058fbabc6fbc8a5e15830e0d1d7cc0445d7a60c8cd15"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-menu-1280.png",
+      "bytes": 153097,
+      "sha256": "f3358646a074d06b83e8901823e5b70e20f6109b52b2d6d6ec12239ce98b9101"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-menu-320.png",
+      "bytes": 65667,
+      "sha256": "bb2be27f0d5fc15ee0e075be86672a12b30daad557f4bde627eac779e2f1e039"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-menu-390.png",
+      "bytes": 67746,
+      "sha256": "bda0a9d77aea78cbf36bfa605ab50814b7e44a533906e706129e6fea8cbd37e2"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/chromium-menu-800.png",
+      "bytes": 117439,
+      "sha256": "7291d2503382f7772c7ab74583baa4a86d3b172227d9dc4f5970e98c479cc6fa"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-connection-error-1280.png",
+      "bytes": 123141,
+      "sha256": "15e6c03ac958a7af234e57781662691494b29445097516b14c54658df41c5d2c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-connection-error-390.png",
+      "bytes": 43295,
+      "sha256": "4cbd050c51bbdeb24ffb50bed9afb64ffe74473ba2ba81e5fa86430c49c66ee3"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-details-1280.png",
+      "bytes": 110329,
+      "sha256": "06faba04e791d26f7a87901545416d3ffc719862a15291cfbfed46ac295c22b4"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-details-320.png",
+      "bytes": 37696,
+      "sha256": "54842b2fb7f87cf37826338e7fdd65f64517b7fdc01255ef9233f4c5f35abc00"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-details-390.png",
+      "bytes": 41295,
+      "sha256": "de88de68c73ec9672de5d3ebeff175dd2523cd1557a0c8ef5f64b144818e2b89"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-details-800.png",
+      "bytes": 94984,
+      "sha256": "19368bed21b0152b6873de99df7e23aa6f495ed0cf93a58d3d022850e5ce5060"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-menu-1280.png",
+      "bytes": 99959,
+      "sha256": "4d8a8e9f44dcaaa664e19a288a2791e4aeda58880e33d7c0e35ae5b90290d7dc"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-menu-320.png",
+      "bytes": 54023,
+      "sha256": "232de08c9d7c580e8e68a5907f9d49a32d903b37c2a7e8c4c76e9f0cfd39f0ab"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-menu-390.png",
+      "bytes": 54146,
+      "sha256": "2604b9c3d2209b7a794ca202ec0cf414fc44b55fb16645d459bfac84fbd7c997"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/firefox-menu-800.png",
+      "bytes": 85628,
+      "sha256": "ecc5864837bf3e9ecb5e2878d0d2ce502de374aa4900ac164eb6642dab955e90"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/hosted-cors-chromium.json",
+      "bytes": 200,
+      "sha256": "9c91a1fa6f3d3f3d28362324e381c1b1ac37451bb11993639db8dfa9658c2056"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/hosted-cors-chromium.png",
+      "bytes": 113385,
+      "sha256": "1cd84430e33e5ff2c703fdc57cbcf8092dd639f71bb17cb3aee388d0340ee96c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/hosted-cors-firefox.json",
+      "bytes": 200,
+      "sha256": "9c91a1fa6f3d3f3d28362324e381c1b1ac37451bb11993639db8dfa9658c2056"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted/ui-repair/hosted-cors-firefox.png",
+      "bytes": 112586,
+      "sha256": "68b47ee241ca2d58deb055e880fff57d6524303448f6870d59a42f53683d9f2e"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/hosted-results/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-connection-error-1280.png",
+      "bytes": 122569,
+      "sha256": "9ce9b96d60ea5431f890c18b1a60771d90cb6707e869ca8adbabd17faf00e497"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-connection-error-390.png",
+      "bytes": 49171,
+      "sha256": "929d6c3093afa5431ba28b4ce4d91d3cdc0cc5b3fe8b720996cb9a5c9e84463c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-details-1280.png",
+      "bytes": 170617,
+      "sha256": "e3255e638f9aa981ecdc0fa9380feb3a2754d851f3d2820528ab3949fab83be3"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-details-320.png",
+      "bytes": 49669,
+      "sha256": "f697f2bd1e8a5251e7dee8f2572299ac6f36ef0196337a8899abd19e29c8b94c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-details-390.png",
+      "bytes": 54724,
+      "sha256": "32b3a4ee07bb7d1601a815ac1ecdb0e47b4d9f79a8564911a6d5e9b8aec51a09"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-details-800.png",
+      "bytes": 134211,
+      "sha256": "875d0256e6b5637ca66e568994cfd07539e64287f939d8c9f7ef4c0d09746632"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-menu-1280.png",
+      "bytes": 153096,
+      "sha256": "7d0d4842e87c6c61aeb112b6766f9ed5e34c842eb87a199d1786a87ffd4d6299"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-menu-320.png",
+      "bytes": 65667,
+      "sha256": "bb2be27f0d5fc15ee0e075be86672a12b30daad557f4bde627eac779e2f1e039"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-menu-390.png",
+      "bytes": 67743,
+      "sha256": "9698207e7ddfe61f0e88f9788e0943fb29c84b9b67455950218fa893c46c279b"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/chromium-menu-800.png",
+      "bytes": 117442,
+      "sha256": "ef0569e0a530452eb99b0f43918ae992b5c478c15f3873234c2c0a1b3992cb4a"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-connection-error-1280.png",
+      "bytes": 123154,
+      "sha256": "f254c09fd7748d290ec0f0eb4fedd934ef46b588e4065534d00386d6e096953a"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-connection-error-390.png",
+      "bytes": 43295,
+      "sha256": "4cbd050c51bbdeb24ffb50bed9afb64ffe74473ba2ba81e5fa86430c49c66ee3"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-details-1280.png",
+      "bytes": 110327,
+      "sha256": "435a8236ddf1e6434d94b3228a46d9a62b93fe0114b87f4eb0f7c1d37921c99c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-details-320.png",
+      "bytes": 37696,
+      "sha256": "54842b2fb7f87cf37826338e7fdd65f64517b7fdc01255ef9233f4c5f35abc00"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-details-390.png",
+      "bytes": 41295,
+      "sha256": "de88de68c73ec9672de5d3ebeff175dd2523cd1557a0c8ef5f64b144818e2b89"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-details-800.png",
+      "bytes": 94987,
+      "sha256": "6732a2100a2b4615b0f8611b7bb00e3b3f7916bb757cd387698b5ff76d47cdf3"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-menu-1280.png",
+      "bytes": 99960,
+      "sha256": "37f8e2d1fdc03712bceae614b9d58b8b51f84b64fdba1be3b538ce4a736eee70"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-menu-320.png",
+      "bytes": 54019,
+      "sha256": "28c0b4020f294f946281436df9356d1f7659295a2a19e4b82c5218a59dc8058d"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-menu-390.png",
+      "bytes": 54147,
+      "sha256": "7567435bccfb486f38e1c14451b0c0d563e33562b439740b5f2790b65e794b1d"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/firefox-menu-800.png",
+      "bytes": 85629,
+      "sha256": "27ba0681d982584202ffdd585b17d864288c609e36862a1a414add17f9530621"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-connection-error-1280.png",
+      "bytes": 386187,
+      "sha256": "eb95c576ca47d29aea6d42f48e8cb226a838e254e1c39e190b79617e845a8936"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-connection-error-390.png",
+      "bytes": 167900,
+      "sha256": "876a20395d0fa7faf8422e0d36fc900caed0a27c2b7e552598e854fa3d81694a"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-details-1280.png",
+      "bytes": 347369,
+      "sha256": "d60bf17bf13493d8087105b62d30aaa945f287a1d7f2c2115f24b9ad1884ef4c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-details-320.png",
+      "bytes": 122898,
+      "sha256": "68ba5d33138d2531cd9a675ba2788eb16732297aeb435ae1653806ee9ae95374"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-details-390.png",
+      "bytes": 136598,
+      "sha256": "31351cd6e5cd53443ad9c56930877d1a01f57e06e5b7b652be68e49359a28c19"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-details-800.png",
+      "bytes": 302313,
+      "sha256": "6f45d33663c63ea23b3b39ce56380e07320ed5abaca5c539bc9aba0fbf89dcaa"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-menu-1280.png",
+      "bytes": 297825,
+      "sha256": "133ff5d7d6ae8b91a6a4bd503c72f824e15ce6e6c3a371949b5f5755ac7fe28f"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-menu-320.png",
+      "bytes": 165299,
+      "sha256": "c94c9683a7429b71b8226595c8dbb396d729ac6802cd342270f66ab2f642a9eb"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-menu-390.png",
+      "bytes": 171337,
+      "sha256": "30fc41c3b5bf6304f1f6e5967ac8cc24f820b7aa86ae9e3cfd06c894496ae84b"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/iphone-menu-800.png",
+      "bytes": 255816,
+      "sha256": "76594a7abe8711cd0cfe4c55bea48f927ea8a12bb4c4dac3ece26cef7e1bd8e0"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-connection-error-1280.png",
+      "bytes": 533697,
+      "sha256": "2264e7be0d93f25f17f81830c2544155b7b179e97ce8f93314421cfd61a9a345"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-connection-error-390.png",
+      "bytes": 238405,
+      "sha256": "8372b2fb485e5db26a530ba5855e3999163a8c9b905dc75237e6cbfb81db5081"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-details-1280.png",
+      "bytes": 798094,
+      "sha256": "6dbf6374840d7b930e99d303e11f4fa550dac45cb239632834bb4e8d4813ca49"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-details-320.png",
+      "bytes": 225996,
+      "sha256": "5bc0fc77a718b299e937bae4a86c81391ff07cb01beb8c31e3f19add6a7cb04d"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-details-390.png",
+      "bytes": 251133,
+      "sha256": "0b88470f6d4a8ab709858cb7ff04a0d76a8d3be1e54d8bcc363acc370224d61c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-details-800.png",
+      "bytes": 614644,
+      "sha256": "60cd21ca25b5106dedc5477a735059250361f0bc4112869c7d2000829175ba74"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-menu-1280.png",
+      "bytes": 717689,
+      "sha256": "210b042651b5adecbbea3b17cf3e927c574dce33dbff703d5230d63f29d1048e"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-menu-320.png",
+      "bytes": 303130,
+      "sha256": "8b1d434e365b69937187fbfb2a0a72cfbace765ad97c61667e865eadf6a0c0f5"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-menu-390.png",
+      "bytes": 316560,
+      "sha256": "742a8cf3749f29cb1c933f5d1ec76dcc4fc461e6378b90147707a3c2d6ec9298"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/mobile-chromium-menu-800.png",
+      "bytes": 529126,
+      "sha256": "81f13be79fab050d318bc567134b901130660f0bd89051f4f0492251aa372a1d"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-connection-error-1280.png",
+      "bytes": 240603,
+      "sha256": "046592f7dffabba3060256cfc188bfaf1958e474d22bda7b5e3daf7dbf5c2dd8"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-connection-error-390.png",
+      "bytes": 103797,
+      "sha256": "b4a3dc629c7d0eb8335d2c81ef78de3785f5eae3c7ce44124dc02bcfb4203033"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-details-1280.png",
+      "bytes": 217555,
+      "sha256": "5e66425aaff08d0fb403098a33a4346d38dd0a133d519dc63e40e5b3af7a336c"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-details-320.png",
+      "bytes": 77965,
+      "sha256": "71fc117d35ab423bfa86022863d1cabf0942265d874decbb9a4d25829f5bd435"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-details-390.png",
+      "bytes": 85343,
+      "sha256": "5d6cb62341ccc9b0c81b684b39a1eb6eaaae7c93db018bf70ac4e6533059f3a6"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-details-800.png",
+      "bytes": 191165,
+      "sha256": "7c83441af7b9c70cad6f1497b9c4260bca22012bee6a789f1828b843ab195395"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-menu-1280.png",
+      "bytes": 184397,
+      "sha256": "b7974d8716b8e13184fb394e7201b45db514eabe9897998300c0084087efb671"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-menu-320.png",
+      "bytes": 100892,
+      "sha256": "a7d4af0f793d96a3ccf0f747708f0b6247ef5183f2c2facbb0560314784cab01"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-menu-390.png",
+      "bytes": 104951,
+      "sha256": "e2c891c1e8aab2f2d325bc676f15f6dc6e91e0286249e30b95af9a2bf18a688a"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local/webkit-menu-800.png",
+      "bytes": 160038,
+      "sha256": "3969ab4a2905a661ffdf459d52544bc07569601b833d4e9d3e951c209e3d3b59"
+    },
+    {
+      "path": "artifacts/chevron-removal-2026-10-25/local-results/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/deployment.json",
+      "bytes": 623,
+      "sha256": "4c7a783f4931f8dc6c409084b966fcfaebe411ab8094c812773fd077c2322c45"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/evidence-manifest.json",
+      "bytes": 28976,
+      "sha256": "260289d182683d8a5dff5d7207ddccd2faddb39495297b4dee14bfa39cde50cc"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/hosted-inventory-summary.json",
+      "bytes": 157,
+      "sha256": "65aed44b98125ebb9b60c8863d2930c386cd1ac330e571f028f0f56d9932ed04"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/hosted-result.json",
+      "bytes": 228,
+      "sha256": "a84a11d9cc69cdbc3ff99f5717a2e94afb444a1b4622276171c420ca94f1253f"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/hosted-source-after.json",
+      "bytes": 769,
+      "sha256": "ce033b6b5529793fb4829c6ade1162d167df01827dc514ffb28fee8c42757644"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/hosted-source-before.json",
+      "bytes": 744,
+      "sha256": "0a93c17ce269f7a350a8254ebbf6087a7f45d96528331b0a8b2da364a53ef320"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/hosted-suite.log",
+      "bytes": 5570,
+      "sha256": "a542a263ce1b54aa294f561515f515ff34199f73d16267bcf65c04d5cd2feb6c"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/local-result.json",
+      "bytes": 171,
+      "sha256": "f8563da4e01b9c11e2d8fffbd1e838ae99a566470c66ce695ef1773c336c536d"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/local-source-after.json",
+      "bytes": 601,
+      "sha256": "6652694fff8ec6c3c7f9e2fa62ba43d70d99d5ff00ddbea12a8f7402c4a5c9e6"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/local-source-before.json",
+      "bytes": 595,
+      "sha256": "6df751de873159c9efbb8424b1a38a1ece157c546c3977dc104c2657d69be4d1"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/local-suite.log",
+      "bytes": 3251,
+      "sha256": "bbc6a1308ea72e7144b246329baa74ab2822e940f6c1503c947feecef3299850"
+    },
+    {
+      "path": "docs/evidence/chevron-removal-2026-10-25/QA-REPORT.md",
+      "bytes": 7359,
+      "sha256": "feb6c9f8ff9687728f76627d8ff225bf3213f87ab598915f047c3a5e4fd33da9"
+    }
+  ]
+}
