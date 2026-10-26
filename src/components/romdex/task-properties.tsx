@@ -1,4 +1,4 @@
-import { STATES } from "@/domain/accepted/core.mjs";
+import { STATES, STATUS, statusOf } from "@/domain/accepted/core.mjs";
 import { editTask } from "@/domain/task-actions";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
@@ -7,6 +7,13 @@ import TaskParent from "./task-parent";
 import { useTaskTextEditing } from "./use-task-text-editing";
 const option = (value: string) => {
   return <option key={value}>{value}</option>;
+};
+const statusOption = (value: string) => {
+  return (
+    <option key={value} value={value}>
+      {statusOf(value) === "red" ? STATUS.red : value}
+    </option>
+  );
 };
 const TaskProperties = ({
   item,
@@ -80,8 +87,8 @@ const TaskProperties = ({
             onChange={state}
           >
             {!Object.values(STATES).includes(displayedState) &&
-              option(displayedState)}
-            {Object.values(STATES).map(option)}
+              statusOption(displayedState)}
+            {Object.values(STATES).map(statusOption)}
           </select>
         </label>
         <label>

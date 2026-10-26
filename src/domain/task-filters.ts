@@ -1,4 +1,4 @@
-import { STATES, type indexTree } from "./accepted/core.mjs";
+import { STATES, STATUS, type indexTree } from "./accepted/core.mjs";
 import type { TaskItem } from "./types";
 export interface TaskFilters {
   status: string;
@@ -36,7 +36,11 @@ export const matchesFilters = (
           })))
   );
 };
-export const statusFilters = Object.entries(STATES);
+export const statusFilters = Object.entries(STATES).map(
+  ([color, state]): [string, string] => {
+    return [color, color === "red" ? STATUS.red : state];
+  },
+);
 
 export const filterFields = (items: TaskItem[]) => {
   const priorities = [

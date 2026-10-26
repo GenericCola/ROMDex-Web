@@ -1,0 +1,30 @@
+diff --git a/core.mjs b/core.mjs
+index c3e5a97..1cc33f2 100644
+--- a/core.mjs
++++ b/core.mjs
+@@ -1,5 +1,5 @@
+ import {applyPlanSync} from './plan-queue.mjs';
+-export const STATUS = {grey:'Untouched',yellow:'In Progress',blue:'Standby',purple:'In Development',amber:'Awaiting Testing',green:'Complete',red:'Critical'};
++export const STATUS = {grey:'Untouched',yellow:'In Progress',blue:'Standby',purple:'In Development',amber:'Awaiting Testing',green:'Complete',red:'Debugging'};
+ export const STATES = {grey:'To do',yellow:'In Progress',blue:'Standby',purple:'In Development',amber:'Awaiting Testing',green:'Done',red:'Critical / Debugging'};
+ // ROMDex keeps its display/assigned label; YouTrack already calls this status Needs Testing.
+ export const youTrackState = value => value === 'Awaiting Testing' ? 'Needs Testing' : value;
+diff --git a/task-filters.mjs b/task-filters.mjs
+index b274f9e..3106709 100644
+--- a/task-filters.mjs
++++ b/task-filters.mjs
+@@ -1,4 +1,4 @@
+-import {STATES} from './core.mjs';
++import {STATES,STATUS} from './core.mjs';
+ import {fieldPresentation} from './field-tags.mjs';
+ export const emptyFilters=()=>({status:'',priority:'',complexity:'',assignee:''});
+ export const filtersActive=filters=>Object.values(filters).some(Boolean);
+@@ -11,7 +11,7 @@ export function matchesFilters(item,tree,filters){return (!filters.status||tree.
+ export function mountTaskFilters({getTree,onChange,beforeOpen}){
+  let filters=emptyFilters();const button=document.getElementById('task-filters'),dialog=document.getElementById('task-filter-dialog');
+  function populate(field,entries){const select=document.getElementById('filter-'+field);select.replaceChildren(new Option('All '+({status:'Statuses',priority:'Priorities',complexity:'Complexities',assignee:'Assignees'}[field]),''),...entries.map(([value,label])=>new Option(label,value)));select.value=filters[field];}
+- function refresh(){const items=[...getTree().byId.values()];populate('status',Object.entries(STATES));populate('priority',[...new Set(items.map(item=>item.priority))].sort().map(value=>[value,fieldPresentation('priority',value).label+(value==='Show-stopper'?' (Show-stopper)':'')]));populate('complexity',[['__unset','Not Set'],...[...new Set(items.map(item=>item.complexity).filter(Boolean))].sort().map(value=>[value,value])]);populate('assignee',[['__unassigned','Unassigned'],...[...new Map(items.flatMap(assignees).map(person=>[person.id,person.name])).entries()].sort((a,b)=>String(a[1]).localeCompare(String(b[1])))]);}
++ function refresh(){const items=[...getTree().byId.values()];populate('status',Object.entries(STATES).map(([color,state])=>[color,color==='red'?STATUS.red:state]));populate('priority',[...new Set(items.map(item=>item.priority))].sort().map(value=>[value,fieldPresentation('priority',value).label+(value==='Show-stopper'?' (Show-stopper)':'')]));populate('complexity',[['__unset','Not Set'],...[...new Set(items.map(item=>item.complexity).filter(Boolean))].sort().map(value=>[value,value])]);populate('assignee',[['__unassigned','Unassigned'],...[...new Map(items.flatMap(assignees).map(person=>[person.id,person.name])).entries()].sort((a,b)=>String(a[1]).localeCompare(String(b[1])))]);}
+  function changed(){button.setAttribute('aria-pressed',String(filtersActive(filters)));onChange();}
+  button.onclick=async()=>{try{await beforeOpen();refresh();dialog.showModal();button.setAttribute('aria-expanded','true');}catch(error){onChange(error);}};
+  for(const field of Object.keys(filters))document.getElementById('filter-'+field).onchange=event=>{filters={...filters,[field]:event.target.value};changed();};

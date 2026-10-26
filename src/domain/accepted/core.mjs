@@ -1,5 +1,5 @@
 import {applyPlanSync} from './plan-queue.mjs';
-export const STATUS = {grey:'Untouched',yellow:'In Progress',blue:'Standby',purple:'In Development',amber:'Awaiting Testing',green:'Complete',red:'Critical'};
+export const STATUS = {grey:'Untouched',yellow:'In Progress',blue:'Standby',purple:'In Development',amber:'Awaiting Testing',green:'Complete',red:'Debugging'};
 export const STATES = {grey:'To do',yellow:'In Progress',blue:'Standby',purple:'In Development',amber:'Awaiting Testing',green:'Done',red:'Critical / Debugging'};
 // The desktop display label maps to the existing native PMON State.
 export const youTrackState = value => value === 'Awaiting Testing' ? 'Needs Testing' : value;
