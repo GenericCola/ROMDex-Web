@@ -1,5 +1,9 @@
 # SC-001: bounded storage concurrency audit — 2026-10-25
 
+## October 26 disposition
+
+The historical audit below led to support ticket 9288924. JetBrains has now confirmed no supported conditional-update/lock/unique-record mechanism or fix for this case. The support request is answered, and SC-001 remains open as a design blocker. See [the response](JETBRAINS-SUPPORT-REPLY-2026-10-26.md) and [current repair actions](../analysis/WEB-PORT/REPAIR_CHECKLIST.md). No implementation or production install follows automatically from the response.
+
 ## Outcome
 
 No safe implementation path was established within this bounded audit. Keep production sharing OFF and stop the repair loop pending a specific platform guarantee. The smallest next step is to obtain JetBrains' supported mechanism for conditional app-property updates, rather than substitute another unprotected read/check/write. No code or native tests were run. This is an audit disposition, not SC-001 resolution.

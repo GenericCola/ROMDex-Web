@@ -1,13 +1,23 @@
 # Full-port acceptance checklist
 
-This checklist reconciles the complete migration handoff with the owner's later instructions. PASSKEY and the later full-port request authorize the port; the old handoff's foundation-only restriction is historical. The user selected PMON for current task development and NPCD for isolated acceptance, then restricted developer mutations to NPCD-872 and NPCD-873. MCP is preferred; app administration is checked in the browser because the connector has no app-administration tool.
+## Current status - October 26, 2026
+
+The task-first web app is hosted at https://romdex-web.vercel.app on application commit `beab9b784500b16b23f54de99592019830945803`. Hosting, exact-origin CORS, native Chrome/Firefox attachment acceptance and the Debugging display-label update are complete within their recorded scopes. The owner's desktop workspace has not been migrated. Desktop data remains the fallback; targeted owner-approved desktop fixes were installed with verified backups.
+
+JetBrains ticket 9288924 confirms that the current shared-status extension-property mechanism has no supported concurrency protection or fix. SC-001 is a design blocker, not an administrator-permission or installation blocker. Production sharing stays withheld. See [the October 26 response](JETBRAINS-SUPPORT-REPLY-2026-10-26.md).
+
+The remaining first-cutover gates are a safe shared-status design and native proof, remaining native task/notes/hierarchy/status delivery checks on private disposable fixtures, actual Windows Chrome/Firefox app installation/lifecycle, and a fresh reviewed desktop export/import with explicit pending-work reconciliation and owner acceptance. NPCDex/RDX authoring and advanced task controls remain full-port work after the first PMON move.
+
+Current phase reports: [Build](../analysis/WEB-PORT/BUILD_CHECKLIST.md), [QA](../analysis/WEB-PORT/QA_CHECKLIST.md), [Repair](../analysis/WEB-PORT/REPAIR_CHECKLIST.md), [working queue](../analysis/WEB-PORT/WORKING_QUEUE.md). Their evidence dates and candidate identities supersede stale current-state statements in older milestone sections below. No new admin installation is requested.
+
+This checklist reconciles the complete migration handoff with the owner's later instructions. PASSKEY and the later full-port request authorize the port; the old handoff's foundation-only restriction is historical. The user selected PMON for current tasks and NPCD-872/873 for metadata acceptance, then additionally authorized disposable tasks beneath private test-only PMON Epic PMON-466 (current attachment children PMON-467/468). Existing production work is not a test target. MCP is preferred; app administration is checked in the browser because the connector has no app-administration tool.
 
 A code check, synthetic browser result, live read and human acceptance are different evidence. An unchecked row is unfinished or still needs its stated acceptance. Passing a subset does not close the full port.
 
 ## Preservation and architecture
 
 - [x] Keep development in the separate private ROMDex-Web repository. Current branch: codex/accepted-app-port. The template push URL stays DISABLED. Private visibility was verified through GitHub MCP before publication.
-- [x] Keep desktop app, data and credentials intact. This checkpoint writes only web-repository and temporary files. Read-only audits re-read hashes of the three current desktop RDX files and found no byte changes.
+- [x] Preserve desktop data/credentials and the fallback. Owner-approved source-only desktop repairs have full verified backups; the October 26 label update preserved all 134 profile files byte for byte. Earlier RDX read-only hashes are historical evidence, not a new live-data audit.
 - [x] Use React controls and accepted shared UI assets. No legacy renderer, iframe, custom application server, proxy, Server Actions or runtime GitHub data backend is introduced. Static export remains configured.
 - [x] Pin added browser hash/byte dependencies without a general dependency upgrade. package.json and the lockfile add only @noble/hashes 2.4.0 and buffer 6.0.3; accepted modules have provenance.
 - [ ] Accept complete visual and keyboard parity against the installed client. Current task shell and initial NPCDex controls are implemented; complete appearance and interaction acceptance remains pending.
@@ -26,7 +36,7 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 - [x] Priority and complexity use current PMON choices and preserve unknown read values. Evidence: live MCP schema read and PMON status browser scenario.
 - [ ] Complete Assignee, Due Date, tags, typed custom properties, grouping and multi-select parity.
 - [ ] Complete tree drag/order gestures and their keyboard alternatives.
-- [ ] Complete attachment list, download, durable upload, exact receipt/hash recovery, reviewed deletion and recovery-file transfer of staged bytes.
+- [x] Attachment list/download, durable upload, exact receipt/hash recovery, reviewed deletion and staged-byte recovery transfer are implemented. Native Chrome/Firefox happy paths and interrupted Firefox recovery passed on private PMON fixtures; additional native error branches retain only their stated synthetic coverage. See NATIVE-ATTACHMENT-ACCEPTANCE-2026-10-25.md.
 - [x] Deletion displays the exact task/descendant list. `Queue deletion of listed tasks?` leads to ` Delete Listed Items`; Cancel preserves work. Evidence: delete-review source, structural-delivery tests and explicit missing/access recovery.
 - [x] Default Auto-Sync is Off. `Save Changes` performs a manual task delivery cycle and leaves that preference unchanged. Evidence: delivery browser tests.
 - [x] Session tokens remain in memory and authenticated/private traffic bypasses shell caching. Evidence: task-port, delivery and worker tests.
@@ -38,11 +48,12 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 
 - [x] Standby is inherited only when at least two immediate children are all effectively Standby. Exactly one Standby child and mixed Done/Standby children produce In Progress. A leaf retains its own assignment. Recursive calculations use each immediate child's effective status. Own assignments remain intact. Installed desktop correction and normal sync are verified. Native YouTrack app acceptance remains pending. Current evidence is STANDBY-METADATA-REPAIR.md; STATUS-CORRECTION.md records the superseded October 22 rule.
 
-- [x] Picker order is To do, In Progress, Standby, In Development, Awaiting Testing, Done, Critical / Debugging. Awaiting Testing displays flashing amber after development. Evidence: task-port browser selection/reload/reduced-motion scenario and accepted core tests.
+- [x] Picker order remains To do, In Progress, Standby, In Development, Awaiting Testing, Done, Debugging. The red display label is Debugging while its native value remains Critical / Debugging. Amber follows development and respects reduced motion. Evidence: task-port checks and DEBUGGING-LABEL.md.
 - [x] Map displayed Awaiting Testing to native PMON Needs Testing. Never create or rename a State bundle value to make a test pass. Evidence: issue-body tests, PMON MCP schema and status-delivery browser tests.
 - [x] Any testing child gives its parent amber precedence, recursively through ancestors, while retaining the parent's own assignment. Evidence: core combinations, rollup tests and status-delivery/shared-status browser scenarios.
-- [x] Shared assigned metadata requires explicit migration preview, revision checking and exact receipt recovery. Unavailable storage blocks shared delivery without native fallback. Evidence: shared-status tests with two independent browser stores.
-- [ ] Activate/update the installed acceptance app and execute live handler, concurrency, rollback and fresh-page tests. Browser inspection still shows version 1.0.1 inactive and the account's Active switch disabled. Current administrator package is version 1.0.4.
+- [x] Shared-status preview, revision comparisons, exact receipt review and unavailable-storage refusal are implemented and covered synthetically. This row passes client mechanics only: the native simultaneous-write failure invalidates the server isolation assumption, so safe shared delivery remains blocked.
+- [x] Acceptance app was updated in place to 1.0.12, ID 155-84, Active on NPCD only (last native inspection October 24). Handler/serial receipt/fresh-page and rollback checks passed within their detailed scope. See LIVE-ACCEPTANCE-2026-10-24.md.
+- [ ] Resolve SC-001 simultaneous-write loss through an approved safe design and native proof. JetBrains confirmed the unsupported concurrency guarantee on October 26; another install alone is insufficient.
 - [ ] Install/enable the accepted production metadata app only after isolated acceptance. Production sharing stays off.
 - [ ] Verify cross-device behavior on actual separate devices. Independent synthetic browser stores are not physical-device acceptance.
 
@@ -78,8 +89,9 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 
 - [x] Production-only worker, complete content-hashed precache, offline shell, explicit `Reload to update`, other-window protection and unrelated-cache preservation. Evidence: foundation, worker and update browser tests.
 - [x] Draft flush/save failure prevents update activation; update refusal releases its lock. Evidence: workspace/NPCDex units and task-update browser scenario.
-- [ ] Choose the HTTPS hosting account and root-origin address. A hosting clarification is pending; no destination is invented.
-- [ ] Deploy with the actual static-host headers, configure YouTrack CORS for that origin and verify direct requests. No proxy workaround.
+- [x] Vercel account/team PMON and root origin https://romdex-web.vercel.app are established; the owner approved access only to GenericCola/ROMDex-Web.
+- [x] Static hosting/headers, exact-origin CORS and native authenticated task/attachment requests are verified at their recorded checkpoints. No proxy is used. Hosted source is now beab9b7; preserved-evidence limits are in QA_CHECKLIST.md.
+- [ ] Verify actual Windows Chrome and Firefox app installation, OS launch and lifecycle. This is distinct from browser engine or emulated standalone acceptance.
 - [ ] Accept real iPhone/iPad installation, storage quota, offline reopening, suspension and update behavior. WebKit/iPhone emulation is automated browser evidence only.
 - [ ] Run final complete checks, publish the private checkpoint, provide the tested build and a concise manual acceptance list, then accept cutover. Current test counts and live blockers are recorded in DESKTOP-MIGRATION.md and LIVE-ACCEPTANCE.md.
 

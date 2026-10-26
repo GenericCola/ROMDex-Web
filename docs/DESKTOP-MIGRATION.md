@@ -1,6 +1,16 @@
 # Desktop migration and portable files
 
-The October 22 port work adds a reviewed desktop import, NPCDex source browsing and planning drafts, and a browser RDX library. The desktop executable, reference source, credentials and original saves have not been changed.
+## Current status - October 26, 2026
+
+The task-first web app is hosted at https://romdex-web.vercel.app on application commit `beab9b784500b16b23f54de99592019830945803`. Hosting, exact-origin CORS, native Chrome/Firefox attachment acceptance and the Debugging display-label update are complete within their recorded scopes. The owner's desktop workspace has not been migrated. Desktop data remains the fallback; targeted owner-approved desktop fixes were installed with verified backups.
+
+JetBrains ticket 9288924 confirms that the current shared-status extension-property mechanism has no supported concurrency protection or fix. SC-001 is a design blocker, not an administrator-permission or installation blocker. Production sharing stays withheld. See [the October 26 response](JETBRAINS-SUPPORT-REPLY-2026-10-26.md).
+
+The remaining first-cutover gates are a safe shared-status design and native proof, remaining native task/notes/hierarchy/status delivery checks on private disposable fixtures, actual Windows Chrome/Firefox app installation/lifecycle, and a fresh reviewed desktop export/import with explicit pending-work reconciliation and owner acceptance. NPCDex/RDX authoring and advanced task controls remain full-port work after the first PMON move.
+
+Current phase reports: [Build](../analysis/WEB-PORT/BUILD_CHECKLIST.md), [QA](../analysis/WEB-PORT/QA_CHECKLIST.md), [Repair](../analysis/WEB-PORT/REPAIR_CHECKLIST.md), [working queue](../analysis/WEB-PORT/WORKING_QUEUE.md). Their evidence dates and candidate identities supersede stale current-state statements in older milestone sections below. No new admin installation is requested.
+
+The October 22 port work added reviewed desktop import, NPCDex browsing/planning drafts and a local RDX library. Later owner-approved desktop source repairs have verified backups; original saves and credentials remain preserved. The owner's workspace has not been transferred to web.
 
 ## Export while the desktop is closed
 
@@ -40,12 +50,12 @@ The browser adapters reuse only pure accepted modules under src/domain/accepted,
 
 ## Cutover work still required
 
-Finish task attachment/property and multi-selection parity; complete versioned content authoring and its YouTrack-only synchronization; complete managed plan editing/publication; then run live isolated acceptance. The installed acceptance app still needs an administrator update/activation. Production sharing remains off.
+For the owner-approved first PMON move, finish SC-001 design/implementation/native proof, the remaining native task workflows, Windows installation/lifecycle and reviewed backup/export/import with pending-work reconciliation. Hosting, CORS and bounded native attachments are complete. No admin install is currently requested.
 
-An HTTPS destination and its hosting account are still needed. Deployment must apply public/_headers at a root origin, followed by YouTrack CORS configuration and real-device acceptance. No hosting destination has been selected or deployment performed. Keep using the desktop as the authoritative fallback until a reviewed migration and cutover are accepted.
+Advanced properties/multi-selection, full NPCDex authoring/content synchronization and managed RDX plan/publication remain later accepted-app parity work. They are not prerequisites newly imposed on the task-first cutover. Keep the desktop fallback until the reviewed migration is accepted.
 
-## Verification
+## Historical October 22 verification
 
-Current code checks pass type checking, zero-warning lint, 116 unit tests and eight worker/build checks. Synthetic tests cover migration integrity, source preservation, stale previews, archive allowlists, closed-owner export guards, draft recovery, task image ID mapping, sibling ordering, golden RDX files produced by the untouched desktop packer and conflicting plan merges. The complete current browser suite passed 173 checks across Chromium, Firefox, WebKit, mobile Chromium and iPhone emulation, with two expected desktop-layout skips on mobile. The untouched desktop reader also accepted browser-repacked synthetic map and plan files with unchanged document revisions and assets. A read-only audit also validated all three current desktop RDX files with 101, 34 and 79 included record revisions; each projected successfully and its source hash stayed unchanged. No live task, comment, attachment or app mutation was used as an acceptance test.
+That checkpoint's code checks passed type checking, zero-warning lint, 116 unit tests and eight worker/build checks. Synthetic tests cover migration integrity, source preservation, stale previews, archive allowlists, closed-owner export guards, draft recovery, task image ID mapping, sibling ordering, golden RDX files produced by the untouched desktop packer and conflicting plan merges. The complete current browser suite passed 173 checks across Chromium, Firefox, WebKit, mobile Chromium and iPhone emulation, with two expected desktop-layout skips on mobile. The untouched desktop reader also accepted browser-repacked synthetic map and plan files with unchanged document revisions and assets. A read-only audit also validated all three current desktop RDX files with 101, 34 and 79 included record revisions; each projected successfully and its source hash stayed unchanged. No live task, comment, attachment or app mutation was used as an acceptance test.
 
 Review: traced file selection, preview, mutation guards, disk failures, unsaved-editor capture, restoration, stale revisions, startup ordering, conflict controls and update locks. Browser-path checks exposed and fixed the startup race, hidden NPCDex recovery controls, save-message precedence, a WebKit editor-registration gap and mobile dialog scroll oscillation. The intended load is one personal workspace; full feature parity, live backend execution, deployed CORS and physical devices remain pending.

@@ -1,5 +1,15 @@
 # Task-first web migration
 
+## Current status - October 26, 2026
+
+The task-first web app is hosted at https://romdex-web.vercel.app on application commit `beab9b784500b16b23f54de99592019830945803`. Hosting, exact-origin CORS, native Chrome/Firefox attachment acceptance and the Debugging display-label update are complete within their recorded scopes. The owner's desktop workspace has not been migrated. Desktop data remains the fallback; targeted owner-approved desktop fixes were installed with verified backups.
+
+JetBrains ticket 9288924 confirms that the current shared-status extension-property mechanism has no supported concurrency protection or fix. SC-001 is a design blocker, not an administrator-permission or installation blocker. Production sharing stays withheld. See [the October 26 response](JETBRAINS-SUPPORT-REPLY-2026-10-26.md).
+
+The remaining first-cutover gates are a safe shared-status design and native proof, remaining native task/notes/hierarchy/status delivery checks on private disposable fixtures, actual Windows Chrome/Firefox app installation/lifecycle, and a fresh reviewed desktop export/import with explicit pending-work reconciliation and owner acceptance. NPCDex/RDX authoring and advanced task controls remain full-port work after the first PMON move.
+
+Current phase reports: [Build](../analysis/WEB-PORT/BUILD_CHECKLIST.md), [QA](../analysis/WEB-PORT/QA_CHECKLIST.md), [Repair](../analysis/WEB-PORT/REPAIR_CHECKLIST.md), [working queue](../analysis/WEB-PORT/WORKING_QUEUE.md). Their evidence dates and candidate identities supersede stale current-state statements in older milestone sections below. No new admin installation is requested.
+
 Owner priority, October 24, 2026: PMON tasks, notes, status, hierarchy and
 attachments must be ready for the first daily-work cutover. The owner wants an
 installed app with its own icon and uses Chrome and Firefox on Windows. NPCDex
@@ -25,7 +35,7 @@ preference; no reduced-safety cutover choice was approved.
   root routing and exclusions for private artifacts and credentials. No proxy,
   application server, credentials or billing settings are added.
 - [x] Confirm the owner's existing Vercel account is signed in. PMON is the
-  selected Vercel account/team. The installed connector exposes no account tools.
+  selected Vercel account/team. Authenticated Vercel MCP now reports the expected project and current Ready deployment.
 - [x] Finish local checks/build/browser verification and record exact output.
   The full invocation plus affected WebKit rerun accounts for 288 unique passes
   and two expected platform skips. The hosting-only repair adds 35 PWA checks.
@@ -56,21 +66,22 @@ preference; no reduced-safety cutover choice was approved.
   branch and dated QA tag. Keep this branch
   open while migration is incomplete; no cleanup pruning.
 
-## Current findings
+## Current findings (reconciled October 26)
 
 Acceptance app 1.0.12 remains restricted to NPCD-872 and NPCD-873. Both child
 race requests succeeded at the same revision and only one receipt remained.
 Production sharing is OFF and production source 1.0.8 remains withheld. Native
-atomic commit/rollback is proven; cross-request serialization is not. A supported
-atomic primitive or a conflict-preserving protocol still needs implementation
-and actual native concurrency tests.
+atomic commit/rollback is proven; cross-request serialization is not. JetBrains has now confirmed that this app mechanism has no supported atomic primitive or fix. A revised design needs a decision, implementation and native proof; no conflict-preserving alternative is accepted as safe yet.
 
-The desktop remains authoritative and untouched. No live export/import or PMON
-mutation has been performed. See [ATTACHMENTS.md](ATTACHMENTS.md) for file-delivery
+The desktop remains authoritative, with owner-approved source updates and verified profile preservation. No live owner-workspace export/import or cutover has been performed. Private disposable PMON fixtures were created and used for native attachment checks; existing production work was preserved. See [ATTACHMENTS.md](ATTACHMENTS.md) for file-delivery
 behavior and [LIVE-ACCEPTANCE-2026-10-24.md](LIVE-ACCEPTANCE-2026-10-24.md) for the
 separate native metadata failure.
 
-## Portable-file repair checkpoint
+## Historical milestone evidence
+
+The following dated milestones retain their original findings and candidate identities. Use the current phase reports above for remaining work.
+
+### Portable-file repair checkpoint
 
 The broader matrix reproduced a staging failure in the emulated iPhone runtime
 before deployment. The old prebuilt archive was only uploaded to an undeployed
@@ -186,4 +197,4 @@ The owner subsequently authorized disposable synthetic PMON tasks in a quarantin
 
 Firefox's first upload confirmation exceeded the original harness's five-second assertion window. The original failure is preserved; exact recovery without resending passed, then one fresh cycle with thirty-second assertions passed. Its upload-to-confirmation boundary took5.212seconds, consistent with the timeout hypothesis without proving the original precise cause. No application code was changed for this test repair. Independent Test-QA review passed both recovery and the fresh cycle. Native error/limit/conflict cases beyond the observed interruption retain synthetic evidence; no blanket native failure-path pass is claimed.
 
-JetBrains support was successfully submitted with the prepared source/synthetic evidence ZIP and related open report JT-98787. SC-001 remains awaiting a supported answer and native retest. Production sharing is OFF; no new admin install is needed for this step. Actual Windows installed-app acceptance and reviewed desktop backup/export/import remain pending. Browser movement/minimization prevented a reliable installation check; no install was performed. See WINDOWS-INSTALL-ACCEPTANCE-2026-10-25.md.
+JetBrains support was successfully submitted with the prepared source/synthetic evidence ZIP and related open report JT-98787. At this October 25 checkpoint SC-001 awaited an answer; the October 26 response above now confirms the design limitation. Native proof of a replacement remains pending. Production sharing is OFF; no new admin install is needed for this step. Actual Windows installed-app acceptance and reviewed desktop backup/export/import remain pending. Browser movement/minimization prevented a reliable installation check; no install was performed. See WINDOWS-INSTALL-ACCEPTANCE-2026-10-25.md.

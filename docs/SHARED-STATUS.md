@@ -1,5 +1,9 @@
 # YouTrack-backed assigned status
 
+## Current safety gate - October 26
+
+This is an implemented, acceptance-only protocol with a confirmed unsafe concurrent-write path; it is not ready for production sharing. JetBrains ticket 9288924 confirms no supported isolation/compare-and-set/lock fix for these extension-property writes. Last verified acceptance app: 1.0.12, ID 155-84, Active on NPCD only; production source 1.0.8 is withheld. Historical installation commands and inactive-version statements below are not a current installation request. [Vendor response](JETBRAINS-SUPPORT-REPLY-2026-10-26.md) and [repair checklist](../analysis/WEB-PORT/REPAIR_CHECKLIST.md) govern next work.
+
 October 24 native acceptance gate: GenericCola now has verified app-update access. Acceptance 1.0.12 is installed as app 155-84, Active on NPCD only. API access, request-stream parsing, receipts, persistence and correlated rollback are verified, but the child race accepted two same-revision writers. Keep production sharing OFF and production source 1.0.8 withheld until supported atomic concurrency is implemented and natively retested. Preserve both synthetic fixtures and their receipts, all PMON tasks and the desktop app/data. See [LIVE-ACCEPTANCE-2026-10-24.md](LIVE-ACCEPTANCE-2026-10-24.md). The owner selected Vercel for eventual hosting; no deployment is performed by this checkpoint.
 
 ROMDex Web can store assigned status in YouTrack app-owned issue properties. Each enabled web device reads the same assigned choice, while native State continues to represent the leaf or parent calculation. Existing browser-only workspaces stay unchanged until the user previews and enables sharing.

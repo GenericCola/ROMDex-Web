@@ -1,5 +1,9 @@
 # JetBrains support submitted — October 25, 2026
 
+## Response received October 26
+
+Ticket **9288924** is identified and answered. JetBrains confirmed the concurrency limitation and offered no supported fix/workaround. [Response and source links](JETBRAINS-SUPPORT-REPLY-2026-10-26.md). The reply monitor was deleted after notifying the owner. The submission record below is retained unchanged.
+
 The owner explicitly authorized submitting the prepared request and synthetic evidence ZIP. The form at https://youtrack-support.jetbrains.com/hc/en-us/requests/new?ticket_form_id=66282 returned: “Your request was successfully submitted.” Exactly one Submit action was performed. No ticket number was shown on the confirmation page; do not invent one or resubmit.
 
 The submitted message and screenshot are preserved in artifacts/jetbrains-support-2026-10-25. The original evidence ZIP is unchanged: SHA-256 180e668ce61bbb8be956a6d488b631ae097dbc3899067ee91564343826de3839. The exact message adds a reference to https://youtrack.jetbrains.com/issue/JT-98787 and asks whether that independently similar open report covers the Cloud instance and what supported fix/workaround exists. The public report does not establish a Cloud guarantee or resolution.
