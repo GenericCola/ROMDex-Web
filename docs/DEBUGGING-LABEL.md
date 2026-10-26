@@ -9,8 +9,10 @@ Requested October 26, 2026: rename the red status light from CRITICAL to DEBUGGI
 - [x] Web typecheck, lint, 135 application tests, 30 worker/backend tests and production build pass. Worker: 1f821e774c62812122b2, 74 assets.
 - [x] Existing task/status/filter browser checks: 38 passes, two expected mobile geometry skips. All five configured browser profiles ran.
 - [x] Fresh Chromium and Firefox UI checks verify Debugging selection, red accessible light, filtering and unchanged native value and Critical priority. All external requests were blocked.
-- [ ] Deploy and verify the hosted label.
+- [x] Deployed beab9b784500b16b23f54de99592019830945803 to https://romdex-web.vercel.app. Vercel deployment dpl_3cXZEbd1HvTnjE6GNDSbcqftgDGs is Ready. Fresh Chromium and Firefox hosted checks pass the same label/selection/filter/priority checks with all external requests blocked.
 
 Main Agent handled this small presentation change directly. No new dependency or permanent test harness was needed. A temporary desktop assertion incorrectly expected uppercase CSS on the button; inspection confirmed the existing title-case rendering. A temporary web locator expected an explicit value attribute on the unchanged priority option; using its accessible option name fixed the check. Neither failure required application changes.
 
 Evidence is retained under artifacts/debugging-label-2026-10-26, including screenshots, logs, source hashes and the private installation receipt. Desktop runtime reopening is user acceptance; the isolated UI check is not a live cloud-sync test. No YouTrack app update or task-data mutation is part of this label change.
+
+Desktop source patch applies cleanly to the backed-up baseline. The hosted checks use isolated browser storage and synthetic local tasks; user browser storage, live tasks and desktop data were not test inputs. Remaining acceptance: the owner can reopen the desktop and accept the PWA reload prompt in any existing installed web-app window.
