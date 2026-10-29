@@ -3,16 +3,11 @@ import {
   callbackCode,
   exchangeCode,
   isOAuthOrigin,
-  LEGACY_ORIGIN,
   OAUTH_CALLBACK,
 } from "./oauth";
-export const signInPopup = (migration = false) => {
-  const legacy =
-    migration &&
-    window.location.origin === LEGACY_ORIGIN &&
-    window.location.pathname === "/origin-migration/";
-  const callback = legacy ? LEGACY_ORIGIN + "/oauth/callback/" : OAUTH_CALLBACK;
-  if (!isOAuthOrigin(window.location.origin) && !legacy)
+export const signInPopup = () => {
+  const callback = OAUTH_CALLBACK;
+  if (!isOAuthOrigin(window.location.origin))
     return Promise.reject(
       Error(
         "Open https://romdex.vercel.app to sign in. Local data here is unchanged.",

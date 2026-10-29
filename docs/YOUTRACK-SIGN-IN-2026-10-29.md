@@ -94,3 +94,23 @@ result. Uncertain outcomes allow read-only inspection, never automatic replay.
 No task data or roles are modified. The server requires Low-level Admin Write.
 Because this endpoint has no atomic CAS, avoid concurrent administrator edits
 while applying. The persisted YouTrack setting remains after this page closes.
+
+## Verified completion receipt — October 29, 22:45 UTC
+
+The one-shot CORS action read the original list containing only
+`https://romdex-web.vercel.app`, then appended only `https://romdex.vercel.app`.
+A mandatory fresh read returned exactly both origins with `allowAllOrigins:false`.
+The new-origin API preflight independently returned the exact allowed origin and
+Authorization header. Native OAuth login at the new address succeeded and PMON
+loaded 435 tasks; automatic delivery stayed off. No task writes were performed.
+Sign-out removed the authenticated workspace and showed only the sign-in gate.
+A real second-account test was unavailable; isolation regressions remain fixtures.
+
+With this readiness evidence, the previously approved Vercel SSO removal succeeded.
+Readback shows SSO protection disabled. An anonymous request returns HTTP200 directly
+at `https://romdex.vercel.app`, with ROMDex sign-in and no task data in the HTML.
+The temporary CORS writer and hook have now been removed; its route is a read-only
+completion notice. Both exact approved OAuth callbacks remain during transition.
+No current desktop recovery export has been provided or imported. Native reads are
+not proof that local-only drafts, queues or files have migrated. SC-001 sharing
+remains off; Windows installation and full daily-work cutover remain separate.
