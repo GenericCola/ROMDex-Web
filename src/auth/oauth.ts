@@ -1,5 +1,9 @@
 import { YOUTRACK_ORIGIN } from "@/youtrack/read-tasks";
-export const OAUTH_CALLBACK = "https://romdex-web.vercel.app/oauth/callback/";
+export const OAUTH_ORIGIN = "https://romdex.vercel.app";
+export const OAUTH_CALLBACK = OAUTH_ORIGIN + "/oauth/callback/";
+export const isOAuthOrigin = (origin: string) => {
+  return origin === OAUTH_ORIGIN;
+};
 const endpoint = YOUTRACK_ORIGIN + "/hub/api/rest/oauth2/";
 export interface OAuthTransaction {
   clientId: string;

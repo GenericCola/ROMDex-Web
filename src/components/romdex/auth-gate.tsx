@@ -1,6 +1,7 @@
 "use client";
 import type { AuthorizedProject } from "@/auth/identity";
 import AuthShell from "./auth-shell";
+import AuthSignIn from "./auth-sign-in";
 import Romdex from "./index";
 import { exportRecovery } from "./recovery-export";
 import { useAuthWorkspace } from "./use-auth-workspace";
@@ -71,15 +72,7 @@ const AuthGate = () => {
               Sign in with YouTrack to see the projects your account can access.
               Your password stays with YouTrack.
             </p>
-            <button
-              className="primary"
-              disabled={busy}
-              onClick={() => {
-                void signIn();
-              }}
-            >
-              {busy ? "Signing in…" : "Sign in with YouTrack"}
-            </button>
+            <AuthSignIn busy={busy} signIn={signIn} />
           </>
         )}
         <p role="status">{message}</p>

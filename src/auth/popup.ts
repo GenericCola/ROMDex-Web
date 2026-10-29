@@ -2,9 +2,16 @@ import {
   beginOAuth,
   callbackCode,
   exchangeCode,
+  isOAuthOrigin,
   OAUTH_CALLBACK,
 } from "./oauth";
 export const signInPopup = () => {
+  if (!isOAuthOrigin(window.location.origin))
+    return Promise.reject(
+      Error(
+        "Open https://romdex.vercel.app to sign in. Local data here is unchanged.",
+      ),
+    );
   const popup = window.open(
     "about:blank",
     "romdex-youtrack-sign-in",

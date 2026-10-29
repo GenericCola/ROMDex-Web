@@ -9,5 +9,7 @@ test("signed-out gate uses accepted device shell and contains no cached workspac
   assert.match(html, /auth-card suite-tray port-form/);
   assert.match(html, /class="primary"/);
   assert.match(html, /Sign in with YouTrack/);
+  assert.match(html, /href="https:\/\/romdex.vercel.app\/"/);
+  assert.match(html, /not automatically transferred/);
   assert.doesNotMatch(html, /id="work-tray"|type="password"|Your Project/);
 });

@@ -26,7 +26,8 @@ test("callback rejects wrong origin, state, expiry, duplicate code and denial", 
   const good = OAUTH_CALLBACK + "?state=" + transaction.state + "&code=example";
   assert.equal(callbackCode(good, transaction, 2), "example");
   for (const bad of [
-    good.replace("romdex-web.vercel.app", "example.com"),
+    good.replace("romdex.vercel.app", "example.com"),
+    good.replace("romdex.vercel.app", "romdex-web.vercel.app"),
     good + "&code=duplicate",
     good.replace(transaction.state, "wrong"),
     good + "&error=denied",

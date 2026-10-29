@@ -1,7 +1,7 @@
 # YouTrack sign-in
 
 The canonical app remains GenericCola/ROMDex-Web, branch
-`codex/accepted-app-port`, hosted at https://romdex-web.vercel.app.
+`codex/accepted-app-port`, hosted at https://romdex.vercel.app.
 No reconstructed Sites application or alternate IndexedDB schema is used here.
 
 The owner approved public OAuth registration on October 29. YouTrack Cloud
@@ -9,7 +9,7 @@ The owner approved public OAuth registration on October 29. YouTrack Cloud
 Authorization Code, required PKCE and required user consent are enabled.
 Implicit and Client Credentials flows are disabled. No client secret, service
 account, new role or offline refresh access was created. The exact registered
-return address is https://romdex-web.vercel.app/oauth/callback/.
+return address is https://romdex.vercel.app/oauth/callback/.
 
 Sign-in opens YouTrack's own login/consent page. ROMDex does not collect a
 password. Random state, S256 challenge and verifier bind the response to the
@@ -65,3 +65,18 @@ Official references:
 - https://www.jetbrains.com/help/youtrack/devportal/OAuth-authorization-in-youtrack.html
 - https://www.jetbrains.com/help/youtrack/cloud/oauth-clients.html
 - https://www.jetbrains.com/help/hub/authorization-code.html
+
+## Canonical address change
+
+The owner requested `romdex.vercel.app` on October 29. It is attached to the
+same Vercel project; the previous address remains available without an automatic
+redirect. Other origins show a link to the canonical sign-in address rather than
+opening a cross-origin callback flow. Existing browser data is not deleted or
+automatically transferred between origins. Export and reviewed import are needed
+for browser-local drafts. No current desktop export has been imported.
+
+Latest local checks: 181 tests (151 unit and 30 supporting), TypeScript, lint and
+static build pass. The corrected shell was visually checked in the protected
+preview at 1188px and 500px; narrower device emulation was unavailable.
+New-origin OAuth token preflight passes, but API authorization preflight does
+not yet return an allowed origin. Live sign-in/data-read acceptance is pending.
