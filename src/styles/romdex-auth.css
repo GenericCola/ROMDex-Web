@@ -1,0 +1,39 @@
+@scope (.romdex-app) {
+  .auth-card {
+    width: min(480px, 100%);
+    margin: auto;
+    padding: 30px;
+    gap: 20px;
+    overflow: auto;
+  }
+  .auth-card h2 { margin-top: 6px; font-size: 24px; }
+  .auth-card > .primary { min-height: 44px; }
+  .auth-card p { color: var(--muted); }
+  .auth-card p:empty { display: none; }
+  .auth-account-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    padding: 8px 14px;
+    background: var(--red-dark);
+    border-bottom: 1px solid var(--line);
+    max-height: 150px;
+    overflow: auto;
+    flex-shrink: 0;
+  }
+  .auth-account-bar p:empty { display: none; }
+  .auth-account-bar .port-actions { gap: 6px; }
+  .auth-account-bar button { padding: 5px 9px; font-size: 12px; }
+  .auth-workspace { flex: 1; min-height: 0; }
+  .auth-workspace > .romdex-app { height: 100%; }
+  .auth-project { overflow: auto; padding: 24px; margin-top: 16px; min-height: 0; }
+  :scope.auth-connected { padding: 0; }
+  :scope.auth-shell { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+  @media (max-width: 600px) {
+    .auth-card { padding: 22px; }
+    .auth-shell .device-header { min-height: 80px; flex-wrap: nowrap; }
+    .auth-shell .device-header > .eyebrow { display: none; }
+    .auth-account-bar { max-height: 180px; }
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 import type { AuthorizedProject } from "@/auth/identity";
+import AuthShell from "./auth-shell";
 import Romdex from "./index";
 import { exportRecovery } from "./recovery-export";
 import { useAuthWorkspace } from "./use-auth-workspace";
@@ -26,10 +27,23 @@ const AuthGate = () => {
       </button>
     );
   };
+  const connected = !!identity && selected?.shortName === "PMON";
   return (
-    <>
-      <section className="port-form" aria-label="YouTrack account">
-        <h1>ROMDex</h1>
+    <AuthShell connected={connected}>
+      <section
+        className={
+          connected
+            ? "auth-account-bar port-form"
+            : "auth-card suite-tray port-form"
+        }
+        aria-label="YouTrack account"
+      >
+        {!connected && (
+          <div>
+            <span className="eyebrow">Connection</span>
+            <h2>{identity ? "Choose your project" : "Sign in to ROMDex"}</h2>
+          </div>
+        )}
         {identity ? (
           <>
             <p>
@@ -58,6 +72,7 @@ const AuthGate = () => {
               Your password stays with YouTrack.
             </p>
             <button
+              className="primary"
               disabled={busy}
               onClick={() => {
                 void signIn();
@@ -82,12 +97,12 @@ const AuthGate = () => {
         )}
       </section>
       {identity && selected?.shortName === "PMON" && (
-        <div inert={busy}>
+        <div className="auth-workspace" inert={busy}>
           <Romdex />
         </div>
       )}
       {identity && selected && selected.shortName !== "PMON" && !busy && (
-        <main className="port-form">
+        <main className="auth-project suite-tray port-form">
           <h2>{selected.name}</h2>
           <p>
             Read-only project view. Editing is unavailable until this project's
@@ -105,7 +120,7 @@ const AuthGate = () => {
           })}
         </main>
       )}
-    </>
+    </AuthShell>
   );
 };
 export default AuthGate;
