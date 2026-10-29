@@ -3,10 +3,16 @@ import {
   callbackCode,
   exchangeCode,
   isOAuthOrigin,
+  LEGACY_ORIGIN,
   OAUTH_CALLBACK,
 } from "./oauth";
-export const signInPopup = () => {
-  if (!isOAuthOrigin(window.location.origin))
+export const signInPopup = (migration = false) => {
+  const legacy =
+    migration &&
+    window.location.origin === LEGACY_ORIGIN &&
+    window.location.pathname === "/origin-migration/";
+  const callback = legacy ? LEGACY_ORIGIN + "/oauth/callback/" : OAUTH_CALLBACK;
+  if (!isOAuthOrigin(window.location.origin) && !legacy)
     return Promise.reject(
       Error(
         "Open https://romdex.vercel.app to sign in. Local data here is unchanged.",
@@ -42,7 +48,7 @@ export const signInPopup = () => {
           finished ||
           !transaction ||
           event.source !== popup ||
-          event.origin !== new URL(OAUTH_CALLBACK).origin
+          event.origin !== new URL(callback).origin
         )
           return;
         const { data } = event;
@@ -78,7 +84,7 @@ export const signInPopup = () => {
         ({ transaction } = result);
         popup.location.href = result.url;
       };
-      void beginOAuth("romdex-web").then(prepared, fail);
+      void beginOAuth("romdex-web", Date.now(), callback).then(prepared, fail);
     },
   );
 };

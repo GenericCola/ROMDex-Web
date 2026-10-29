@@ -1,17 +1,15 @@
 "use client";
-import { OAUTH_CALLBACK } from "@/auth/oauth";
+import { allowedCallback } from "@/auth/oauth";
 import AuthShell from "@/components/romdex/auth-shell";
 import { useEffect } from "react";
 const Callback = () => {
   const complete = () => {
     const url = window.location.href;
-    window.history.replaceState(null, "", new URL(OAUTH_CALLBACK).pathname);
+    const callback = window.location.origin + "/oauth/callback/";
+    window.history.replaceState(null, "", "/oauth/callback/");
     const opener = window.opener as Window | null;
-    if (opener && window.location.origin === new URL(OAUTH_CALLBACK).origin)
-      opener.postMessage(
-        { type: "romdex-oauth", url },
-        new URL(OAUTH_CALLBACK).origin,
-      );
+    if (opener && allowedCallback(callback))
+      opener.postMessage({ type: "romdex-oauth", url }, window.location.origin);
   };
   useEffect(complete, []);
   return (

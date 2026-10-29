@@ -80,3 +80,17 @@ static build pass. The corrected shell was visually checked in the protected
 preview at 1188px and 500px; narrower device emulation was unavailable.
 New-origin OAuth token preflight passes, but API authorization preflight does
 not yet return an allowed origin. Live sign-in/data-read acceptance is pending.
+
+## Temporary origin migration
+
+The owner approved the narrowly scoped `/origin-migration/` administrator page.
+It operates only at `https://romdex-web.vercel.app`, using public PKCE sign-in
+and an in-memory user token. Both exact old/new callback addresses are retained
+during transition. The page reads the documented CORS settings, displays the
+existing list and the one proposed new origin, then requires an explicit checked
+confirmation. It refuses wildcard/allow-all settings and changed baselines.
+One POST appends only `https://romdex.vercel.app`; mandatory readback verifies the
+result. Uncertain outcomes allow read-only inspection, never automatic replay.
+No task data or roles are modified. The server requires Low-level Admin Write.
+Because this endpoint has no atomic CAS, avoid concurrent administrator edits
+while applying. The persisted YouTrack setting remains after this page closes.

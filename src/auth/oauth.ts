@@ -1,12 +1,16 @@
 import { YOUTRACK_ORIGIN } from "@/youtrack/read-tasks";
-export const OAUTH_ORIGIN = "https://romdex.vercel.app";
-export const OAUTH_CALLBACK = OAUTH_ORIGIN + "/oauth/callback/";
-export const isOAuthOrigin = (origin: string) => {
-  return origin === OAUTH_ORIGIN;
-};
+import { allowedCallback, OAUTH_CALLBACK } from "./origins";
+export {
+  allowedCallback,
+  isOAuthOrigin,
+  LEGACY_ORIGIN,
+  OAUTH_CALLBACK,
+  OAUTH_ORIGIN,
+} from "./origins";
 const endpoint = YOUTRACK_ORIGIN + "/hub/api/rest/oauth2/";
 export interface OAuthTransaction {
   clientId: string;
+  callback: string;
   state: string;
   verifier: string;
   expiresAt: number;
@@ -24,11 +28,17 @@ export const codeChallenge = async (verifier: string) => {
     ),
   );
 };
-export const beginOAuth = async (clientId: string, now = Date.now()) => {
+export const beginOAuth = async (
+  clientId: string,
+  now = Date.now(),
+  callback = OAUTH_CALLBACK,
+) => {
+  if (!allowedCallback(callback)) throw Error("Unsupported sign-in callback.");
   if (!clientId?.trim() || clientId.trim() !== clientId)
     throw Error("YouTrack sign-in is not configured.");
   const transaction: OAuthTransaction = {
     clientId,
+    callback,
     state: base64url(crypto.getRandomValues(new Uint8Array(32))),
     verifier: base64url(crypto.getRandomValues(new Uint8Array(32))),
     expiresAt: now + 5 * 60 * 1000,
@@ -37,7 +47,7 @@ export const beginOAuth = async (clientId: string, now = Date.now()) => {
     ["response_type", "code"],
     ["client_id", clientId],
     ["state", transaction.state],
-    ["redirect_uri", OAUTH_CALLBACK],
+    ["redirect_uri", transaction.callback],
     ["request_credentials", "default"],
     ["scope", "YouTrack"],
     ["access_type", "online"],
@@ -53,7 +63,8 @@ export const callbackCode = (
 ) => {
   const url = new URL(href);
   if (
-    url.origin + url.pathname !== OAUTH_CALLBACK ||
+    !allowedCallback(transaction.callback) ||
+    url.origin + url.pathname !== transaction.callback ||
     url.hash ||
     now >= transaction.expiresAt ||
     url.searchParams.getAll("state").length !== 1 ||
@@ -77,6 +88,8 @@ export const exchangeCode = async (
   fetcher: typeof fetch = fetch,
   now = Date.now(),
 ) => {
+  if (!allowedCallback(transaction.callback))
+    throw Error("Unsupported sign-in callback.");
   if (now >= transaction.expiresAt)
     throw Error("Sign-in expired. Start again.");
   let response: Response;
@@ -95,7 +108,7 @@ export const exchangeCode = async (
         ["grant_type", "authorization_code"],
         ["client_id", transaction.clientId],
         ["code", code],
-        ["redirect_uri", OAUTH_CALLBACK],
+        ["redirect_uri", transaction.callback],
         ["code_verifier", transaction.verifier],
       ]),
     });
