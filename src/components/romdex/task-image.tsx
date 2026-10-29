@@ -1,5 +1,6 @@
 import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
+import { trackWorkspaceWork } from "@/domain/workspace-work";
 import { taskImage } from "@/rdx/images";
 import { useState } from "react";
 const TaskImage = ({ id, data }: { id: string; data: WorkspaceData }) => {
@@ -34,7 +35,10 @@ const TaskImage = ({ id, data }: { id: string; data: WorkspaceData }) => {
           accept="image/png,image/jpeg,image/gif,image/webp"
           onChange={(event) => {
             const file = event.target.files?.[0];
-            if (file) void load(file);
+            if (file)
+              void trackWorkspaceWork(() => {
+                return load(file);
+              });
             event.target.value = "";
           }}
         />

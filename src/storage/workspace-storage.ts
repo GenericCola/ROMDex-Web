@@ -5,6 +5,9 @@ interface WorkspaceRecord {
   data: WorkspaceData;
 }
 export class WorkspaceStorage {
+  constructor(private key = "current") {
+    if (!key || key.length > 2048) throw Error("Invalid workspace key.");
+  }
   private connection: Promise<IDBDatabase> | undefined;
   private open = (): Promise<IDBDatabase> => {
     this.connection ??= new Promise((resolve, reject) => {
@@ -39,7 +42,7 @@ export class WorkspaceStorage {
       const request = db
         .transaction("workspace")
         .objectStore("workspace")
-        .get("current");
+        .get(this.key);
       const success = () => {
         try {
           const record = request.result as WorkspaceRecord | undefined;
@@ -78,7 +81,7 @@ export class WorkspaceStorage {
       let reason =
         "Browser storage could not save. Keep this window open and export a recovery copy.";
       const store = tx.objectStore("workspace");
-      const request = store.get("current");
+      const request = store.get(this.key);
       const checked = () => {
         const record = request.result as WorkspaceRecord | undefined;
         if ((record?.revision ?? 0) !== expectedRevision) {
@@ -87,7 +90,7 @@ export class WorkspaceStorage {
           tx.abort();
           return;
         }
-        store.put({ revision: expectedRevision + 1, data }, "current");
+        store.put({ revision: expectedRevision + 1, data }, this.key);
       };
       const complete = () => {
         return resolve(expectedRevision + 1);

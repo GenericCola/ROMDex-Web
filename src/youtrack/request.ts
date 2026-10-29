@@ -1,3 +1,4 @@
+import { authRequestGuard } from "@/auth/session";
 import { YOUTRACK_ORIGIN } from "./read-tasks";
 export type YouTrackRequest = (
   route: string,
@@ -7,7 +8,9 @@ export type YouTrackRequest = (
 export const sessionRequest = (value: string): YouTrackRequest => {
   const token = value.trim();
   if (!token) throw Error("Enter a YouTrack token.");
+  const assertSession = authRequestGuard(token);
   const request: YouTrackRequest = async (route, method = "GET", body) => {
+    assertSession();
     const form = body instanceof FormData;
     const response = await fetch(YOUTRACK_ORIGIN + "/api/" + route, {
       method,
@@ -26,10 +29,12 @@ export const sessionRequest = (value: string): YouTrackRequest => {
         ? { body: form ? body : JSON.stringify(body) }
         : {}),
     });
+    assertSession();
     if (response.status === 404 && method === "GET") return null;
     if (!response.ok)
       throw Error("YouTrack request failed (HTTP " + response.status + ").");
     const text = await response.text();
+    assertSession();
     return text ? (JSON.parse(text) as unknown) : null;
   };
   return request;

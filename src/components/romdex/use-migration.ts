@@ -9,6 +9,7 @@ import { jsonObject, parseJson } from "@/domain/json";
 import type { WorkspaceData } from "@/domain/types";
 import { validateWorkspace } from "@/domain/workspace-data";
 import { workspaceStore } from "@/domain/workspace-store";
+import { trackWorkspaceWork } from "@/domain/workspace-work";
 import type { DesktopPreview } from "@/migration/desktop";
 import { applyDesktop, previewDesktop } from "@/migration/desktop";
 import { readDesktopExport } from "@/migration/desktop-export";
@@ -62,7 +63,10 @@ export const useMigration = (close: () => void) => {
   };
   const select = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) void load(file);
+    if (file)
+      void trackWorkspaceWork(() => {
+        return load(file);
+      });
     event.target.value = "";
   };
   const toggle = (event: ChangeEvent<HTMLInputElement>) => {
@@ -110,7 +114,7 @@ export const useMigration = (close: () => void) => {
     }
   };
   const submit = () => {
-    void apply();
+    void trackWorkspaceWork(apply);
   };
   const choose = (id: string, selected: boolean) => {
     setChoices((previous) => {

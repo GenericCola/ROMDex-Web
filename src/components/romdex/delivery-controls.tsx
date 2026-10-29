@@ -1,3 +1,4 @@
+import { authToken, hasAuthSession } from "@/auth/session";
 import {
   connectDelivery,
   deliveryConnected,
@@ -5,17 +6,11 @@ import {
 } from "@/cloud/session";
 import { cloudData } from "@/cloud/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import type { ChangeEvent } from "react";
 import { useState } from "react";
 import DeliveryReview from "./delivery-review";
-import SharedStatusControls from "./shared-status-controls";
 const DeliveryControls = () => {
-  const [token, setToken] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const changeToken = (event: ChangeEvent<HTMLInputElement>) => {
-    return setToken(event.target.value);
-  };
   const execute = async (action: () => Promise<void>) => {
     setBusy(true);
     try {
@@ -31,14 +26,12 @@ const DeliveryControls = () => {
   };
   const connect = () => {
     const action = async () => {
-      await connectDelivery(token);
-      setToken("");
+      await connectDelivery(authToken());
     };
     void execute(action);
   };
   const disconnect = () => {
     disconnectDelivery();
-    setToken("");
     setMessage("Disconnected. Queue and drafts kept; session token discarded.");
   };
   const records = Object.entries(
@@ -64,23 +57,14 @@ const DeliveryControls = () => {
         Optional, session only. Save Changes delivers new tasks, listed
         deletions, hierarchy, assigned status with parent rollups, titles,
         notes, priority, complexity and comments. Assigned choices stay in this
-        browser until shared status is enabled below; recovery exports retain
-        them. Calculated statuses go to YouTrack State. Deletions permanently
-        remove only the reviewed list. Auto-Sync is off initially. Enabling
-        delivery uses your saved preference. Avoid simultaneous desktop edits to
-        the same fields. A timeout pauses automatic delivery until review.
+        browser while shared status is disabled; recovery exports retain them.
+        Calculated statuses go to YouTrack State. Deletions permanently remove
+        only the reviewed list. Auto-Sync is off initially. Enabling delivery
+        uses your saved preference. Avoid simultaneous desktop edits to the same
+        fields. A timeout pauses automatic delivery until review.
       </p>
-      <label>
-        Session token for delivery
-        <input
-          type="password"
-          value={token}
-          onChange={changeToken}
-          autoComplete="off"
-        />
-      </label>
       <div className="port-actions">
-        <button onClick={connect} disabled={busy || !token.trim()}>
+        <button onClick={connect} disabled={busy || !hasAuthSession()}>
           Enable delivery for this session
         </button>
         <button onClick={disconnect} disabled={busy || !deliveryConnected()}>
@@ -89,9 +73,10 @@ const DeliveryControls = () => {
       </div>
       <p role="status">{message}</p>
       {records.map(render)}
-      {records.length === 0 && (
-        <SharedStatusControls busy={busy} execute={execute} />
-      )}
+      <p>
+        Shared assigned status is unavailable while its concurrency safety check
+        remains unresolved.
+      </p>
     </section>
   );
 };

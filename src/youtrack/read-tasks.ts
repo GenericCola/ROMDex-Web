@@ -1,3 +1,4 @@
+import { authRequestGuard } from "@/auth/session";
 import type { TaskItem } from "@/domain/types";
 export const YOUTRACK_ORIGIN = "https://thegobindsingh.youtrack.cloud";
 interface RawValue {
@@ -72,10 +73,21 @@ export const normalize = (raw: RawIssue): TaskItem => {
     url: YOUTRACK_ORIGIN + "/issue/" + raw.idReadable,
   };
 };
-export const readTasks = async (token: string): Promise<TaskItem[]> => {
+export const readTasks = async (
+  token: string,
+  current: () => void = () => {
+    return undefined;
+  },
+): Promise<TaskItem[]> => {
+  const guard = authRequestGuard(token.trim());
+  const assertCurrent = () => {
+    guard();
+    current();
+  };
   if (!token.trim()) throw Error("Enter a YouTrack token in this window.");
   const items: TaskItem[] = [];
   for (let skip = 0; skip < 100000; skip += 100) {
+    assertCurrent();
     const query = new URLSearchParams({
       query: "project: PMON sort by: created asc",
       fields:
@@ -111,6 +123,7 @@ export const readTasks = async (token: string): Promise<TaskItem[]> => {
           "). Check token access to PMON.",
       );
     const raw: unknown = await response.json();
+    assertCurrent();
     if (!Array.isArray(raw))
       throw Error(
         "Unexpected YouTrack response. No workspace data was replaced.",

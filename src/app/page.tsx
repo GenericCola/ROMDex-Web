@@ -1,5 +1,5 @@
-import Romdex from "@components/romdex";
+import AuthGate from "@components/romdex/auth-gate";
 const HomePage = () => {
-  return <Romdex />;
+  return <AuthGate />;
 };
 export default HomePage;

@@ -1,4 +1,5 @@
 import { registerDraftEditor } from "@/domain/editor-drafts";
+import { trackWorkspaceWork } from "@/domain/workspace-work";
 import { useLayoutEffect, useRef, useState } from "react";
 export const useAttachmentWork = () => {
   const [busy, setBusy] = useState(false),
@@ -22,7 +23,9 @@ export const useAttachmentWork = () => {
   };
   const run = (action: () => Promise<void>) => {
     if (pendingRef.current) return;
-    const pending = execute(action);
+    const pending = trackWorkspaceWork(() => {
+      return execute(action);
+    });
     pendingRef.current = pending;
     void pending
       .finally(() => {
@@ -36,7 +39,7 @@ export const useAttachmentWork = () => {
     return registerDraftEditor({
       label: "Attachment operation in progress",
       dirty: () => {
-        return busy;
+        return pendingRef.current !== null;
       },
       flush: async () => {
         await pendingRef.current;

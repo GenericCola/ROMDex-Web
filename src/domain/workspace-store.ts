@@ -1,64 +1,18 @@
-import { verifyRetainedAssets } from "@/migration/verify-assets";
-import { WorkspaceStorage } from "@/storage/workspace-storage";
-import { flushDraftEditors, hasDraftEdits } from "./editor-drafts";
-import type { WorkspaceData, WorkspaceSnapshot } from "./types";
-import { emptyWorkspace, validateWorkspace } from "./workspace-data";
+import { hasDraftEdits } from "./editor-drafts";
+import type { WorkspaceData } from "./types";
+import { emptyWorkspace } from "./workspace-data";
+import {
+  prepareWorkspaceUpdate,
+  type WorkspacePersistence,
+} from "./workspace-lifecycle";
+import { WorkspacePersistenceStore } from "./workspace-persistence-store";
 import { exportWorkspace } from "./workspace-recovery";
-export interface WorkspacePersistence {
-  load: () => Promise<{ revision: number; data: WorkspaceData } | undefined>;
-  save: (data: WorkspaceData, expectedRevision: number) => Promise<number>;
-}
-export class WorkspaceStore {
-  private storage: WorkspacePersistence;
-  private revision = 0;
-  private loading: Promise<void> | undefined;
-  private writes: Promise<void> = Promise.resolve();
-  private listeners = new Set<() => void>();
-  private state: WorkspaceSnapshot = {
-    ready: false,
-    updating: false,
-    delivering: false,
-    data: emptyWorkspace(),
-    pendingWrites: 0,
-    error: "",
-    connection: "Not connected",
-  };
-  constructor(storage: WorkspacePersistence = new WorkspaceStorage()) {
-    this.storage = storage;
-  }
-  getSnapshot = () => {
-    return this.state;
-  };
-  subscribe = (listener: () => void) => {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
-  };
-  private publish = (patch: Partial<WorkspaceSnapshot>) => {
-    this.state = { ...this.state, ...patch };
-    for (const listener of this.listeners) listener();
-  };
-  start = () => {
-    this.loading ??= this.load();
-    return this.loading;
-  };
-  private load = async () => {
-    try {
-      const record = await this.storage.load();
-      if (record) await verifyRetainedAssets(record.data);
-      this.revision = record?.revision ?? 0;
-      this.publish({ data: record?.data ?? emptyWorkspace(), ready: true });
-    } catch (error) {
-      this.publish({
-        error:
-          error instanceof Error ? error.message : "Workspace could not load.",
-      });
-    }
-  };
+import { hasWorkspaceWork } from "./workspace-work";
+export type { WorkspacePersistence } from "./workspace-lifecycle";
+export class WorkspaceStore extends WorkspacePersistenceStore {
   change = (update: (data: WorkspaceData) => void) => {
-    if (this.state.delivering)
-      throw Error("Wait for cloud delivery to finish.");
+    if (this.state.delivering || this.switching)
+      throw Error("Wait for cloud delivery or workspace switching to finish.");
     return this.write(update);
   };
   deliver = async (
@@ -67,6 +21,7 @@ export class WorkspaceStore {
     ) => Promise<void>,
   ) => {
     if (
+      this.switching ||
       this.state.delivering ||
       this.state.updating ||
       !this.state.ready ||
@@ -85,56 +40,44 @@ export class WorkspaceStore {
       this.publish({ delivering: false });
     }
   };
-  private write = (update: (data: WorkspaceData) => void) => {
-    if (!this.state.ready || this.state.error || this.state.updating)
+  prepareUpdate = () => {
+    return prepareWorkspaceUpdate(
+      this,
+      (updating) => {
+        this.publish({ updating });
+      },
+      () => {
+        return this.switching;
+      },
+    );
+  };
+  switchPersistence = async (storage: WorkspacePersistence) => {
+    if (
+      this.switching ||
+      this.state.delivering ||
+      this.state.updating ||
+      hasWorkspaceWork() ||
+      hasDraftEdits()
+    )
       throw Error(
-        this.state.error ||
-          (this.state.updating
-            ? "An app update is being prepared."
-            : "Wait for your workspace to open."),
+        "Finish delivery, updates and draft edits before switching workspaces.",
       );
-    const data = structuredClone(this.state.data);
-    update(data);
-    validateWorkspace(data);
-    this.publish({ data, pendingWrites: this.state.pendingWrites + 1 });
-    const persist = async () => {
-      try {
-        if (this.state.error) return;
-        this.revision = await this.storage.save(data, this.revision);
-      } catch (error) {
-        this.publish({
-          error:
-            error instanceof Error ? error.message : "Local saving failed.",
-        });
-      } finally {
-        this.publish({ pendingWrites: this.state.pendingWrites - 1 });
-      }
-    };
-    this.writes = this.writes.then(persist);
-    return this.writes;
-  };
-  flush = async () => {
-    let pending;
-    do {
-      pending = this.writes;
-      await pending;
-    } while (pending !== this.writes);
-    if (this.state.error) throw Error(this.state.error);
-  };
-  prepareUpdate = async () => {
-    if (hasDraftEdits()) await flushDraftEditors();
-    if (this.state.delivering)
-      throw Error("Wait for cloud delivery before updating.");
-    this.publish({ updating: true });
-    const release = () => {
-      return this.publish({ updating: false });
-    };
+    this.switching = true;
+    this.generation++;
     try {
       await this.flush();
-      return release;
-    } catch (error) {
-      release();
-      throw error;
+      this.storage = storage;
+      this.revision = 0;
+      this.publish({
+        data: emptyWorkspace(),
+        ready: false,
+        error: "",
+        connection: "Not connected",
+      });
+      this.loading = this.load();
+      await this.loading;
+    } finally {
+      this.switching = false;
     }
   };
   setConnection = (connection: string) => {

@@ -1,8 +1,11 @@
 import { MAX_UPLOAD } from "@/attachments/validate";
+import { authRequestGuard } from "@/auth/session";
 import { YOUTRACK_ORIGIN } from "./read-tasks";
 export const attachmentBytes = (value: string) => {
   const token = value.trim();
+  const assertSession = authRequestGuard(token);
   return async (raw: string, expected: number) => {
+    assertSession();
     if (expected > MAX_UPLOAD)
       throw Error("Download is limited to 50 MiB per file.");
     const url = new URL(raw, YOUTRACK_ORIGIN);
@@ -28,6 +31,7 @@ export const attachmentBytes = (value: string) => {
     try {
       for (;;) {
         const part = await reader.read();
+        assertSession();
         if (part.done) break;
         size += part.value.length;
         if (size > expected || size > MAX_UPLOAD)
@@ -46,6 +50,7 @@ export const attachmentBytes = (value: string) => {
       bytes.set(chunk, at);
       at += chunk.length;
     }
+    assertSession();
     return bytes;
   };
 };

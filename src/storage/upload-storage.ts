@@ -5,10 +5,20 @@ import {
   verifyUpload,
 } from "@/attachments/validate";
 type StoredRecord = Pick<StoredUpload, "id" | "file"> & {
+  scope?: string;
   bytes?: ArrayBuffer;
   blob?: Blob;
 };
 export class UploadStorage implements UploadStore {
+  private scope: string | undefined;
+  setScope = (scope?: string) => {
+    if (scope !== undefined && (!scope || scope.length > 2048))
+      throw Error("Invalid upload scope.");
+    this.scope = scope;
+  };
+  private key = (id: string, scope: string | undefined): IDBValidKey => {
+    return scope === undefined ? id : [scope, id];
+  };
   private connection: Promise<IDBDatabase> | undefined;
   private open = () => {
     this.connection ??= new Promise<IDBDatabase>((resolve, reject) => {
@@ -32,10 +42,14 @@ export class UploadStorage implements UploadStore {
     return this.connection;
   };
   get = async (id: string) => {
+    const { scope } = this;
     const db = await this.open();
     const value = await new Promise<StoredRecord | undefined>(
       (resolve, reject) => {
-        const request = db.transaction("files").objectStore("files").get(id);
+        const request = db
+          .transaction("files")
+          .objectStore("files")
+          .get(this.key(id, scope));
         request.onsuccess = () => {
           resolve(request.result as StoredRecord | undefined);
         };
@@ -44,7 +58,8 @@ export class UploadStorage implements UploadStore {
         };
       },
     );
-    if (value && value.id !== id) throw Error("Staged file identity differs.");
+    if (value && (value.id !== id || value.scope !== scope))
+      throw Error("Staged file identity differs.");
     if (!value) return undefined;
     const blob =
       value.blob ??
@@ -56,6 +71,7 @@ export class UploadStorage implements UploadStore {
     return verifyUpload({ id: value.id, file: value.file, blob });
   };
   put = async (value: StoredUpload) => {
+    const { scope } = this;
     await verifyUpload(value);
     const bytes = await value.blob.arrayBuffer();
     const db = await this.open();
@@ -65,7 +81,9 @@ export class UploadStorage implements UploadStore {
         request = store.getAll();
       let reason = "Staged file could not be saved. Keep the original file.";
       request.onsuccess = () => {
-        const current = request.result as StoredRecord[],
+        const current = (request.result as StoredRecord[]).filter((record) => {
+            return record.scope === scope;
+          }),
           existing = current.find((record) => {
             return record.id === value.id;
           });
@@ -84,7 +102,15 @@ export class UploadStorage implements UploadStore {
           tx.abort();
           return;
         }
-        store.put({ id: value.id, file: value.file, bytes }, value.id);
+        store.put(
+          {
+            id: value.id,
+            file: value.file,
+            bytes,
+            ...(scope === undefined ? {} : { scope }),
+          },
+          this.key(value.id, scope),
+        );
       };
       tx.oncomplete = () => {
         resolve();
@@ -95,10 +121,11 @@ export class UploadStorage implements UploadStore {
     });
   };
   remove = async (id: string) => {
+    const { scope } = this;
     const db = await this.open();
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction("files", "readwrite", { durability: "strict" });
-      tx.objectStore("files").delete(id);
+      tx.objectStore("files").delete(this.key(id, scope));
       tx.oncomplete = () => {
         resolve();
       };

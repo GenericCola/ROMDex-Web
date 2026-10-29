@@ -1,3 +1,4 @@
+import { trackWorkspaceWork } from "@/domain/workspace-work";
 import { useRef, useState } from "react";
 export const useRdxOperation = () => {
   const [busy, setBusy] = useState(false),
@@ -8,7 +9,7 @@ export const useRdxOperation = () => {
     setBusy(true);
     setMessage("");
     try {
-      await task();
+      await trackWorkspaceWork(task);
     } catch (error) {
       if (generation === generationRef.current)
         setMessage(
