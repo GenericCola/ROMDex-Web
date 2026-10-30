@@ -96,7 +96,8 @@ export async function callback(request: Request, deps: CookieDependencies) {
   const cookie = await sealCookie(value, deps.key);
   if (request.signal.aborted || deps.now() >= expiresAt)
     throw new HttpFailure(401);
-  return redirect(ORIGIN + "/", [
+  // Query bypasses older service-worker shells after OAuth; never put credentials here.
+  return redirect(ORIGIN + "/?auth=complete", [
     setCookie(SESSION, cookie, expiresAt - deps.now()),
     setCookie(LOGIN, "", 0),
   ]);

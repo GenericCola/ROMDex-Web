@@ -385,7 +385,7 @@ test("actual HTTP server executes same Web handler: login redirect cookie then a
       { headers, redirect: "manual" },
     );
     assert.equal(result.status, 303);
-    assert.equal(result.headers.get("location"), origin + "/");
+    assert.equal(result.headers.get("location"), origin + "/?auth=complete");
     const access = result.headers
       .getSetCookie()
       .find((v) => v.startsWith("__Host-romdex-access="))!;
