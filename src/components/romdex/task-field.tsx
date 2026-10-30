@@ -1,4 +1,5 @@
 import { fieldChoices, fieldPresentation } from "@/domain/field-presentation";
+import { needsDeliveryReview } from "@/domain/review-browsing";
 import { editTask } from "@/domain/task-actions";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
@@ -17,10 +18,12 @@ const TaskField = ({
   item: TaskItem;
   field: keyof typeof fieldChoices;
 }) => {
+  const readOnly = needsDeliveryReview(workspaceStore.getSnapshot().data);
   const value = item[field];
   const shown = fieldPresentation(field, value);
   const choices = fieldChoices[field];
   const change = (event: ChangeEvent<HTMLSelectElement>) => {
+    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
     const next = event.target.value;
     void workspaceStore.change((data) => {
       editTask(
@@ -39,6 +42,7 @@ const TaskField = ({
       </span>
       <select
         className="field-select"
+        disabled={readOnly}
         aria-label={field + " for " + item.summary}
         title={
           field === "priority" && value === "Show-stopper"

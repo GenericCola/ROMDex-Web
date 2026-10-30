@@ -1,3 +1,4 @@
+import { needsDeliveryReview } from "@/domain/review-browsing";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { attachmentsReadable } from "@/youtrack/attachment-reader";
 import AttachmentCache from "./attachment-cache";
@@ -23,7 +24,7 @@ const TaskAttachments = ({
           className="sr-only"
           aria-label="Attach Files"
           multiple
-          disabled={model.busy}
+          disabled={model.busy || needsDeliveryReview(data)}
           onChange={(event) => {
             const files = [...(event.target.files ?? [])];
             if (files.length) model.stageMany(files);
@@ -46,7 +47,21 @@ const TaskAttachments = ({
       <p className="small" role="status" hidden={!model.busy && !model.message}>
         {model.busy ? "Attachment operation in progress" : model.message}
       </p>
-      <NativeAttachmentList data={data} id={item.id} model={model} />
+      <NativeAttachmentList
+        data={
+          model.readOnlyFiles
+            ? {
+                ...data,
+                attachmentLists: {
+                  ...data.attachmentLists,
+                  [item.id]: model.readOnlyFiles,
+                },
+              }
+            : data
+        }
+        id={item.id}
+        model={model}
+      />
       <QueuedAttachments data={data} id={item.id} model={model} />
       <details>
         <summary>Local File Recovery</summary>

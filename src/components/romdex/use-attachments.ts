@@ -12,26 +12,14 @@ import { uploadStorage } from "@/storage/upload-storage";
 import { attachmentReader } from "@/youtrack/attachment-reader";
 import { useState } from "react";
 import { stageTaskFiles } from "./stage-task-files";
+import { useAttachmentInventory } from "./use-attachment-inventory";
 import { useAttachmentPreview } from "./use-attachment-preview";
 import { useAttachmentWork } from "./use-attachment-work";
 export const useAttachments = (item: TaskItem, quietRead = false) => {
   const work = useAttachmentWork(),
     [removing, setRemoving] = useState<Attachment | null>(null);
   const preview = useAttachmentPreview(item.id, work);
-  const read = () => {
-    work.run(async () => {
-      const files = await attachmentReader().list(item.id);
-      await workspaceStore.change((data) => {
-        data.attachmentLists ??= {};
-        data.attachmentLists[item.id] = files;
-      });
-      await workspaceStore.flush();
-      if (!quietRead)
-        work.setMessage(
-          files.length + " attachments read. No file mutation was sent.",
-        );
-    });
-  };
+  const inventory = useAttachmentInventory(item, work, quietRead);
   const stageMany = (files: File[]) => {
     work.run(async () => {
       const staged = await stageTaskFiles(item.id, files);
@@ -108,13 +96,13 @@ export const useAttachments = (item: TaskItem, quietRead = false) => {
     });
   };
   return {
+    ...inventory,
     cancelDeletion,
     ...work,
     ...preview,
     cancel,
     removing,
     setRemoving,
-    read,
     stageMany,
     restore,
     exportPending,

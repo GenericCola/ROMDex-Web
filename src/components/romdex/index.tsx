@@ -1,5 +1,5 @@
 "use client";
-import { cloudData } from "@/cloud/types";
+import { needsDeliveryReview, reviewNotice } from "@/domain/review-browsing";
 import { WorkSelectionProvider } from "./work-selection-provider";
 
 import { materialize } from "@/domain/accepted/core.mjs";
@@ -91,15 +91,17 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
             {state.error}
           </p>
         )}
+        {needsDeliveryReview(state.data) && (
+          <p className="port-notice" role="status">
+            {reviewNotice(state.data)} Browsing is available; task edits are
+            paused.
+            <button onClick={openConnection}>Review pending changes</button>
+          </p>
+        )}
         {state.ready && (
           <DeviceBody
             enabled={view.workspace === "romdex"}
-            inert={
-              !!state.error ||
-              Object.values(cloudData(state.data).records).some((record) => {
-                return record.status !== "confirmed";
-              })
-            }
+            inert={!!state.error}
           >
             {view.workspace === "romdex" ? (
               <Selectors data={state.data} items={items} add={add} />

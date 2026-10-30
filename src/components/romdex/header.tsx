@@ -3,6 +3,7 @@ import { cloudData } from "@/cloud/types";
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState, type ReactNode } from "react";
+import { saveExplanation, syncControl } from "./header-status";
 import Lamp from "./lamp";
 import WorkspaceMenu from "./workspace-menu";
 import WorkspaceTools from "./workspace-tools";
@@ -19,6 +20,8 @@ const Header = ({
   tools,
 }: HeaderProps) => {
   const [message, setMessage] = useState("");
+  const sync = syncControl(deliveryConnected(), cloudData(state.data).autoSync);
+  const saveReason = saveExplanation(state, unsavedDrafts);
   const save = () => {
     setMessage("");
     const done = (value: string) => {
@@ -63,17 +66,13 @@ const Header = ({
           <button
             className="auto-sync-toggle"
             {...{ autoComplete: "off" }}
-            role="switch"
-            aria-label="Auto-Sync Data"
-            aria-checked={cloudData(state.data).autoSync}
-            disabled={!deliveryConnected()}
-            onClick={toggleSync}
-            title="Deliver supported queued changes every 10 seconds while connected"
+            role={sync.role}
+            aria-label={sync.label}
+            aria-checked={sync.checked}
+            onClick={sync.connected ? toggleSync : connect}
+            title={sync.description}
           >
-            Auto-Sync Data{" "}
-            <span className="toggle-value">
-              {cloudData(state.data).autoSync ? "On" : "Off"}
-            </span>
+            Auto-Sync Data <span className="toggle-value">{sync.value}</span>
           </button>
           <div className="save-controls">
             <button
@@ -81,6 +80,8 @@ const Header = ({
               className="save"
               onClick={save}
               disabled={!state.ready}
+              title={saveReason}
+              aria-label={`Save Changes. ${saveReason}`}
             >
               Save Changes{" "}
               <Lamp

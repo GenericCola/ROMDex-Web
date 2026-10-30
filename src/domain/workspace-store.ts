@@ -1,4 +1,5 @@
 import { hasDraftEdits } from "./editor-drafts";
+import { guardReviewBrowsing } from "./review-browsing";
 import type { WorkspaceData } from "./types";
 import { emptyWorkspace } from "./workspace-data";
 import {
@@ -13,7 +14,10 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
   change = (update: (data: WorkspaceData) => void) => {
     if (this.state.delivering || this.switching)
       throw Error("Wait for cloud delivery or workspace switching to finish.");
-    return this.write(update);
+    return this.write((data) => {
+      update(data);
+      guardReviewBrowsing(this.state.data, data);
+    });
   };
   deliver = async (
     run: (

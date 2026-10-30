@@ -1,4 +1,5 @@
 import { indexTree, materialize } from "@/domain/accepted/core.mjs";
+import { needsDeliveryReview } from "@/domain/review-browsing";
 import { editTask } from "@/domain/task-actions";
 import { taskAssigneeLabel } from "@/domain/task-assignee-label";
 import { itemName, taskTier } from "@/domain/task-presentation";
@@ -20,6 +21,7 @@ const TaskProperties = ({
   remove: () => void;
   children?: ReactNode;
 }) => {
+  const readOnly = needsDeliveryReview(data);
   const editing = useTaskTextEditing(item.id, "title");
   const tree = indexTree(materialize(data.remote, data.operations), data.order);
   const parents: string[] = [];
@@ -30,6 +32,7 @@ const TaskProperties = ({
   }
   const inherited = !!tree.children.get(item.id)?.length;
   const title = (event: ChangeEvent<HTMLInputElement>) => {
+    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
     const { value } = event.target;
     void workspaceStore.change((next) => {
       next.titleDrafts[item.id] = value;
@@ -37,6 +40,7 @@ const TaskProperties = ({
   };
   const commitTitle = () => {
     editing.blur();
+    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
     if (data.titleDrafts[item.id]?.trim())
       void workspaceStore.change((next) => {
         editTask(next, item.id, {
@@ -52,6 +56,7 @@ const TaskProperties = ({
       </p>
       <input
         id="detail-title"
+        readOnly={readOnly}
         className="detail-title"
         aria-label="Task Title"
         value={data.titleDrafts[item.id] ?? item.summary}
@@ -91,7 +96,11 @@ const TaskProperties = ({
             Open in YouTrack ↗
           </a>
         )}
-        <button className="danger text-button" onClick={remove}>
+        <button
+          className="danger text-button"
+          onClick={remove}
+          disabled={readOnly}
+        >
           Delete Item
         </button>
       </div>

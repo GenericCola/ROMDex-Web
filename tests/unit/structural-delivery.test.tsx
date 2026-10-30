@@ -61,3 +61,16 @@ test("corrupt deletion receipts cannot skip unapproved targets",async()=>{
 test("a later queued local parent is created before its dependent without losing intent",async()=>{
   const s=await setup();await s.store.change(data=>{const child=createTask(data,null,"Earlier child");const parent=createTask(data,null,"Later parent");editTask(data,child,{parentId:parent});});await s.run();assert.equal(s.counts().creates,2);assert.equal(s.remote.get("PMON-900101")?.summary,"Later parent");assert.equal(s.remote.get("PMON-900102")?.parentId,"PMON-900101");assert.equal(s.saved().operations.length,0);
 });
+
+test("stale deletion review allows browsing and safe cancellation without any remote deletion",async()=>{
+  const s=await setup([item()]);await s.store.change(data=>deleteTask(data,item().id));
+  Object.assign(s.remote.get(item().id)!,{state:"Done",commentCount:1,comments:[{id:"fixture-comment",text:"Investigation",author:"Fixture",created:2}]});
+  await assert.rejects(s.run(),/changed deletion/);
+  await s.store.change(data=>{data.view.scope=item().id;data.view.selected=item().id;});
+  assert.equal(s.store.getSnapshot().data.view.selected,item().id);
+  await s.review("cloud");
+  assert.deepEqual(s.deletes,[]);assert.equal(s.saved().operations.length,0);
+  assert.equal(s.saved().remote[0]?.state,"Done");
+  await s.store.change(data=>editTask(data,item().id,{summary:"Local edit after cancellation"}));
+  assert.equal(s.saved().operations.length,1);assert.deepEqual(s.deletes,[]);
+});

@@ -1,3 +1,4 @@
+import { needsDeliveryReview } from "@/domain/review-browsing";
 import { editTask, postComment } from "@/domain/task-actions";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
@@ -5,7 +6,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useRef } from "react";
 import { useDetailNavigation } from "./detail-navigation-context";
 import TaskCommentList from "./task-comment-list";
-import { useTaskComments } from "./use-task-comments";
+import { queuedTaskComments, useTaskComments } from "./use-task-comments";
 import { useTaskTextEditing } from "./use-task-text-editing";
 const TaskWriting = ({
   item,
@@ -14,26 +15,32 @@ const TaskWriting = ({
   item: TaskItem;
   data: WorkspaceData;
 }) => {
+  const readOnly = needsDeliveryReview(data);
   const editing = useTaskTextEditing(item.id, "notes");
   const { tab, setTab, focusNotes } = useDetailNavigation();
   const nativeComments = useTaskComments(item.id, tab === "comments");
+  const shownComments = nativeComments.comments ?? item.comments,
+    remoteCount = nativeComments.comments?.length ?? item.commentCount;
   const notesRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     if (focusNotes?.id === item.id) notesRef.current?.focus();
   }, [focusNotes, item.id]);
   const description = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
     const { value } = event.target;
     void workspaceStore.change((next) => {
       return editTask(next, item.id, { description: value });
     });
   };
   const comment = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
     const { value } = event.target;
     void workspaceStore.change((next) => {
       next.commentDrafts[item.id] = value;
     });
   };
   const post = () => {
+    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
     void workspaceStore.change((next) => {
       return postComment(next, item.id);
     });
@@ -45,19 +52,7 @@ const TaskWriting = ({
     setTab("comments");
     if (tab === "comments") nativeComments.load();
   };
-  const queued = data.operations
-    .filter((operation) => {
-      return operation.type === "comment" && operation.issueId === item.id;
-    })
-    .map((operation) => {
-      return {
-        id: operation.opId,
-        text: operation.type === "comment" ? operation.text : "",
-        author: "You · Pending",
-        created: operation.type === "comment" ? operation.created : 0,
-        pending: true,
-      };
-    });
+  const queued = queuedTaskComments(data.operations, item.id);
   return (
     <section className="detail-writing" aria-label="Task Notes and Comments">
       <div className="detail-tabs">
@@ -74,15 +69,14 @@ const TaskWriting = ({
           aria-pressed={tab === "comments"}
         >
           Comments{" "}
-          <span id="comment-count">
-            {item.commentCount + queued.length || ""}
-          </span>
+          <span id="comment-count">{remoteCount + queued.length || ""}</span>
         </button>
       </div>
       {tab === "notes" ? (
         <section id="notes-panel">
           <textarea
             id="notes"
+            readOnly={readOnly}
             ref={notesRef}
             aria-label="Notes and Instructions"
             value={item.description}
@@ -92,8 +86,9 @@ const TaskWriting = ({
             placeholder="Notes, Instructions, or a Development Prompt…"
           />
           <p className="editor-hint">
-            Edits save locally. When connected, Auto-Sync waits until you leave
-            this editor. Save Changes can send the current version.
+            {readOnly
+              ? "Editing is paused until delivery review is resolved. You can still read notes and comments."
+              : "Edits save locally. When connected, Auto-Sync waits until you leave this editor. Save Changes can send the current version."}
           </p>
         </section>
       ) : (
@@ -103,14 +98,15 @@ const TaskWriting = ({
           )}
           {nativeComments.busy && <p role="status">Reading Comments…</p>}
           <TaskCommentList
-            comments={[...item.comments, ...queued]}
-            remoteCount={item.commentCount}
+            comments={[...shownComments, ...queued]}
+            remoteCount={remoteCount}
           />
-          {item.commentCount > item.comments.length && (
+          {remoteCount > shownComments.length && (
             <p>Some remote comments have not been downloaded yet.</p>
           )}
           <textarea
             id="comment-input"
+            readOnly={readOnly}
             aria-label="Write a Comment"
             placeholder="Write a Comment…"
             rows={4}
@@ -123,6 +119,7 @@ const TaskWriting = ({
                 !event.altKey &&
                 !event.nativeEvent.isComposing &&
                 !event.repeat &&
+                !readOnly &&
                 data.commentDrafts[item.id]?.trim()
               ) {
                 event.preventDefault();
@@ -133,7 +130,7 @@ const TaskWriting = ({
           <button
             className="primary"
             onClick={post}
-            disabled={!data.commentDrafts[item.id]?.trim()}
+            disabled={readOnly || !data.commentDrafts[item.id]?.trim()}
           >
             Post Comment
           </button>
