@@ -14,6 +14,11 @@ export const inspectRdx = async (
   let { bytes } = request,
     parsed = await readRdx(bytes),
     preview = null;
+  if (request.planOnly) {
+    // Plan imports always pass the same origin/kind gate, including first import.
+    const reviewed = previewPlanImport(parsed);
+    ({ preview } = reviewed);
+  }
   if (request.action === "merge") {
     const local = await readRdx(request.local);
     if (local.document.kind !== parsed.document.kind)

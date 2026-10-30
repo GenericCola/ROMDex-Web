@@ -18,9 +18,10 @@ export interface RdxInspection {
   bytes: Uint8Array;
 }
 export type RdxRequest =
-  | { action: "inspect"; bytes: Uint8Array }
+  | { action: "inspect"; bytes: Uint8Array; planOnly?: boolean }
   | {
       action: "merge";
+      planOnly?: boolean;
       bytes: Uint8Array;
       local: Uint8Array;
       choices: Record<string, string>;

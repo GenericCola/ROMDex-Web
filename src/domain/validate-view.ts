@@ -29,6 +29,7 @@ export const validateView = (data: WorkspaceData) => {
     !["default", "expanded", "collapsed"].includes(view.detailsMode) ||
     !nullableText(view.scope) ||
     !nullableText(view.selected) ||
+    (view.renameId !== undefined && !nullableText(view.renameId)) ||
     typeof view.search !== "string" ||
     typeof view.hideCompleted !== "boolean" ||
     !textList(view.expanded) ||
@@ -43,7 +44,9 @@ export const validateView = (data: WorkspaceData) => {
     (data.newTask !== null &&
       (!record(data.newTask) ||
         typeof data.newTask.title !== "string" ||
-        !nullableText(data.newTask.parentId)))
+        !nullableText(data.newTask.parentId) ||
+        (data.newTask.afterId !== undefined &&
+          !nullableText(data.newTask.afterId))))
   )
     throw Error(
       "The workspace layout or draft data is invalid. Existing browser data has been kept.",

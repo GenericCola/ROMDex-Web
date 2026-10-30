@@ -3,6 +3,7 @@ import type { SharedStatus } from "@/cloud/shared-status-types";
 import type { CloudData } from "@/cloud/types";
 import type { MigrationRecord } from "@/migration/types";
 import type { NpcdexDraft, NpcdexTarget } from "@/npcdex/model";
+import type { PlanLedger } from "@/rdx/plan-ledger";
 import type { RdxFile } from "@/rdx/types";
 import type { JsonObject } from "./json";
 export type LampColor =
@@ -73,6 +74,7 @@ export interface WorkspaceData {
   schemaVersion: 1;
   attachmentLists?: Record<string, Attachment[]>;
   rdxFiles?: RdxFile[];
+  rdxImports?: Record<string, PlanLedger>;
   editorRecovery?: JsonObject[];
   images?: Record<string, string>;
   npcdex?: JsonObject;
@@ -80,7 +82,11 @@ export interface WorkspaceData {
   npcdexHistory?: JsonObject[];
   migration?: MigrationRecord;
   cloud?: CloudData;
-  newTask: { title: string; parentId: string | null } | null;
+  newTask: {
+    title: string;
+    parentId: string | null;
+    afterId?: string | null;
+  } | null;
   titleDrafts: Record<string, string>;
   remote: TaskItem[];
   operations: TaskOperation[];
@@ -91,6 +97,7 @@ export interface WorkspaceData {
     npcdex?: { target: NpcdexTarget; gender: string; stage: string };
     scope: string | null;
     selected: string | null;
+    renameId?: string | null;
     search: string;
     hideCompleted: boolean;
     expanded: string[];

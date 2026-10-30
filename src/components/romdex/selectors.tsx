@@ -2,7 +2,9 @@ import { indexTree } from "@/domain/accepted/core.mjs";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import Image from "next/image";
-import Lamp from "./lamp";
+import { useState } from "react";
+import SelectorBranch from "./selector-branch";
+import TileSettings from "./tile-settings";
 interface SelectorProps {
   data: WorkspaceData;
   items: TaskItem[];
@@ -10,6 +12,8 @@ interface SelectorProps {
 }
 const Selectors = ({ data, items, add }: SelectorProps) => {
   const tree = indexTree(items, data.order);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
+  const settingsItem = settingsId ? tree.byId.get(settingsId) : undefined;
   const all = () => {
     void workspaceStore.change((next) => {
       next.view.scope = null;
@@ -18,63 +22,23 @@ const Selectors = ({ data, items, add }: SelectorProps) => {
   const addEpic = () => {
     return add(null);
   };
-  const render = (item: TaskItem): React.ReactNode => {
-    const depth = tree.depths.get(item.id) ?? 0;
-    const children = tree.children.get(item.id) ?? [];
-    const expanded = data.view.selectorExpanded.includes(item.id);
-    const select = () => {
-      void workspaceStore.change((next) => {
-        next.view.scope = item.id;
-      });
-    };
-    const expand = () => {
-      void workspaceStore.change((next) => {
-        if (expanded)
-          next.view.selectorExpanded = next.view.selectorExpanded.filter(
-            (id) => {
-              return id !== item.id;
-            },
-          );
-        else {
-          next.view.selectorExpanded = next.view.selectorExpanded.filter(
-            (id) => {
-              return (tree.depths.get(id) ?? 0) < depth;
-            },
-          );
-          next.view.selectorExpanded.push(item.id);
-        }
-      });
-    };
+  const render = (item: TaskItem) => {
     return (
-      <div key={item.id}>
-        <div
-          className={
-            "port-selector-row" + (data.view.scope === item.id ? " active" : "")
-          }
-          style={{ paddingLeft: depth * 10 }}
-        >
-          {depth < 3 && children.length > 0 ? (
-            <button
-              className="port-selector-toggle"
-              aria-label={(expanded ? "Collapse " : "Expand ") + item.summary}
-              aria-expanded={expanded}
-              onClick={expand}
-            >
-              {expanded ? "▾" : "▸"}
-            </button>
-          ) : (
-            <span aria-hidden="true">·</span>
-          )}
-          <button title={item.summary} onClick={select}>
-            <Lamp color={tree.colors.get(item.id) ?? "grey"} /> {item.summary}
-          </button>
-        </div>
-        {expanded && depth < 3 && children.map(render)}
-      </div>
+      <SelectorBranch
+        key={item.id}
+        item={item}
+        tree={tree}
+        data={data}
+        setSettingsId={setSettingsId}
+      />
     );
   };
+
   return (
-    <aside className="navigator suite-tray" aria-label="Project Hierarchy">
+    <aside
+      className="navigator suite-selector-tray"
+      aria-label="Project Hierarchy"
+    >
       <div className="pane-heading">
         <div>
           <span className="eyebrow">Pokémon / PMON</span>
@@ -99,6 +63,17 @@ const Selectors = ({ data, items, add }: SelectorProps) => {
       <nav id="selectors" aria-label="Epics, Sagas, Stories, and Verses">
         {(tree.children.get(null) ?? []).map(render)}
       </nav>
+      {settingsItem && (
+        <TileSettings
+          key={settingsItem.id}
+          item={settingsItem}
+          depth={tree.depths.get(settingsItem.id) ?? 0}
+          image={data.images?.[settingsItem.id] ?? null}
+          close={() => {
+            return setSettingsId(null);
+          }}
+        />
+      )}
     </aside>
   );
 };

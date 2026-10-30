@@ -6,6 +6,7 @@ import TaskAttachments from "./task-attachments";
 import TaskImage from "./task-image";
 import TaskProperties from "./task-properties";
 import TaskWriting from "./task-writing";
+import { useWorkSelection } from "./work-selection-context";
 const Details = ({
   data,
   items,
@@ -14,8 +15,9 @@ const Details = ({
   items: TaskItem[];
 }) => {
   const [deleting, setDeleting] = useState(false);
+  const multiple = useWorkSelection().selection.ids.length > 1;
   const item = items.find((candidate) => {
-    return candidate.id === data.view.selected;
+    return !multiple && candidate.id === data.view.selected;
   });
   const resize = () => {
     void workspaceStore.change((next) => {
@@ -76,8 +78,10 @@ const Details = ({
           </div>
         ) : (
           <div className="detail-placeholder">
-            <h2>Select a Task</h2>
-            <p>
+            <h2>
+              {multiple ? "Multiple Items are Selected." : "Select a Task"}
+            </h2>
+            <p hidden={multiple}>
               Choose a task in the Work Tray to view its notes, comments, and
               properties.
             </p>

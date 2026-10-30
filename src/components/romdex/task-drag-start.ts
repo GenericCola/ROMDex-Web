@@ -1,0 +1,40 @@
+import { materialize } from "@/domain/accepted/core.mjs";
+import { siblingSelection } from "@/domain/bulk-hierarchy";
+import { hierarchySignature } from "@/domain/task-drop";
+import { workspaceStore } from "@/domain/workspace-store";
+import type { PointerEvent } from "react";
+import type { Drag } from "./task-drag-state";
+export const startTaskDrag = (
+  event: PointerEvent<HTMLElement>,
+  selectedIds: string[],
+): Drag | null => {
+  const grip = (event.target as Element).closest<HTMLElement>("[data-drag]");
+  const id = grip?.dataset.drag;
+  if (event.button !== 0 || !id || !grip) return null;
+  const state = workspaceStore.getSnapshot();
+  if (!state.ready || state.error || state.delivering || state.updating)
+    return null;
+  let bulkIds: string[] | undefined;
+  if (selectedIds.length > 1) {
+    if (!selectedIds.includes(id))
+      throw Error("Drag a Checked Item to Move the Selection.");
+    bulkIds = siblingSelection(
+      materialize(state.data.remote, state.data.operations),
+      state.data.order,
+      selectedIds,
+    ).members.map((item) => {
+      return item.id;
+    });
+  }
+  grip.setPointerCapture(event.pointerId);
+  return {
+    ...(bulkIds ? { bulkIds } : {}),
+    id,
+    x: event.clientX,
+    y: event.clientY,
+    pointer: event.pointerId,
+    signature: hierarchySignature(state.data),
+    active: false,
+    intent: null,
+  };
+};

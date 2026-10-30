@@ -1,11 +1,15 @@
-import { indexTree } from "@/domain/accepted/core.mjs";
+import { descendants, indexTree } from "@/domain/accepted/core.mjs";
 import { emptyFilters, filtersActive } from "@/domain/task-filters";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workRows } from "@/domain/work-rows";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState, type ChangeEvent } from "react";
-import TaskFilterControl from "./task-filters";
+import TaskRows from "./task-rows";
+import { useTableSelection } from "./use-table-selection";
+import { useTaskDrag } from "./use-task-drag";
+import WorkEmpty from "./work-empty";
 import WorkRow from "./work-row";
+import WorkToolbar from "./work-toolbar";
 interface WorkTableProps {
   data: WorkspaceData;
   items: TaskItem[];
@@ -16,8 +20,10 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
   const filtering = filtersActive(filters);
   const tree = indexTree(items, data.order);
   const { scope } = data.view;
-  const query = data.view.search.trim();
+  const scopeCount = scope ? descendants(items, scope).length : items.length;
   const rows = workRows(items, data, filters);
+  const selection = useTableSelection(rows);
+  const drag = useTaskDrag(selection.selection.ids, selection.clear);
   const search = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     void workspaceStore.change((next) => {
@@ -53,6 +59,18 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
         tree={tree}
         scope={scope}
         add={add}
+        checked={selection.selection.ids.includes(item.id)}
+        selectionDisabled={selection.busy || !!selection.group}
+        choose={selection.choose}
+        clearSelection={selection.clear}
+        dragging={drag.dragId === item.id}
+        drop={
+          drag.preview?.anchorId === item.id
+            ? drag.preview.after
+              ? "after"
+              : "before"
+            : null
+        }
       />
     );
   };
@@ -61,36 +79,22 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
       id="work-tray"
       className="workspace suite-tray"
       aria-label="Work Tray"
+      {...drag.handlers}
+      onKeyDown={selection.keyDown}
+      tabIndex={0}
     >
-      <div className="work-header">
-        <div className="work-title-row">
-          <h2>{scope ? tree.byId.get(scope)?.summary : "Your Project"}</h2>
-        </div>
-        <div className="work-toolbar">
-          <div className="tools">
-            <label className="search-label">
-              <input
-                type="search"
-                placeholder="Search This View…"
-                aria-label="Search This View"
-                value={data.view.search}
-                onChange={search}
-              />
-            </label>
-            <TaskFilterControl
-              items={items}
-              filters={filters}
-              change={setFilters}
-            />
-            <button onClick={expand}>Expand All</button>
-            <button onClick={collapse}>Collapse All</button>
-            <button onClick={addItem}>+ Add Item</button>
-          </div>
-          <button onClick={completed} aria-pressed={data.view.hideCompleted}>
-            {data.view.hideCompleted ? "Show Completed" : "Hide Completed"}
-          </button>
-        </div>
-      </div>
+      <WorkToolbar
+        items={items}
+        data={data}
+        filters={filters}
+        setFilters={setFilters}
+        locked={!!selection.group}
+        search={search}
+        expand={expand}
+        collapse={collapse}
+        addItem={addItem}
+        completed={completed}
+      />
       <div className="work-body">
         <section className="table-area" aria-label="Task List">
           <div className="table-scroll">
@@ -100,30 +104,32 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
                   <th className="title-column">Name</th>
                   <th>Priority</th>
                   <th>Complexity</th>
-                  <th>Actions</th>
+                  <th className="actions-column">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
-              <tbody>{rows.map(render)}</tbody>
+              <TaskRows
+                rows={rows}
+                data={data}
+                items={items}
+                render={render}
+                group={selection.group}
+                closeGroup={selection.closeGroup}
+              />
             </table>
-            {rows.length === 0 && (
-              <div className="empty">
-                <h3>
-                  {filtering || query
-                    ? "No Matching Items"
-                    : "No Items Here Yet"}
-                </h3>
-                <p>
-                  {filtering || query
-                    ? "Change the filters or search to show more tasks."
-                    : "Add an item to start organizing this section."}
-                </p>
-              </div>
+            {rows.length === 0 && !data.newTask && (
+              <WorkEmpty filtered={!!(filtering || data.view.search.trim())} />
             )}
           </div>
           <footer className="work-footer">
-            <span>{rows.length} visible</span>
             <span>
-              Changes stay in this browser until cloud delivery is enabled.
+              {rows.length} Visible / {scopeCount} in View
+            </span>
+            <span role="status">
+              {selection.message ||
+                drag.message ||
+                "Drag to Reorder · Drag Sideways to Change Level"}
             </span>
           </footer>
         </section>

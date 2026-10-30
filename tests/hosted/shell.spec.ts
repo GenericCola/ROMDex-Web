@@ -1,3 +1,4 @@
+import { finishInlineTask } from "../e2e/inline-task";
 import {test,expect} from '@playwright/test';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
@@ -23,5 +24,5 @@ test('hosted app renders without reading YouTrack or importing desktop data',asy
 });
 
 test('hosted app preserves a local note across offline reopening',async({page,context})=>{
- await page.goto('/');await page.getByRole('button',{name:'Add Epic',exact:true}).click();await page.getByRole('dialog').getByLabel('Name',{exact:true}).fill('Hosted synthetic local task');await page.getByRole('button',{name:'Create Item',exact:true}).click();await page.getByRole('textbox',{name:'Notes and Instructions',exact:true}).fill('Offline note fixture; no cloud request.');await expect(page.getByText('All changes saved in this browser',{exact:true})).toBeVisible();await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}));});await context.setOffline(true);await page.reload();await expect(page.getByRole('textbox',{name:'Notes and Instructions',exact:true})).toHaveValue('Offline note fixture; no cloud request.');await context.setOffline(false);
+ await page.goto('/');await page.getByRole('button',{name:'Add Epic',exact:true}).click();await finishInlineTask(page, 'Hosted synthetic local task');await page.getByRole('textbox',{name:'Notes and Instructions',exact:true}).fill('Offline note fixture; no cloud request.');await expect(page.getByText('All changes saved in this browser',{exact:true})).toBeVisible();await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}));});await context.setOffline(true);await page.reload();await expect(page.getByRole('textbox',{name:'Notes and Instructions',exact:true})).toHaveValue('Offline note fixture; no cloud request.');await context.setOffline(false);
 });

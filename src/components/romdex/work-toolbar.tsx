@@ -1,0 +1,68 @@
+import type { emptyFilters } from "@/domain/task-filters";
+import type { TaskItem, WorkspaceData } from "@/domain/types";
+import type { ChangeEvent } from "react";
+import Lamp from "./lamp";
+import PlanImportButton from "./plan-import-button";
+import TaskFilterControl from "./task-filters";
+import WorkHeading from "./work-heading";
+const WorkToolbar = ({
+  items,
+  data,
+  filters,
+  setFilters,
+  locked,
+  search,
+  expand,
+  collapse,
+  addItem,
+  completed,
+}: {
+  items: TaskItem[];
+  data: WorkspaceData;
+  filters: ReturnType<typeof emptyFilters>;
+  setFilters: (filters: ReturnType<typeof emptyFilters>) => void;
+  locked: boolean;
+  search: (event: ChangeEvent<HTMLInputElement>) => void;
+  expand: () => void;
+  collapse: () => void;
+  addItem: () => void;
+  completed: () => void;
+}) => {
+  return (
+    <div className="work-header" inert={locked}>
+      <WorkHeading items={items} data={data} />
+      <div className="work-toolbar">
+        <div className="tools">
+          <label className="search-label">
+            <span aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              placeholder="Search This View…"
+              aria-label="Search This View"
+              value={data.view.search}
+              onChange={search}
+            />
+          </label>
+          <TaskFilterControl
+            items={items}
+            filters={filters}
+            change={setFilters}
+          />
+          <button onClick={expand}>Expand All</button>
+          <button onClick={collapse}>Collapse All</button>
+          <button onClick={addItem}>+ Add Item</button>
+          <PlanImportButton />
+        </div>
+        <button
+          id="toggle-completed"
+          onClick={completed}
+          aria-pressed={data.view.hideCompleted}
+        >
+          {data.view.hideCompleted ? "Show Completed" : "Hide Completed"}
+          <Lamp color={data.view.hideCompleted ? "green" : "grey"} />
+        </button>
+      </div>
+    </div>
+  );
+};
+export default WorkToolbar;

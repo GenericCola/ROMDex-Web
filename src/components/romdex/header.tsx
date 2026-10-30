@@ -2,15 +2,22 @@ import { deliveryConnected, saveDelivery } from "@/cloud/session";
 import { cloudData } from "@/cloud/types";
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Lamp from "./lamp";
 import WorkspaceMenu from "./workspace-menu";
+import WorkspaceTools from "./workspace-tools";
 interface HeaderProps {
   state: WorkspaceSnapshot;
   connect: () => void;
   unsavedDrafts?: boolean;
+  tools?: ReactNode;
 }
-const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
+const Header = ({
+  state,
+  connect,
+  unsavedDrafts = false,
+  tools,
+}: HeaderProps) => {
   const [message, setMessage] = useState("");
   const save = () => {
     setMessage("");
@@ -52,6 +59,7 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
         </div>
         <div className="header-actions">
           <WorkspaceMenu workspace={state.data.view.workspace} />
+          {tools && <WorkspaceTools>{tools}</WorkspaceTools>}
           <button
             className="auto-sync-toggle"
             {...{ autoComplete: "off" }}

@@ -40,9 +40,7 @@ export const useAuthWorkspace = () => {
   };
   const closeProject = async () => {
     if (workspaceStore.getSnapshot().delivering)
-      throw Error(
-        "Wait for delivery to finish before switching projects or signing out.",
-      );
+      throw Error("Finish delivery before switching projects or signing out.");
     await flushDraftEditors();
     await flushWorkspaceWork();
     if (workspaceStore.getSnapshot().ready) await workspaceStore.flush();
@@ -81,6 +79,7 @@ export const useAuthWorkspace = () => {
     }
   };
   const signOut = async () => {
+    if (recoveryBlocked) return;
     setBusy(true);
     try {
       await closeProject();
@@ -89,22 +88,21 @@ export const useAuthWorkspace = () => {
       setIdentity(null);
     } catch (error) {
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Save local work before signing out.",
+        error instanceof Error ? error.message : "Save local work first.",
       );
     } finally {
       setBusy(false);
     }
   };
   const finishExpired = async () => {
-    setRecoveryBlocked(false);
+    setBusy(true);
     try {
       await flushDraftEditors();
       await flushWorkspaceWork();
       if (workspaceStore.getSnapshot().delivering)
         throw Error("Delivery is finishing.");
       if (workspaceStore.getSnapshot().ready) await workspaceStore.flush();
+      setRecoveryBlocked(false);
       setIdentity(null);
       setSelected(null);
       setIssues([]);
@@ -112,6 +110,7 @@ export const useAuthWorkspace = () => {
       setMessage("Session expired. Sign in again; local work is preserved.");
     } catch {
       setRecoveryBlocked(true);
+      setBusy(false);
       setMessage(
         "Export recovery or retry saving. Account switching stays blocked.",
       );

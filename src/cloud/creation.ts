@@ -78,6 +78,8 @@ export const completeCreation = (
     }
   }
   data.view.selected = id(data.view.selected);
+  if (data.view.renameId !== undefined)
+    data.view.renameId = id(data.view.renameId);
   data.view.scope = id(data.view.scope);
   data.view.expanded = data.view.expanded.map((entry) => {
     return entry === old ? remote.id : entry;
@@ -85,7 +87,11 @@ export const completeCreation = (
   data.view.selectorExpanded = data.view.selectorExpanded.map((entry) => {
     return entry === old ? remote.id : entry;
   });
-  if (data.newTask) data.newTask.parentId = id(data.newTask.parentId);
+  if (data.newTask) {
+    data.newTask.parentId = id(data.newTask.parentId);
+    if (data.newTask.afterId !== undefined)
+      data.newTask.afterId = id(data.newTask.afterId);
+  }
   const parentId = id(operation.item.parentId);
   if (remote.parentId !== parentId)
     data.operations.unshift({

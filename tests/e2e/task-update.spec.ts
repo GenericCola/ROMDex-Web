@@ -1,11 +1,11 @@
+import { finishInlineTask } from "./inline-task";
 import {test,expect} from "@playwright/test";
 import {readFile,writeFile} from "node:fs/promises";
 test("task drafts survive a blocked update and the consenting reload",async({page,context})=>{
   const original=await readFile("out/sw.js","utf8");
   try {
     await page.goto("/");await page.getByRole("button",{name:"Add Epic",exact:true}).click();
-    await page.getByRole("dialog").getByLabel("Name",{exact:true}).fill("Synthetic update task");
-    await page.getByRole("button",{name:"Create Item",exact:true}).click();
+    await finishInlineTask(page, "Synthetic update task");
     await page.getByRole("textbox",{name:"Notes and Instructions",exact:true}).fill("Draft retained across update");
     await expect(page.getByRole("status").first()).toHaveText("All changes saved in this browser");
     await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener("controllerchange",()=>resolve(),{once:true}));});

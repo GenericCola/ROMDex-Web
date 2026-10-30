@@ -1,3 +1,4 @@
+import { finishInlineTask } from "./inline-task";
 import { expect, type Page } from "@playwright/test";
 type Task={id:string;summary:string;description:string;parentId:string|null;state:string;priority:string;complexity:string|null;type:string;updated:number};
 export const structuralFixture=async(page:Page,mode:"normal"|"create-lost"|"delete-lost"|"move-lost"|"status-lost"="normal")=>{
@@ -40,5 +41,5 @@ export const structuralFixture=async(page:Page,mode:"normal"|"create-lost"|"dele
   return {tasks,writes,connect,save,confirmed,uncertain};
 };
 export const addTask=async(page:Page,title:string,parent?:string)=>{
-  await page.getByRole("button",{name:parent?"Add child to "+parent:"Add Epic",exact:true}).click();await page.getByRole("dialog").getByLabel("Name",{exact:true}).fill(title);await page.getByRole("button",{name:"Create Item",exact:true}).click();
+  await page.getByRole("button",{name:parent?"Add child to "+parent:"Add Epic",exact:true}).click();await finishInlineTask(page, title);
 };
