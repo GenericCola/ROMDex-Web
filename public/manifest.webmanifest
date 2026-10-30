@@ -2,12 +2,12 @@
   "id": "/",
   "name": "ROMDex",
   "short_name": "ROMDex",
-  "description": "ROMDex web foundation",
+  "description": "ROMDex task workspace",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f7f8f9",
-  "theme_color": "#c44720",
+  "background_color": "#162e2b",
+  "theme_color": "#a92032",
   "icons": [
     {
       "src": "/icons/icon-192.png",

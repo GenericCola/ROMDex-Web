@@ -19,7 +19,12 @@ const WorkspaceMenu = ({ workspace }: { workspace: "romdex" | "npcdex" }) => {
         setMenu(false);
     };
     const escape = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Tab") {
+        setMenu(false);
+        return;
+      }
       if (event.key !== "Escape") return;
+      event.stopImmediatePropagation();
       event.preventDefault();
       setMenu(false);
       triggerRef.current?.focus();
@@ -33,11 +38,11 @@ const WorkspaceMenu = ({ workspace }: { workspace: "romdex" | "npcdex" }) => {
     };
     document.addEventListener("focusin", focusOutside);
     document.addEventListener("pointerdown", outside);
-    document.addEventListener("keydown", escape);
+    document.addEventListener("keydown", escape, true);
     const stop = () => {
       document.removeEventListener("focusin", focusOutside);
       document.removeEventListener("pointerdown", outside);
-      document.removeEventListener("keydown", escape);
+      document.removeEventListener("keydown", escape, true);
     };
     return stop;
   };

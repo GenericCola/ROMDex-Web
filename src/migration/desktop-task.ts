@@ -2,6 +2,7 @@ import type { JsonValue } from "@/domain/json";
 import { jsonObject } from "@/domain/json";
 import type { TaskItem } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
+import { desktopNativeFields } from "./desktop-native-fields";
 export const desktopText = (
   value: JsonValue | undefined,
   fallback = "",
@@ -47,6 +48,7 @@ export const desktopTask = (value: JsonValue): TaskItem => {
         created: typeof c.created === "number" ? c.created : 0,
       };
     });
+  Object.assign(result, desktopNativeFields(raw));
   validateTask(result);
   return result;
 };

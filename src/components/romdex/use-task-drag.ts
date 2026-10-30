@@ -10,7 +10,8 @@ export const useTaskDrag = (
   clearSelection?: () => void,
 ) => {
   const dragRef = useRef<Drag | null>(null),
-    mountedRef = useRef(true);
+    mountedRef = useRef(true),
+    suppressClickUntilRef = useRef(0);
   const [preview, setPreview] = useState<DropTarget | null>(null);
   const [message, setMessage] = useState("");
   const [dragId, setDragId] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export const useTaskDrag = (
     mountedRef.current = true;
     const escape = (event: KeyboardEvent) => {
       if (event.key === "Escape" && dragRef.current) {
+        event.preventDefault();
         cancel();
         setMessage("Move cancelled.");
       }
@@ -76,7 +78,10 @@ export const useTaskDrag = (
   const up = (event: PointerEvent<HTMLElement>) => {
     const { current } = dragRef;
     if (current?.pointer !== event.pointerId) return;
-    if (current.active) move(event);
+    if (current.active) {
+      move(event);
+      suppressClickUntilRef.current = Date.now() + 350;
+    }
     cancel();
     if (!current.active || !current.intent) return;
     const { intent } = current;
@@ -95,7 +100,7 @@ export const useTaskDrag = (
       () => {
         if (mountedRef.current) {
           setMessage(current.bulkIds ? "Selected Items Moved." : "Item moved.");
-          clearSelection?.();
+          if (current.bulkIds) clearSelection?.();
         }
       },
       (error: unknown) => {
@@ -109,10 +114,22 @@ export const useTaskDrag = (
     );
   };
   return {
+    suppressClick: () => {
+      suppressClickUntilRef.current = Date.now() + 350;
+    },
+    pending: () => {
+      return !!dragRef.current;
+    },
     preview,
     message,
     dragId,
     handlers: {
+      onClickCapture: (event: React.MouseEvent<HTMLElement>) => {
+        if (Date.now() < suppressClickUntilRef.current) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
       onPointerDown: down,
       onPointerMove: move,
       onPointerUp: up,

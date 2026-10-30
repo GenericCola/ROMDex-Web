@@ -6,6 +6,7 @@ import { workspaceStore } from "@/domain/workspace-store";
 import { taskImage } from "@/rdx/images";
 import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import Dialog from "./dialog";
+import TileImagePreview from "./tile-image-preview";
 import { useAttachmentWork } from "./use-attachment-work";
 
 const TileSettings = ({
@@ -69,8 +70,14 @@ const TileSettings = ({
     });
   };
   return (
-    <Dialog title="Tile Settings" close={dismiss} canClose={!busy}>
-      <form className="port-form" onSubmit={submit}>
+    <Dialog
+      id="image-dialog"
+      title="Tile Settings"
+      close={dismiss}
+      canClose={!busy}
+      desktop
+    >
+      <form id="tile-settings-form" onSubmit={submit}>
         <p className="muted">
           {taskTier(depth)} · {item.id}
         </p>
@@ -85,19 +92,7 @@ const TileSettings = ({
           }}
         />
         <h3>Choose Image</h3>
-        {draft.image && (
-          <span
-            className="selector-settings-preview"
-            role="img"
-            aria-label="Assigned Tile Image Preview"
-            style={{
-              backgroundImage: "url(" + JSON.stringify(draft.image) + ")",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-            }}
-          />
-        )}
+        <TileImagePreview image={draft.image} />
         <div className="selector-settings-actions">
           <label>
             Upload Image
@@ -132,7 +127,9 @@ const TileSettings = ({
         <p className="muted small">
           Images are kept in your ROMDex workspace in this browser.
         </p>
-        <p role="status">{message}</p>
+        <p role="status" hidden={!message}>
+          {message}
+        </p>
         <div className="dialog-actions">
           <button type="button" onClick={dismiss} disabled={busy}>
             Close

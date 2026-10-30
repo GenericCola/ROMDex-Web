@@ -1,5 +1,6 @@
 import { cloudData } from "@/cloud/types";
 import { materialize } from "@/domain/accepted/core.mjs";
+import { tabAction } from "@/domain/accepted/workspace-keyboard.mjs";
 import { siblingSelection } from "@/domain/bulk-hierarchy";
 import { flushDraftEditors } from "@/domain/editor-drafts";
 import { hierarchySignature } from "@/domain/task-drop";
@@ -61,6 +62,9 @@ export const useTableSelection = (rows: TaskItem[]) => {
   const closeGroup = () => {
     setGroup(null);
     selection.clear();
+    document
+      .querySelector<HTMLElement>(".work-trays")
+      ?.focus({ preventScroll: true });
   };
   const beginGroup = () => {
     work.run(async () => {
@@ -90,9 +94,13 @@ export const useTableSelection = (rows: TaskItem[]) => {
       });
     });
   };
+  useEffect(() => {
+    return selection.registerGroup(beginGroup);
+  });
   const keyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (
       event.nativeEvent.isComposing ||
+      event.defaultPrevented ||
       work.busy ||
       (event.target instanceof HTMLElement &&
         event.target.closest(
@@ -100,11 +108,25 @@ export const useTableSelection = (rows: TaskItem[]) => {
         ))
     )
       return;
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "g") {
+    const target = event.target as HTMLElement;
+    if (
+      tabAction({
+        key: event.key,
+        shiftKey: event.shiftKey,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        altKey: event.altKey,
+        modal: !!document.querySelector("dialog[open]"),
+        busy: !!group,
+        selectedCount: selection.selection.ids.length,
+        navigation: target.matches(
+          ".row-title,#work-tray,input[type=checkbox]",
+        ),
+      }) === "group"
+    ) {
       event.preventDefault();
       beginGroup();
     }
-    if (event.key === "Escape" && !group) selection.clear();
   };
   return {
     ...selection,

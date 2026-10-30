@@ -1,30 +1,34 @@
-import { STATES, STATUS, statusOf } from "@/domain/accepted/core.mjs";
+import { indexTree, materialize } from "@/domain/accepted/core.mjs";
 import { editTask } from "@/domain/task-actions";
+import { taskAssigneeLabel } from "@/domain/task-assignee-label";
+import { itemName, taskTier } from "@/domain/task-presentation";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import type { ChangeEvent } from "react";
-import TaskParent from "./task-parent";
+import type { ChangeEvent, ReactNode } from "react";
+import TaskField from "./task-field";
+import TaskStatusPopup from "./task-status-popup";
+import TaskSummaryChildren from "./task-summary-children";
 import { useTaskTextEditing } from "./use-task-text-editing";
-const option = (value: string) => {
-  return <option key={value}>{value}</option>;
-};
-const statusOption = (value: string) => {
-  return (
-    <option key={value} value={value}>
-      {statusOf(value) === "red" ? STATUS.red : value}
-    </option>
-  );
-};
 const TaskProperties = ({
   item,
   data,
   remove,
+  children,
 }: {
   item: TaskItem;
   data: WorkspaceData;
   remove: () => void;
+  children?: ReactNode;
 }) => {
   const editing = useTaskTextEditing(item.id, "title");
+  const tree = indexTree(materialize(data.remote, data.operations), data.order);
+  const parents: string[] = [];
+  let parent = tree.byId.get(item.parentId ?? "");
+  while (parent) {
+    parents.unshift(itemName(parent));
+    parent = tree.byId.get(parent.parentId ?? "");
+  }
+  const inherited = !!tree.children.get(item.id)?.length;
   const title = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     void workspaceStore.change((next) => {
@@ -41,32 +45,14 @@ const TaskProperties = ({
         delete next.titleDrafts[item.id];
       });
   };
-  const state = (event: ChangeEvent<HTMLSelectElement>) => {
-    const { value } = event.target;
-    void workspaceStore.change((next) => {
-      return editTask(next, item.id, { assignedState: value });
-    });
-  };
-  const priority = (event: ChangeEvent<HTMLSelectElement>) => {
-    const { value } = event.target;
-    void workspaceStore.change((next) => {
-      return editTask(next, item.id, { priority: value });
-    });
-  };
-  const complexity = (event: ChangeEvent<HTMLSelectElement>) => {
-    const { value } = event.target;
-    void workspaceStore.change((next) => {
-      return editTask(next, item.id, { complexity: value || null });
-    });
-  };
-  const assignedState = item.assignedState ?? item.state;
-  const displayedState =
-    assignedState === "Needs Testing" ? STATES.amber : assignedState;
-  const priorities = ["Minor", "Normal", "Major", "Critical", "Show-stopper"];
   return (
     <section className="detail-summary" aria-label="Task Properties">
+      <p id="detail-parent" className="eyebrow">
+        {parents.join(" / ") || "Top-Level Epic"}
+      </p>
       <input
-        className="port-title"
+        id="detail-title"
+        className="detail-title"
         aria-label="Task Title"
         value={data.titleDrafts[item.id] ?? item.summary}
         onChange={title}
@@ -78,42 +64,27 @@ const TaskProperties = ({
           <p role="alert">Enter an item name. Your draft is kept.</p>
         )}
       <div className="detail-properties">
-        <TaskParent item={item} data={data} />
-        <label>
-          Status
-          <select
-            aria-label="Assigned Status"
-            value={displayedState}
-            onChange={state}
-          >
-            {!Object.values(STATES).includes(displayedState) &&
-              statusOption(displayedState)}
-            {Object.values(STATES).map(statusOption)}
-          </select>
-        </label>
-        <label>
-          Priority
-          <select
-            aria-label="Item Priority"
-            value={item.priority}
-            onChange={priority}
-          >
-            {!priorities.includes(item.priority) && option(item.priority)}
-            {priorities.map(option)}
-          </select>
-        </label>
-        <label>
-          Complexity
-          <select
-            aria-label="Item Complexity"
-            value={item.complexity ?? ""}
-            onChange={complexity}
-          >
-            <option value="">Not Set</option>
-            {["LOW", "MID", "HIGH", "INSANE"].map(option)}
-          </select>
-        </label>
+        <TaskStatusPopup
+          item={item}
+          color={tree.colors.get(item.id) ?? "grey"}
+          inherited={inherited}
+          compact={false}
+        />
+        <span className="detail-field">
+          Priority <TaskField item={item} field="priority" />
+        </span>
+        <span className="detail-field">
+          Complexity <TaskField item={item} field="complexity" />
+        </span>
       </div>
+      <div className="detail-extra">
+        <span>{taskTier(tree.depths.get(item.id) ?? 0)}</span>
+        <span>Assignee: {taskAssigneeLabel(item)}</span>
+        <span>Due Date: {item.dueDate ?? "Not Set"}</span>
+        {inherited && <span>Status Inherited from Children</span>}
+      </div>
+      <TaskSummaryChildren item={item} tree={tree} />
+      {children}
       <div className="detail-bottom">
         {item.url && (
           <a href={item.url} target="_blank" rel="noopener noreferrer">

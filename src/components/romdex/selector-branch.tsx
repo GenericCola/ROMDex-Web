@@ -8,7 +8,9 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { tw } from "@utils/tw";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import Lamp from "./lamp";
+import { useWorkspaceDrag } from "./task-drag-context";
 interface SelectorBranchProps {
   item: TaskItem;
   tree: ReturnType<typeof indexTree>;
@@ -21,6 +23,7 @@ const SelectorBranch = ({
   data,
   setSettingsId,
 }: SelectorBranchProps) => {
+  const drag = useWorkspaceDrag();
   const renderChild = (child: TaskItem) => {
     return (
       <SelectorBranch
@@ -35,6 +38,10 @@ const SelectorBranch = ({
   const depth = tree.depths.get(item.id) ?? 0;
   const children = tree.children.get(item.id) ?? [];
   const expanded = data.view.selectorExpanded.includes(item.id);
+  const [revealed, setRevealed] = useState(expanded);
+  useEffect(() => {
+    if (expanded) setRevealed(true);
+  }, [expanded]);
   const label = itemName(item);
   const expandable = depth < 3 && children.length > 0;
   const control = "selector-children-" + item.id;
@@ -53,15 +60,19 @@ const SelectorBranch = ({
       <div
         className={tw(
           "selector",
+          drag.preview?.selectorId === item.id && "drop-target",
+          drag.dragId === item.id && "dragging",
           ["depth-0", "depth-1", "depth-2", "depth-3"][depth],
           data.view.scope === item.id && "selected",
         )}
+        data-selector={item.id}
       >
         <span className="selector-status">
           <Lamp color={tree.colors.get(item.id) ?? "grey"} />
         </span>
         <button
           className="selector-main"
+          data-select={item.id}
           title={label}
           aria-current={data.view.scope === item.id ? "true" : "false"}
           onClick={select}
@@ -108,7 +119,7 @@ const SelectorBranch = ({
       >
         <div className="selector-reveal-body">
           <div className="selector-children">
-            {expanded && expandable && children.map(renderChild)}
+            {(expanded || revealed) && expandable && children.map(renderChild)}
           </div>
         </div>
       </div>

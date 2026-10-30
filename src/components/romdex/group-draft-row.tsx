@@ -69,8 +69,9 @@ const GroupDraftRow = ({
     });
   };
   const keyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.nativeEvent.isComposing || busy) return;
+    if (event.nativeEvent.isComposing || busy || event.repeat) return;
     if (event.key === "Escape") {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
       event.preventDefault();
       event.stopPropagation();
       close();

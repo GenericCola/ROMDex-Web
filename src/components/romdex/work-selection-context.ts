@@ -4,6 +4,8 @@ import type {
 } from "@/domain/work-selection";
 import { createContext, use } from "react";
 interface SelectionContext {
+  registerGroup: (action: () => void) => () => void;
+  group: () => boolean;
   selection: WorkSelection;
   reconcile: (visible: string[], mapping?: Record<string, string>) => void;
   toggle: (

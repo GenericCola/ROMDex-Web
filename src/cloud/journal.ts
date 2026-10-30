@@ -1,4 +1,5 @@
 import type { TaskItem, TaskOperation, WorkspaceData } from "@/domain/types";
+import { planReceipt } from "@/rdx/plan-ledger";
 import { replaceRemote } from "./delivery-helpers";
 import type { Commit, DeliveryRecord } from "./types";
 import { cloudData } from "./types";
@@ -30,6 +31,7 @@ export const acknowledge = (
     message: "YouTrack result confirmed.",
     archivedOperation: operation,
   });
+  planReceipt(data, operation.opId);
 };
 export const attemptDelivery = async (
   operation: TaskOperation,

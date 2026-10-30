@@ -9,13 +9,13 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#c44720",
+  themeColor: "#a92032",
 };
 
 export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "ROMDex", statusBarStyle: "default" },
-  icons: { apple: "/icons/apple-touch-icon.png" },
+  icons: { icon: "/favicon.ico", apple: "/icons/apple-touch-icon.png" },
   metadataBase: new URL(site.url),
   title: { default: site.name, template: `%s | ${site.name}` },
   description: site.description,

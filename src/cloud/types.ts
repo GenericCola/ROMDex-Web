@@ -10,6 +10,7 @@ import type {
   SharedStatusWrite,
 } from "./shared-status-types";
 export interface DeliveryRecord {
+  tagSteps?: import("./tag-types").TagStep[];
   metadataWrite?: SharedStatusWrite;
   attachmentBeforeIds?: string[];
   status: "attempting" | "uncertain" | "conflict" | "confirmed" | "ready";
@@ -43,11 +44,17 @@ export interface CloudData {
   records: Record<string, DeliveryRecord>;
 }
 export interface DeliveryPort {
+  tags?: import("./tag-types").TagPort;
   files?: AttachmentPort;
   metadata?: SharedStatusPort;
   accountId: string;
   all: () => Promise<TaskItem[]>;
   get: (id: string) => Promise<TaskItem | null>;
+  prepareUpdate?: (
+    id: string,
+    patch: TaskPatch,
+    expected: TaskItem,
+  ) => Promise<void>;
   update: (id: string, patch: TaskPatch, expected?: TaskItem) => Promise<void>;
   comment: (id: string, text: string) => Promise<{ id: string }>;
   prepareCreate: (item: TaskItem) => Promise<void>;

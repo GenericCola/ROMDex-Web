@@ -15,6 +15,12 @@ export interface TaskComment {
   created: number;
 }
 export interface TaskItem {
+  [key: `custom:${string}`]: import("./json").JsonValue;
+  _custom?: JsonObject[];
+  assignee?: string | string[] | null;
+  dueDate?: string | null;
+  tags?: string[];
+  tagNames?: { id: string; name: string }[];
   assignees?: { id: string; name: string }[];
   id: string;
   dbId?: string;
@@ -42,8 +48,11 @@ export type TaskPatch = Partial<
     | "assignedState"
     | "priority"
     | "complexity"
+    | "assignee"
+    | "dueDate"
+    | "tags"
   >
->;
+> & { [key: `custom:${string}`]: import("./json").JsonValue };
 export type TaskOperation =
   | AttachmentOperation
   | { opId: string; type: "create"; issueId: string; item: TaskItem }
@@ -104,6 +113,7 @@ export interface WorkspaceData {
     selectorExpanded: string[];
     detailsMode: DetailsMode;
     workHeight: number;
+    automaticTrayHeight?: boolean;
   };
 }
 export interface WorkspaceSnapshot {

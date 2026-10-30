@@ -1,21 +1,26 @@
 import { tw } from "@utils/tw";
 import type { PropsWithChildren } from "react";
 import { useEffect, useRef } from "react";
+import { cancelDialog } from "./dialog-cancel";
 import SessionNotice from "./session-notice";
 interface DialogProps extends PropsWithChildren {
   title: string;
+  id?: string;
   close: () => void;
   className?: string;
   open?: boolean;
   canClose?: boolean;
+  desktop?: boolean;
 }
 const Dialog = ({
   title,
+  id,
   close,
   children,
   className = "",
   open = true,
   canClose = true,
+  desktop = false,
 }: DialogProps) => {
   const ref = useRef<HTMLDialogElement>(null);
   const show = () => {
@@ -33,12 +38,12 @@ const Dialog = ({
   useEffect(show, [open]);
   return (
     <dialog
-      className={tw("port-dialog", className)}
+      id={id}
+      className={tw(desktop ? "desktop-dialog" : "port-dialog", className)}
       ref={ref}
       aria-label={title}
       onCancel={(event) => {
-        event.preventDefault();
-        if (canClose) close();
+        cancelDialog(event, canClose, close);
       }}
     >
       <div className="dialog-head">

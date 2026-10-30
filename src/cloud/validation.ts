@@ -5,6 +5,7 @@ import {
   queueText as text,
 } from "./queue-shape";
 import { validateStatuses } from "./status-validation";
+import { validateTagJournal } from "./tag-journal";
 import { validateOperation } from "./validate-operation";
 export const validateQueue = (data: WorkspaceData) => {
   const ids = new Set<string>();
@@ -38,6 +39,7 @@ export const validateQueue = (data: WorkspaceData) => {
       data.operations.find((op) => {
         return op.opId === id;
       }) ?? record.archivedOperation;
+    validateTagJournal(record, operation);
     if (
       record.attachmentBeforeIds !== undefined &&
       (!Array.isArray(record.attachmentBeforeIds) ||

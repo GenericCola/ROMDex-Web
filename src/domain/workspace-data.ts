@@ -1,6 +1,7 @@
 import { validateAttachmentLists } from "@/attachments/actions";
 import { validateQueue } from "@/cloud/validation";
 import { validateMigration } from "@/migration/validate";
+import { validatePlanLedger } from "@/rdx/validate-plan-ledger";
 import { indexTree } from "./accepted/core.mjs";
 import type { WorkspaceData } from "./types";
 import { validateTask } from "./validate-task";
@@ -24,6 +25,7 @@ export const emptyWorkspace = (): WorkspaceData => {
       selectorExpanded: [],
       detailsMode: "default",
       workHeight: 46,
+      automaticTrayHeight: true,
     },
   };
 };
@@ -59,6 +61,7 @@ export const validateWorkspace = (value: unknown): WorkspaceData => {
     ids.add(item.id);
   }
   validateMigration(data);
+  validatePlanLedger(data);
   validateAttachmentLists(data);
   validateQueue(data);
   indexTree(data.remote, data.order);

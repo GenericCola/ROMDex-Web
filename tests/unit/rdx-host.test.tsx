@@ -68,11 +68,11 @@ void test("original desktop dialog routes import, edit and export locally withou
   assert.equal(task.title, "Edited synthetic plan");
   await assert.rejects(
     host.api("publication-preview", { key: imported.key }),
-    /publication is withheld/,
+    /Sign in with YouTrack/,
   );
   await assert.rejects(
     host.api("queue", { key: imported.key, approved: true }),
-    /publication is withheld/,
+    /approval is required/,
   );
   assert.equal(data.operations.length, 0);
 });

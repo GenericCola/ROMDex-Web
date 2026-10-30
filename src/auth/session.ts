@@ -12,6 +12,11 @@ export const authToken = () => {
     throw Error("Sign in with YouTrack again.");
   return current.token;
 };
+export const authIdentity = () => {
+  authToken();
+  if (!current) throw Error("Sign in with YouTrack again.");
+  return { userId: current.userId, projectId: current.projectId };
+};
 export const hasAuthSession = () => {
   return current !== null && Date.now() < current.expiresAt;
 };

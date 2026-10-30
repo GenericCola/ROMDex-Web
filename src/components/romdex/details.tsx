@@ -2,8 +2,9 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
-import TaskAttachments from "./task-attachments";
-import TaskImage from "./task-image";
+import DetailAttachments from "./detail-attachments";
+import DetailHeading from "./detail-heading";
+import { useDetailNavigation } from "./detail-navigation-context";
 import TaskProperties from "./task-properties";
 import TaskWriting from "./task-writing";
 import { useWorkSelection } from "./work-selection-context";
@@ -14,6 +15,10 @@ const Details = ({
   data: WorkspaceData;
   items: TaskItem[];
 }) => {
+  const navigation = useDetailNavigation();
+  const previous = items.find((entry) => {
+    return entry.id === navigation.previous;
+  });
   const [deleting, setDeleting] = useState(false);
   const multiple = useWorkSelection().selection.ids.length > 1;
   const item = items.find((candidate) => {
@@ -21,12 +26,16 @@ const Details = ({
   });
   const resize = () => {
     void workspaceStore.change((next) => {
+      if (next.view.detailsMode === "expanded")
+        next.view.automaticTrayHeight = true;
       next.view.detailsMode =
         next.view.detailsMode === "expanded" ? "default" : "expanded";
     });
   };
   const minimize = () => {
     void workspaceStore.change((next) => {
+      if (next.view.detailsMode === "expanded")
+        next.view.automaticTrayHeight = true;
       next.view.detailsMode = "collapsed";
     });
   };
@@ -43,38 +52,21 @@ const Details = ({
         className="details suite-tray"
         aria-label="Task Details"
       >
-        <div className="detail-top">
-          <span>
-            {item?.id.startsWith("local-")
-              ? "Local item"
-              : (item?.id ?? "Task Details")}
-          </span>
-          <div>
-            <button
-              className="icon-button"
-              aria-label="Expand Details Tray"
-              aria-pressed={data.view.detailsMode === "expanded"}
-              onClick={resize}
-            >
-              ↗
-            </button>
-            <button
-              className="icon-button"
-              aria-label="Minimize Details Tray"
-              onClick={minimize}
-            >
-              −
-            </button>
-          </div>
-        </div>
+        <DetailHeading
+          item={item}
+          previous={previous}
+          multiple={multiple}
+          expanded={data.view.detailsMode === "expanded"}
+          back={navigation.back}
+          resize={resize}
+          minimize={minimize}
+        />
         {item ? (
           <div className="detail-scroll">
-            <TaskProperties item={item} data={data} remove={askDelete} />
-            <div className="port-detail-content">
-              <TaskWriting item={item} data={data} />
-              <TaskImage id={item.id} data={data} />
-              <TaskAttachments key={item.id} item={item} data={data} />
-            </div>
+            <TaskProperties item={item} data={data} remove={askDelete}>
+              <DetailAttachments key={item.id} item={item} data={data} />
+            </TaskProperties>
+            <TaskWriting item={item} data={data} />
           </div>
         ) : (
           <div className="detail-placeholder">

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import DeviceBody from "../../src/components/romdex/device-body";
 import TaskField from "../../src/components/romdex/task-field";
 import { WorkSelectionProvider } from "../../src/components/romdex/work-selection-provider";
 import WorkTable from "../../src/components/romdex/work-table";
@@ -35,13 +36,15 @@ void test("work tray restores desktop headings, summaries, badges and compact ro
   const before = JSON.stringify(data);
   const html = renderToStaticMarkup(
     <WorkSelectionProvider>
-      <WorkTable
-        data={data}
-        items={items}
-        add={() => {
-          return undefined;
-        }}
-      />
+      <DeviceBody enabled inert={false}>
+        <WorkTable
+          data={data}
+          items={items}
+          add={() => {
+            return undefined;
+          }}
+        />
+      </DeviceBody>
     </WorkSelectionProvider>,
   );
   assert.match(html, /<h2>All Tasks<\/h2>/);
@@ -63,13 +66,15 @@ void test("work tray restores desktop headings, summaries, badges and compact ro
   data.view.scope = parent;
   const scoped = renderToStaticMarkup(
     <WorkSelectionProvider>
-      <WorkTable
-        data={data}
-        items={items}
-        add={() => {
-          return undefined;
-        }}
-      />
+      <DeviceBody enabled inert={false}>
+        <WorkTable
+          data={data}
+          items={items}
+          add={() => {
+            return undefined;
+          }}
+        />
+      </DeviceBody>
     </WorkSelectionProvider>,
   );
   assert.match(scoped, /<h2>Fixture<\/h2>/);

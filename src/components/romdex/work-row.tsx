@@ -2,9 +2,11 @@ import { hasMeaningfulNotes, indexTree } from "@/domain/accepted/core.mjs";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import type { SelectionModifiers } from "@/domain/work-selection";
 import { workspaceStore } from "@/domain/workspace-store";
-import { rasterImage } from "@/npcdex/model";
 import type { CSSProperties } from "react";
+import { useDetailNavigation } from "./detail-navigation-context";
+import NotesIcon from "./notes-icon";
 import RowGutter from "./row-gutter";
+import TaskAttachmentButton from "./task-attachment-button";
 import TaskField from "./task-field";
 import TaskRowActions from "./task-row-actions";
 import TaskRowTitle from "./task-row-title";
@@ -18,7 +20,6 @@ const WorkRow = ({
   checked,
   selectionDisabled,
   choose,
-  clearSelection,
   dragging = false,
   drop = null,
 }: {
@@ -30,7 +31,6 @@ const WorkRow = ({
   checked: boolean;
   selectionDisabled: boolean;
   choose: (id: string, modifiers: SelectionModifiers) => void;
-  clearSelection: () => void;
   dragging?: boolean;
   drop?: "before" | "after" | null;
 }) => {
@@ -39,13 +39,12 @@ const WorkRow = ({
     (scope ? (tree.depths.get(scope) ?? 0) + 1 : 0);
   const children = tree.children.get(item.id) ?? [];
   const expanded = data.view.expanded.includes(item.id);
+  const navigation = useDetailNavigation();
   const select = () => {
-    clearSelection();
-    void workspaceStore.change((next) => {
-      next.view.selected = item.id;
-      if (next.view.detailsMode === "collapsed")
-        next.view.detailsMode = "default";
-    });
+    navigation.open(item.id);
+  };
+  const openNotes = () => {
+    navigation.open(item.id, false, true);
   };
   const toggle = () => {
     void workspaceStore.change((next) => {
@@ -95,17 +94,6 @@ const WorkRow = ({
             ) : (
               <span className="row-toggle" aria-hidden="true" />
             )}
-            {rasterImage(data.images?.[item.id]) && (
-              <span
-                className="port-task-thumbnail"
-                role="img"
-                aria-label={item.summary + " image"}
-                style={{
-                  backgroundImage:
-                    "url(" + JSON.stringify(data.images?.[item.id]) + ")",
-                }}
-              />
-            )}
             <TaskStatusPopup
               item={item}
               color={tree.colors.get(item.id) ?? "grey"}
@@ -114,12 +102,21 @@ const WorkRow = ({
             <div className="title-wrap">
               <TaskRowTitle item={item} data={data} select={select} />
               {hasMeaningfulNotes(item.description) && (
-                <span title="Notes and instructions" aria-label="Has notes">
-                  ▤
-                </span>
+                <button
+                  className="note-button"
+                  title="Has Notes / Instructions"
+                  aria-label={"Notes for " + item.summary}
+                  onClick={openNotes}
+                >
+                  <NotesIcon />
+                </button>
               )}
+              <TaskAttachmentButton item={item} data={data} />
               <span className="row-id">
                 {item.id.startsWith("local-") ? "New · Pending" : item.id}
+                {data.operations.some((op) => {
+                  return op.issueId === item.id;
+                }) && <span className="pending-dot" title="Pending Changes" />}
               </span>
             </div>
           </div>

@@ -36,6 +36,8 @@ const DeleteReview = ({
   };
   return (
     <Dialog
+      id="delete-dialog"
+      desktop
       title="Queue deletion of listed tasks?"
       close={close}
       canClose={!busy}

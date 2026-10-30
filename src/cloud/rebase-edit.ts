@@ -1,4 +1,5 @@
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { planReceipt } from "@/rdx/plan-ledger";
 import { acknowledge, recordDelivery } from "./journal";
 import { cloudData } from "./types";
 export const rebaseEdit = (
@@ -11,7 +12,21 @@ export const rebaseEdit = (
   });
   const operation = data.operations[at];
   if (operation?.type !== "edit") throw Error("Only an edit can be rebased.");
-  if (cloudData(data).sharedStatuses) {
+  if (operation.patch.tags !== undefined && cloudData(data).records[opId]) {
+    const replacement = {
+      ...operation,
+      opId: crypto.randomUUID(),
+      base: remote,
+    };
+    data.operations.splice(at, 1, replacement);
+    recordDelivery(data, opId, {
+      status: "confirmed",
+      archivedOperation: structuredClone(operation),
+      message:
+        "Prior tag attempt archived after explicit fresh readback/rebase; its historical request outcome is not inferred.",
+    });
+    planReceipt(data, opId, {}, replacement.opId);
+  } else if (cloudData(data).sharedStatuses) {
     acknowledge(data, operation);
     recordDelivery(data, opId, {
       message: "Previous edit archived after explicit shared-status rebase.",

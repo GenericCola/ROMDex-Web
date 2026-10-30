@@ -5,9 +5,21 @@ import {
   type SelectionModifiers,
   type WorkSelection,
 } from "@/domain/work-selection";
-import { useState, type PropsWithChildren } from "react";
+import { useRef, useState, type PropsWithChildren } from "react";
 import { WorkSelectionContext } from "./work-selection-context";
 export const WorkSelectionProvider = ({ children }: PropsWithChildren) => {
+  const groupRef = useRef<(() => void) | null>(null);
+  const registerGroup = (action: () => void) => {
+    groupRef.current = action;
+    return () => {
+      if (groupRef.current === action) groupRef.current = null;
+    };
+  };
+  const group = () => {
+    if (!groupRef.current) return false;
+    groupRef.current();
+    return true;
+  };
   const [selection, setSelection] = useState<WorkSelection>({
     ids: [],
     anchor: null,
@@ -34,7 +46,9 @@ export const WorkSelectionProvider = ({ children }: PropsWithChildren) => {
     setSelection({ ids: [], anchor: null });
   };
   return (
-    <WorkSelectionContext value={{ selection, reconcile, toggle, clear }}>
+    <WorkSelectionContext
+      value={{ selection, reconcile, toggle, clear, registerGroup, group }}
+    >
       {children}
     </WorkSelectionContext>
   );

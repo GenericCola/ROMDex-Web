@@ -21,7 +21,7 @@ export const useAttachmentWork = () => {
       setBusy(false);
     }
   };
-  const run = (action: () => Promise<void>) => {
+  const runAwaitable = (action: () => Promise<void>) => {
     if (pendingRef.current) return;
     const pending = trackWorkspaceWork(() => {
       return execute(action);
@@ -34,6 +34,7 @@ export const useAttachmentWork = () => {
       .catch(() => {
         return undefined;
       });
+    return pending;
   };
   useLayoutEffect(() => {
     return registerDraftEditor({
@@ -46,5 +47,8 @@ export const useAttachmentWork = () => {
       },
     });
   }, [busy]);
-  return { busy, message, setMessage, run };
+  const run = (action: () => Promise<void>) => {
+    void runAwaitable(action);
+  };
+  return { busy, message, setMessage, run, runAwaitable };
 };

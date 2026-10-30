@@ -2,20 +2,30 @@ import { materialize } from "@/domain/accepted/core.mjs";
 import { siblingSelection } from "@/domain/bulk-hierarchy";
 import { hierarchySignature } from "@/domain/task-drop";
 import { workspaceStore } from "@/domain/workspace-store";
+import { hasWorkspaceWork } from "@/domain/workspace-work";
 import type { PointerEvent } from "react";
 import type { Drag } from "./task-drag-state";
 export const startTaskDrag = (
   event: PointerEvent<HTMLElement>,
   selectedIds: string[],
 ): Drag | null => {
-  const grip = (event.target as Element).closest<HTMLElement>("[data-drag]");
-  const id = grip?.dataset.drag;
+  const grip = (event.target as Element).closest<HTMLElement>(
+    "[data-drag],.selector-main[data-select]",
+  );
+  const id = grip?.dataset.drag ?? grip?.dataset.select;
   if (event.button !== 0 || !id || !grip) return null;
   const state = workspaceStore.getSnapshot();
-  if (!state.ready || state.error || state.delivering || state.updating)
+  if (
+    hasWorkspaceWork() ||
+    !state.ready ||
+    state.error ||
+    state.delivering ||
+    state.updating ||
+    document.querySelector('input[aria-label="New Parent Title"]')
+  )
     return null;
   let bulkIds: string[] | undefined;
-  if (selectedIds.length > 1) {
+  if (grip.dataset.drag && selectedIds.length > 1) {
     if (!selectedIds.includes(id))
       throw Error("Drag a Checked Item to Move the Selection.");
     bulkIds = siblingSelection(

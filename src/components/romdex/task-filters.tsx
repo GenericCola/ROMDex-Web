@@ -88,7 +88,7 @@ const TaskFilterControl = ({
         </svg>
       </button>
       {open && (
-        <Dialog title="Filters" close={close}>
+        <Dialog id="task-filter-dialog" title="Filters" close={close} desktop>
           <p>Show only tasks matching all selected filters.</p>
           <div className="task-filter-fields">{fields.map(renderField)}</div>
           <div className="dialog-actions">

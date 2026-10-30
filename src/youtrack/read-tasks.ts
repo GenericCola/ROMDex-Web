@@ -1,12 +1,12 @@
 import { authRequestGuard } from "@/auth/session";
 import type { TaskItem } from "@/domain/types";
+import {
+  nativeIssueFields,
+  nativeObject,
+  nativeTaskFields,
+  type NativeField,
+} from "./native-task-fields";
 export const YOUTRACK_ORIGIN = "https://thegobindsingh.youtrack.cloud";
-interface RawValue {
-  name?: string;
-  id?: string;
-  login?: string;
-  fullName?: string;
-}
 export interface RawIssue {
   id: string;
   idReadable: string;
@@ -15,7 +15,8 @@ export interface RawIssue {
   updated: number;
   project: { shortName: string };
   parent?: { issues?: { idReadable: string }[] };
-  customFields?: { name: string; value?: RawValue | RawValue[] | null }[];
+  customFields?: NativeField[];
+  tags?: { id: string; name: string }[];
   commentsCount?: number;
 }
 export const normalize = (raw: RawIssue): TaskItem => {
@@ -36,27 +37,11 @@ export const normalize = (raw: RawIssue): TaskItem => {
     const value = raw.customFields?.find((field) => {
       return field.name === name;
     })?.value;
-    return Array.isArray(value) ? undefined : value?.name;
+    const nameValue = nativeObject(value)?.name;
+    return typeof nameValue === "string" ? nameValue : undefined;
   };
   return {
-    assignees: (() => {
-      const person = raw.customFields?.find((field) => {
-        return field.name === "Assignee";
-      })?.value;
-      return (Array.isArray(person) ? person : person ? [person] : []).flatMap(
-        (person) => {
-          return person.id
-            ? [
-                {
-                  id: person.id,
-                  name:
-                    person.fullName ?? person.login ?? person.name ?? person.id,
-                },
-              ]
-            : [];
-        },
-      );
-    })(),
+    ...nativeTaskFields(raw.customFields, raw.tags),
     id: raw.idReadable,
     dbId: raw.id,
     summary: raw.summary,
@@ -90,8 +75,7 @@ export const readTasks = async (
     assertCurrent();
     const query = new URLSearchParams({
       query: "project: PMON sort by: created asc",
-      fields:
-        "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(name,value(name,id,login,fullName)),commentsCount",
+      fields: nativeIssueFields,
       $top: "100",
       $skip: String(skip),
     });

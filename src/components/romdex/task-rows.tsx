@@ -18,7 +18,7 @@ const TaskRows = ({
   closeGroup: () => void;
 }) => {
   return (
-    <tbody>
+    <tbody id="rows">
       {group &&
         !rows.some((item) => {
           return item.id === group.beforeId;

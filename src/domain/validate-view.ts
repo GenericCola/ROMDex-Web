@@ -34,6 +34,8 @@ export const validateView = (data: WorkspaceData) => {
     typeof view.hideCompleted !== "boolean" ||
     !textList(view.expanded) ||
     !textList(view.selectorExpanded) ||
+    (view.automaticTrayHeight !== undefined &&
+      typeof view.automaticTrayHeight !== "boolean") ||
     !Number.isFinite(view.workHeight) ||
     view.workHeight < 0 ||
     view.workHeight > 100 ||

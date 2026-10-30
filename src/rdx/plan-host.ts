@@ -2,6 +2,7 @@ import { encodeBytes } from "@/domain/bytes";
 import { jsonObject, type JsonObject } from "@/domain/json";
 import { readRdx, writeRdx } from "./container";
 import { fileBytes } from "./library";
+import { NativePlanSession } from "./native-plan-session";
 import { planContext } from "./plan-context";
 import {
   editPlanDocument,
@@ -9,6 +10,7 @@ import {
   reviewPlanImport,
   storePlan,
 } from "./plan-documents";
+import { PlanReviewSession } from "./plan-review-session";
 import { PlanTransfer } from "./plan-transfer";
 const text = (value: unknown) => {
   if (typeof value !== "string") throw Error("Invalid plan request.");
@@ -22,16 +24,29 @@ const choices = (value: unknown): Record<string, string> => {
 };
 export class BrowserPlanHost {
   private transfer = new PlanTransfer();
+  private publication = new PlanReviewSession();
+  private native = new NativePlanSession();
   private exporting: { id: string; bytes: Uint8Array } | null = null;
   cancel = () => {
     this.transfer.cancel();
+    this.publication.cancel();
+    this.native.cancel();
     this.exporting = null;
   };
 
   api = async (route: string, input: JsonObject = {}): Promise<unknown> => {
-    if (route === "context") return planContext();
-    if (route === "refresh-fields")
-      throw Error("Plan publication is withheld in this checkpoint.");
+    if (route === "sync-review" || route === "resolve-native")
+      return this.native.review(
+        input,
+        this.publication,
+        route === "resolve-native",
+      );
+    if (route === "context")
+      return planContext(this.publication.fieldOptions());
+    if (route === "refresh-fields") {
+      await this.publication.refresh();
+      return planContext(this.publication.fieldOptions());
+    }
     if (route === "begin") return this.transfer.begin(input.bytes);
     if (route === "chunk")
       return this.transfer.chunk(input.id, input.offset, input.base64);
@@ -66,10 +81,9 @@ export class BrowserPlanHost {
         document: (await readRdx(bytes)).document,
         status: { saved: true },
       };
-    if (route === "publication-preview" || route === "queue")
-      throw Error(
-        "Plan publication is withheld in this checkpoint. Local import, editing and export do not send YouTrack changes.",
-      );
+    if (route === "publication-preview")
+      return this.publication.preview(bytes, input);
+    if (route === "queue") return this.publication.queue(bytes, input);
     if (route === "export") {
       this.exporting = { id: crypto.randomUUID(), bytes };
       return {

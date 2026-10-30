@@ -9,6 +9,7 @@ export interface DropIntent {
   after: boolean;
 }
 export interface DropTarget {
+  selectorId?: string;
   parentId: string | null;
   beforeId: string | null;
   anchorId: string;

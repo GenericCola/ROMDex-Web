@@ -1,17 +1,16 @@
 import { reconcile } from "@/domain/accepted/core.mjs";
 import type { TaskItem, TaskOperation, WorkspaceData } from "@/domain/types";
-import {
-  assignmentPatch,
-  assignStatus,
-  observeStatus,
-} from "./assigned-status";
+import { assignmentPatch, observeStatus } from "./assigned-status";
 import { equal, supported } from "./delivery-helpers";
-import { acknowledge, attemptDelivery, recordDelivery } from "./journal";
+import { nativeTagBaseline, prepareEditPatch } from "./edit-patch-delivery";
+import { finishExisting } from "./finish-existing";
+import { attemptDelivery, recordDelivery } from "./journal";
 import {
   confirmStatusAttempt,
   saveStatusAttempt,
   sharedWrite,
 } from "./shared-status-delivery";
+import { tagReconcileValues } from "./tag-reconcile";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
 type Existing = Extract<TaskOperation, { type: "edit" | "comment" }>;
@@ -34,7 +33,10 @@ export const deliverExisting = async (
       "A queued task is no longer readable. Nothing was sent for it.",
     );
   const copy = structuredClone(snapshot());
-  const remote = observeStatus(copy, received);
+  const remote = observeStatus(
+    copy,
+    await nativeTagBaseline(operation, received, port),
+  );
   await commit((data) => {
     data.cloud = cloudData(copy);
   });
@@ -44,7 +46,12 @@ export const deliverExisting = async (
       ...operation.base,
       assignedState: operation.base.assignedState ?? operation.base.state,
     };
-    const result = reconcile(base, patch, remote);
+    const normalized = tagReconcileValues(base, patch, remote);
+    const result = reconcile(
+      normalized.base,
+      normalized.patch,
+      normalized.remote,
+    );
     ({ patch } = result);
     if (
       cloudData(snapshot()).sharedStatuses &&
@@ -76,32 +83,28 @@ export const deliverExisting = async (
     cloudData(snapshot()).sharedStatuses && assignedState !== undefined
       ? sharedWrite(operation, remote, "assign", assignedState)
       : undefined;
-  const finish = async (verified: TaskItem) => {
-    await commit((data) => {
-      const observed = observeStatus(data, verified);
-      if (
-        assignedState !== undefined &&
-        observed.assignedState !== remote.assignedState &&
-        observed.assignedState !== assignedState
-      )
-        throw Error("Assigned status changed during delivery.");
-      acknowledge(
-        data,
-        operation,
-        assignedState === undefined
-          ? observed
-          : assignStatus(data, verified, assignedState),
-      );
-    });
+  const finish = (verified: TaskItem) => {
+    return finishExisting(operation, remote, assignedState, verified, commit);
   };
   if (
     operation.type === "edit" &&
     !metadata &&
     !Object.keys(nativePatch).length
   ) {
-    await finish(received);
+    await finish(remote);
     return;
   }
+  const deliverPatch =
+    operation.type === "edit"
+      ? await prepareEditPatch(
+          operation,
+          nativePatch,
+          remote,
+          snapshot,
+          commit,
+          port,
+        )
+      : null;
   await attemptDelivery(
     operation,
     commit,
@@ -111,8 +114,7 @@ export const deliverExisting = async (
           throw Error("Shared-status delivery is unavailable.");
         await port.metadata.write(operation.issueId, metadata);
       }
-      if (operation.type === "edit" && Object.keys(nativePatch).length)
-        await port.update(operation.issueId, nativePatch, remote);
+      if (deliverPatch) await deliverPatch();
       else if (operation.type === "comment") {
         const receipt = await port.comment(operation.issueId, operation.text);
         if (!receipt.id) throw Error("Missing comment receipt.");
@@ -120,8 +122,9 @@ export const deliverExisting = async (
           recordDelivery(data, operation.opId, { remoteId: receipt.id });
         });
       }
-      const verified = await port.get(operation.issueId);
-      if (!verified) throw Error("Readback unavailable.");
+      const readback = await port.get(operation.issueId);
+      if (!readback) throw Error("Readback unavailable.");
+      const verified = await nativeTagBaseline(operation, readback, port);
       if (
         operation.type === "edit" &&
         !Object.entries(nativePatch).every(([key, value]) => {

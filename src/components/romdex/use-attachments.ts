@@ -1,46 +1,43 @@
 import {
   cancelUnsentUpload,
   queueAttachmentDelete,
-  queueUpload,
 } from "@/attachments/actions";
+import { cancelUnsentAttachmentDeletion } from "@/attachments/cancel-deletion";
 import { downloadFile } from "@/attachments/download";
 import type { Attachment, AttachmentOperation } from "@/attachments/types";
 import { stagedFile } from "@/attachments/validate";
-import { requireDelivery } from "@/cloud/session";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { uploadStorage } from "@/storage/upload-storage";
+import { attachmentReader } from "@/youtrack/attachment-reader";
 import { useState } from "react";
+import { stageTaskFiles } from "./stage-task-files";
+import { useAttachmentPreview } from "./use-attachment-preview";
 import { useAttachmentWork } from "./use-attachment-work";
-export const useAttachments = (item: TaskItem) => {
+export const useAttachments = (item: TaskItem, quietRead = false) => {
   const work = useAttachmentWork(),
     [removing, setRemoving] = useState<Attachment | null>(null);
+  const preview = useAttachmentPreview(item.id, work);
   const read = () => {
     work.run(async () => {
-      const port = requireDelivery();
-      if (!port.files) throw Error("Attachment delivery is unavailable.");
-      const files = await port.files.list(item.id);
+      const files = await attachmentReader().list(item.id);
       await workspaceStore.change((data) => {
         data.attachmentLists ??= {};
         data.attachmentLists[item.id] = files;
       });
       await workspaceStore.flush();
-      work.setMessage(
-        files.length + " attachments read. No file mutation was sent.",
-      );
+      if (!quietRead)
+        work.setMessage(
+          files.length + " attachments read. No file mutation was sent.",
+        );
     });
   };
-  const stage = (file: File) => {
+  const stageMany = (files: File[]) => {
     work.run(async () => {
-      const id = crypto.randomUUID(),
-        value = await stagedFile(id, file);
-      await uploadStorage.put(value);
-      await workspaceStore.change((data) => {
-        queueUpload(data, item.id, id, value.file);
-      });
-      await workspaceStore.flush();
+      const staged = await stageTaskFiles(item.id, files);
       work.setMessage(
-        "File staged in this browser. Save Changes sends it when delivery is connected.",
+        staged.length +
+          " files kept locally. Save Changes uploads them when delivery is connected.",
       );
     });
   };
@@ -69,9 +66,7 @@ export const useAttachments = (item: TaskItem) => {
   };
   const download = (file: Attachment) => {
     work.run(async () => {
-      const port = requireDelivery();
-      if (!port.files) throw Error("Attachment delivery is unavailable.");
-      downloadFile(await port.files.download(item.id, file), file.name);
+      downloadFile(await attachmentReader().download(item.id, file), file.name);
       work.setMessage("Attachment downloaded from verified current metadata.");
     });
   };
@@ -101,13 +96,26 @@ export const useAttachments = (item: TaskItem) => {
       );
     });
   };
+  const cancelDeletion = (id: string) => {
+    work.run(async () => {
+      await workspaceStore.change((data) => {
+        cancelUnsentAttachmentDeletion(data, id);
+      });
+      await workspaceStore.flush();
+      work.setMessage(
+        "Unsent attachment deletion cancelled. The remote file was not changed.",
+      );
+    });
+  };
   return {
+    cancelDeletion,
     ...work,
+    ...preview,
     cancel,
     removing,
     setRemoving,
     read,
-    stage,
+    stageMany,
     restore,
     exportPending,
     download,

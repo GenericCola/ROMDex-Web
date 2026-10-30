@@ -1,6 +1,7 @@
 import { materialize } from "./accepted/core.mjs";
 import { stageMove } from "./bulk-hierarchy";
 import { flushDraftEditors } from "./editor-drafts";
+import { revealDropParent } from "./reveal-drop-parent";
 import { rowDropTarget, type DropIntent } from "./task-drop";
 import { workspaceStore } from "./workspace-store";
 import { trackWorkspaceWork } from "./workspace-work";
@@ -22,6 +23,7 @@ export const commitBulkTaskDrop = (
       );
       if (!target) throw Error("The destination is no longer available.");
       stageMove(data, ids, target.parentId, target.beforeId, signature);
+      revealDropParent(data, target.parentId);
     });
     await workspaceStore.flush();
   });

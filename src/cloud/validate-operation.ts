@@ -1,4 +1,5 @@
 import { validateAttachmentOperation } from "@/attachments/validate";
+import { nativeEditKey, nativePatchValue } from "@/domain/native-edit-fields";
 import type { TaskOperation } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
 import {
@@ -6,6 +7,7 @@ import {
   queueObject as object,
   queueText as text,
 } from "./queue-shape";
+import { tagIds } from "./tag-types";
 export const validateOperation = (operation: TaskOperation) => {
   switch (operation.type) {
     case "attachment":
@@ -21,6 +23,15 @@ export const validateOperation = (operation: TaskOperation) => {
         invalid();
       validateTask(operation.base);
       for (const [key, value] of Object.entries(operation.patch)) {
+        if (key === "tags") {
+          tagIds(value);
+          tagIds(operation.base.tags);
+          continue;
+        }
+        if (nativeEditKey(key)) {
+          if (!nativePatchValue(key, value)) invalid();
+          continue;
+        }
         if (
           ![
             "summary",

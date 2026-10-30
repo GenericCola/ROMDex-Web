@@ -4,9 +4,9 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workRows } from "@/domain/work-rows";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState, type ChangeEvent } from "react";
+import { useWorkspaceDrag } from "./task-drag-context";
 import TaskRows from "./task-rows";
 import { useTableSelection } from "./use-table-selection";
-import { useTaskDrag } from "./use-task-drag";
 import WorkEmpty from "./work-empty";
 import WorkRow from "./work-row";
 import WorkToolbar from "./work-toolbar";
@@ -23,7 +23,7 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
   const scopeCount = scope ? descendants(items, scope).length : items.length;
   const rows = workRows(items, data, filters);
   const selection = useTableSelection(rows);
-  const drag = useTaskDrag(selection.selection.ids, selection.clear);
+  const drag = useWorkspaceDrag();
   const search = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     void workspaceStore.change((next) => {
@@ -62,7 +62,6 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
         checked={selection.selection.ids.includes(item.id)}
         selectionDisabled={selection.busy || !!selection.group}
         choose={selection.choose}
-        clearSelection={selection.clear}
         dragging={drag.dragId === item.id}
         drop={
           drag.preview?.anchorId === item.id
@@ -79,7 +78,6 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
       id="work-tray"
       className="workspace suite-tray"
       aria-label="Work Tray"
-      {...drag.handlers}
       onKeyDown={selection.keyDown}
       tabIndex={0}
     >

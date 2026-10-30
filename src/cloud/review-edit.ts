@@ -2,6 +2,7 @@ import type { TaskItem, TaskOperation, WorkspaceData } from "@/domain/types";
 import { assignmentPatch, assignStatus } from "./assigned-status";
 import { equal } from "./delivery-helpers";
 import { confirmStatusAttempt } from "./shared-status-delivery";
+import { tagIds } from "./tag-types";
 import { cloudData } from "./types";
 type Edit = Extract<TaskOperation, { type: "edit" }>;
 export const confirmEdit = (operation: Edit, remote: TaskItem) => {
@@ -10,6 +11,7 @@ export const confirmEdit = (operation: Edit, remote: TaskItem) => {
       ? operation.patch
       : assignmentPatch(operation.patch);
   const matches = Object.entries(patch).every(([key, value]) => {
+    if (key === "tags") return equal(tagIds(remote.tags), tagIds(value));
     if (
       remote.sharedStatus ||
       key !== "assignedState" ||

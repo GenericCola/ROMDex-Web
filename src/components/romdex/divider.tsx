@@ -1,42 +1,32 @@
+import { trayKey } from "@/domain/tray-keyboard";
 import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import type { KeyboardEvent, PointerEvent } from "react";
-import { useRef } from "react";
+import type { KeyboardEvent } from "react";
+import { measureTray } from "./tray-measurement";
+import { useDividerMetrics } from "./use-divider-metrics";
+import { useDividerPointer } from "./use-divider-pointer";
 const Divider = ({ view }: { view: WorkspaceData["view"] }) => {
-  const pointerRef = useRef<number | null>(null);
-  const setHeight = (height: number) => {
-    void workspaceStore.change((data) => {
-      data.view.workHeight = Math.max(10, Math.min(90, height));
-      data.view.detailsMode = height > 94 ? "collapsed" : "default";
-    });
-  };
-  const down = (event: PointerEvent<HTMLDivElement>) => {
-    pointerRef.current = event.pointerId;
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-  const move = (event: PointerEvent<HTMLDivElement>) => {
-    if (pointerRef.current !== event.pointerId) return;
-    const bounds = event.currentTarget.parentElement?.getBoundingClientRect();
-    if (bounds) setHeight(((event.clientY - bounds.top) / bounds.height) * 100);
-  };
-  const up = () => {
-    pointerRef.current = null;
-  };
+  const { ref, percent, text } = useDividerMetrics(view);
+  const { down, move, up, cancel } = useDividerPointer();
   const keys = (event: KeyboardEvent<HTMLDivElement>) => {
-    const step = event.shiftKey ? 10 : 3;
-    if (
-      ["ArrowUp", "ArrowDown", "Home", "End", "Enter", " "].includes(event.key)
-    )
-      event.preventDefault();
-    if (event.key === "ArrowUp") setHeight(view.workHeight - step);
-    if (event.key === "ArrowDown") setHeight(view.workHeight + step);
-    if (event.key === "Home") setHeight(10);
-    if (event.key === "End") setHeight(100);
-    if (event.key === "Enter" || event.key === " ")
-      setHeight(view.detailsMode === "collapsed" ? 46 : 100);
+    if (event.nativeEvent.isComposing) return;
+    const host = event.currentTarget.parentElement;
+    const next = trayKey(
+      view,
+      event.key,
+      event.shiftKey,
+      host?.getBoundingClientRect().height ?? 0,
+      host ? measureTray(host, view) : undefined,
+    );
+    if (!next) return;
+    event.preventDefault();
+    void workspaceStore.change((data) => {
+      Object.assign(data.view, next);
+    });
   };
   return (
     <div
+      ref={ref}
       id="pane-divider"
       className="pane-divider"
       role="separator"
@@ -45,12 +35,14 @@ const Divider = ({ view }: { view: WorkspaceData["view"] }) => {
       aria-orientation="horizontal"
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={view.detailsMode === "collapsed" ? 100 : view.workHeight}
+      aria-valuenow={percent}
+      aria-valuetext={text}
       onKeyDown={keys}
       onPointerDown={down}
       onPointerMove={move}
       onPointerUp={up}
-      onPointerCancel={up}
+      onPointerCancel={cancel}
+      onLostPointerCapture={cancel}
     >
       <span className="split-grip" aria-hidden="true" />
     </div>

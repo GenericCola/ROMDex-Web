@@ -5,6 +5,7 @@ import { abandonCreation } from "./abandon-creation";
 import { observeStatus } from "./assigned-status";
 import { completeCreation, matchesCreation } from "./creation";
 import { replaceRemote } from "./delivery-helpers";
+import { nativeTagBaseline } from "./edit-patch-delivery";
 import { acknowledge } from "./journal";
 import { rebaseEdit } from "./rebase-edit";
 import { reviewAttachment } from "./review-attachment";
@@ -73,7 +74,10 @@ export const reviewQueue = async (
       "The task is not readable; preserve recovery and resolve access first.",
     );
   const copy = structuredClone(data);
-  const remote = observeStatus(copy, received);
+  const remote = observeStatus(
+    copy,
+    await nativeTagBaseline(operation, received, port),
+  );
   await commit((next) => {
     next.cloud = cloudData(copy);
   });

@@ -1,4 +1,5 @@
 import type { DeliveryPort } from "@/cloud/types";
+import { nativeEditKey } from "@/domain/native-edit-fields";
 import type { TaskItem, TaskPatch } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
 import { AttachmentClient } from "./attachment-client";
@@ -7,22 +8,27 @@ import { readDeliveryTasks } from "./delivery-read";
 import { changeParent, childrenOf } from "./hierarchy";
 import type { Field } from "./issue-body";
 import { creationBody, issueBody } from "./issue-body";
-import type { RawIssue } from "./read-tasks";
-import { normalize } from "./read-tasks";
+import { NativeEditAdapter } from "./native-edit-adapter";
+import { readDeliveryIssue } from "./read-delivery-issue";
 import type { YouTrackRequest } from "./request";
 import { issueId, sessionRequest } from "./request";
 import { SharedStatusClient } from "./shared-status-client";
-const fields =
-  "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(id,name,$type,value(name,id,login,fullName)),commentsCount,comments(id,text,created,author(login,fullName))";
+import { TagClient } from "./tags";
 export class DeliveryClient implements DeliveryPort {
   accountId = "";
   files: AttachmentClient;
+  tags: TagClient;
   metadata?: SharedStatusClient;
   private request: YouTrackRequest;
   private fields = new Map<string, Field[]>();
+  private native: NativeEditAdapter;
   private creations = new Map<string, unknown>();
   constructor(token: string, shared = false) {
     this.request = sessionRequest(token);
+    this.native = new NativeEditAdapter(this.request, this.get, (id) => {
+      return this.fields.get(id) ?? [];
+    });
+    this.tags = new TagClient(this.request);
     this.files = new AttachmentClient(this.request, token.trim());
     if (shared) this.metadata = new SharedStatusClient(this.request);
   }
@@ -40,36 +46,14 @@ export class DeliveryClient implements DeliveryPort {
     return this.metadata ? this.metadata.annotateAll(items) : items;
   };
   get = async (id: string) => {
-    if (!/^PMON-\d+$/.test(id))
-      throw Error("Only PMON tasks can be delivered.");
-    const raw = (await this.request(
-      "issues/" + id + "?fields=" + encodeURIComponent(fields),
-    )) as
-      | (RawIssue & {
-          customFields: Field[];
-          comments?: {
-            id: string;
-            text: string;
-            created: number;
-            author?: { fullName?: string; login?: string };
-          }[];
-        })
-      | null;
-    if (!raw) return null;
-    const item = normalize(raw);
-    if (item.id !== id)
-      throw Error("YouTrack returned a different task. Nothing was sent.");
-    this.fields.set(id, raw.customFields ?? []);
-    item.comments = (raw.comments ?? []).map((comment) => {
-      return {
-        id: comment.id,
-        text: comment.text,
-        created: comment.created,
-        author: comment.author?.fullName ?? comment.author?.login ?? "Unknown",
-      };
-    });
-    validateTask(item);
+    const result = await readDeliveryIssue(this.request, id);
+    if (!result) return null;
+    const { item, fields } = result;
+    this.fields.set(id, fields);
     return this.metadata ? this.metadata.annotate(item) : item;
+  };
+  prepareUpdate = (id: string, patch: TaskPatch, expected: TaskItem) => {
+    return this.native.prepare(id, patch, expected);
   };
   update = async (id: string, patch: TaskPatch, expected?: TaskItem) => {
     issueId(id);
@@ -87,7 +71,18 @@ export class DeliveryClient implements DeliveryPort {
       })?.value?.name !== "string"
     )
       throw Error("The current native State value cannot be verified.");
-    const body = issueBody(patch, this.fields.get(id) ?? []);
+    const extra = await this.native.fieldsFor(id, patch, expected);
+    const basic = Object.fromEntries(
+      Object.entries(patch).filter(([key]) => {
+        return !nativeEditKey(key);
+      }),
+    ) as TaskPatch;
+    const body = issueBody(basic, this.fields.get(id) ?? []);
+    if (extra.length)
+      body.customFields = [
+        ...((body.customFields ?? []) as unknown[]),
+        ...extra,
+      ];
     if (Object.keys(body).length)
       await this.request("issues/" + id, "POST", body);
     if (patch.parentId !== undefined)
@@ -103,7 +98,10 @@ export class DeliveryClient implements DeliveryPort {
     validateTask(item);
     if (item.parentId && !(await this.get(item.parentId)))
       throw Error("The creation parent is not readable.");
-    this.creations.set(item.id, await creationBody(this.request, item));
+    this.creations.set(
+      item.id,
+      await this.native.creation(item, await creationBody(this.request, item)),
+    );
   };
   create = async (item: TaskItem) => {
     const body = this.creations.get(item.id);

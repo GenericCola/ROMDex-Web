@@ -1,10 +1,12 @@
 import { parseSharedStatus } from "@/cloud/shared-status-protocol";
 import type { TaskItem } from "./types";
+import { validateNativeTask } from "./validate-native-task";
 export const validateTask: (value: unknown) => asserts value is TaskItem = (
   value,
 ) => {
   if (!value || typeof value !== "object") throw Error("Invalid task data.");
   const item = value as TaskItem;
+  validateNativeTask(item);
   if (
     item.assignees !== undefined &&
     (!Array.isArray(item.assignees) ||

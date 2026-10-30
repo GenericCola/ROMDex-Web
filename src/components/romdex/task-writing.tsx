@@ -2,16 +2,11 @@ import { editTask, postComment } from "@/domain/task-actions";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
+import { useDetailNavigation } from "./detail-navigation-context";
+import TaskCommentList from "./task-comment-list";
+import { useTaskComments } from "./use-task-comments";
 import { useTaskTextEditing } from "./use-task-text-editing";
-const renderComment = (entry: { id: string; text: string; author: string }) => {
-  return (
-    <article key={entry.id}>
-      <strong>{entry.author}</strong>
-      <p className="port-detail-text">{entry.text}</p>
-    </article>
-  );
-};
 const TaskWriting = ({
   item,
   data,
@@ -20,7 +15,12 @@ const TaskWriting = ({
   data: WorkspaceData;
 }) => {
   const editing = useTaskTextEditing(item.id, "notes");
-  const [tab, setTab] = useState<"notes" | "comments">("notes");
+  const { tab, setTab, focusNotes } = useDetailNavigation();
+  const nativeComments = useTaskComments(item.id, tab === "comments");
+  const notesRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (focusNotes?.id === item.id) notesRef.current?.focus();
+  }, [focusNotes, item.id]);
   const description = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target;
     void workspaceStore.change((next) => {
@@ -42,7 +42,8 @@ const TaskWriting = ({
     return setTab("notes");
   };
   const comments = () => {
-    return setTab("comments");
+    setTab("comments");
+    if (tab === "comments") nativeComments.load();
   };
   const queued = data.operations
     .filter((operation) => {
@@ -52,23 +53,37 @@ const TaskWriting = ({
       return {
         id: operation.opId,
         text: operation.type === "comment" ? operation.text : "",
-        author: "You · awaiting sync",
+        author: "You · Pending",
+        created: operation.type === "comment" ? operation.created : 0,
+        pending: true,
       };
     });
   return (
     <section className="detail-writing" aria-label="Task Notes and Comments">
       <div className="detail-tabs">
-        <button onClick={notes} aria-pressed={tab === "notes"}>
+        <button
+          className={tab === "notes" ? "active" : ""}
+          onClick={notes}
+          aria-pressed={tab === "notes"}
+        >
           Notes &amp; Instructions
         </button>
-        <button onClick={comments} aria-pressed={tab === "comments"}>
-          Comments {item.commentCount + queued.length}
+        <button
+          className={tab === "comments" ? "active" : ""}
+          onClick={comments}
+          aria-pressed={tab === "comments"}
+        >
+          Comments{" "}
+          <span id="comment-count">
+            {item.commentCount + queued.length || ""}
+          </span>
         </button>
       </div>
       {tab === "notes" ? (
-        <section>
+        <section id="notes-panel">
           <textarea
             id="notes"
+            ref={notesRef}
             aria-label="Notes and Instructions"
             value={item.description}
             onChange={description}
@@ -82,15 +97,38 @@ const TaskWriting = ({
           </p>
         </section>
       ) : (
-        <section>
-          <div>{[...item.comments, ...queued].map(renderComment)}</div>
+        <section id="comments-panel">
+          {nativeComments.message && (
+            <p role="status">{nativeComments.message}</p>
+          )}
+          {nativeComments.busy && <p role="status">Reading Comments…</p>}
+          <TaskCommentList
+            comments={[...item.comments, ...queued]}
+            remoteCount={item.commentCount}
+          />
           {item.commentCount > item.comments.length && (
             <p>Some remote comments have not been downloaded yet.</p>
           )}
           <textarea
+            id="comment-input"
             aria-label="Write a Comment"
+            placeholder="Write a Comment…"
+            rows={4}
             value={data.commentDrafts[item.id] ?? ""}
             onChange={comment}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                (event.ctrlKey || event.metaKey) &&
+                !event.altKey &&
+                !event.nativeEvent.isComposing &&
+                !event.repeat &&
+                data.commentDrafts[item.id]?.trim()
+              ) {
+                event.preventDefault();
+                post();
+              }
+            }}
           />
           <button
             className="primary"

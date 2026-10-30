@@ -13,10 +13,11 @@ import { workspaceStore } from "@/domain/workspace-store";
 import Npcdex from "@components/npcdex";
 import NpcdexSidebar from "@components/npcdex/sidebar";
 import PwaControls from "@components/pwa-controls";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useState, useSyncExternalStore } from "react";
 import Connection from "./connection";
 import Details from "./details";
+import DeviceBody from "./device-body";
 import Divider from "./divider";
 import Header from "./header";
 import Migration from "./migration";
@@ -25,6 +26,7 @@ import Selectors from "./selectors";
 import { useInlineAction } from "./use-inline-action";
 import { useWorkspace } from "./use-workspace";
 import WorkTable from "./work-table";
+import WorkTrays from "./work-trays";
 import WorkspaceStatus from "./workspace-status";
 const Romdex = ({ account }: { account?: ReactNode }) => {
   const state = useWorkspace();
@@ -57,7 +59,6 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
   };
   const { view } = state.data;
   const mode = view.detailsMode;
-  const style = { "--work-height": view.workHeight + "%" } as CSSProperties;
   return (
     <WorkSelectionProvider>
       <div className="romdex-app" inert={state.updating || state.delivering}>
@@ -91,8 +92,8 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
           </p>
         )}
         {state.ready && (
-          <div
-            className="device-body"
+          <DeviceBody
+            enabled={view.workspace === "romdex"}
             inert={
               !!state.error ||
               Object.values(cloudData(state.data).records).some((record) => {
@@ -106,18 +107,7 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
               <NpcdexSidebar data={state.data} />
             )}
             {view.workspace === "romdex" ? (
-              <main
-                className={
-                  "work-trays" +
-                  (mode === "collapsed"
-                    ? " details-collapsed"
-                    : mode === "expanded"
-                      ? " details-full"
-                      : "")
-                }
-                style={style}
-                aria-label="Work and Details Trays"
-              >
+              <WorkTrays view={view}>
                 {mode !== "expanded" && (
                   <WorkTable data={state.data} items={items} add={add} />
                 )}
@@ -125,11 +115,11 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
                 {mode !== "collapsed" && (
                   <Details data={state.data} items={items} />
                 )}
-              </main>
+              </WorkTrays>
             ) : (
               <Npcdex data={state.data} />
             )}
-          </div>
+          </DeviceBody>
         )}
         {connection && <Connection close={closeConnection} />}
         {migration && <Migration close={closeMigration} />}

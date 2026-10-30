@@ -112,3 +112,32 @@ void test("stale hierarchy and invalid descendant moves never mutate data", () =
   }, /descendants/);
   assert.equal(JSON.stringify(data), before);
 });
+void test("selector destinations append under their tile and reject descendant cycles", () => {
+  const { data, a, b, c } = fixture();
+  const intent = { dragId: a, targetId: b, delta: 1, after: true };
+  const target = rowDropTarget(
+    materialize(data.remote, data.operations),
+    data.order,
+    intent,
+    [],
+  );
+  assert.equal(target?.parentId, b);
+  assert.equal(target?.beforeId, null);
+  applyTaskDrop(data, intent, hierarchySignature(data));
+  const tree = indexTree(materialize(data.remote, data.operations), data.order);
+  assert.deepEqual(
+    tree.children.get(b)?.map((item) => {
+      return item.id;
+    }),
+    [c, a],
+  );
+  const before = JSON.stringify(data);
+  assert.throws(() => {
+    return applyTaskDrop(
+      data,
+      { dragId: b, targetId: c, delta: 1, after: true },
+      hierarchySignature(data),
+    );
+  });
+  assert.equal(JSON.stringify(data), before);
+});

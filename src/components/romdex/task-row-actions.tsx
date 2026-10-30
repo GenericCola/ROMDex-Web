@@ -1,6 +1,7 @@
 import type { TaskItem } from "@/domain/types";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
+import ItemEditDialog from "./item-edit-dialog";
 const TaskRowActions = ({
   item,
   items,
@@ -10,6 +11,7 @@ const TaskRowActions = ({
   items: TaskItem[];
   add: (parentId: string | null) => void;
 }) => {
+  const [editing, setEditing] = useState<TaskItem | null>(null);
   const [deleting, setDeleting] = useState(false);
   return (
     <div className="row-actions">
@@ -21,6 +23,15 @@ const TaskRowActions = ({
         }}
       >
         +
+      </button>
+      <button
+        title="Edit Item"
+        aria-label={"Edit " + item.summary}
+        onClick={() => {
+          setEditing(structuredClone(item));
+        }}
+      >
+        ✎
       </button>
       <button
         title="Delete Item"
@@ -36,6 +47,14 @@ const TaskRowActions = ({
           />
         </svg>
       </button>
+      {editing && (
+        <ItemEditDialog
+          item={editing}
+          close={() => {
+            setEditing(null);
+          }}
+        />
+      )}
       {deleting && (
         <DeleteReview
           item={item}

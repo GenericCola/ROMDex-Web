@@ -12,10 +12,12 @@ const TaskStatusPopup = ({
   item,
   color,
   inherited,
+  compact = true,
 }: {
   item: TaskItem;
   color: LampColor;
   inherited: boolean;
+  compact?: boolean;
 }) => {
   const [base, setBase] = useState<string | null>(null);
   const { busy, message, setMessage, run } = useAttachmentWork();
@@ -51,7 +53,11 @@ const TaskStatusPopup = ({
   return (
     <>
       <button
-        className={"status-button row-status" + (inherited ? " inherited" : "")}
+        className={
+          "status-button" +
+          (compact ? " row-status" : "") +
+          (inherited ? " inherited" : "")
+        }
         aria-label={"Set Status for " + item.summary}
         title={
           (inherited ? "Inherited from Children: " : "") +
@@ -61,10 +67,10 @@ const TaskStatusPopup = ({
         onClick={open}
       >
         <Lamp color={color} />
-        <span className="sr-only">{STATUS[color]}</span>
+        <span className={compact ? "sr-only" : ""}>{STATUS[color]}</span>
       </button>
       {base !== null && (
-        <Dialog title="Set Status" close={close} canClose={!busy}>
+        <Dialog title="Set Status" close={close} canClose={!busy} desktop>
           <p className="muted">
             {itemName(item)}
             {inherited

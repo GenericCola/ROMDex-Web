@@ -1,17 +1,29 @@
 import { youTrackState } from "@/domain/accepted/core.mjs";
+import { nativeEditKey } from "@/domain/native-edit-fields";
 import type { TaskItem, TaskOperation, WorkspaceData } from "@/domain/types";
+import { planReceipt } from "@/rdx/plan-ledger";
+import { creationFollowup } from "./creation-followup";
 import { equal } from "./delivery-helpers";
+import { nativeTagBaseline } from "./edit-patch-delivery";
 import { acknowledge, attemptDelivery, recordDelivery } from "./journal";
 import type { Commit, DeliveryPort } from "./types";
 type Creation = Extract<TaskOperation, { type: "create" }>;
 export const matchesCreation = (item: TaskItem, remote: TaskItem) => {
+  const mappedType = remote._custom?.some((field) => {
+    return (
+      field.name === "Type" &&
+      typeof field.id === "string" &&
+      Object.hasOwn(item, `custom:${field.id}`)
+    );
+  });
   return [
     "summary",
     "description",
     "state",
     "priority",
     "complexity",
-    "type",
+    ...(mappedType ? [] : ["type"]),
+    ...Object.keys(item).filter(nativeEditKey),
   ].every((key) => {
     return equal(
       key === "state"
@@ -93,14 +105,9 @@ export const completeCreation = (
       data.newTask.afterId = id(data.newTask.afterId);
   }
   const parentId = id(operation.item.parentId);
-  if (remote.parentId !== parentId)
-    data.operations.unshift({
-      opId: operation.opId + ":parent",
-      type: "edit",
-      issueId: remote.id,
-      base: remote,
-      patch: { parentId },
-    });
+  const followup = creationFollowup(operation, remote, parentId);
+  if (followup) data.operations.unshift(followup);
+  planReceipt(data, operation.opId, { [old]: remote.id }, followup?.opId);
 };
 export const deliverCreation = async (
   operation: Creation,
@@ -109,6 +116,10 @@ export const deliverCreation = async (
 ) => {
   if (!operation.issueId.startsWith("local-"))
     throw Error("Creation needs a browser-local ID.");
+  if (operation.item.tags !== undefined && !port.tags?.prepare)
+    throw Error(
+      "Creation tags require native tag preparation before creating the task.",
+    );
   await port.prepareCreate(operation.item);
   await attemptDelivery(operation, commit, async () => {
     const receipt = await port.create(operation.item);
@@ -117,7 +128,10 @@ export const deliverCreation = async (
     await commit((data) => {
       recordDelivery(data, operation.opId, { remoteId: receipt.id });
     });
-    const remote = await port.get(receipt.id);
+    const readback = await port.get(receipt.id);
+    const remote = readback
+      ? await nativeTagBaseline(operation, readback, port)
+      : null;
     if (!remote || !matchesCreation(operation.item, remote))
       throw Error("Creation readback differs.");
     await commit((data) => {

@@ -10,14 +10,16 @@ export const taskDragPreview = (
 ) => {
   const row = document
     .elementFromPoint(event.clientX, event.clientY)
-    ?.closest<HTMLElement>("[data-row]");
-  if (!row?.dataset.row || !event.currentTarget.contains(row)) return null;
+    ?.closest<HTMLElement>("[data-row],[data-selector]");
+  const targetId = row?.dataset.row ?? row?.dataset.selector;
+  if (!row || !targetId || !event.currentTarget.contains(row)) return null;
+  const selector = !!row.dataset.selector;
   const bounds = row.getBoundingClientRect();
   const intent = {
     dragId: current.id,
-    targetId: row.dataset.row,
-    delta: Math.round((event.clientX - current.x) / 26),
-    after: event.clientY >= bounds.top + bounds.height / 2,
+    targetId,
+    delta: selector ? 1 : Math.round((event.clientX - current.x) / 26),
+    after: selector || event.clientY >= bounds.top + bounds.height / 2,
   };
   const { data } = workspaceStore.getSnapshot();
   if (hierarchySignature(data) !== current.signature)
@@ -43,12 +45,15 @@ export const taskDragPreview = (
       result.beforeId,
     );
 
-  const scroller = row.closest(".table-scroll");
+  const scroller = row.closest(".table-scroll,#selectors");
   if (scroller) {
     const rect = scroller.getBoundingClientRect();
     if (event.clientY < rect.top + 35) scroller.scrollTop -= 14;
     else if (event.clientY > rect.bottom - 35) scroller.scrollTop += 14;
   }
 
-  return { result, intent };
+  return {
+    result: { ...result, ...(selector ? { selectorId: targetId } : {}) },
+    intent,
+  };
 };
