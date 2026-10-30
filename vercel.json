@@ -80,7 +80,31 @@
   ],
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/api/auth/start",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/auth/callback",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/auth/session",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/auth/logout",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/auth/cancel",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/youtrack",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/attachment",
       "destination": "/api"
     }
   ],
