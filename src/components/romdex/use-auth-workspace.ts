@@ -2,8 +2,6 @@ import {
   activateProject,
   closeProjectConnection,
 } from "@/auth/activate-project";
-import { startCookieLogin } from "@/auth/cookie-client";
-import { flushLocal } from "@/auth/flush-local";
 import type {
   AuthorizedProject,
   ProjectIssue,
@@ -14,6 +12,7 @@ import { expired, setAuthSession } from "@/auth/session";
 import { rememberSession } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
 import { useEffect, useRef, useState } from "react";
+import { cookieSignIn } from "./cookie-sign-in";
 import { cookieSignOut } from "./cookie-sign-out";
 import { finishExpiredSession } from "./finish-expired-session";
 import { startCookieResume } from "./start-cookie-resume";
@@ -32,24 +31,21 @@ export const useAuthWorkspace = () => {
     if (recoveryBlocked || busy) return;
     setRetryable(false);
     const run = ++generationRef.current;
-    setBusy(true);
-    setMessage("");
-    try {
-      await flushLocal();
-      if (run !== generationRef.current) return;
-      disconnectDelivery();
-      setAuthSession(null);
-      sessionRef.current = null;
-      setIdentity(null);
-      setSelected(null);
-      setIssues([]);
-      await startCookieLogin();
-    } catch (error) {
-      if (run === generationRef.current)
-        setMessage(error instanceof Error ? error.message : "Sign-in failed.");
-    } finally {
-      if (run === generationRef.current) setBusy(false);
-    }
+    await cookieSignIn(
+      () => {
+        return run === generationRef.current;
+      },
+      () => {
+        disconnectDelivery();
+        setAuthSession(null);
+        sessionRef.current = null;
+        setIdentity(null);
+        setSelected(null);
+        setIssues([]);
+      },
+      setBusy,
+      setMessage,
+    );
   };
   const closeProject = async () => {
     await closeProjectConnection();
@@ -58,14 +54,8 @@ export const useAuthWorkspace = () => {
   };
   const choose = async (project: AuthorizedProject) => {
     const auth = sessionRef.current;
-    if (
-      busy ||
-      recoveryBlocked ||
-      !auth ||
-      !identity ||
-      expired(auth.expiresAt)
-    )
-      return;
+    if (busy || recoveryBlocked) return;
+    if (!auth || !identity || expired(auth.expiresAt)) return;
     setBusy(true);
     setMessage("");
     const run = ++generationRef.current;
