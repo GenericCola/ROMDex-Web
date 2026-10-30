@@ -49,6 +49,9 @@ export const disconnectDelivery = () => {
   suspended = true;
   workspaceStore.setConnection("Not connected");
 };
+export const deliveryPaused = () => {
+  return client !== null && suspended;
+};
 export const deliveryConnected = () => {
   return client !== null;
 };

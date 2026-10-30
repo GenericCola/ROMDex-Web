@@ -5,6 +5,8 @@ import type {
 } from "@/auth/identity";
 import { OAUTH_ORIGIN } from "@/auth/origins";
 import { restoreSession } from "@/auth/restore-session";
+import { ResumeRetryable } from "@/auth/resume-failure";
+import { readResumeRecord } from "@/auth/resume-record";
 import { setAuthSession } from "@/auth/session";
 import { tabStorage } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
@@ -17,12 +19,21 @@ export const startResume = ({
   setIdentity,
   setSelected,
   setIssues,
+  setRetryable,
 }: SessionRefs & {
+  setRetryable: (value: boolean) => void;
   setIdentity: (value: YouTrackIdentity | null) => void;
   setSelected: (value: AuthorizedProject | null) => void;
   setIssues: (value: ProjectIssue[]) => void;
 }) => {
   const run = ++generationRef.current;
+  sessionRef.current = null;
+  setBusy(true);
+  setMessage("");
+  setRetryable(false);
+  setIdentity(null);
+  setSelected(null);
+  setIssues([]);
   const assertCurrent = () => {
     if (run !== generationRef.current)
       throw Error("The sign-in session changed.");
@@ -47,11 +58,29 @@ export const startResume = ({
       setIdentity(identity);
       setSelected(project);
       setIssues(issues);
-    } catch {
-      if (run === generationRef.current)
+    } catch (error) {
+      if (run === generationRef.current) {
+        let retry = error instanceof ResumeRetryable;
+        if (retry) {
+          try {
+            const retained = readResumeRecord(tabStorage());
+            retry = !!retained;
+            if (retained)
+              sessionRef.current = {
+                token: retained.token,
+                expiresAt: retained.expiresAt,
+              };
+          } catch {
+            retry = false;
+          }
+        }
+        setRetryable(retry);
         setMessage(
-          "Could not resume sign-in. Sign in again; local work is preserved.",
+          retry && error instanceof ResumeRetryable
+            ? error.message
+            : "Could not resume sign-in. Sign in again; local work is preserved.",
         );
+      }
     } finally {
       if (run === generationRef.current) setBusy(false);
     }

@@ -1,4 +1,5 @@
 import { authRequestGuard } from "@/auth/session";
+import { YouTrackHttpError } from "./http-error";
 import { YOUTRACK_ORIGIN } from "./read-tasks";
 export type YouTrackRequest = (
   route: string,
@@ -31,8 +32,7 @@ export const sessionRequest = (value: string): YouTrackRequest => {
     });
     assertSession();
     if (response.status === 404 && method === "GET") return null;
-    if (!response.ok)
-      throw Error("YouTrack request failed (HTTP " + response.status + ").");
+    if (!response.ok) throw new YouTrackHttpError(response.status);
     const text = await response.text();
     assertSession();
     return text ? (JSON.parse(text) as unknown) : null;

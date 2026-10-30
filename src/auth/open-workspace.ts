@@ -6,6 +6,7 @@ import { WorkspaceStorage } from "@/storage/workspace-storage";
 import { readTasks, YOUTRACK_ORIGIN } from "@/youtrack/read-tasks";
 import type { AuthorizedProject } from "./identity";
 import { readIdentity, readProject } from "./identity";
+import { ResumeRejected } from "./resume-failure";
 export const openPmonWorkspace = async (
   token: string,
   userId: string,
@@ -45,7 +46,9 @@ export const prepareProject = async (
       return item.id === project.id && item.shortName === project.shortName;
     })
   )
-    throw Error("This project is no longer available to your account.");
+    throw new ResumeRejected(
+      "This project is no longer available to your account.",
+    );
   if (!isCurrent()) throw Error("The sign-in session changed.");
   const items = await readProject(token, project);
   if (!isCurrent()) throw Error("The sign-in session changed.");

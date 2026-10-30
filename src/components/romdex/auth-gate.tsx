@@ -1,7 +1,7 @@
 "use client";
 import type { AuthorizedProject } from "@/auth/identity";
 import AuthShell from "./auth-shell";
-import AuthSignIn from "./auth-sign-in";
+import AuthSignInSection from "./auth-sign-in-section";
 import Romdex from "./index";
 import { ProjectSelectionContext } from "./project-selection-context";
 import { exportRecovery } from "./recovery-export";
@@ -9,6 +9,8 @@ import { SessionRecoveryContext } from "./session-recovery-context";
 import { useAuthWorkspace } from "./use-auth-workspace";
 const AuthGate = () => {
   const {
+    retryable,
+    retryResume,
     identity,
     selected,
     issues,
@@ -72,13 +74,12 @@ const AuthGate = () => {
           )}
         </>
       ) : (
-        <>
-          <p>
-            Sign in with YouTrack to see the projects your account can access.
-            Your password stays with YouTrack.
-          </p>
-          <AuthSignIn busy={busy} signIn={signIn} />
-        </>
+        <AuthSignInSection
+          busy={busy || recoveryBlocked}
+          retryable={retryable}
+          retryResume={retryResume}
+          signIn={signIn}
+        />
       )}
       <p role="status">{message}</p>
       {recoveryBlocked && (

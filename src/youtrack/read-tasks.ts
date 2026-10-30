@@ -1,5 +1,6 @@
 import { authRequestGuard } from "@/auth/session";
 import type { TaskItem } from "@/domain/types";
+import { YouTrackHttpError } from "./http-error";
 import {
   nativeIssueFields,
   nativeObject,
@@ -100,12 +101,7 @@ export const readTasks = async (
         "YouTrack could not be reached. Check your connection and allow this app's origin in YouTrack CORS settings. No workspace data was replaced.",
       );
     }
-    if (!response.ok)
-      throw Error(
-        "YouTrack read failed (HTTP " +
-          response.status +
-          "). Check token access to PMON.",
-      );
+    if (!response.ok) throw new YouTrackHttpError(response.status);
     const raw: unknown = await response.json();
     assertCurrent();
     if (!Array.isArray(raw))

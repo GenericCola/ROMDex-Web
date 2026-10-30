@@ -1,4 +1,5 @@
 import { list, sessionRequest } from "@/youtrack/request";
+import { ResumeRejected } from "./resume-failure";
 export interface AuthorizedProject {
   id: string;
   shortName: string;
@@ -25,7 +26,7 @@ export const readIdentity = async (
     user.guest === true ||
     user.login === "guest"
   )
-    throw Error("A signed-in YouTrack account is required.");
+    throw new ResumeRejected("A signed-in YouTrack account is required.");
   const projects = await list<AuthorizedProject>(
     request,
     "admin/projects",

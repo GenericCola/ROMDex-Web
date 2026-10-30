@@ -1,17 +1,32 @@
 import { cloudData } from "@/cloud/types";
 import type { WorkspaceSnapshot } from "@/domain/types";
-export const syncControl = (connected: boolean, enabled: boolean) => {
+export const syncControl = (
+  connected: boolean,
+  enabled: boolean,
+  paused = false,
+) => {
   return {
     connected,
-    value: connected ? (enabled ? "On" : "Off") : enabled ? "Paused" : "Off",
+    value: connected
+      ? enabled
+        ? paused
+          ? "Paused"
+          : "On"
+        : "Off"
+      : enabled
+        ? "Paused"
+        : "Off",
     role: connected ? ("switch" as const) : ("button" as const),
     checked: connected ? enabled : undefined,
     label: connected
       ? "Auto-Sync Data"
       : "Auto-Sync Data. Delivery disconnected. Open Connection Details",
-    description: connected
-      ? "When enabled and not paused, checks supported queued changes every 10 seconds while connected"
-      : "Delivery is disconnected. Open Connection Details to review and enable delivery. No changes are sent by opening it.",
+    description:
+      connected && paused
+        ? "Automatic delivery is paused after an earlier failure. Review the pending changes, then use Save Changes to explicitly retry; turning this switch on does not resend them."
+        : connected
+          ? "When enabled and not paused, checks supported queued changes every 10 seconds while connected"
+          : "Delivery is disconnected. Open Connection Details to review and enable delivery. No changes are sent by opening it.",
   };
 };
 export const saveExplanation = (state: WorkspaceSnapshot, drafts: boolean) => {
@@ -29,4 +44,15 @@ export const saveExplanation = (state: WorkspaceSnapshot, drafts: boolean) => {
   return reasons.length
     ? `${reasons.join("; ")}.`
     : "No pending changes in this browser.";
+};
+
+export const deliveryMessage = (
+  state: WorkspaceSnapshot,
+  message: { text: string; connection: string } | null,
+) => {
+  if (state.delivering) return "";
+  if (message?.connection === state.connection) return message.text;
+  return state.connection.startsWith("Automatic delivery paused")
+    ? state.connection
+    : "";
 };

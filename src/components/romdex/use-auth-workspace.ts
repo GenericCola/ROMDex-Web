@@ -11,6 +11,7 @@ import { expired, setAuthSession } from "@/auth/session";
 import { forgetSession, rememberSession } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
 import { useEffect, useRef, useState } from "react";
+import { finishExpiredSession } from "./finish-expired-session";
 import { startResume } from "./start-auth-resume";
 import { useSessionExpiry } from "./use-session-expiry";
 export const useAuthWorkspace = () => {
@@ -19,10 +20,14 @@ export const useAuthWorkspace = () => {
   const [issues, setIssues] = useState<ProjectIssue[]>([]);
   const [busy, setBusy] = useState(true);
   const [recoveryBlocked, setRecoveryBlocked] = useState(false);
+  const [retryable, setRetryable] = useState(false);
   const [message, setMessage] = useState("");
   const sessionRef = useRef<{ token: string; expiresAt: number } | null>(null);
   const generationRef = useRef(0);
   const signIn = async () => {
+    if (recoveryBlocked) return;
+    sessionRef.current = null;
+    setRetryable(false);
     const run = ++generationRef.current;
     setBusy(true);
     setMessage("");
@@ -100,23 +105,13 @@ export const useAuthWorkspace = () => {
       setBusy(false);
     }
   };
-  const finishExpired = async () => {
-    setBusy(true);
-    try {
-      await flushLocal();
-      setRecoveryBlocked(false);
+  const finishExpired = () => {
+    setRetryable(false);
+    return finishExpiredSession(setBusy, setRecoveryBlocked, setMessage, () => {
       setIdentity(null);
       setSelected(null);
       setIssues([]);
-      setBusy(false);
-      setMessage("Session expired. Sign in again; local work is preserved.");
-    } catch {
-      setRecoveryBlocked(true);
-      setBusy(false);
-      setMessage(
-        "Export recovery or retry saving. Account switching stays blocked.",
-      );
-    }
+    });
   };
   const session = { sessionRef, generationRef, setBusy, setMessage };
   useSessionExpiry({ ...session, finishExpired });
@@ -129,10 +124,15 @@ export const useAuthWorkspace = () => {
       setIdentity,
       setSelected,
       setIssues,
+      setRetryable,
     });
   };
   useEffect(resume, []);
   return {
+    retryable,
+    retryResume: () => {
+      if (!recoveryBlocked && !busy) resume();
+    },
     identity,
     selected,
     issues,

@@ -44,7 +44,7 @@ const DeletionReviewActions = ({
         await reviewDelivery(operation.opId, choice, "", missing === record);
       },
       choice === "local"
-        ? "Deletion targets rechecked and approved. The deletion is queued, not yet completed; Save Changes or enabled Auto-Sync runs another check before deleting."
+        ? "Deletion targets rechecked and approved. The deletion is queued, not yet completed. Close Connection Details and use Save Changes to explicitly retry. Save runs another check before deleting; paused Auto-Sync does not resume from this approval."
         : choice === "cloud"
           ? "Remaining queued deletion cancelled. Earlier confirmed deletions were not undone."
           : "Earlier deletion outcome checked. Review any remaining queued targets before Save Changes.",

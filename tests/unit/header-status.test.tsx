@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
+  deliveryMessage,
   saveExplanation,
   syncControl,
 } from "../../src/components/romdex/header-status";
@@ -51,4 +52,31 @@ test("Save reason distinguishes local errors, writes, drafts, queue, rollups and
     saveExplanation(state, true),
     /Local save needs attention: Storage unavailable/,
   );
+});
+
+test("connected suspended Auto-Sync is shown paused without changing saved opt-in", () => {
+  const control = syncControl(true, true, true);
+  assert.equal(control.value, "Paused");
+  assert.equal(control.checked, true);
+  assert.match(control.description, /Save Changes/);
+  assert.match(control.description, /does not resend/);
+});
+
+test("current manual Save result is not masked by old pause, but a newer pause replaces it", () => {
+  const state: WorkspaceSnapshot = {
+    ready: true,
+    updating: false,
+    delivering: false,
+    data: emptyWorkspace(),
+    pendingWrites: 0,
+    error: "",
+    connection: "Automatic delivery paused: old",
+  };
+  const result = {
+    text: "Fresh read found a new child",
+    connection: state.connection,
+  };
+  assert.equal(deliveryMessage(state, result), result.text);
+  state.connection = "Automatic delivery paused: newer";
+  assert.equal(deliveryMessage(state, result), state.connection);
 });

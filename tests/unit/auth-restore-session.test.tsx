@@ -3,6 +3,7 @@ import test from "node:test";
 import { restoreSession } from "../../src/auth/restore-session";
 import { RESUME_KEY, writeResumeRecord } from "../../src/auth/resume-record";
 import { deliveryConnected, disconnectDelivery } from "../../src/cloud/session";
+import { YouTrackHttpError } from "../../src/youtrack/http-error";
 import { YOUTRACK_ORIGIN } from "../../src/youtrack/read-tasks";
 const project = { id: "0-1", name: "Fixture", shortName: "PMON" };
 const identity = { id: "1-1", name: "Fixture", projects: [project] };
@@ -71,7 +72,7 @@ void test("revocation, changed account or project, and project failure clear res
     values.set("local-draft", "preserved");
     let opens = 0;
     const person = () => {
-      if (mode === "revoked") throw Error("HTTP 401");
+      if (mode === "revoked") throw new YouTrackHttpError(401);
       return Promise.resolve(
         mode === "account"
           ? { ...identity, id: "1-2" }
@@ -82,7 +83,7 @@ void test("revocation, changed account or project, and project failure clear res
     };
     const open = () => {
       opens++;
-      throw Error("Permission denied");
+      throw new YouTrackHttpError(403);
     };
     await assert.rejects(restoreSession(storage, current, person, open));
     assert.equal(opens, mode === "open" ? 1 : 0);
@@ -139,5 +140,44 @@ void test("expired record is erased without network and expiry during opening fa
     assert.equal(values.has(RESUME_KEY), false);
   } finally {
     Date.now = original;
+  }
+});
+
+void test("transient teammate identity or workspace failures retain original expiry and retry without OAuth", async () => {
+  for (const phase of ["identity", "project"]) {
+    const { storage, values, record } = fixture();
+    let failed = true;
+    const person = async () => {
+      if (failed && phase === "identity") throw new TypeError("Network failed");
+      return identity;
+    };
+    const open = async () => {
+      if (failed && phase === "project")
+        throw Error("Local workspace temporarily unavailable");
+      return [];
+    };
+    await assert.rejects(
+      restoreSession(storage, current, person, open),
+      /Retry verification/,
+    );
+    assert.equal(
+      JSON.parse(values.get(RESUME_KEY)!).expiresAt,
+      record.expiresAt,
+    );
+    failed = false;
+    const result = await restoreSession(storage, current, person, open);
+    assert.equal(result?.identity.id, identity.id);
+    assert.equal(result?.record.expiresAt, record.expiresAt);
+  }
+});
+
+void test("typed HTTP rejection clears retained token while server errors remain retryable", async () => {
+  for (const status of [401, 403, 429, 500, 503]) {
+    const { storage, values } = fixture();
+    const fail = async () => {
+      throw new YouTrackHttpError(status);
+    };
+    await assert.rejects(restoreSession(storage, current, fail));
+    assert.equal(values.has(RESUME_KEY), status !== 401 && status !== 403);
   }
 });

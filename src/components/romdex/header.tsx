@@ -1,9 +1,13 @@
-import { deliveryConnected, saveDelivery } from "@/cloud/session";
+import {
+  deliveryConnected,
+  deliveryPaused,
+  saveDelivery,
+} from "@/cloud/session";
 import { cloudData } from "@/cloud/types";
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState, type ReactNode } from "react";
-import { saveExplanation, syncControl } from "./header-status";
+import { deliveryMessage, saveExplanation, syncControl } from "./header-status";
 import Lamp from "./lamp";
 import WorkspaceMenu from "./workspace-menu";
 import WorkspaceTools from "./workspace-tools";
@@ -19,26 +23,33 @@ const Header = ({
   unsavedDrafts = false,
   tools,
 }: HeaderProps) => {
-  const [message, setMessage] = useState("");
-  const sync = syncControl(deliveryConnected(), cloudData(state.data).autoSync);
+  const [message, setMessage] = useState<{
+    text: string;
+    connection: string;
+  } | null>(null);
+  const sync = syncControl(
+    deliveryConnected(),
+    cloudData(state.data).autoSync,
+    deliveryPaused(),
+  );
   const saveReason = saveExplanation(state, unsavedDrafts);
   const save = () => {
-    setMessage("");
+    setMessage(null);
     const done = (value: string) => {
-      return setMessage(value);
+      return setMessage({
+        text: value,
+        connection: workspaceStore.getSnapshot().connection,
+      });
     };
     const failed = (error: unknown) => {
-      return setMessage(
-        error instanceof Error ? error.message : "Cloud delivery failed",
-      );
+      return setMessage({
+        text: error instanceof Error ? error.message : "Cloud delivery failed",
+        connection: workspaceStore.getSnapshot().connection,
+      });
     };
     void saveDelivery().then(done, failed);
   };
-  const status = state.delivering
-    ? ""
-    : state.connection.startsWith("Automatic delivery paused")
-      ? state.connection
-      : message;
+  const status = deliveryMessage(state, message);
   const toggleSync = () => {
     void workspaceStore.change((data) => {
       data.cloud = { ...cloudData(data), autoSync: !cloudData(data).autoSync };

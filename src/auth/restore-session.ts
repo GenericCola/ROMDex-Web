@@ -1,5 +1,7 @@
+import { YouTrackHttpError } from "@/youtrack/http-error";
 import { readIdentity } from "./identity";
 import { prepareProject } from "./open-workspace";
+import { ResumeRejected, ResumeRetryable } from "./resume-failure";
 import {
   clearResumeRecord,
   readResumeRecord,
@@ -18,8 +20,10 @@ export const restoreSession = async (
   if (!record) return null;
   const check = () => {
     assertCurrent();
-    if (Date.now() >= record.expiresAt) throw Error("Saved sign-in expired.");
+    if (Date.now() >= record.expiresAt)
+      throw new ResumeRejected("Saved sign-in expired.");
   };
+  let phase = "identity and project permissions";
   try {
     const { identity, project } = await verifyResume(
       record,
@@ -34,6 +38,7 @@ export const restoreSession = async (
         return false;
       }
     };
+    phase = "project data or local workspace";
     const issues = project
       ? await projectOpener(record.token, identity.id, project, isCurrent)
       : [];
@@ -42,7 +47,20 @@ export const restoreSession = async (
   } catch (error) {
     // A cancelled old run must never erase a newer sign-in's record.
     assertCurrent();
-    clearResumeRecord(storage);
-    throw error;
+    if (
+      Date.now() >= record.expiresAt ||
+      error instanceof ResumeRejected ||
+      (error instanceof YouTrackHttpError && [401, 403].includes(error.status))
+    ) {
+      clearResumeRecord(storage);
+      throw new ResumeRejected(
+        "Saved sign-in expired or access changed. Sign in again; local work is preserved.",
+      );
+    }
+    throw new ResumeRetryable(
+      "Could not verify " +
+        phase +
+        ". Your existing sign-in is retained until its original expiry. Retry verification; no workspace is shown until checks pass.",
+    );
   }
 };
