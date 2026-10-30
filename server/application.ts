@@ -4,6 +4,7 @@ import {
   createCookieHandler,
   type CookieDependencies,
 } from "./cookie-runtime.ts";
+import { HierarchyRecoveryConflict } from "./hierarchy-recovery.ts";
 import { oauthUpstream } from "./oauth-upstream.ts";
 import { response } from "./runtime-http.ts";
 import { HttpFailure } from "./runtime-types.ts";
@@ -30,6 +31,11 @@ export function createApplication(deps: ApplicationDependencies) {
         ? await downloadAttachment(request, session, deps)
         : await jsonProxy(request, session, deps);
     } catch (error) {
+      if (error instanceof HierarchyRecoveryConflict)
+        return response(409, {
+          error:
+            "Hierarchy recovery is in progress for this account. This move was not sent; local work is preserved. Do not retry until the queued moves are reviewed.",
+        });
       return response(error instanceof HttpFailure ? error.status : 502, {
         error:
           "YouTrack request could not be completed. Local changes are preserved.",

@@ -10,10 +10,10 @@ import {
 import { FENCE } from "./cookie-codec.ts";
 import { fixture } from "./cookie-fixture.ts";
 const origin = "https://romdex.vercel.app";
-async function appFixture() {
+async function appFixture(userId = "non-owner") {
   const f = fixture();
   f.deps.oauth.verify = async () => ({
-    id: "non-owner",
+    id: userId,
     guest: false,
     projects: [{ id: "0-1", name: "PMON", shortName: "PMON" }],
   });
@@ -43,6 +43,10 @@ async function appFixture() {
         removed: false,
         draft: false,
       });
+    if (url.pathname.endsWith("/links"))
+      return Response.json([
+        { id: "80-0t", linkType: { name: "Subtask", aggregation: true } },
+      ]);
     if (url.pathname.endsWith("/customFields"))
       return Response.json([
         { id: "f-1", field: { name: "State", fieldType: { id: "state[1]" } } },
@@ -415,4 +419,26 @@ test("actual Vercel entry exports the Web fetch handler and fails closed before 
   );
   assert.equal(result.status, 503);
   assert.equal(result.headers.get("cache-control"), "no-store");
+});
+
+test("old cached client cannot resend incident account hierarchy, ordinary edits still work", async () => {
+  const f = await appFixture("2-2");
+  for (const [route, method, body] of [
+    ["issues/PMON-1/links/80-0t/issues", "POST", { id: "1-2" }],
+    ["issues/PMON-1/links/80-0t/issues/1-2", "DELETE", undefined],
+  ] as const) {
+    const result = await f.proxy(route, method, body);
+    assert.equal(result.status, 409);
+    assert.match((await result.json()).error, /Hierarchy recovery/);
+  }
+  assert.equal(
+    f.calls.filter((call) => call.init.method && call.init.method !== "GET")
+      .length,
+    0,
+  );
+  assert.equal(
+    (await f.proxy("issues/PMON-1", "POST", { summary: "ordinary edit" }))
+      .status,
+    200,
+  );
 });
