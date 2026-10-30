@@ -3,6 +3,7 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import Image from "next/image";
 import { useState } from "react";
+import ProjectSelector from "./project-selector";
 import SelectorBranch from "./selector-branch";
 import TileSettings from "./tile-settings";
 interface SelectorProps {
@@ -41,7 +42,7 @@ const Selectors = ({ data, items, add }: SelectorProps) => {
     >
       <div className="pane-heading">
         <div>
-          <span className="eyebrow">Pokémon / PMON</span>
+          <ProjectSelector />
         </div>
         <button className="icon-button" aria-label="Add Epic" onClick={addEpic}>
           +

@@ -7,15 +7,20 @@ import {
 import { cloudData } from "@/cloud/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
+import DeliveryFeedback from "./delivery-feedback";
 import DeliveryReview from "./delivery-review";
 const DeliveryControls = () => {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const execute = async (action: () => Promise<void>) => {
+  const execute = async (
+    action: () => Promise<void>,
+    success = "Saved. Use Save Changes to run one delivery cycle.",
+  ) => {
     setBusy(true);
+    setMessage("Checking…");
     try {
       await action();
-      setMessage("Saved. Use Save Changes to run one delivery cycle.");
+      setMessage(success);
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Delivery setup failed.",
@@ -71,8 +76,8 @@ const DeliveryControls = () => {
           Disconnect delivery
         </button>
       </div>
-      <p role="status">{message}</p>
       {records.map(render)}
+      <DeliveryFeedback message={message} />
       <p>
         Shared assigned status is unavailable while its concurrency safety check
         remains unresolved.

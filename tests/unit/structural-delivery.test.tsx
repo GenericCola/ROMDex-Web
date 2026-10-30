@@ -74,3 +74,13 @@ test("stale deletion review allows browsing and safe cancellation without any re
   await s.store.change(data=>editTask(data,item().id,{summary:"Local edit after cancellation"}));
   assert.equal(s.saved().operations.length,1);assert.deepEqual(s.deletes,[]);
 });
+
+test("approving a stale deletion only rechecks and queues; review never dispatches deletion",async()=>{
+  const s=await setup([item()]);await s.store.change(data=>deleteTask(data,item().id));
+  Object.assign(s.remote.get(item().id)!,{state:"Done",commentCount:1,updated:2});
+  await assert.rejects(s.run(),/changed deletion/);assert.deepEqual(s.deletes,[]);
+  await s.review("local");
+  const data=s.saved();assert.equal(data.operations.length,1);
+  assert.equal(data.cloud?.records[data.operations[0]!.opId]?.status,"ready");
+  assert.deepEqual(s.deletes,[]);
+});

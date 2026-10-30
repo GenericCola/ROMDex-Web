@@ -13,7 +13,7 @@ const DeletionReviewActions = ({
   operation: Deletion;
   record: DeliveryRecord;
   busy: boolean;
-  execute: (action: () => Promise<void>) => Promise<void>;
+  execute: (action: () => Promise<void>, success?: string) => Promise<void>;
 }) => {
   const [approved, setApproved] = useState<DeliveryRecord | null>(null);
   const [missing, setMissing] = useState<DeliveryRecord | null>(null);
@@ -27,21 +27,28 @@ const DeletionReviewActions = ({
     setMissing(event.target.checked ? record : null);
   };
   const run = (choice: "cloud" | "local" | "confirm") => {
-    void execute(async () => {
-      const current = workspaceStore.getSnapshot().data;
-      if (
-        cloudData(current).records[operation.opId] !== record ||
-        !current.operations.includes(operation)
-      )
-        throw Error(
-          "This review changed. Read the updated details before choosing.",
-        );
-      if (choice === "local" && approved !== record)
-        throw Error(
-          "Review and explicitly approve the remaining deletion targets first.",
-        );
-      await reviewDelivery(operation.opId, choice, "", missing === record);
-    });
+    void execute(
+      async () => {
+        const current = workspaceStore.getSnapshot().data;
+        if (
+          cloudData(current).records[operation.opId] !== record ||
+          !current.operations.includes(operation)
+        )
+          throw Error(
+            "This review changed. Read the updated details before choosing.",
+          );
+        if (choice === "local" && approved !== record)
+          throw Error(
+            "Review and explicitly approve the remaining deletion targets first.",
+          );
+        await reviewDelivery(operation.opId, choice, "", missing === record);
+      },
+      choice === "local"
+        ? "Deletion targets rechecked and approved. The deletion is queued, not yet completed; Save Changes or enabled Auto-Sync runs another check before deleting."
+        : choice === "cloud"
+          ? "Remaining queued deletion cancelled. Earlier confirmed deletions were not undone."
+          : "Earlier deletion outcome checked. Review any remaining queued targets before Save Changes.",
+    );
   };
   const keep = () => {
     run("cloud");
@@ -71,7 +78,7 @@ const DeletionReviewActions = ({
           a later Save or enabled delivery cycle; it is not an undoable local
           edit.
         </p>
-        <label>
+        <label className="deletion-review-confirmation">
           <input
             type="checkbox"
             checked={approved === record}
@@ -87,7 +94,7 @@ const DeletionReviewActions = ({
       {uncertain && (
         <details>
           <summary>Check whether an earlier deletion already happened</summary>
-          <label>
+          <label className="deletion-review-confirmation">
             <input
               type="checkbox"
               checked={missing === record}

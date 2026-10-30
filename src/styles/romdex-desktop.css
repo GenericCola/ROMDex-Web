@@ -384,3 +384,10 @@ dialog.rdx-browser-dialog{top:16px;bottom:auto;margin-block:0}.rdx-browser-dialo
 }
 
 @scope (.romdex-app) { @media (max-width: 550px) { .selector-expand { width: 28px; height: 28px; right: 2px; bottom: -1px; } } }
+
+/* Project navigation reuses the existing tray heading, without a new toolbar. */
+.project-selector-trigger { appearance: none; border: 0; border-radius: 0; background: transparent; padding: 0; text-align: left; cursor: pointer; }
+.project-selector-trigger:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+.deletion-review-confirmation { display: flex; align-items: flex-start; gap: .5rem; margin-block: .75rem; }
+.deletion-review-confirmation input[type="checkbox"] { flex: 0 0 auto; margin: .2em 0 0; }

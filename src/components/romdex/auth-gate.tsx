@@ -3,6 +3,7 @@ import type { AuthorizedProject } from "@/auth/identity";
 import AuthShell from "./auth-shell";
 import AuthSignIn from "./auth-sign-in";
 import Romdex from "./index";
+import { ProjectSelectionContext } from "./project-selection-context";
 import { exportRecovery } from "./recovery-export";
 import { SessionRecoveryContext } from "./session-recovery-context";
 import { useAuthWorkspace } from "./use-auth-workspace";
@@ -56,7 +57,7 @@ const AuthGate = () => {
             {selected?.name ?? "Choose a project"}
           </p>
           <div className="port-actions">
-            {identity.projects.map(renderProject)}
+            {!connected && identity.projects.map(renderProject)}
             <button
               disabled={busy || recoveryBlocked}
               onClick={() => {
@@ -106,7 +107,16 @@ const AuthGate = () => {
         )}
         {identity && selected?.shortName === "PMON" && (
           <div className="auth-workspace" inert={busy}>
-            <Romdex account={account} />
+            <ProjectSelectionContext
+              value={{
+                selected,
+                projects: identity.projects,
+                disabled: busy || recoveryBlocked,
+                choose,
+              }}
+            >
+              <Romdex account={account} />
+            </ProjectSelectionContext>
           </div>
         )}
         {identity && selected && selected.shortName !== "PMON" && !busy && (

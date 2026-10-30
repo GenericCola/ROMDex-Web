@@ -17,7 +17,7 @@ const DeliveryReview = ({
   id: string;
   record: DeliveryRecord;
   busy: boolean;
-  execute: (action: () => Promise<void>) => Promise<void>;
+  execute: (action: () => Promise<void>, success?: string) => Promise<void>;
 }) => {
   const [receipt, setReceipt] = useState("");
   const [missing, setMissing] = useState(false);
