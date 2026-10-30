@@ -25,11 +25,13 @@ export const syncControl = (
       connected && paused
         ? "Automatic delivery is paused after an earlier failure. Review the pending changes, then use Save Changes to explicitly retry; turning this switch on does not resend them."
         : connected
-          ? "When enabled and not paused, checks supported queued changes every 10 seconds while connected"
+          ? "When enabled and not paused, sends committed changes after a short typing pause. Turning Off lets the current operation finish, then stops automatic delivery."
           : "Delivery is disconnected. Open Connection Details to retry the data connection. No changes are sent by opening it.",
   };
 };
 export const saveExplanation = (state: WorkspaceSnapshot, drafts: boolean) => {
+  if (state.delivering)
+    return "Cloud delivery is running. Browsing and unrelated ticket edits remain available.";
   if (state.error) return `Local save needs attention: ${state.error}`;
   if (state.pendingWrites) return "Saving changes in this browser.";
   const reasons: string[] = [];

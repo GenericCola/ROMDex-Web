@@ -1,6 +1,6 @@
 import type { Attachment } from "@/attachments/types";
 import { authRequestGuard, authToken } from "@/auth/session";
-import { needsDeliveryReview } from "@/domain/review-browsing";
+import { previewRequired, taskEditingLocked } from "@/domain/task-edit-lock";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { attachmentReader } from "@/youtrack/attachment-reader";
@@ -26,12 +26,14 @@ export const useAttachmentInventory = (
   }, [item.id]);
   const read = () => {
     const scope = itemRef.current;
+    const epoch = workspaceStore.deliveryEpoch();
+    const readOnly = taskEditingLocked(item.id);
     work.run(async () => {
       const assertCurrent = authRequestGuard(authToken());
       const files = await attachmentReader().list(item.id);
       assertCurrent();
       if (!scope.active || scope.id !== item.id) return;
-      if (needsDeliveryReview(workspaceStore.getSnapshot().data)) {
+      if (previewRequired(epoch, readOnly)) {
         setReadOnlyFiles({ id: item.id, files, check: assertCurrent });
         work.setMessage(
           "Current attachments read for review. Saved queue and baseline unchanged.",

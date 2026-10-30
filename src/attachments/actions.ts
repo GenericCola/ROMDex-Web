@@ -1,6 +1,7 @@
 import { acknowledge, recordDelivery } from "@/cloud/journal";
 import { cloudData } from "@/cloud/types";
 import { materialize } from "@/domain/accepted/core.mjs";
+import { reviewedTicketIds } from "@/domain/ticket-locks";
 import type { WorkspaceData } from "@/domain/types";
 import type { Attachment, UploadFile } from "./types";
 import { validateAttachment, validateUploadFile } from "./validate";
@@ -11,12 +12,9 @@ const ready = (data: WorkspaceData, issue: string) => {
     })
   )
     throw Error("The task no longer exists.");
-  if (
-    Object.values(cloudData(data).records).some((record) => {
-      return record.status !== "confirmed";
-    })
-  )
-    throw Error("Review the current delivery before changing attachments.");
+  const locked = reviewedTicketIds(data);
+  if (locked.has("*") || locked.has(issue))
+    throw Error("Review this ticket before changing its attachments.");
 };
 export const queueUpload = (
   data: WorkspaceData,

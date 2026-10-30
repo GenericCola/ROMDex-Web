@@ -1,5 +1,6 @@
 import { materialize } from "@/domain/accepted/core.mjs";
 import { FileDropTarget } from "@/domain/accepted/file-drop.mjs";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useRef } from "react";
 import { stageTaskFiles } from "./stage-task-files";
@@ -29,6 +30,7 @@ const TaskFileDrop = ({ enabled }: { enabled: boolean }) => {
     const target = new FileDropTarget({
       doc: document,
       item: (id) => {
+        if (taskEditingLocked(id)) return undefined;
         const { data } = workspaceStore.getSnapshot();
         return materialize(data.remote, data.operations).find((item) => {
           return item.id === id;
@@ -56,7 +58,6 @@ const TaskFileDrop = ({ enabled }: { enabled: boolean }) => {
         const state = workspaceStore.getSnapshot();
         return (
           currentRef.current.drag.pending() ||
-          state.delivering ||
           state.updating ||
           !!document.querySelector("dialog[open]")
         );

@@ -19,8 +19,12 @@ test("conflict permits tray navigation but preserves queue, task and journal sna
   };
   let revision = 0;
   const store = new WorkspaceStore({
-    load: async () => ({ revision, data }),
-    save: async () => ++revision,
+    load: async () => {
+      return { revision, data };
+    },
+    save: async () => {
+      return ++revision;
+    },
   });
   await store.start();
   assert.equal(needsDeliveryReview(store.getSnapshot().data), true);
@@ -31,27 +35,21 @@ test("conflict permits tray navigation but preserves queue, task and journal sna
   });
   assert.equal(store.getSnapshot().data.view.selected, "PMON-499");
   const before = structuredClone(store.getSnapshot().data);
-  assert.throws(
-    () =>
-      store.change((next) => {
-        next.operations = [];
-      }),
-    /browse tasks/,
-  );
-  assert.throws(
-    () =>
-      store.change((next) => {
-        next.cloud!.records = {};
-      }),
-    /browse tasks/,
-  );
-  assert.throws(
-    () =>
-      store.change((next) => {
-        next.commentDrafts["PMON-499"] = "overwrite";
-      }),
-    /browse tasks/,
-  );
+  assert.throws(() => {
+    return store.change((next) => {
+      next.operations = [];
+    });
+  }, /ticket.*review/);
+  assert.throws(() => {
+    return store.change((next) => {
+      next.cloud!.records = {};
+    });
+  }, /ticket.*review/);
+  assert.throws(() => {
+    return store.change((next) => {
+      next.commentDrafts["PMON-499"] = "overwrite";
+    });
+  }, /ticket.*review/);
   assert.deepEqual(store.getSnapshot().data, before);
   await store.change((next) => {
     next.cloud!.autoSync = true;

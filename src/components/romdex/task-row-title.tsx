@@ -1,4 +1,4 @@
-import { needsDeliveryReview } from "@/domain/review-browsing";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import { itemName } from "@/domain/task-presentation";
 import {
   beginInlineRename,
@@ -36,7 +36,7 @@ const TaskRowTitle = ({
     };
   }, []);
   const rename = () => {
-    if (needsDeliveryReview(data)) return;
+    if (taskEditingLocked(item.id)) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     run((next) => {
       beginInlineRename(next, item.id);
@@ -73,7 +73,9 @@ const TaskRowTitle = ({
           className="draft-input"
           aria-label="Rename Task"
           value={data.titleDrafts[item.id] ?? item.summary}
-          readOnly={busy || needsDeliveryReview(data)}
+          readOnly={busy || taskEditingLocked(item.id)}
+          onCompositionStart={editing.compositionStart}
+          onCompositionEnd={editing.compositionEnd}
           onFocus={editing.focus}
           onBlur={editing.blur}
           onKeyDown={key}

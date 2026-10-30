@@ -1,6 +1,6 @@
-import { cloudData } from "@/cloud/types";
 import { indexTree, materialize, validateMove } from "./accepted/core.mjs";
 import { editTask } from "./task-actions";
+import { guardTicketChanges, reviewedTicketIds } from "./ticket-locks";
 import type { TaskItem, WorkspaceData } from "./types";
 export interface DropIntent {
   dragId: string;
@@ -79,7 +79,7 @@ export const hierarchySignature = (data: WorkspaceData) => {
     data.order,
   ]);
 };
-export const applyTaskDrop = (
+const stageTaskDrop = (
   data: WorkspaceData,
   intent: DropIntent,
   expected: string,
@@ -92,12 +92,6 @@ export const applyTaskDrop = (
   if (!target) return;
   const item = tree.byId.get(intent.dragId);
   if (!item) throw Error("The task no longer exists.");
-  if (
-    Object.values(cloudData(data).records).some((record) => {
-      return record.status !== "confirmed";
-    })
-  )
-    throw Error("Review cloud delivery before changing the queue.");
   if (item.parentId !== target.parentId)
     editTask(data, item.id, { parentId: target.parentId });
   const siblings = (tree.children.get(target.parentId) ?? []).filter(
@@ -119,4 +113,15 @@ export const applyTaskDrop = (
   });
   if (target.parentId && !data.view.expanded.includes(target.parentId))
     data.view.expanded.push(target.parentId);
+};
+
+export const applyTaskDrop = (
+  data: WorkspaceData,
+  intent: DropIntent,
+  expected: string,
+) => {
+  const next = structuredClone(data);
+  stageTaskDrop(next, intent, expected);
+  guardTicketChanges(data, next, reviewedTicketIds(data));
+  Object.assign(data, next);
 };

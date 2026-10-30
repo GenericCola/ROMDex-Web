@@ -1,5 +1,5 @@
-import { needsDeliveryReview } from "@/domain/review-browsing";
 import { editTask, postComment } from "@/domain/task-actions";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
@@ -15,7 +15,7 @@ const TaskWriting = ({
   item: TaskItem;
   data: WorkspaceData;
 }) => {
-  const readOnly = needsDeliveryReview(data);
+  const readOnly = taskEditingLocked(item.id, data);
   const editing = useTaskTextEditing(item.id, "notes");
   const { tab, setTab, focusNotes } = useDetailNavigation();
   const nativeComments = useTaskComments(item.id, tab === "comments");
@@ -26,21 +26,21 @@ const TaskWriting = ({
     if (focusNotes?.id === item.id) notesRef.current?.focus();
   }, [focusNotes, item.id]);
   const description = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
+    if (taskEditingLocked(item.id)) return;
     const { value } = event.target;
     void workspaceStore.change((next) => {
       return editTask(next, item.id, { description: value });
     });
   };
   const comment = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
+    if (taskEditingLocked(item.id)) return;
     const { value } = event.target;
     void workspaceStore.change((next) => {
       next.commentDrafts[item.id] = value;
     });
   };
   const post = () => {
-    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
+    if (taskEditingLocked(item.id)) return;
     void workspaceStore.change((next) => {
       return postComment(next, item.id);
     });
@@ -81,14 +81,16 @@ const TaskWriting = ({
             aria-label="Notes and Instructions"
             value={item.description}
             onChange={description}
+            onCompositionStart={editing.compositionStart}
+            onCompositionEnd={editing.compositionEnd}
             onFocus={editing.focus}
             onBlur={editing.blur}
             placeholder="Notes, Instructions, or a Development Prompt…"
           />
           <p className="editor-hint">
             {readOnly
-              ? "Editing is paused until delivery review is resolved. You can still read notes and comments."
-              : "Edits save locally. When connected, Auto-Sync waits until you leave this editor. Save Changes can send the current version."}
+              ? "This ticket is being synchronized or needs delivery review. You can still browse and edit unrelated tickets."
+              : "Edits save locally. When connected, Auto-Sync sends committed edits after a short typing pause. Save Changes can send the current version."}
           </p>
         </section>
       ) : (

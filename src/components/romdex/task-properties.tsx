@@ -1,7 +1,7 @@
 import { indexTree, materialize } from "@/domain/accepted/core.mjs";
-import { needsDeliveryReview } from "@/domain/review-browsing";
 import { editTask } from "@/domain/task-actions";
 import { taskAssigneeLabel } from "@/domain/task-assignee-label";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import { itemName, taskTier } from "@/domain/task-presentation";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
@@ -21,7 +21,7 @@ const TaskProperties = ({
   remove: () => void;
   children?: ReactNode;
 }) => {
-  const readOnly = needsDeliveryReview(data);
+  const readOnly = taskEditingLocked(item.id, data);
   const editing = useTaskTextEditing(item.id, "title");
   const tree = indexTree(materialize(data.remote, data.operations), data.order);
   const parents: string[] = [];
@@ -32,7 +32,7 @@ const TaskProperties = ({
   }
   const inherited = !!tree.children.get(item.id)?.length;
   const title = (event: ChangeEvent<HTMLInputElement>) => {
-    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
+    if (taskEditingLocked(item.id)) return;
     const { value } = event.target;
     void workspaceStore.change((next) => {
       next.titleDrafts[item.id] = value;
@@ -40,7 +40,7 @@ const TaskProperties = ({
   };
   const commitTitle = () => {
     editing.blur();
-    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
+    if (taskEditingLocked(item.id)) return;
     if (data.titleDrafts[item.id]?.trim())
       void workspaceStore.change((next) => {
         editTask(next, item.id, {
@@ -61,6 +61,8 @@ const TaskProperties = ({
         aria-label="Task Title"
         value={data.titleDrafts[item.id] ?? item.summary}
         onChange={title}
+        onCompositionStart={editing.compositionStart}
+        onCompositionEnd={editing.compositionEnd}
         onFocus={editing.focus}
         onBlur={commitTitle}
       />

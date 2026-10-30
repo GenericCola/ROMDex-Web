@@ -6,6 +6,7 @@ import { cancelLocalDeletions } from "./cancel-local-deletions";
 import { deliverCreation } from "./creation";
 import { creationDependency } from "./creation-dependency";
 import { deliverDeletion } from "./deletion";
+import { assertDeliveryInputs } from "./delivery-inputs";
 import { deliverExisting } from "./existing-delivery";
 import { deliverRollup, planRollup } from "./rollup";
 import { refreshShared } from "./shared-status-delivery";
@@ -17,8 +18,18 @@ export const deliverQueue = async (
   commit: Commit,
   port: DeliveryPort,
   uploads?: UploadStore,
+  keepGoing: () => boolean = () => {
+    return true;
+  },
 ) => {
   validateQueue(snapshot());
+  const batch = new Set(
+    snapshot().operations.flatMap((op) => {
+      return op.type === "create"
+        ? [op.opId, op.opId + ":parent", op.opId + ":tags"]
+        : [op.opId];
+    }),
+  );
   const blocked = Object.values(cloudData(snapshot()).records).find(
     (record) => {
       return ["attempting", "uncertain", "conflict"].includes(record.status);
@@ -40,11 +51,27 @@ export const deliverQueue = async (
   });
   await refreshShared(snapshot, commit, port);
   while (snapshot().operations.length || cloudData(snapshot()).rollupPending) {
+    if (!keepGoing()) return;
+    if (
+      snapshot().operations.some((op) => {
+        return !batch.has(op.opId);
+      })
+    )
+      return;
     const planned = !snapshot().operations.length
       ? await planRollup(snapshot, commit, port)
       : undefined;
+    if (!keepGoing()) return;
     const first = snapshot().operations[0];
     if (!first) return;
+    if (planned?.operationId) batch.add(planned.operationId);
+    if (
+      snapshot().operations.some((op) => {
+        return !batch.has(op.opId);
+      })
+    )
+      return;
+    if (planned) assertDeliveryInputs(planned.inputs, snapshot());
     const dependency = creationDependency(snapshot());
     if (dependency && dependency !== first.opId) {
       await commit((data) => {

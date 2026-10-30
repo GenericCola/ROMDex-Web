@@ -1,5 +1,6 @@
 import type { TaskOperation, WorkspaceData } from "@/domain/types";
 import { observeStatus } from "./assigned-status";
+import { assertDeliveryInputs, deliveryInputs } from "./delivery-inputs";
 import { acknowledge, attemptDelivery } from "./journal";
 import { readRollupTree } from "./rollup-tree";
 import {
@@ -15,9 +16,13 @@ export const planRollup = async (
   commit: Commit,
   port: DeliveryPort,
 ) => {
+  const inputs = deliveryInputs(snapshot());
   const copy = structuredClone(snapshot());
   const tree = await readRollupTree(copy, port);
+  let operationId: string | undefined;
+  let committedInputs = inputs;
   await commit((data) => {
+    assertDeliveryInputs(inputs, data);
     data.cloud = {
       ...cloudData(data),
       assigned: cloudData(copy).assigned ?? {},
@@ -29,9 +34,10 @@ export const planRollup = async (
       });
       return { ...item, comments: previous?.comments ?? item.comments };
     });
-    if (tree.next)
+    if (tree.next) {
+      operationId = crypto.randomUUID();
       data.operations.push({
-        opId: crypto.randomUUID(),
+        opId: operationId,
         type: "edit",
         purpose: "rollup",
         issueId: tree.next.id,
@@ -41,8 +47,10 @@ export const planRollup = async (
           assignedState: tree.next.assignedState ?? tree.next.state,
         },
       });
+    }
+    committedInputs = deliveryInputs(data);
   });
-  return tree;
+  return { ...tree, operationId, inputs: committedInputs };
 };
 export const deliverRollup = async (
   operation: Edit,
@@ -51,12 +59,14 @@ export const deliverRollup = async (
   port: DeliveryPort,
   planned?: Awaited<ReturnType<typeof readRollupTree>>,
 ) => {
+  const inputs = deliveryInputs(snapshot());
   const copy = structuredClone(snapshot());
   const tree = planned ?? (await readRollupTree(copy, port));
   const current = tree.items.find((item) => {
     return item.id === operation.issueId;
   });
   await commit((data) => {
+    assertDeliveryInputs(inputs, data);
     data.cloud = {
       ...cloudData(data),
       assigned: cloudData(copy).assigned ?? {},
@@ -74,7 +84,9 @@ export const deliverRollup = async (
     });
     return;
   }
+  const beforeFresh = deliveryInputs(snapshot());
   const fresh = await port.get(current.id);
+  assertDeliveryInputs(beforeFresh, snapshot());
   if (
     fresh?.state !== current.state ||
     fresh?.parentId !== current.parentId ||

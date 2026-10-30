@@ -1,20 +1,26 @@
 import { cloudData } from "@/cloud/types";
 import { descendants, materialize, validateMove } from "./accepted/core.mjs";
+import { reviewedTicketIds } from "./ticket-locks";
 import type { TaskItem, TaskPatch, WorkspaceData } from "./types";
-const requireReviewClear = (data: WorkspaceData) => {
+const requireReviewClear = (
+  data: WorkspaceData,
+  ids: (string | null | undefined)[],
+) => {
+  const locked = reviewedTicketIds(data);
   if (
-    Object.values(cloudData(data).records).some((record) => {
-      return record.status !== "confirmed";
+    locked.has("*") ||
+    ids.some((id) => {
+      return id && locked.has(id);
     })
   )
-    throw Error("Review cloud delivery before changing the queue.");
+    throw Error("Review cloud delivery for this ticket before changing it.");
 };
 export const createTask = (
   data: WorkspaceData,
   parentId: string | null,
   title: string,
 ): string => {
-  requireReviewClear(data);
+  requireReviewClear(data, [parentId]);
   const summary = title.trim();
   if (!summary) throw Error("Enter an item name.");
   if (
@@ -47,7 +53,7 @@ export const createTask = (
   return id;
 };
 export const editTask = (data: WorkspaceData, id: string, patch: TaskPatch) => {
-  requireReviewClear(data);
+  requireReviewClear(data, [id, patch.parentId]);
   const items = materialize(data.remote, data.operations);
   const item = items.find((candidate) => {
     return candidate.id === id;
@@ -76,7 +82,10 @@ export const editTask = (data: WorkspaceData, id: string, patch: TaskPatch) => {
   });
 };
 export const deleteTask = (data: WorkspaceData, id: string) => {
-  requireReviewClear(data);
+  requireReviewClear(data, [
+    id,
+    ...descendants(materialize(data.remote, data.operations), id),
+  ]);
   const items = materialize(data.remote, data.operations);
   if (
     !items.some((item) => {
@@ -123,7 +132,7 @@ export const deleteTask = (data: WorkspaceData, id: string) => {
   if (data.view.scope && ids.includes(data.view.scope)) data.view.scope = null;
 };
 export const postComment = (data: WorkspaceData, id: string) => {
-  requireReviewClear(data);
+  requireReviewClear(data, [id]);
   const text = data.commentDrafts[id]?.trim();
   if (!text) return;
   data.operations.push({

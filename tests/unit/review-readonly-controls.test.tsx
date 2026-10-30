@@ -58,7 +58,7 @@ test("transient comment read returns before persisted cache writes, guarded by a
     "src/components/romdex/use-task-comments.ts",
     "utf8",
   );
-  assert.match(source, /readOnly \|\| needsDeliveryReview/);
+  assert.match(source, /previewRequired\(epoch, readOnly\)/);
   assert.match(
     source,
     /setPreview\(\{ id, comments, check: assertCurrent \}\);\s*return;/,

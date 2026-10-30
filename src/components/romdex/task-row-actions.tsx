@@ -1,6 +1,5 @@
-import { needsDeliveryReview } from "@/domain/review-browsing";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import type { TaskItem } from "@/domain/types";
-import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
 import ItemEditDialog from "./item-edit-dialog";
@@ -18,7 +17,7 @@ const TaskRowActions = ({
   return (
     <div className="row-actions">
       <button
-        disabled={needsDeliveryReview(workspaceStore.getSnapshot().data)}
+        disabled={taskEditingLocked(item.id)}
         title="Add Subtask"
         aria-label={"Add child to " + item.summary}
         onClick={() => {
@@ -28,7 +27,7 @@ const TaskRowActions = ({
         +
       </button>
       <button
-        disabled={needsDeliveryReview(workspaceStore.getSnapshot().data)}
+        disabled={taskEditingLocked(item.id)}
         title="Edit Item"
         aria-label={"Edit " + item.summary}
         onClick={() => {
@@ -38,7 +37,7 @@ const TaskRowActions = ({
         ✎
       </button>
       <button
-        disabled={needsDeliveryReview(workspaceStore.getSnapshot().data)}
+        disabled={taskEditingLocked(item.id)}
         title="Delete Item"
         aria-label={"Delete " + item.summary}
         onClick={() => {

@@ -32,13 +32,10 @@ export const deliverExisting = async (
     throw Error(
       "A queued task is no longer readable. Nothing was sent for it.",
     );
-  const copy = structuredClone(snapshot());
-  const remote = observeStatus(
-    copy,
-    await nativeTagBaseline(operation, received, port),
-  );
+  const receivedBaseline = await nativeTagBaseline(operation, received, port);
+  let remote = receivedBaseline;
   await commit((data) => {
-    data.cloud = cloudData(copy);
+    remote = observeStatus(data, receivedBaseline);
   });
   let patch = operation.type === "edit" ? assignmentPatch(operation.patch) : {};
   if (operation.type === "edit") {

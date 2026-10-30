@@ -1,5 +1,5 @@
 import { authRequestGuard, authToken, hasAuthSession } from "@/auth/session";
-import { needsDeliveryReview } from "@/domain/review-browsing";
+import { previewRequired, taskEditingLocked } from "@/domain/task-edit-lock";
 import type { TaskComment, TaskOperation } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { readComments } from "@/youtrack/read-comments";
@@ -32,14 +32,15 @@ export const useTaskComments = (id: string, active: boolean) => {
   const load = useCallback(() => {
     if (!/^PMON-\d+$/.test(id) || !hasAuthSession()) return;
     const scope = scopeRef.current;
-    const readOnly = needsDeliveryReview(workspaceStore.getSnapshot().data);
+    const readOnly = taskEditingLocked(id);
+    const epoch = workspaceStore.deliveryEpoch();
     run(async () => {
       const token = authToken(),
         assertCurrent = authRequestGuard(token);
       const comments = await readComments(sessionRequest(token), id);
       assertCurrent();
       if (!scope.active || scope.id !== id) return;
-      if (readOnly || needsDeliveryReview(workspaceStore.getSnapshot().data)) {
+      if (previewRequired(epoch, readOnly)) {
         setPreview({ id, comments, check: assertCurrent });
         return;
       }

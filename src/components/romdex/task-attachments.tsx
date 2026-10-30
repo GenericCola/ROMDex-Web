@@ -1,4 +1,4 @@
-import { needsDeliveryReview } from "@/domain/review-browsing";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { attachmentsReadable } from "@/youtrack/attachment-reader";
 import AttachmentCache from "./attachment-cache";
@@ -24,7 +24,7 @@ const TaskAttachments = ({
           className="sr-only"
           aria-label="Attach Files"
           multiple
-          disabled={model.busy || needsDeliveryReview(data)}
+          disabled={model.busy || taskEditingLocked(item.id)}
           onChange={(event) => {
             const files = [...(event.target.files ?? [])];
             if (files.length) model.stageMany(files);

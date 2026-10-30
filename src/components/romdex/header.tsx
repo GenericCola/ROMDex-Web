@@ -90,7 +90,7 @@ const Header = ({
               id="save"
               className="save"
               onClick={save}
-              disabled={!state.ready}
+              disabled={!state.ready || state.delivering}
               title={saveReason}
               aria-label={`Save Changes. ${saveReason}`}
             >

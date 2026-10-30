@@ -1,6 +1,6 @@
 import { isRasterAttachment } from "@/attachments/preview";
 import { fileSize, nativeAttachmentRows } from "@/attachments/rows";
-import { needsDeliveryReview } from "@/domain/review-browsing";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import type { WorkspaceData } from "@/domain/types";
 import { attachmentsReadable } from "@/youtrack/attachment-reader";
 import type { useAttachments } from "./use-attachments";
@@ -57,7 +57,7 @@ const NativeAttachmentList = ({
               </button>
               {deletion ? (
                 <button
-                  disabled={model.busy || held || needsDeliveryReview(data)}
+                  disabled={model.busy || held || taskEditingLocked(id)}
                   onClick={() => {
                     return model.cancelDeletion(deletion.opId);
                   }}
@@ -68,7 +68,7 @@ const NativeAttachmentList = ({
                 <button
                   className="danger"
                   aria-label={"Delete " + file.name}
-                  disabled={model.busy || needsDeliveryReview(data)}
+                  disabled={model.busy || taskEditingLocked(id)}
                   onClick={() => {
                     return model.setRemoving(file);
                   }}

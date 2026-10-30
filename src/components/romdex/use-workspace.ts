@@ -1,4 +1,4 @@
-import { automaticDelivery } from "@/cloud/session";
+import { watchOutgoing } from "@/cloud/watch-outgoing";
 import { hasDraftEdits } from "@/domain/editor-drafts";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useSyncExternalStore } from "react";
@@ -11,10 +11,10 @@ const beforeUnload = (event: BeforeUnloadEvent) => {
 };
 const connectWorkspace = () => {
   void workspaceStore.start();
-  const timer = window.setInterval(automaticDelivery, 10000);
+  const stopOutgoing = watchOutgoing();
   window.addEventListener("beforeunload", beforeUnload);
   const cleanup = () => {
-    window.clearInterval(timer);
+    stopOutgoing();
     return window.removeEventListener("beforeunload", beforeUnload);
   };
   return cleanup;

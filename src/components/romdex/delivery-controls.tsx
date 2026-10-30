@@ -7,12 +7,19 @@ import { useState } from "react";
 import DeliveryFeedback from "./delivery-feedback";
 import DeliveryReview from "./delivery-review";
 const DeliveryControls = () => {
+  const { delivering } = workspaceStore.getSnapshot();
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const execute = async (
     action: () => Promise<void>,
     success = "Saved. Use Save Changes to run one delivery cycle.",
   ) => {
+    if (workspaceStore.getSnapshot().delivering) {
+      setMessage(
+        "Delivery is running. Review actions resume when it finishes.",
+      );
+      return;
+    }
     setBusy(true);
     setMessage("Checking…");
     try {
@@ -43,7 +50,7 @@ const DeliveryControls = () => {
         key={id}
         id={id}
         record={record}
-        busy={busy}
+        busy={busy || delivering}
         execute={execute}
       />
     );
@@ -68,7 +75,10 @@ const DeliveryControls = () => {
           : "Data connection unavailable. No queued changes will be sent."}
       </p>
       {!deliveryConnected() && (
-        <button onClick={connect} disabled={busy || !hasAuthSession()}>
+        <button
+          onClick={connect}
+          disabled={busy || delivering || !hasAuthSession()}
+        >
           Retry data connection
         </button>
       )}

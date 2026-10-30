@@ -1,11 +1,12 @@
 import { ResumeRejected } from "@/auth/resume-failure";
 import { authRequestGuard } from "@/auth/session";
 import { flushDraftEditors } from "@/domain/editor-drafts";
-import { hasTaskTextEditing } from "@/domain/task-editing";
+import { hasTaskComposition } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { connectionNeedsManualSave } from "./connection-policy";
 import { deliverQueue } from "./delivery";
+import { DeliveryInputsChanged } from "./delivery-inputs";
 import { cloudData } from "./types";
 let client: DeliveryClient | null = null;
 let suspended = false;
@@ -72,7 +73,7 @@ export const saveDelivery = async (automatic = false) => {
   await flushDraftEditors();
   if (
     automatic &&
-    (hasTaskTextEditing() ||
+    (hasTaskComposition() ||
       !cloudData(workspaceStore.getSnapshot().data).autoSync)
   )
     return "Saved in this browser. Automatic delivery is waiting.";
@@ -89,14 +90,26 @@ export const saveDelivery = async (automatic = false) => {
         },
         commit,
         active,
+        undefined,
+        () => {
+          return (
+            !automatic || cloudData(workspaceStore.getSnapshot().data).autoSync
+          );
+        },
       );
     });
     suspended = false;
     workspaceStore.setConnection(
       "YouTrack delivery connected for this session",
     );
-    return "Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.";
+    return workspaceStore.getSnapshot().data.operations.length
+      ? "Current delivery finished. Additional changes remain safely queued."
+      : "Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.";
   } catch (error) {
+    if (error instanceof DeliveryInputsChanged) {
+      suspended = false;
+      return error.message;
+    }
     suspended = true;
     throw error;
   }
@@ -105,7 +118,7 @@ export const automaticDelivery = () => {
   const state = workspaceStore.getSnapshot();
   if (
     !client ||
-    hasTaskTextEditing() ||
+    hasTaskComposition() ||
     suspended ||
     state.error ||
     state.updating ||
@@ -124,7 +137,7 @@ export const automaticDelivery = () => {
           : "Cloud delivery needs review"),
     );
   };
-  void saveDelivery(true).catch(failed);
+  return saveDelivery(true).catch(failed);
 };
 export const requireDelivery = () => {
   if (!client)

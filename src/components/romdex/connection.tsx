@@ -7,14 +7,17 @@ import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { readTasks } from "@/youtrack/read-tasks";
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import DeliveryControls from "./delivery-controls";
 import Dialog from "./dialog";
 const Connection = ({ close }: { close: () => void }) => {
+  const previewEpochRef = useRef(0);
+  const { delivering } = workspaceStore.getSnapshot();
   const [preview, setPreview] = useState<TaskItem[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const load = async () => {
+    const epoch = workspaceStore.deliveryEpoch();
     setBusy(true);
     setMessage("");
     try {
@@ -27,6 +30,14 @@ const Connection = ({ close }: { close: () => void }) => {
         ? await new DeliveryClient(token, true).all()
         : await readTasks(token);
       indexTree(items);
+      if (
+        workspaceStore.getSnapshot().delivering ||
+        epoch !== workspaceStore.deliveryEpoch()
+      )
+        throw Error(
+          "Delivery changed while reading. Read the tasks again after it finishes.",
+        );
+      previewEpochRef.current = epoch;
       setPreview(items);
       setMessage(
         items.length + " tasks read. Review before saving a browser copy.",
@@ -45,6 +56,10 @@ const Connection = ({ close }: { close: () => void }) => {
     if (!preview) return;
     try {
       await workspaceStore.start();
+      if (previewEpochRef.current !== workspaceStore.deliveryEpoch())
+        throw Error(
+          "Delivery changed after this preview. Read the tasks again.",
+        );
       await workspaceStore.change((data) => {
         adoptTasks(data, preview);
       });
@@ -71,7 +86,7 @@ const Connection = ({ close }: { close: () => void }) => {
         import runs. Review the result before saving a browser copy.
       </p>
       <form className="port-form" onSubmit={submit}>
-        <button type="submit" disabled={busy}>
+        <button type="submit" disabled={busy || delivering}>
           {busy ? "Reading…" : "Read YouTrack Tasks"}
         </button>
       </form>
@@ -82,7 +97,7 @@ const Connection = ({ close }: { close: () => void }) => {
             Saving this copy refreshes the browser's remote baseline and retains
             its local queued edits. Existing desktop data stays intact.
           </p>
-          <button className="primary" onClick={adopt}>
+          <button className="primary" onClick={adopt} disabled={delivering}>
             Save {preview.length} Tasks in This Browser
           </button>
         </>

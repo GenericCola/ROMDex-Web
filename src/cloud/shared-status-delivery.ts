@@ -1,5 +1,6 @@
 import type { TaskItem, TaskOperation, WorkspaceData } from "@/domain/types";
 import { adoptTasks } from "./assigned-status";
+import { assertDeliveryInputs, deliveryInputs } from "./delivery-inputs";
 import { recordDelivery } from "./journal";
 import { readRollupTree } from "./rollup-tree";
 import { matchesStatusWrite, statusBase } from "./shared-status-protocol";
@@ -54,9 +55,11 @@ export const refreshShared = async (
       "Shared status is enabled. Reconnect its compatible YouTrack app before delivery.",
     );
   await port.metadata.probe();
+  const inputs = deliveryInputs(snapshot());
   const copy = structuredClone(snapshot());
   const tree = await readRollupTree(copy, port);
   await commit((data) => {
+    assertDeliveryInputs(inputs, data);
     const comments = new Map(
       data.remote.map((item) => {
         return [item.id, item.comments];

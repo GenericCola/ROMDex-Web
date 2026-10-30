@@ -1,6 +1,6 @@
 import { STATUS, statusOf } from "@/domain/accepted/core.mjs";
 import { assignTaskStatus } from "@/domain/assigned-status";
-import { needsDeliveryReview } from "@/domain/review-browsing";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import { itemName } from "@/domain/task-presentation";
 import type { LampColor, TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
@@ -65,7 +65,7 @@ const TaskStatusPopup = ({
           STATUS[color] +
           " · Click to Set Assigned Status"
         }
-        disabled={needsDeliveryReview(workspaceStore.getSnapshot().data)}
+        disabled={taskEditingLocked(item.id)}
         onClick={open}
       >
         <Lamp color={color} />

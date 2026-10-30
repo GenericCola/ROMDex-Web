@@ -1,8 +1,8 @@
-import { cloudData } from "@/cloud/types";
 import { indexTree, materialize } from "./accepted/core.mjs";
 import { bulkMovePlan, siblingSelection } from "./bulk-selection";
 import { createTask } from "./task-actions";
 import { hierarchySignature } from "./task-drop";
+import { guardTicketChanges, reviewedTicketIds } from "./ticket-locks";
 import type { TaskItem, WorkspaceData } from "./types";
 export { bulkMovePlan, siblingSelection } from "./bulk-selection";
 
@@ -22,12 +22,6 @@ const queueMove = (
 const safeDraft = (data: WorkspaceData, expected: string) => {
   if (hierarchySignature(data) !== expected)
     throw Error("The hierarchy changed. Review the selection again.");
-  if (
-    Object.values(cloudData(data).records).some((record) => {
-      return record.status !== "confirmed";
-    })
-  )
-    throw Error("Review cloud delivery before changing the queue.");
   return structuredClone(data);
 };
 export const stageMove = (
@@ -53,6 +47,7 @@ export const stageMove = (
   if (parentId && !next.view.expanded.includes(parentId))
     next.view.expanded.push(parentId);
   indexTree(materialize(next.remote, next.operations), next.order);
+  guardTicketChanges(data, next, reviewedTicketIds(data));
   Object.assign(data, next);
 };
 export const stageGroup = (
@@ -91,6 +86,7 @@ export const stageGroup = (
   });
   next.view.expanded = [...new Set([...next.view.expanded, createdParentId])];
   indexTree(materialize(next.remote, next.operations), next.order);
+  guardTicketChanges(data, next, reviewedTicketIds(data));
   Object.assign(data, next);
   return createdParentId;
 };

@@ -1,6 +1,7 @@
 import { materialize } from "@/domain/accepted/core.mjs";
 import { siblingSelection } from "@/domain/bulk-hierarchy";
 import { hierarchySignature } from "@/domain/task-drop";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import { workspaceStore } from "@/domain/workspace-store";
 import { hasWorkspaceWork } from "@/domain/workspace-work";
 import type { PointerEvent } from "react";
@@ -19,7 +20,10 @@ export const startTaskDrag = (
     hasWorkspaceWork() ||
     !state.ready ||
     state.error ||
-    state.delivering ||
+    taskEditingLocked(id) ||
+    selectedIds.some((selected) => {
+      return taskEditingLocked(selected);
+    }) ||
     state.updating ||
     document.querySelector('input[aria-label="New Parent Title"]')
   )

@@ -1,6 +1,6 @@
 import { fieldChoices, fieldPresentation } from "@/domain/field-presentation";
-import { needsDeliveryReview } from "@/domain/review-browsing";
 import { editTask } from "@/domain/task-actions";
+import { taskEditingLocked } from "@/domain/task-edit-lock";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
@@ -18,12 +18,12 @@ const TaskField = ({
   item: TaskItem;
   field: keyof typeof fieldChoices;
 }) => {
-  const readOnly = needsDeliveryReview(workspaceStore.getSnapshot().data);
+  const readOnly = taskEditingLocked(item.id);
   const value = item[field];
   const shown = fieldPresentation(field, value);
   const choices = fieldChoices[field];
   const change = (event: ChangeEvent<HTMLSelectElement>) => {
-    if (needsDeliveryReview(workspaceStore.getSnapshot().data)) return;
+    if (taskEditingLocked(item.id)) return;
     const next = event.target.value;
     void workspaceStore.change((data) => {
       editTask(

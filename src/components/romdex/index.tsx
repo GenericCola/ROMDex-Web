@@ -60,7 +60,7 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
   const mode = view.detailsMode;
   return (
     <WorkSelectionProvider>
-      <div className="romdex-app" inert={state.updating || state.delivering}>
+      <div className="romdex-app" inert={state.updating}>
         <Header
           state={state}
           connect={openConnection}

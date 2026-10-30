@@ -7,7 +7,9 @@ import { ProjectSelectionContext } from "./project-selection-context";
 import { exportRecovery } from "./recovery-export";
 import { SessionRecoveryContext } from "./session-recovery-context";
 import { useAuthWorkspace } from "./use-auth-workspace";
+import { useDeliveryActive } from "./use-delivery-active";
 const AuthGate = () => {
+  const delivering = useDeliveryActive();
   const {
     retryable,
     retryResume,
@@ -29,7 +31,7 @@ const AuthGate = () => {
     return (
       <button
         key={project.id}
-        disabled={busy || recoveryBlocked}
+        disabled={busy || recoveryBlocked || delivering}
         onClick={open}
       >
         {project.name} ({project.shortName})
@@ -61,7 +63,7 @@ const AuthGate = () => {
           <div className="port-actions">
             {!connected && identity.projects.map(renderProject)}
             <button
-              disabled={busy || recoveryBlocked}
+              disabled={busy || recoveryBlocked || delivering}
               onClick={() => {
                 void signOut();
               }}
@@ -112,7 +114,7 @@ const AuthGate = () => {
               value={{
                 selected,
                 projects: identity.projects,
-                disabled: busy || recoveryBlocked,
+                disabled: busy || recoveryBlocked || delivering,
                 choose,
               }}
             >
