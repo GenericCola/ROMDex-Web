@@ -26,7 +26,7 @@ export const syncControl = (
         ? "Automatic delivery is paused after an earlier failure. Review the pending changes, then use Save Changes to explicitly retry; turning this switch on does not resend them."
         : connected
           ? "When enabled and not paused, checks supported queued changes every 10 seconds while connected"
-          : "Delivery is disconnected. Open Connection Details to review and enable delivery. No changes are sent by opening it.",
+          : "Delivery is disconnected. Open Connection Details to retry the data connection. No changes are sent by opening it.",
   };
 };
 export const saveExplanation = (state: WorkspaceSnapshot, drafts: boolean) => {

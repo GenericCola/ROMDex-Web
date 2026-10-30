@@ -44,10 +44,12 @@ const ProjectSelector = () => {
       </button>
       {open && (
         <Dialog title="Choose project" close={close}>
-          <div className="port-actions">{projects.map(renderProject)}</div>
-          <button type="button" onClick={close}>
-            Cancel
-          </button>
+          <div className="project-selector-content">
+            <div className="port-actions">{projects.map(renderProject)}</div>
+            <button type="button" onClick={close}>
+              Cancel
+            </button>
+          </div>
         </Dialog>
       )}
     </>

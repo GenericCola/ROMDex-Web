@@ -4,3 +4,7 @@
 .task-filter-fields label { display: grid; gap: 6px; min-width: 0; }
 .task-filter-fields select { width: 100%; min-width: 0; }
 @media (max-width: 480px) { .task-filter-fields { grid-template-columns: 1fr; } }
+/* Tailwind resets dialog margins; restore native desktop modal centering. */
+@scope (.romdex-app) {
+  dialog.desktop-dialog { margin: auto; }
+}

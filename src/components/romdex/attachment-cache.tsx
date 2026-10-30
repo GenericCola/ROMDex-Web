@@ -75,7 +75,7 @@ const AttachmentCache = () => {
               );
             })}
           </ul>
-          <label>
+          <label className="port-check-line">
             <input
               type="checkbox"
               checked={approved}

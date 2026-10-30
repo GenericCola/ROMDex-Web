@@ -1,5 +1,4 @@
 "use client";
-import { needsDeliveryReview, reviewNotice } from "@/domain/review-browsing";
 import { WorkSelectionProvider } from "./work-selection-provider";
 
 import { materialize } from "@/domain/accepted/core.mjs";
@@ -89,13 +88,6 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
         {state.error && (
           <p className="port-recovery" role="alert">
             {state.error}
-          </p>
-        )}
-        {needsDeliveryReview(state.data) && (
-          <p className="port-notice" role="status">
-            {reviewNotice(state.data)} Browsing is available; task edits are
-            paused.
-            <button onClick={openConnection}>Review pending changes</button>
           </p>
         )}
         {state.ready && (

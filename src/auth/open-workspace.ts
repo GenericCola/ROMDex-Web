@@ -1,4 +1,3 @@
-import { adoptTasks } from "@/cloud/assigned-status";
 import { workspaceStore } from "@/domain/workspace-store";
 import { uploadStorage } from "@/storage/upload-storage";
 import { scopedWorkspaceKey } from "@/storage/workspace-key";
@@ -6,6 +5,7 @@ import { WorkspaceStorage } from "@/storage/workspace-storage";
 import { readTasks, YOUTRACK_ORIGIN } from "@/youtrack/read-tasks";
 import type { AuthorizedProject } from "./identity";
 import { readIdentity, readProject } from "./identity";
+import { initializeWorkspaceTasks } from "./initialize-workspace";
 import { ResumeRejected } from "./resume-failure";
 export const openPmonWorkspace = async (
   token: string,
@@ -14,7 +14,10 @@ export const openPmonWorkspace = async (
   isCurrent: () => boolean,
 ) => {
   const key = scopedWorkspaceKey(YOUTRACK_ORIGIN, userId, projectId);
-  await workspaceStore.switchPersistence(new WorkspaceStorage(key));
+  const storage = new WorkspaceStorage(key);
+  const isNew = !(await storage.load());
+  if (!isCurrent()) return;
+  await workspaceStore.switchPersistence(storage);
   uploadStorage.setScope(key);
   const opened = workspaceStore.getSnapshot();
   if (!opened.ready || opened.error)
@@ -27,7 +30,7 @@ export const openPmonWorkspace = async (
     const tasks = await readTasks(token, assertCurrent);
     if (!isCurrent()) return;
     await workspaceStore.change((data) => {
-      adoptTasks(data, tasks);
+      initializeWorkspaceTasks(data, tasks, isNew);
     });
     await workspaceStore.flush();
   }

@@ -104,7 +104,7 @@ const Migration = ({ close }: { close: () => void }) => {
       )}
       {(preview ?? recovery) && (
         <>
-          <label>
+          <label className="port-check-line">
             <input type="checkbox" checked={confirmed} onChange={toggle} />I
             have preserved my current recovery copy and reviewed these import
             choices.

@@ -62,7 +62,10 @@ const DeletionReviewActions = ({
   const uncertain =
     record.status === "uncertain" || record.status === "attempting";
   return (
-    <section aria-label="Review queued deletion">
+    <section
+      className="deletion-review-actions"
+      aria-label="Review queued deletion"
+    >
       <p>
         No deletion is retried from this review. Keeping tasks cancels the
         remaining queued deletion; any earlier confirmed deletion is not undone.

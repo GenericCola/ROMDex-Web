@@ -391,3 +391,13 @@ dialog.rdx-browser-dialog{top:16px;bottom:auto;margin-block:0}.rdx-browser-dialo
 
 .deletion-review-confirmation { display: flex; align-items: flex-start; gap: .5rem; margin-block: .75rem; }
 .deletion-review-confirmation input[type="checkbox"] { flex: 0 0 auto; margin: .2em 0 0; }
+
+/* Keep related confirmation and navigation controls separated after the reset. */
+.project-selector-content { display: grid; gap: 12px; }
+.project-selector-content > button { justify-self: start; }
+.port-check-line { display: flex; align-items: flex-start; gap: .5rem; margin-block: .75rem; }
+.port-check-line input:is([type="checkbox"], [type="radio"]) { flex: 0 0 auto; width: auto; margin: .2em 0 0; }
+
+.delivery-controls-panel, .delivery-review-card, .deletion-review-actions { display: grid; gap: 12px; }
+.deletion-review-actions > button { justify-self: start; }
+.deletion-review-actions details > p { margin-block: 12px; }

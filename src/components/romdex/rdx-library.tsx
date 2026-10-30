@@ -58,7 +58,7 @@ const RdxLibrary = ({
       <footer>
         {model.value && (
           <>
-            <label>
+            <label className="port-check-line">
               <input
                 type="checkbox"
                 checked={model.confirmed}

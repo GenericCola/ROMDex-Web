@@ -1,10 +1,7 @@
-import { authToken, hasAuthSession } from "@/auth/session";
-import {
-  connectDelivery,
-  deliveryConnected,
-  disconnectDelivery,
-} from "@/cloud/session";
+import { authIdentity, authToken, hasAuthSession } from "@/auth/session";
+import { connectDelivery, deliveryConnected } from "@/cloud/session";
 import { cloudData } from "@/cloud/types";
+import { needsDeliveryReview, reviewNotice } from "@/domain/review-browsing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import DeliveryFeedback from "./delivery-feedback";
@@ -31,13 +28,9 @@ const DeliveryControls = () => {
   };
   const connect = () => {
     const action = async () => {
-      await connectDelivery(authToken());
+      await connectDelivery(authToken(), authIdentity().userId);
     };
     void execute(action);
-  };
-  const disconnect = () => {
-    disconnectDelivery();
-    setMessage("Disconnected. Queue and drafts kept; session token discarded.");
   };
   const records = Object.entries(
     cloudData(workspaceStore.getSnapshot().data).records,
@@ -56,26 +49,35 @@ const DeliveryControls = () => {
     );
   };
   return (
-    <section>
+    <section className="delivery-controls-panel">
       <h3>Cloud delivery</h3>
       <p>
-        Optional, session only. Save Changes delivers new tasks, listed
-        deletions, hierarchy, assigned status with parent rollups, titles,
-        notes, priority, complexity and comments. Assigned choices stay in this
-        browser while shared status is disabled; recovery exports retain them.
-        Calculated statuses go to YouTrack State. Deletions permanently remove
-        only the reviewed list. Auto-Sync is off initially. Enabling delivery
-        uses your saved preference. Avoid simultaneous desktop edits to the same
-        fields. A timeout pauses automatic delivery until review.
+        Connected automatically after verified sign-in. Save Changes delivers
+        new tasks, listed deletions, hierarchy, assigned status with parent
+        rollups, titles, notes, priority, complexity and comments. Assigned
+        choices stay in this browser while shared status is disabled; recovery
+        exports retain them. Calculated statuses go to YouTrack State. Deletions
+        permanently remove only the reviewed list. Auto-Sync honors your saved
+        preference. Turning it off stops automatic delivery, while manual Save
+        and review remain available. Avoid simultaneous desktop edits to the
+        same fields. A timeout pauses automatic delivery until review.
       </p>
-      <div className="port-actions">
+      <p role="status">
+        {deliveryConnected()
+          ? "Data connection ready."
+          : "Data connection unavailable. No queued changes will be sent."}
+      </p>
+      {!deliveryConnected() && (
         <button onClick={connect} disabled={busy || !hasAuthSession()}>
-          Enable delivery for this session
+          Retry data connection
         </button>
-        <button onClick={disconnect} disabled={busy || !deliveryConnected()}>
-          Disconnect delivery
-        </button>
-      </div>
+      )}
+      {needsDeliveryReview(workspaceStore.getSnapshot().data) && (
+        <p>
+          {reviewNotice(workspaceStore.getSnapshot().data)} Browsing is
+          available; task edits are paused until review and delivery complete.
+        </p>
+      )}
       {records.map(render)}
       <DeliveryFeedback message={message} />
       <p>

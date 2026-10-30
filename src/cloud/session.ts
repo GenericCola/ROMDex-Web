@@ -1,14 +1,19 @@
+import { ResumeRejected } from "@/auth/resume-failure";
 import { authRequestGuard } from "@/auth/session";
 import { flushDraftEditors } from "@/domain/editor-drafts";
 import { hasTaskTextEditing } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
+import { connectionNeedsManualSave } from "./connection-policy";
 import { deliverQueue } from "./delivery";
 import { cloudData } from "./types";
 let client: DeliveryClient | null = null;
 let suspended = false;
 let connectionGeneration = 0;
-export const connectDelivery = async (token: string) => {
+export const connectDelivery = async (
+  token: string,
+  expectedUserId?: string,
+) => {
   const generation = ++connectionGeneration;
   const checkAuth = authRequestGuard(token);
   const assertCurrent = () => {
@@ -31,6 +36,10 @@ export const connectDelivery = async (token: string) => {
   );
   await next.connect();
   assertCurrent();
+  if (expectedUserId && next.accountId !== expectedUserId)
+    throw new ResumeRejected(
+      "The data connection identity differs from the signed-in account.",
+    );
   const bound = cloudData(workspaceStore.getSnapshot().data).accountId;
   if (bound && bound !== next.accountId)
     throw Error("The queue is bound to a different account.");
@@ -40,8 +49,12 @@ export const connectDelivery = async (token: string) => {
   await workspaceStore.flush();
   assertCurrent();
   client = next;
-  suspended = false;
-  workspaceStore.setConnection("YouTrack delivery connected for this session");
+  suspended = connectionNeedsManualSave(workspaceStore.getSnapshot().data);
+  workspaceStore.setConnection(
+    suspended
+      ? "Data connection ready. Reviewed changes remain paused until Save Changes."
+      : "YouTrack data connected",
+  );
 };
 export const disconnectDelivery = () => {
   ++connectionGeneration;

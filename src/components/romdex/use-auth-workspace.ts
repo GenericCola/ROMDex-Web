@@ -1,15 +1,17 @@
-import { flushLocal } from "@/auth/flush-local";
+import {
+  activateProject,
+  closeProjectConnection,
+} from "@/auth/activate-project";
 import type {
   AuthorizedProject,
   ProjectIssue,
   YouTrackIdentity,
 } from "@/auth/identity";
 import { readIdentity } from "@/auth/identity";
-import { prepareProject } from "@/auth/open-workspace";
 import { signInPopup } from "@/auth/popup";
-import { expired, setAuthSession } from "@/auth/session";
+import { ResumeRejected } from "@/auth/resume-failure";
+import { expired } from "@/auth/session";
 import { forgetSession, rememberSession } from "@/auth/tab-session";
-import { disconnectDelivery } from "@/cloud/session";
 import { useEffect, useRef, useState } from "react";
 import { finishExpiredSession } from "./finish-expired-session";
 import { startResume } from "./start-auth-resume";
@@ -46,9 +48,7 @@ export const useAuthWorkspace = () => {
     }
   };
   const closeProject = async () => {
-    await flushLocal();
-    disconnectDelivery();
-    setAuthSession(null);
+    await closeProjectConnection();
     setSelected(null);
     setIssues([]);
   };
@@ -68,19 +68,22 @@ export const useAuthWorkspace = () => {
           !expired(auth.expiresAt)
         );
       };
-      const items = await prepareProject(
-        auth.token,
+      const { items, warning } = await activateProject(
+        auth,
         identity.id,
         project,
         isCurrent,
       );
       if (!isCurrent()) return;
-      rememberSession(auth, identity.id, project.id);
-      setAuthSession({ ...auth, userId: identity.id, projectId: project.id });
+      setMessage(warning);
       setIssues(items);
       setSelected(project);
     } catch (error) {
       if (run !== generationRef.current) return;
+      if (error instanceof ResumeRejected) {
+        sessionRef.current = null;
+        setIdentity(null);
+      }
       setMessage(
         error instanceof Error ? error.message : "Project could not open.",
       );

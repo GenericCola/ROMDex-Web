@@ -52,7 +52,7 @@ const DeliveryReview = ({
     });
   };
   return (
-    <section>
+    <section className="delivery-review-card">
       <h3>{summary.title}</h3>
       <p>
         {record.status === "conflict"
@@ -90,7 +90,7 @@ const DeliveryReview = ({
           />
 
           {operation?.type === "attachment-delete" && (
-            <label>
+            <label className="port-check-line">
               <input
                 type="checkbox"
                 checked={missing}
