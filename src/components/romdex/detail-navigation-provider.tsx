@@ -58,7 +58,7 @@ const DetailNavigationProvider = ({ children }: PropsWithChildren) => {
         setTab("notes");
         setFocusNotes({ id });
       }
-      await workspaceStore.flush();
+      if (!workspaceStore.getSnapshot().error) await workspaceStore.flush();
     });
   };
   const back = () => {
@@ -76,7 +76,7 @@ const DetailNavigationProvider = ({ children }: PropsWithChildren) => {
       navigationRef.current.back(tree().byId);
       setPrevious(navigationRef.current.destination(tree().byId));
       selection.clear();
-      await workspaceStore.flush();
+      if (!workspaceStore.getSnapshot().error) await workspaceStore.flush();
     });
   };
   return (

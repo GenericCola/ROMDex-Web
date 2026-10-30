@@ -1,10 +1,15 @@
 import { MAX_UPLOAD } from "@/attachments/validate";
+import { cookieFetch, isCookieHandle } from "@/auth/cookie-client";
 import { authRequestGuard } from "@/auth/session";
 import { YOUTRACK_ORIGIN } from "./read-tasks";
 export const attachmentBytes = (value: string) => {
   const token = value.trim();
   const assertSession = authRequestGuard(token);
-  return async (raw: string, expected: number) => {
+  return async (
+    raw: string,
+    expected: number,
+    attachment?: { issue: string; id: string },
+  ) => {
     assertSession();
     if (expected > MAX_UPLOAD)
       throw Error("Download is limited to 50 MiB per file.");
@@ -16,13 +21,25 @@ export const attachmentBytes = (value: string) => {
       !/^\/(?:youtrack\/)?api\/files\//.test(url.pathname)
     )
       throw Error("YouTrack returned an unapproved attachment address.");
-    const response = await fetch(url, {
-      headers: { Authorization: "Bearer " + token },
-      credentials: "omit",
-      cache: "no-store",
-      redirect: "error",
-      signal: AbortSignal.timeout(30000),
-    });
+    if (isCookieHandle(token) && !attachment)
+      throw Error("Verified attachment identity required.");
+    const response = isCookieHandle(token)
+      ? await cookieFetch(
+          token,
+          "/api/attachment?issue=" +
+            encodeURIComponent(attachment?.issue ?? "") +
+            "&id=" +
+            encodeURIComponent(attachment?.id ?? "") +
+            "&size=" +
+            expected,
+        )
+      : await fetch(url, {
+          headers: { Authorization: "Bearer " + token },
+          credentials: "omit",
+          cache: "no-store",
+          redirect: "error",
+          signal: AbortSignal.timeout(30000),
+        });
     if (!response.ok || !response.body)
       throw Error("Attachment bytes could not be read.");
     const reader = response.body.getReader(),

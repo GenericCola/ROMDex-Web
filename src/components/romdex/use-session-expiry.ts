@@ -1,3 +1,4 @@
+import { assertCookieHandle, isCookieHandle } from "@/auth/cookie-client";
 import { expired, setAuthSession } from "@/auth/session";
 import { forgetSession } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
@@ -17,7 +18,15 @@ export const useSessionExpiry = ({
 }: SessionRefs & { finishExpired: () => Promise<void> }) => {
   const monitor = () => {
     const check = () => {
-      if (!sessionRef.current || !expired(sessionRef.current.expiresAt)) return;
+      if (!sessionRef.current) return;
+      let changed = false;
+      try {
+        if (isCookieHandle(sessionRef.current.token))
+          assertCookieHandle(sessionRef.current.token);
+      } catch {
+        changed = true;
+      }
+      if (!changed && !expired(sessionRef.current.expiresAt)) return;
       ++generationRef.current;
       disconnectDelivery();
       setAuthSession(null);
@@ -32,8 +41,12 @@ export const useSessionExpiry = ({
       void finishExpired();
     };
     const timer = window.setInterval(check, 1000);
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", check);
     return () => {
       window.clearInterval(timer);
+      window.removeEventListener("focus", check);
+      document.removeEventListener("visibilitychange", check);
     };
   };
   useEffect(monitor, [

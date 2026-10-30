@@ -1,3 +1,4 @@
+import { cookieFetch, isCookieHandle } from "@/auth/cookie-client";
 import { authRequestGuard } from "@/auth/session";
 import { YouTrackHttpError } from "./http-error";
 import { YOUTRACK_ORIGIN } from "./read-tasks";
@@ -13,23 +14,38 @@ export const sessionRequest = (value: string): YouTrackRequest => {
   const request: YouTrackRequest = async (route, method = "GET", body) => {
     assertSession();
     const form = body instanceof FormData;
-    const response = await fetch(YOUTRACK_ORIGIN + "/api/" + route, {
-      method,
-      headers: {
-        Authorization: "Bearer " + token,
-        Accept: "application/json",
-        ...(body !== undefined && !form
-          ? { "Content-Type": "application/json" }
-          : {}),
-      },
-      credentials: "omit",
-      cache: "no-store",
-      redirect: "error",
-      signal: AbortSignal.timeout(30000),
-      ...(body !== undefined
-        ? { body: form ? body : JSON.stringify(body) }
-        : {}),
-    });
+    const response = isCookieHandle(token)
+      ? await cookieFetch(
+          token,
+          "/api/youtrack?route=" + encodeURIComponent(route),
+          {
+            method,
+            headers:
+              body !== undefined && !form
+                ? { "Content-Type": "application/json" }
+                : {},
+            ...(body !== undefined
+              ? { body: form ? body : JSON.stringify(body) }
+              : {}),
+          },
+        )
+      : await fetch(YOUTRACK_ORIGIN + "/api/" + route, {
+          method,
+          headers: {
+            Authorization: "Bearer " + token,
+            Accept: "application/json",
+            ...(body !== undefined && !form
+              ? { "Content-Type": "application/json" }
+              : {}),
+          },
+          credentials: "omit",
+          cache: "no-store",
+          redirect: "error",
+          signal: AbortSignal.timeout(30000),
+          ...(body !== undefined
+            ? { body: form ? body : JSON.stringify(body) }
+            : {}),
+        });
     assertSession();
     if (response.status === 404 && method === "GET") return null;
     if (!response.ok) throw new YouTrackHttpError(response.status);

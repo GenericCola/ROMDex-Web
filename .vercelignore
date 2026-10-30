@@ -25,3 +25,6 @@ playwright-report
 .vercel
 media
 coverage
+
+server/*.test.ts
+server/*fixture.ts

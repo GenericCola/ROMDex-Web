@@ -1,4 +1,9 @@
 import { list, sessionRequest } from "@/youtrack/request";
+import {
+  assertCookieHandle,
+  cookieSession,
+  isCookieHandle,
+} from "./cookie-client";
 import { ResumeRejected } from "./resume-failure";
 export interface AuthorizedProject {
   id: string;
@@ -13,6 +18,14 @@ export interface YouTrackIdentity {
 export const readIdentity = async (
   token: string,
 ): Promise<YouTrackIdentity> => {
+  if (isCookieHandle(token)) {
+    assertCookieHandle(token);
+    const session = await cookieSession();
+    assertCookieHandle(token);
+    if (session?.token !== token)
+      throw new ResumeRejected("Sign in with YouTrack again.");
+    return session.identity;
+  }
   const request = sessionRequest(token);
   const raw = await request("users/me?fields=id,login,fullName,guest");
   if (!raw || typeof raw !== "object")

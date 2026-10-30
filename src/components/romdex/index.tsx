@@ -19,6 +19,7 @@ import Details from "./details";
 import DeviceBody from "./device-body";
 import Divider from "./divider";
 import Header from "./header";
+import LocalSaveRecovery from "./local-save-recovery";
 import Migration from "./migration";
 import RdxLibrary from "./rdx-library";
 import Selectors from "./selectors";
@@ -85,16 +86,9 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
             {inline.error}
           </p>
         )}
-        {state.error && (
-          <p className="port-recovery" role="alert">
-            {state.error}
-          </p>
-        )}
+        {state.error && <LocalSaveRecovery state={state} />}
         {state.ready && (
-          <DeviceBody
-            enabled={view.workspace === "romdex"}
-            inert={!!state.error}
-          >
+          <DeviceBody enabled={view.workspace === "romdex"} inert={false}>
             {view.workspace === "romdex" ? (
               <Selectors data={state.data} items={items} add={add} />
             ) : (

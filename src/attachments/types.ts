@@ -34,6 +34,7 @@ export type AttachmentOperation =
       base: Attachment;
     };
 export interface AttachmentPort {
+  requireUploadSize?: (size: number) => void;
   list: (issue: string) => Promise<Attachment[]>;
   upload: (issue: string, value: StoredUpload) => Promise<{ id: string }>;
   download: (issue: string, attachment: Attachment) => Promise<Uint8Array>;

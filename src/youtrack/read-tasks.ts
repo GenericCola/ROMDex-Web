@@ -1,3 +1,4 @@
+import { cookieFetch, isCookieHandle } from "@/auth/cookie-client";
 import { authRequestGuard } from "@/auth/session";
 import type { TaskItem } from "@/domain/types";
 import { YouTrackHttpError } from "./http-error";
@@ -82,20 +83,23 @@ export const readTasks = async (
     });
     let response: Response;
     try {
-      response = await fetch(
-        YOUTRACK_ORIGIN + "/api/issues?" + query.toString(),
-        {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + token.trim(),
-            Accept: "application/json",
-          },
-          credentials: "omit",
-          cache: "no-store",
-          redirect: "error",
-          signal: AbortSignal.timeout(30000),
-        },
-      );
+      response = isCookieHandle(token)
+        ? await cookieFetch(
+            token,
+            "/api/youtrack?route=" +
+              encodeURIComponent("issues?" + query.toString()),
+          )
+        : await fetch(YOUTRACK_ORIGIN + "/api/issues?" + query.toString(), {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + token.trim(),
+              Accept: "application/json",
+            },
+            credentials: "omit",
+            cache: "no-store",
+            redirect: "error",
+            signal: AbortSignal.timeout(30000),
+          });
     } catch {
       throw Error(
         "YouTrack could not be reached. Check your connection and allow this app's origin in YouTrack CORS settings. No workspace data was replaced.",

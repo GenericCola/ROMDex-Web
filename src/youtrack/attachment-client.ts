@@ -8,6 +8,7 @@ import {
   sameAttachment,
   validateAttachment,
 } from "@/attachments/validate";
+import { isCookieHandle } from "@/auth/cookie-client";
 import { attachmentBytes } from "./attachment-bytes";
 import type { YouTrackRequest } from "./request";
 import { issueId } from "./request";
@@ -35,7 +36,7 @@ export class AttachmentClient implements AttachmentPort {
   private bytes: ReturnType<typeof attachmentBytes>;
   constructor(
     private request: YouTrackRequest,
-    token: string,
+    private token: string,
   ) {
     this.bytes = attachmentBytes(token);
   }
@@ -74,8 +75,15 @@ export class AttachmentClient implements AttachmentPort {
       throw Error("Attachment inventory changed. Read it again.");
     return current;
   };
+  requireUploadSize = (size: number) => {
+    requireCloudUploadSize(size);
+    if (isCookieHandle(this.token) && size > 4_000_000)
+      throw Error(
+        "This file is too large for server sign-in upload (4 MB maximum). No upload was sent. Its queued bytes and local attachment are preserved.",
+      );
+  };
   upload = async (issue: string, value: StoredUpload) => {
-    requireCloudUploadSize(value.file.size);
+    this.requireUploadSize(value.file.size);
     const form = new FormData();
     form.append(
       "upload",
@@ -118,7 +126,10 @@ export class AttachmentClient implements AttachmentPort {
       throw Error(
         "The attachment changed or is unreadable. Refresh its metadata before downloading.",
       );
-    return this.bytes(raw.url, expected.size);
+    return this.bytes(raw.url, expected.size, {
+      issue: issueId(issue),
+      id: expected.id,
+    });
   };
   remove = async (issue: string, id: string) => {
     await this.request(

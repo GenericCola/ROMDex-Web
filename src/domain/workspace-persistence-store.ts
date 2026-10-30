@@ -50,7 +50,7 @@ export class WorkspacePersistenceStore {
     }
   };
   protected write = (update: (data: WorkspaceData) => void) => {
-    if (!this.state.ready || this.state.error || this.state.updating)
+    if (!this.state.ready || this.state.updating)
       throw Error(
         this.state.error ||
           (this.state.updating
@@ -60,6 +60,18 @@ export class WorkspacePersistenceStore {
     const data = structuredClone(this.state.data);
     update(data);
     validateWorkspace(data);
+    if (this.state.error) {
+      // Browsing is session-only while saving is unavailable. Never change the
+      // queued operations, journal, drafts, or revision to make navigation work.
+      const unchanged =
+        JSON.stringify({ ...data, view: null }) ===
+        JSON.stringify({ ...this.state.data, view: null });
+      const moved =
+        JSON.stringify(data.view) !== JSON.stringify(this.state.data.view);
+      if (!unchanged || !moved) throw Error(this.state.error);
+      this.publish({ data });
+      return Promise.resolve();
+    }
     this.publish({ data, pendingWrites: this.state.pendingWrites + 1 });
     const persist = async () => {
       try {
@@ -76,6 +88,38 @@ export class WorkspacePersistenceStore {
     };
     this.writes = this.writes.then(persist);
     return this.writes;
+  };
+  retryLocalSave = () => {
+    if (
+      !this.state.ready ||
+      !this.state.error ||
+      this.state.updating ||
+      this.state.delivering ||
+      this.state.pendingWrites > 0
+    )
+      return Promise.reject(Error("No loaded workspace needs a save retry."));
+    const retry = async () => {
+      try {
+        // Retain the original CAS revision. A conflict must never be resolved
+        // by loading a newer revision and overwriting another window's work.
+        this.revision = await this.storage.save(this.state.data, this.revision);
+        this.publish({ error: "" });
+      } catch (error) {
+        this.publish({
+          error:
+            error instanceof Error ? error.message : "Local saving failed.",
+        });
+        throw error;
+      } finally {
+        this.publish({ pendingWrites: this.state.pendingWrites - 1 });
+      }
+    };
+    this.publish({ pendingWrites: this.state.pendingWrites + 1 });
+    const result = this.writes.then(retry);
+    this.writes = result.catch(() => {
+      // Keep the queue usable; the caller and state retain the retry failure.
+    });
+    return result;
   };
   flush = async () => {
     let pending;

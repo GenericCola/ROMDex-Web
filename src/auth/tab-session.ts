@@ -1,4 +1,6 @@
 import { YOUTRACK_ORIGIN } from "@/youtrack/read-tasks";
+import { isCookieHandle } from "./cookie-client";
+import { saveCookieProject } from "./cookie-preferences";
 import { OAUTH_ORIGIN } from "./origins";
 import { clearResumeRecord, writeResumeRecord } from "./resume-record";
 export const tabStorage = () => {
@@ -11,6 +13,11 @@ export const rememberSession = (
   userId: string,
   projectId: string | null,
 ) => {
+  if (isCookieHandle(auth.token)) {
+    saveCookieProject(userId, projectId);
+    clearResumeRecord(tabStorage());
+    return;
+  }
   writeResumeRecord(tabStorage(), {
     version: 1,
     instance: YOUTRACK_ORIGIN,

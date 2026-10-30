@@ -1,3 +1,4 @@
+import { assertCookieHandle, isCookieHandle } from "./cookie-client";
 let current: {
   token: string;
   expiresAt: number;
@@ -23,6 +24,7 @@ export const hasAuthSession = () => {
 export const authRequestGuard = (token: string) => {
   const bound = current;
   return () => {
+    if (isCookieHandle(token)) assertCookieHandle(token);
     if (
       bound &&
       (current !== bound ||

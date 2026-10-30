@@ -73,6 +73,7 @@ export const deliverAttachment = async (
     }
   } else {
     requireCloudUploadSize(operation.file.size);
+    files.requireUploadSize?.(operation.file.size);
     const value = await storage.get(operation.uploadId);
     if (!value || !sameUploadFile(value.file, operation.file))
       throw Error("Restore the queued file bytes before delivery.");

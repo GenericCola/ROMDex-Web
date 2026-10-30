@@ -88,9 +88,11 @@ const TaskWriting = ({
             placeholder="Notes, Instructions, or a Development Prompt…"
           />
           <p className="editor-hint">
-            {readOnly
-              ? "This ticket is being synchronized or needs delivery review. You can still browse and edit unrelated tickets."
-              : "Edits save locally. When connected, Auto-Sync sends committed edits after a short typing pause. Save Changes can send the current version."}
+            {workspaceStore.getSnapshot().error
+              ? "Local saving needs attention. Editing is paused; you can browse, export a recovery copy, or retry local saving."
+              : readOnly
+                ? "This ticket is being synchronized or needs delivery review. You can still browse and edit unrelated tickets."
+                : "Edits save locally. When connected, Auto-Sync sends committed edits after a short typing pause. Save Changes can send the current version."}
           </p>
         </section>
       ) : (

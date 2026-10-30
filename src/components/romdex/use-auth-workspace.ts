@@ -2,19 +2,21 @@ import {
   activateProject,
   closeProjectConnection,
 } from "@/auth/activate-project";
+import { startCookieLogin } from "@/auth/cookie-client";
+import { flushLocal } from "@/auth/flush-local";
 import type {
   AuthorizedProject,
   ProjectIssue,
   YouTrackIdentity,
 } from "@/auth/identity";
-import { readIdentity } from "@/auth/identity";
-import { signInPopup } from "@/auth/popup";
 import { ResumeRejected } from "@/auth/resume-failure";
-import { expired } from "@/auth/session";
-import { forgetSession, rememberSession } from "@/auth/tab-session";
+import { expired, setAuthSession } from "@/auth/session";
+import { rememberSession } from "@/auth/tab-session";
+import { disconnectDelivery } from "@/cloud/session";
 import { useEffect, useRef, useState } from "react";
+import { cookieSignOut } from "./cookie-sign-out";
 import { finishExpiredSession } from "./finish-expired-session";
-import { startResume } from "./start-auth-resume";
+import { startCookieResume } from "./start-cookie-resume";
 import { useSessionExpiry } from "./use-session-expiry";
 export const useAuthWorkspace = () => {
   const [identity, setIdentity] = useState<YouTrackIdentity | null>(null);
@@ -27,19 +29,21 @@ export const useAuthWorkspace = () => {
   const sessionRef = useRef<{ token: string; expiresAt: number } | null>(null);
   const generationRef = useRef(0);
   const signIn = async () => {
-    if (recoveryBlocked) return;
-    sessionRef.current = null;
+    if (recoveryBlocked || busy) return;
     setRetryable(false);
     const run = ++generationRef.current;
     setBusy(true);
     setMessage("");
     try {
-      const auth = await signInPopup();
-      const person = await readIdentity(auth.token);
+      await flushLocal();
       if (run !== generationRef.current) return;
-      rememberSession(auth, person.id, null);
-      sessionRef.current = auth;
-      setIdentity(person);
+      disconnectDelivery();
+      setAuthSession(null);
+      sessionRef.current = null;
+      setIdentity(null);
+      setSelected(null);
+      setIssues([]);
+      await startCookieLogin();
     } catch (error) {
       if (run === generationRef.current)
         setMessage(error instanceof Error ? error.message : "Sign-in failed.");
@@ -54,7 +58,14 @@ export const useAuthWorkspace = () => {
   };
   const choose = async (project: AuthorizedProject) => {
     const auth = sessionRef.current;
-    if (!auth || !identity || expired(auth.expiresAt)) return;
+    if (
+      busy ||
+      recoveryBlocked ||
+      !auth ||
+      !identity ||
+      expired(auth.expiresAt)
+    )
+      return;
     setBusy(true);
     setMessage("");
     const run = ++generationRef.current;
@@ -92,21 +103,17 @@ export const useAuthWorkspace = () => {
     }
   };
   const signOut = async () => {
-    if (recoveryBlocked) return;
-    setBusy(true);
-    try {
-      forgetSession();
-      ++generationRef.current;
-      await closeProject();
-      sessionRef.current = null;
-      setIdentity(null);
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Save local work first.",
-      );
-    } finally {
-      setBusy(false);
-    }
+    if (recoveryBlocked || busy) return;
+    await cookieSignOut(
+      closeProject,
+      () => {
+        ++generationRef.current;
+        sessionRef.current = null;
+        setIdentity(null);
+      },
+      setBusy,
+      setMessage,
+    );
   };
   const finishExpired = () => {
     setRetryable(false);
@@ -119,7 +126,7 @@ export const useAuthWorkspace = () => {
   const session = { sessionRef, generationRef, setBusy, setMessage };
   useSessionExpiry({ ...session, finishExpired });
   const resume = () => {
-    return startResume({
+    return startCookieResume({
       sessionRef,
       generationRef,
       setBusy,

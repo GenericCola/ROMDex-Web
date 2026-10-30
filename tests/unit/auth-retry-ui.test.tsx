@@ -96,7 +96,7 @@ test("recovery-blocked gate disables signed-out sign-in and retry controls", asy
   );
   assert.match(
     hook,
-    /const signIn = async \(\) => \{\s*if \(recoveryBlocked\) return/,
+    /const signIn = async \(\) => \{\s*if \(recoveryBlocked \|\| busy\) return/,
   );
   assert.match(hook, /if \(!recoveryBlocked && !busy\) resume/);
 });
