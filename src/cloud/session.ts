@@ -4,10 +4,11 @@ import { flushDraftEditors } from "@/domain/editor-drafts";
 import { hasTaskComposition } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
-import { connectionNeedsManualSave } from "./connection-policy";
 import { deliverQueue } from "./delivery";
 import { DeliveryInputsChanged } from "./delivery-inputs";
+import { HierarchyQuarantine } from "./hierarchy-quarantine";
 import { cloudData } from "./types";
+const hierarchyQuarantine = new HierarchyQuarantine();
 let client: DeliveryClient | null = null;
 let suspended = false;
 let connectionGeneration = 0;
@@ -49,12 +50,10 @@ export const connectDelivery = async (
   });
   await workspaceStore.flush();
   assertCurrent();
+  suspended = hierarchyQuarantine.capture(workspaceStore.getSnapshot().data);
   client = next;
-  suspended = connectionNeedsManualSave(workspaceStore.getSnapshot().data);
   workspaceStore.setConnection(
-    suspended
-      ? "Data connection ready. Reviewed changes remain paused until Save Changes."
-      : "YouTrack data connected",
+    hierarchyQuarantine.message(workspaceStore.getSnapshot().data, suspended),
   );
 };
 export const disconnectDelivery = () => {
@@ -70,6 +69,7 @@ export const deliveryConnected = () => {
   return client !== null;
 };
 export const saveDelivery = async (automatic = false) => {
+  hierarchyQuarantine.assertSafe(workspaceStore.getSnapshot().data);
   await flushDraftEditors();
   if (
     automatic &&

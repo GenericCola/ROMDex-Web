@@ -10,6 +10,8 @@ export const startTaskDrag = (
   event: PointerEvent<HTMLElement>,
   selectedIds: string[],
 ): Drag | null => {
+  // Touch/pen gestures scroll; hierarchy moves require a deliberate mouse drag.
+  if (event.pointerType !== "mouse") return null;
   const grip = (event.target as Element).closest<HTMLElement>(
     "[data-drag],.selector-main[data-select]",
   );

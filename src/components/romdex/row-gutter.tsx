@@ -34,7 +34,7 @@ const RowGutter = ({
             moveSibling(next, id, direction);
           });
         }}
-        style={{ touchAction: "none" }}
+        style={{ touchAction: "pan-y" }}
       >
         ⠿
       </button>
