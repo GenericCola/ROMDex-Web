@@ -1,5 +1,6 @@
 import { createGeneration } from "./cookie-generation";
 import type { YouTrackIdentity } from "./identity";
+import { preserveRecoverySignIn } from "./recovery-mode";
 const prefix = "romdex-cookie:";
 let csrf = "";
 const random = () => {
@@ -77,6 +78,7 @@ export const cookieSession = async () => {
   };
 };
 export const startCookieLogin = async () => {
+  preserveRecoverySignIn();
   const generation = cookieGeneration().rotate();
   const response = await fetch("/api/auth/start", {
     method: "POST",

@@ -16,6 +16,7 @@ export const connectDelivery = async (
   token: string,
   expectedUserId?: string,
 ) => {
+  hierarchyQuarantine.assertConnectionAllowed();
   const generation = ++connectionGeneration;
   const checkAuth = authRequestGuard(token);
   const assertCurrent = () => {
@@ -140,6 +141,7 @@ export const automaticDelivery = () => {
   return saveDelivery(true).catch(failed);
 };
 export const requireDelivery = () => {
+  hierarchyQuarantine.assertConnectionAllowed();
   if (!client)
     throw Error(
       "Reconnect delivery with the bound account before reviewing cloud results.",

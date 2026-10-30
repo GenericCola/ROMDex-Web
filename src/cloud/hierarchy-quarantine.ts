@@ -1,8 +1,12 @@
+import { assertNotRecoveryMode } from "@/auth/recovery-mode";
 import type { WorkspaceData } from "@/domain/types";
 import { connectionNeedsManualSave } from "./connection-policy";
 // Reopening must not resend unreviewed hierarchy changes from an earlier session.
 export class HierarchyQuarantine {
   private ids = new Set<string>();
+  assertConnectionAllowed() {
+    assertNotRecoveryMode();
+  }
   capture(data: WorkspaceData) {
     this.ids = new Set(
       data.operations
@@ -23,6 +27,7 @@ export class HierarchyQuarantine {
         : "YouTrack data connected";
   }
   assertSafe(data: WorkspaceData) {
+    assertNotRecoveryMode();
     if (this.blocked(data))
       throw Error(
         "Earlier hierarchy changes are quarantined. Do not retry Save. Export a recovery copy and review these moves before delivery; all local work is preserved.",
