@@ -1,0 +1,55 @@
+/* Explicit action rows share spacing; compact task icons and tabs stay separate. */
+.romdex-app {
+  --romdex-control-gap: 10px;
+}
+.romdex-app :is(.port-actions, .dialog-actions, .attachment-actions),
+.romdex-app .rdx-plan-dialog footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--romdex-control-gap);
+}
+.romdex-app
+  :is(.port-actions, .dialog-actions, .attachment-actions)
+  > :is(button, a),
+.romdex-app .rdx-plan-dialog footer > button {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.romdex-app .port-actions > :is(p, div) {
+  flex-basis: 100%;
+}
+.romdex-app .romdex-update-dialog .port-actions {
+  justify-content: center;
+}
+.romdex-app
+  :is(dialog, .port-form)
+  label:has(> input:is([type="checkbox"], [type="radio"])),
+.romdex-app :is(.port-check-line, .deletion-review-confirmation) {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--romdex-control-gap);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.romdex-app
+  :is(dialog, .port-form)
+  label
+  > input:is([type="checkbox"], [type="radio"]),
+.romdex-app
+  :is(.port-check-line, .deletion-review-confirmation)
+  > input:is([type="checkbox"], [type="radio"]) {
+  flex: 0 0 auto;
+  max-width: 18px;
+  margin: 0.2em 0 0;
+}
+/* Reserve the longest sync label so On/Off/Paused cannot reflow the header. */
+.romdex-app .auto-sync-toggle .toggle-value {
+  box-sizing: content-box;
+  width: 6ch;
+  min-width: 6ch;
+  flex: 0 0 6ch;
+}

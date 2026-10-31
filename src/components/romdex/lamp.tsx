@@ -13,15 +13,17 @@ const classes = {
 const Lamp = ({
   color,
   className,
+  label,
 }: {
   color: LampColor;
   className?: string;
+  label?: string;
 }) => {
   return (
     <span
       className={tw(classes[color], className)}
       role="img"
-      aria-label={STATUS[color]}
+      aria-label={label ?? STATUS[color]}
     />
   );
 };

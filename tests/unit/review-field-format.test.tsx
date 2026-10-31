@@ -61,18 +61,15 @@ test("ordinary assigned status conflict explains proposed and competing values a
     ],
   };
   const text = conflictSummary(op, record).items.join("\n");
-  assert.match(text, /Your proposed change — Assigned status: Done/);
+  assert.match(text, /change status to Done/);
   assert.match(
     text,
     /reviewed Critical \/ Debugging; browser Done; YouTrack Needs Testing/,
   );
-  assert.match(
-    reviewChoiceLabel(op, record, true)!,
-    /Keep my Assigned status: Done; queue for Save/,
-  );
+  assert.match(reviewChoiceLabel(op, record, true)!, /Use my choice: Done/);
   assert.match(
     reviewChoiceLabel(op, record, false)!,
-    /Keep YouTrack Assigned status: Needs Testing; archive mine/,
+    /Keep YouTrack: Needs Testing/,
   );
 });
 test("native enum, user and tag identifiers resolve only from exact unambiguous saved evidence", () => {
@@ -123,8 +120,8 @@ test("proposed edit remains readable without conflict evidence; missing fields n
     status: "uncertain",
     message: "interrupted",
   }).items.join("\n");
-  assert.match(result, /Release: Unknown identifier enum-missing/);
-  assert.match(result, /Notes: content withheld/);
+  assert.match(result, /change release to Unknown identifier enum-missing/);
+  assert.match(result, /change notes to content withheld/);
   assert.match(result, /No field comparison is available/);
   assert.doesNotMatch(result, /PRIVATE/);
   assert.match(
@@ -134,7 +131,7 @@ test("proposed edit remains readable without conflict evidence; missing fields n
       issueId: base.id,
       ids: [base.id],
     })[0],
-    /Delete listed tasks: PMON-900099/,
+    /delete listed tasks: PMON-900099/,
   );
 });
 

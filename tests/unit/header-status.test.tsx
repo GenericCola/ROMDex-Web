@@ -80,3 +80,76 @@ test("current manual Save result is not masked by old pause, but a newer pause r
   state.connection = "Automatic delivery paused: newer";
   assert.equal(deliveryMessage(state, result), state.connection);
 });
+
+test("Save light and its explanation use the same pending-work truth, independent of app updates", async () => {
+  const { saveIndicator } =
+    await import("../../src/components/romdex/header-status");
+  for (const drafts of [false, true])
+    for (const writes of [0, 1])
+      for (const failed of [false, true]) {
+        const state: WorkspaceSnapshot = {
+          ready: true,
+          updating: false,
+          delivering: false,
+          data: emptyWorkspace(),
+          pendingWrites: writes,
+          error: failed ? "Storage unavailable" : "",
+          connection: "Connected",
+        };
+        const indicator = saveIndicator(state, drafts);
+        assert.equal(
+          indicator.color,
+          failed ? "red" : writes ? "yellow" : drafts ? "red" : "green",
+        );
+        assert.equal(indicator.description, saveExplanation(state, drafts));
+        assert.doesNotMatch(indicator.description, /up to date/i);
+      }
+  for (const kind of ["queue", "parent", "review"] as const) {
+    const state: WorkspaceSnapshot = {
+      ready: true,
+      updating: false,
+      delivering: false,
+      data: emptyWorkspace(),
+      pendingWrites: 0,
+      error: "",
+      connection: "Connected",
+    };
+    if (kind === "queue")
+      state.data.operations.push({
+        opId: "pending",
+        type: "comment",
+        issueId: "PMON-1",
+        text: "kept",
+        created: 1,
+      });
+    if (kind === "parent")
+      state.data.cloud = { ...state.data.cloud, rollupPending: true };
+    if (kind === "review")
+      state.data.cloud = {
+        ...state.data.cloud,
+        records: { pending: { status: "uncertain" } },
+      };
+    assert.equal(saveIndicator(state, false).color, "red");
+    assert.doesNotMatch(saveIndicator(state, false).description, /No pending/);
+    state.delivering = true;
+    assert.equal(saveIndicator(state, false).color, "red");
+  }
+  const source = readFileSync("src/components/romdex/header.tsx", "utf8");
+  assert.match(source, /color=\{indicator.color\}/);
+  assert.match(source, /label=\{saveReason\}/);
+  const update = readFileSync(
+    "src/components/pwa-controls/check-update.ts",
+    "utf8",
+  );
+  assert.match(update, /latest ROMDex app version. Ticket syncing is separate/);
+});
+
+test("header contains only fixed controls; expanding feedback is kept out of its layout", () => {
+  const source = readFileSync("src/components/romdex/header.tsx", "utf8");
+  assert.doesNotMatch(
+    source,
+    /className="port-notice|Review sync problems|<p[ >]/,
+  );
+  assert.match(source, /ConnectionIndicator/);
+  assert.match(source, /detail=\{/);
+});

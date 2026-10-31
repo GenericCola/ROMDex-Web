@@ -5,7 +5,7 @@ const HierarchyRecovery = ({ state }: { state: WorkspaceSnapshot }) => {
   const recovery = useHierarchyRecovery();
   if (!recoveryMode()) return null;
   return (
-    <section aria-label="Local hierarchy recovery">
+    <section className="port-form" aria-label="Local hierarchy recovery">
       <button
         onClick={() => {
           void recovery.read();
@@ -44,7 +44,7 @@ const HierarchyRecovery = ({ state }: { state: WorkspaceSnapshot }) => {
             {recovery.preview.items.map((item) => {
               return (
                 <li key={item.id}>
-                  <label>
+                  <label className="port-check-line">
                     <input
                       type="checkbox"
                       aria-label={"Repair parent for " + item.issueId}
@@ -80,7 +80,7 @@ const HierarchyRecovery = ({ state }: { state: WorkspaceSnapshot }) => {
                 {recovery.selected.length} item(s) selected. A local recovery
                 backup is retained before applying.
               </p>
-              <label>
+              <label className="port-check-line">
                 <input
                   type="checkbox"
                   checked={recovery.confirmed}

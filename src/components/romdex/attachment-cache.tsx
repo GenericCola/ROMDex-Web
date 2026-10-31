@@ -87,19 +87,21 @@ const AttachmentCache = () => {
             staged bytes.
           </label>
           <p role="status">{work.message}</p>
-          <button
-            disabled={work.busy || !approved || !files.length}
-            onClick={remove}
-          >
-            Remove Listed Staged Copies
-          </button>
-          <button
-            onClick={() => {
-              setFiles(null);
-            }}
-          >
-            Cancel
-          </button>
+          <div className="port-actions">
+            <button
+              disabled={work.busy || !approved || !files.length}
+              onClick={remove}
+            >
+              Remove Listed Staged Copies
+            </button>
+            <button
+              onClick={() => {
+                setFiles(null);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </Dialog>
       )}
     </>

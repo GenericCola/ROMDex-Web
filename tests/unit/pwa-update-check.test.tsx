@@ -66,7 +66,7 @@ test("forces update and remains pending until the real registration update resol
   release();
   await check.work;
   assert.equal(done, true);
-  assert.match(check.messages.at(-1) ?? "", /up to date/);
+  assert.match(check.messages.at(-1) ?? "", /latest ROMDex app version/);
   assert.equal(check.waiting.at(-1), null);
 });
 test("waits for actual installation, then exposes waiting worker without activating it", async () => {
@@ -108,7 +108,7 @@ test("already waiting still forces a check, no updatefound leaves app up to date
   first.installing = null;
   install.move("activated");
   await initial.work;
-  assert.match(initial.messages.at(-1) ?? "", /up to date/);
+  assert.match(initial.messages.at(-1) ?? "", /latest ROMDex app version/);
 });
 test("offline, network failure, failed installation and missing registration are honest errors", async () => {
   const offline = new Registration();

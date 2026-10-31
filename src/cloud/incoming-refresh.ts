@@ -9,6 +9,7 @@ import { draftTicketIds } from "@/domain/editor-drafts";
 import { editingTicketIds } from "@/domain/task-editing";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
+import { incomingStep, IncomingSuperseded } from "./incoming-error";
 import { deliveryConnected, requireDelivery } from "./session";
 const heldTickets = () => {
   return new Set([...draftTicketIds(), ...editingTicketIds()]);
@@ -51,7 +52,7 @@ export const incomingContext = () => {
         next.error ||
         next.updating
       )
-        throw Error("The workspace changed while reading incoming updates.");
+        throw new IncomingSuperseded("The workspace changed during this read.");
     };
     return { client, current };
   } catch {
@@ -87,13 +88,19 @@ export const refreshIncoming = (
     cached = [];
   }
   const current = () => {
-    if (!alive()) throw Error("Incoming update watcher stopped.");
+    if (!alive()) throw new IncomingSuperseded("Incoming watcher stopped.");
     context.current();
+  };
+  const apply = (items: TaskItem[]) => {
+    return incomingStep("apply", () => {
+      return workspaceStore.applyIncoming(items, heldTickets(), current);
+    });
   };
   const run = async () => {
     current();
     if (Date.now() - checkedAt >= 1000) {
-      const next = await context.client.latestRevision();
+      const read = context.client.latestRevision;
+      const next = await incomingStep("revision", read);
       current();
       if (
         force ||
@@ -101,19 +108,19 @@ export const refreshIncoming = (
         !fullAt ||
         Date.now() - fullAt >= 60000
       ) {
-        const items = await context.client.all();
+        const items = await incomingStep("tasks", context.client.all);
         current();
-        await workspaceStore.applyIncoming(items, heldTickets(), current);
+        await apply(items);
         current();
         cached = items;
         fullAt = Date.now();
         revision = next;
       } else if (cached.length) {
-        await workspaceStore.applyIncoming(cached, heldTickets(), current);
+        await apply(cached);
       }
       checkedAt = Date.now();
     } else if (cached.length) {
-      await workspaceStore.applyIncoming(cached, heldTickets(), current);
+      await apply(cached);
     }
   };
   running = run().finally(() => {

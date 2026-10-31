@@ -79,11 +79,11 @@ test("paused recovery identifies the route and only offers retry without unresol
       const before = JSON.stringify(workspaceStore.getSnapshot().data);
       const requests = reads;
       const html = renderToStaticMarkup(<DeliveryControls />);
-      assert.match(html, /Signed in, but delivery is paused/);
+      assert.match(html, /Save to YouTrack/);
       if (status === undefined || status === "ready")
-        assert.match(html, /Retry queued changes/);
+        assert.match(html, /SAVE CHANGE/);
       else {
-        assert.doesNotMatch(html, /Retry queued changes/);
+        assert.doesNotMatch(html, /SAVE CHANGE/);
         assert.match(html, /PMON-499/);
       }
       assert.equal(reads, requests, "render never starts readback or delivery");
@@ -92,7 +92,7 @@ test("paused recovery identifies the route and only offers retry without unresol
     }
     assert.match(
       syncControl(true, true, true).description,
-      /Review sync problems/,
+      /Open Connection Details/,
     );
     assert.match(
       syncControl(true, true, true).description,

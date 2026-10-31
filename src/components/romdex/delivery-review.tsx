@@ -1,13 +1,13 @@
 import { reviewDelivery } from "@/cloud/review";
 import type { DeliveryRecord } from "@/cloud/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import type { ChangeEvent } from "react";
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import AttachmentReview from "./attachment-review";
 import { conflictSummary } from "./conflict-summary";
 import DeletionReviewActions from "./deletion-review-actions";
 import DeliveryReceipt, { StopDeliveryLabel } from "./delivery-receipt";
 import DeliveryTechnicalDetails from "./delivery-technical-details";
+import ReviewComparison from "./review-comparison";
 import ReviewGuidance from "./review-guidance";
 import {
   reviewChoiceLabel,
@@ -45,9 +45,6 @@ const DeliveryReview = ({
             return entry.id === operation?.issueId;
           });
   const summary = conflictSummary(operation, record, task?.summary);
-  const renderChange = (text: string, index: number) => {
-    return <li key={index}>{text}</li>;
-  };
   const run = (choice: "cloud" | "local" | "confirm") => {
     void execute(() => {
       return reviewDelivery(id, choice, receipt, missing);
@@ -65,21 +62,19 @@ const DeliveryReview = ({
   return (
     <section className="delivery-review-card">
       <h3>{summary.title}</h3>
-      <p>
-        {record.status === "conflict"
-          ? "Changed in YouTrack — your queued change is paused."
-          : "Earlier delivery has an unknown outcome — nothing will be resent automatically."}
-      </p>
-      <p>
-        <strong>Why this needs review:</strong>{" "}
-        {record.message || "No failure details were saved."}
-      </p>
-      <p>{summary.explanation}</p>
-      <ul>{summary.items.map(renderChange)}</ul>
+      {record.status === "conflict" ? (
+        <p>This task also changed in YouTrack. Choose which version to keep.</p>
+      ) : (
+        <ReviewGuidance choice="check" />
+      )}
+      <ReviewComparison
+        operation={operation}
+        record={record}
+        items={summary.items}
+      />
       {operation?.type === "edit" && operation.purpose === "rollup" && (
         <ReviewGuidance choice="rollup" />
       )}
-      {operation?.type !== "delete" && <ReviewGuidance choice="check" />}
       {operation?.type === "delete" ? (
         <DeletionReviewActions
           operation={operation}
@@ -123,22 +118,27 @@ const DeliveryReview = ({
                   !missing)
               }
             >
-              Check YouTrack; confirm without resending
+              Check whether this saved
             </button>
-            {operation?.type === "edit" && operation.purpose !== "rollup" && (
-              <div>
-                <ReviewGuidance choice="keep" />
-                <button onClick={local} disabled={busy}>
-                  {reviewChoiceLabel(operation, record, true) ??
-                    "Keep my changes for next Save"}
-                </button>
-              </div>
-            )}
+            {operation?.type === "edit" &&
+              record.status === "conflict" &&
+              operation.purpose !== "rollup" && (
+                <div>
+                  <ReviewGuidance choice="keep" />
+                  <button onClick={local} disabled={busy}>
+                    {reviewChoiceLabel(operation, record, true) ??
+                      "Use my changes"}
+                  </button>
+                </div>
+              )}
             <ReviewGuidance choice="stop" />
             <button onClick={cloud} disabled={busy || !operation}>
-              {reviewChoiceLabel(operation, record, false) ?? (
-                <StopDeliveryLabel type={operation?.type} />
-              )}
+              {reviewChoiceLabel(operation, record, false) ??
+                (operation?.type === "edit" ? (
+                  "Keep YouTrack; set aside my change"
+                ) : (
+                  <StopDeliveryLabel type={operation?.type} />
+                ))}
             </button>
           </div>
         </>

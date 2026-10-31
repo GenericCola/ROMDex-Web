@@ -29,25 +29,27 @@ const UpdateCheck = ({
           {update.message}
         </p>
       </div>
-      {update.hasUpdate && (
-        <button
-          disabled={update.checking || update.applying}
-          onClick={() => {
-            void update.reloadToUpdate();
-          }}
-        >
-          Apply update
-        </button>
-      )}
-      {!update.checking && !update.applying && (
-        <button
-          onClick={() => {
-            void update.checkForUpdates();
-          }}
-        >
-          Check again
-        </button>
-      )}
+      <div className="port-actions">
+        {update.hasUpdate && (
+          <button
+            disabled={update.checking || update.applying}
+            onClick={() => {
+              void update.reloadToUpdate();
+            }}
+          >
+            Apply update
+          </button>
+        )}
+        {!update.checking && !update.applying && (
+          <button
+            onClick={() => {
+              void update.checkForUpdates();
+            }}
+          >
+            Check again
+          </button>
+        )}
+      </div>
     </Dialog>
   );
 };

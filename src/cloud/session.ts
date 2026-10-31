@@ -4,6 +4,7 @@ import { hasTaskComposition } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { deliverQueue } from "./delivery";
+import { reportDeliveryFailure } from "./delivery-failure";
 import { DeliveryInputsChanged } from "./delivery-inputs";
 import { HierarchyQuarantine } from "./hierarchy-quarantine";
 import { finishLocalSave, saveLocalDrafts } from "./save-local-drafts";
@@ -111,6 +112,7 @@ export const saveDelivery = async (automatic = false) => {
       return error.message;
     }
     suspended = true;
+    reportDeliveryFailure(error);
     throw error;
   }
 };
@@ -130,12 +132,7 @@ export const automaticDelivery = () => {
   )
     return;
   const failed = (error: unknown) => {
-    return workspaceStore.setConnection(
-      "Automatic delivery paused: " +
-        (error instanceof Error
-          ? error.message
-          : "Cloud delivery needs review"),
-    );
+    reportDeliveryFailure(error, true);
   };
   return saveDelivery(true).catch(failed);
 };

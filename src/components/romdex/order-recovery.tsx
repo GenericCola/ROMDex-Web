@@ -19,7 +19,7 @@ const OrderRecovery = ({ state }: { state: WorkspaceSnapshot }) => {
   } = useOrderRecovery();
   const items = materialize(state.data.remote, state.data.operations);
   return (
-    <section aria-label="Local order recovery">
+    <section className="port-form" aria-label="Local order recovery">
       <button
         onClick={start}
         disabled={
@@ -72,7 +72,7 @@ const OrderRecovery = ({ state }: { state: WorkspaceSnapshot }) => {
               <button onClick={backup} disabled={busy}>
                 Download current order backup
               </button>
-              <label>
+              <label className="port-check-line">
                 <input
                   type="checkbox"
                   checked={confirmed}

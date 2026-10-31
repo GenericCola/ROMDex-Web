@@ -1,4 +1,6 @@
 import { authIdentity, authToken, hasAuthSession } from "@/auth/session";
+import { reportDeliveryFailure } from "@/cloud/delivery-failure";
+import { incomingMessage, subscribeIncoming } from "@/cloud/incoming-status";
 import {
   connectDelivery,
   deliveryConnected,
@@ -6,25 +8,31 @@ import {
   saveDelivery,
 } from "@/cloud/session";
 import { cloudData } from "@/cloud/types";
-import { needsDeliveryReview, reviewNotice } from "@/domain/review-browsing";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import DeliveryFeedback from "./delivery-feedback";
 import DeliveryReview from "./delivery-review";
 import SyncRecoveryPanel from "./sync-recovery-panel";
 const DeliveryControls = () => {
   const { delivering, data, connection } = workspaceStore.getSnapshot();
+  const incoming = useSyncExternalStore(
+    subscribeIncoming,
+    incomingMessage,
+    () => {
+      return "";
+    },
+  );
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const runningRef = useRef(false);
   const execute = async (
     action: () => Promise<void | string>,
-    success = "Saved. Use Save Changes to run one delivery cycle.",
+    success = "Connected. Your changes are kept on this device until saved.",
   ) => {
     if (runningRef.current) return;
     if (workspaceStore.getSnapshot().delivering) {
       setMessage(
-        "Delivery is running. Review actions resume when it finishes.",
+        "Saving is in progress. Please wait before reviewing this change.",
       );
       return;
     }
@@ -56,7 +64,10 @@ const DeliveryControls = () => {
   });
   const retry = () => {
     void execute(() => {
-      return saveDelivery();
+      return saveDelivery().catch((error: unknown) => {
+        reportDeliveryFailure(error);
+        throw error;
+      });
     });
   };
   const render = ([id, record]: (typeof records)[number]) => {
@@ -72,25 +83,11 @@ const DeliveryControls = () => {
   };
   return (
     <section className="delivery-controls-panel">
-      <h3>Cloud delivery</h3>
-      <p>
-        Connected automatically after verified sign-in. Save Changes delivers
-        new tasks, listed deletions, hierarchy, assigned status with parent
-        rollups, titles, notes, priority, complexity and comments. Assigned
-        choices stay in this browser while shared status is disabled; recovery
-        exports retain them. Calculated statuses go to YouTrack State. Deletions
-        permanently remove only the reviewed list. Auto-Sync honors your saved
-        preference. Turning it off stops automatic delivery, while manual Save
-        and review remain available. Avoid simultaneous desktop edits to the
-        same fields. A timeout pauses automatic delivery until review.
-      </p>
-      <p role="status">
-        {deliveryConnected()
-          ? deliveryPaused()
-            ? "Signed in, but delivery is paused. Follow the steps below; turning Auto-Sync on does not resolve a failed change."
-            : "Data connection ready."
-          : "Data connection unavailable. No queued changes will be sent."}
-      </p>
+      <h3>Save to YouTrack</h3>
+      {incoming && <p role="status">{incoming}</p>}
+      {!deliveryConnected() && (
+        <p>Not connected. Your changes are kept on this device.</p>
+      )}
       {!deliveryConnected() && (
         <button
           onClick={connect}
@@ -99,7 +96,10 @@ const DeliveryControls = () => {
           Retry data connection
         </button>
       )}
-      {deliveryPaused() && (
+      {(deliveryPaused() ||
+        data.operations.length > 0 ||
+        !!cloudData(data).rollupPending ||
+        records.length > 0) && (
         <SyncRecoveryPanel
           data={data}
           connection={connection}
@@ -109,19 +109,8 @@ const DeliveryControls = () => {
           retry={retry}
         />
       )}
-      {needsDeliveryReview(workspaceStore.getSnapshot().data) && (
-        <p>
-          {reviewNotice(workspaceStore.getSnapshot().data)} Browsing is
-          available. Only affected tickets and their dependencies are locked;
-          other tickets remain editable.
-        </p>
-      )}
       {records.map(render)}
       <DeliveryFeedback message={message} />
-      <p>
-        Shared assigned status is unavailable while its concurrency safety check
-        remains unresolved.
-      </p>
     </section>
   );
 };

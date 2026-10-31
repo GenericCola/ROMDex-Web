@@ -73,15 +73,11 @@ const render = (
 test("paused edit names the task, exposes reason and explains safe choices without executing them", () => {
   const html = render(edit);
   assert.match(html, /Review PMON-499 · Synthetic paused ticket/);
-  assert.ok(
-    html.indexOf("Synthetic request interrupted") < html.indexOf("<details>"),
-  );
-  assert.match(html, /unknown outcome/);
-  assert.match(html, /Check YouTrack; confirm without resending/);
-  assert.match(html, /Keep my changes for next Save/);
-  assert.match(html, /fields can replace the YouTrack/);
-  assert.match(html, /No edit is sent now/);
-  assert.match(html, /recovery archive/);
+  assert.match(html, /do not know whether the earlier attempt saved/);
+  assert.match(html, /Check whether this saved/);
+  assert.doesNotMatch(html, /Use my changes/);
+  assert.match(html, /will not send it again/);
+  assert.match(html, /recovery history/);
 });
 test("create and attachment reviews never offer an edit retry; missing operations cannot act", () => {
   const created = render({
@@ -91,8 +87,8 @@ test("create and attachment reviews never offer an edit retry; missing operation
     item: { ...task, id: "local-fixture" },
   });
   assert.match(created, /Exact created issue ID/);
-  assert.match(created, /Inspect YouTrack before creating again/);
-  assert.doesNotMatch(created, /Keep my changes for next Save/);
+  assert.match(created, /Do not create it again to check/);
+  assert.doesNotMatch(created, /Use my changes/);
   const comment = render({
     type: "comment",
     issueId: task.id,
@@ -100,7 +96,7 @@ test("create and attachment reviews never offer an edit retry; missing operation
     text: "Retain comment",
     created: 1,
   });
-  assert.doesNotMatch(comment, /Keep my changes for next Save/);
+  assert.doesNotMatch(comment, /Use my changes/);
   assert.match(comment, /Review PMON-499 · Synthetic paused ticket/);
   const upload = render({
     type: "attachment",
@@ -111,7 +107,7 @@ test("create and attachment reviews never offer an edit retry; missing operation
   });
   assert.match(upload, /Read Current Attachment IDs/);
   assert.match(upload, /Stop upload; archive pending file/);
-  assert.doesNotMatch(upload, /Keep my changes for next Save/);
+  assert.doesNotMatch(upload, /Use my changes/);
   const missing = render(undefined);
   assert.equal((missing.match(/<button disabled=""/g) ?? []).length, 2);
   const busy = render(edit, "conflict", true);
@@ -132,11 +128,10 @@ test("assigned status review presents both named choices before optional raw dia
       },
     ],
   );
-  assert.match(html, /Keep my Assigned status: Done; queue for Save/);
-  assert.match(
-    html,
-    /Keep YouTrack Assigned status: Needs Testing; archive mine/,
-  );
-  assert.ok(html.indexOf("Keep my Assigned") < html.indexOf("<details>"));
+  assert.match(html, /Use my choice: Done/);
+  assert.match(html, /Keep YouTrack: Needs Testing/);
+  assert.ok(html.indexOf("Use my choice") < html.indexOf("<details>"));
   assert.doesNotMatch(html, /<details open/);
+  assert.match(html, /YOUR CHANGE: Done/);
+  assert.match(html, /CURRENT YOUTRACK: Needs Testing/);
 });

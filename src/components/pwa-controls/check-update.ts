@@ -64,7 +64,9 @@ export const checkRegistrationUpdate = (
         message("Finishing update installation…");
       } else {
         waiting(null);
-        message("ROMDex is up to date.");
+        message(
+          "You have the latest ROMDex app version. Ticket syncing is separate.",
+        );
         finish();
       }
     };

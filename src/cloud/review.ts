@@ -134,4 +134,5 @@ export const reviewDelivery = async (
       missingAcknowledged,
     );
   });
+  workspaceStore.setConnection("Review choice saved in this browser.");
 };

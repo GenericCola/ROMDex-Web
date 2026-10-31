@@ -21,10 +21,12 @@ const AttachmentDeleteReview = ({
         ID {model.removing.id} · {model.removing.size} bytes
       </p>
       <p role="status">{model.message}</p>
-      <button disabled={model.busy} onClick={model.remove}>
-        Queue Attachment Deletion
-      </button>
-      <button onClick={close}>Cancel</button>
+      <div className="port-actions">
+        <button disabled={model.busy} onClick={model.remove}>
+          Queue Attachment Deletion
+        </button>
+        <button onClick={close}>Cancel</button>
+      </div>
     </Dialog>
   ) : null;
 };

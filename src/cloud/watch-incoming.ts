@@ -1,6 +1,7 @@
 import { subscribeDraftEditors } from "@/domain/editor-drafts";
 import { subscribeTaskEditing } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
+import { incomingFailureMessage, IncomingSuperseded } from "./incoming-error";
 import { incomingContext, refreshIncoming } from "./incoming-refresh";
 import { setIncomingMessage } from "./incoming-status";
 export const watchIncoming = () => {
@@ -35,12 +36,14 @@ export const watchIncoming = () => {
       });
       if (alive) setIncomingMessage("");
       delay = 3000;
-    } catch {
+    } catch (error) {
+      if (error instanceof IncomingSuperseded) {
+        force = true;
+        return;
+      }
       delay = Math.min(Math.max(delay * 2, 15000), 60000);
       if (alive && incomingContext())
-        setIncomingMessage(
-          "Incoming YouTrack updates are delayed. Your local work is kept; checking again automatically.",
-        );
+        setIncomingMessage(incomingFailureMessage(error));
     } finally {
       busy = false;
       if (alive) schedule(force ? 250 : delay);

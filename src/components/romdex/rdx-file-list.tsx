@@ -25,7 +25,7 @@ const RdxFileList = ({
               })
               .map((file) => {
                 return (
-                  <li key={file.name}>
+                  <li key={file.name} className="port-form">
                     {file.name}
                     <button
                       disabled={model.busy}
@@ -57,28 +57,30 @@ const RdxFileList = ({
         <ul>
           {data.rdxFiles.map((file) => {
             return (
-              <li key={file.sha256}>
+              <li key={file.sha256} className="port-form">
                 {file.name} · {file.kind} · {file.revision.slice(0, 12)}
-                {mode !== "export" && (
-                  <button
-                    disabled={model.busy}
-                    onClick={() => {
-                      model.openFile(file);
-                    }}
-                  >
-                    Inspect {file.name}
-                  </button>
-                )}
-                {mode !== "import" && (
-                  <button
-                    disabled={model.busy}
-                    onClick={() => {
-                      void model.download(file);
-                    }}
-                  >
-                    Export {file.name}
-                  </button>
-                )}
+                <div className="port-actions">
+                  {mode !== "export" && (
+                    <button
+                      disabled={model.busy}
+                      onClick={() => {
+                        model.openFile(file);
+                      }}
+                    >
+                      Inspect {file.name}
+                    </button>
+                  )}
+                  {mode !== "import" && (
+                    <button
+                      disabled={model.busy}
+                      onClick={() => {
+                        void model.download(file);
+                      }}
+                    >
+                      Export {file.name}
+                    </button>
+                  )}
+                </div>
               </li>
             );
           })}

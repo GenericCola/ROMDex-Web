@@ -7,9 +7,9 @@ import {
 import { cloudData } from "@/cloud/types";
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import ConnectionIndicator from "./connection-indicator";
-import { deliveryMessage, saveExplanation, syncControl } from "./header-status";
+import { saveIndicator, syncControl } from "./header-status";
 import Lamp from "./lamp";
 import WorkspaceMenu from "./workspace-menu";
 interface HeaderProps {
@@ -25,33 +25,27 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
       return "";
     },
   );
-  const [message, setMessage] = useState<{
-    text: string;
-    connection: string;
-  } | null>(null);
   const sync = syncControl(
     deliveryConnected(),
     cloudData(state.data).autoSync,
     deliveryPaused(),
   );
-  const saveReason = saveExplanation(state, unsavedDrafts);
+  const indicator = saveIndicator(state, unsavedDrafts);
+  const saveReason = indicator.description;
   const save = () => {
-    setMessage(null);
     const done = (value: string) => {
-      return setMessage({
-        text: value,
-        connection: workspaceStore.getSnapshot().connection,
-      });
+      workspaceStore.setConnection(value);
     };
     const failed = (error: unknown) => {
-      return setMessage({
-        text: error instanceof Error ? error.message : "Cloud delivery failed",
-        connection: workspaceStore.getSnapshot().connection,
-      });
+      workspaceStore.setConnection(
+        "Save stopped: " +
+          (error instanceof Error
+            ? error.message
+            : "Check Connection Details."),
+      );
     };
     void saveDelivery().then(done, failed);
   };
-  const status = deliveryMessage(state, message);
   const toggleSync = () => {
     void workspaceStore.change((data) => {
       data.cloud = { ...cloudData(data), autoSync: !cloudData(data).autoSync };
@@ -98,17 +92,8 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
               Save Changes{" "}
               <Lamp
                 className="save-light"
-                color={
-                  state.error
-                    ? "red"
-                    : state.pendingWrites
-                      ? "yellow"
-                      : unsavedDrafts ||
-                          state.data.operations.length ||
-                          cloudData(state.data).rollupPending
-                        ? "red"
-                        : "green"
-                }
+                color={indicator.color}
+                label={saveReason}
               />
             </button>
             <ConnectionIndicator
@@ -116,29 +101,18 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
               enabled={cloudData(state.data).autoSync}
               paused={deliveryPaused()}
               open={connect}
+              detail={
+                incoming ||
+                (/^(Save stopped|Automatic delivery paused):/.test(
+                  state.connection,
+                )
+                  ? state.connection
+                  : "")
+              }
             />
           </div>
         </div>
       </header>
-      {incoming && (
-        <p className="port-notice" role="status">
-          {incoming}
-        </p>
-      )}
-      {deliveryPaused() && (
-        <div className="port-notice" role="status">
-          <span>
-            Auto-Sync is paused. Your pending changes are kept in this
-            browser.{" "}
-          </span>
-          <button onClick={connect}>Review sync problems</button>
-        </div>
-      )}
-      {status && (
-        <p className="port-notice" role="status">
-          {status}
-        </p>
-      )}
     </>
   );
 };

@@ -50,9 +50,11 @@ test("connection lens has specific readable status and no side effects; Save sem
   assert.doesNotMatch(html, /Not Started|In Progress|yellow|green/);
   assert.equal(opened, 0);
   const header = readFileSync("src/components/romdex/header.tsx", "utf8");
-  assert.match(header, /state\.error\s*\? "red"/);
-  assert.match(header, /state\.pendingWrites\s*\? "yellow"/);
-  assert.match(header, /: "green"/);
+  const save = readFileSync("src/components/romdex/header-status.ts", "utf8");
+  assert.match(header, /color=\{indicator.color\}/);
+  assert.match(save, /state\.error\s*\? "red"/);
+  assert.match(save, /state\.pendingWrites\s*\? "yellow"/);
+  assert.match(save, /: "green"/);
   assert.doesNotMatch(
     header,
     /state\.connection === "Not connected" \? "blue" : "yellow"/,

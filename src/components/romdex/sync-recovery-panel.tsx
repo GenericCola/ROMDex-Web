@@ -1,3 +1,4 @@
+import { cloudData } from "@/cloud/types";
 import type { WorkspaceData } from "@/domain/types";
 import { proposedOperationSummary } from "./review-operation-summary";
 const SyncRecoveryPanel = ({
@@ -15,23 +16,57 @@ const SyncRecoveryPanel = ({
   busy: boolean;
   retry: () => void;
 }) => {
+  const failure = /^(Automatic delivery paused|Save stopped):/.test(connection);
+  const statusPending = !!cloudData(data).rollupPending;
+  const pending = data.operations.length > 0 || statusPending;
   const hasMoves = data.operations.some((operation) => {
     return operation.type === "edit" && "parentId" in operation.patch;
   });
   return (
     <section aria-label="Sync recovery">
-      <h3>Resume paused sync</h3>
-      <p>{connection}</p>
-      <p>
+      <h3>
         {reviews
-          ? "Review each ticket below. Choose which version to keep, or check an unknown result without resending it. When all reviews are resolved, retry the remaining queued changes."
-          : hasMoves
-            ? "A queued parent move needs care. If the message above says quarantined, do not retry it; review the move using recovery mode first."
-            : "No unresolved merge or unknown request is recorded. You can explicitly retry the queued changes. A failed retry keeps them here for review."}
-      </p>
+          ? "Choose what to keep"
+          : failure
+            ? "Save stopped"
+            : pending
+              ? "Ready to save"
+              : "No changes to save"}
+      </h3>
+      {failure && (
+        <p role="alert">
+          {connection.replace(
+            /^(Automatic delivery paused|Save stopped):\s*/,
+            "",
+          )}
+        </p>
+      )}
+      {reviews ? (
+        <p>Resolve the changes below before saving.</p>
+      ) : hasMoves ? (
+        <p>A task move needs review in recovery mode before it can be saved.</p>
+      ) : (
+        <p>
+          {!data.operations.length
+            ? statusPending
+              ? "Ticket changes saved; parent status updates still need to finish."
+              : "No pending changes are listed on this device."
+            : failure
+              ? "Your changes are kept on this device. You can try saving again."
+              : data.operations.length === 1
+                ? "Your choice is ready to save to YouTrack."
+                : "Your changes are ready to save to YouTrack."}
+        </p>
+      )}
+      {connection && !failure && (
+        <details>
+          <summary>Connection details</summary>
+          <p>{connection}</p>
+        </details>
+      )}
       {!reviews && data.operations.length > 0 && (
         <>
-          <h4>Pending changes ({data.operations.length})</h4>
+          <h4>Changes to save ({data.operations.length})</h4>
           <ul>
             {data.operations.slice(0, 5).map((operation) => {
               return (
@@ -43,13 +78,17 @@ const SyncRecoveryPanel = ({
             })}
           </ul>
           {data.operations.length > 5 && (
-            <p>Additional queued changes are also retained.</p>
+            <p>{data.operations.length - 5} more changes are included.</p>
           )}
         </>
       )}
-      {!reviews && !hasMoves && connected && (
+      {!reviews && !hasMoves && connected && pending && (
         <button onClick={retry} disabled={busy}>
-          Retry queued changes
+          {!data.operations.length
+            ? "SAVE STATUS UPDATES"
+            : data.operations.length === 1
+              ? "SAVE CHANGE"
+              : `SAVE ${data.operations.length} CHANGES`}
         </button>
       )}
     </section>

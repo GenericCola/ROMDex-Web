@@ -28,28 +28,18 @@ export const proposedOperationSummary = (
   switch (operation.type) {
     case "edit":
       return Object.entries(operation.patch).map(([field, value]) => {
-        return `Your proposed change — ${reviewFieldLabel(field, tasks)}: ${display(field, value, tasks)}.`;
+        return `change ${field === "assignedState" ? "status" : (reviewFieldLabel(field, tasks) ?? "field").toLowerCase()} to ${display(field, value, tasks)}`;
       });
     case "create":
-      return [
-        `Create task: ${concise(operation.item.summary)}. Confirm an existing task by its exact YouTrack ID; do not create it again to test.`,
-      ];
+      return [`create task: ${concise(operation.item.summary)}`];
     case "comment":
-      return [
-        "Add a comment (text not shown). Check its exact saved comment before confirming; do not post it again to test.",
-      ];
+      return ["add a comment (text hidden)"];
     case "attachment":
-      return [
-        `Upload ${concise(operation.file.name)} (${operation.file.size} bytes). Check the existing attachment ID and bytes; do not upload it again to test.`,
-      ];
+      return [`upload ${concise(operation.file.name)}`];
     case "attachment-delete":
-      return [
-        `Delete attachment ${concise(operation.base.name)} (${operation.attachmentId}). Check access and whether this exact file remains; do not resend its deletion.`,
-      ];
+      return [`delete attachment ${concise(operation.base.name)}`];
     case "delete":
-      return [
-        `Delete listed tasks: ${operation.ids.join(", ")}. Only the reviewed targets are queued; inspect each before approving deletion.`,
-      ];
+      return [`delete listed tasks: ${operation.ids.join(", ")}`];
   }
 };
 export const reviewChoiceLabel = (
@@ -72,15 +62,13 @@ export const reviewChoiceLabel = (
     local ? conflict.local : conflict.remote,
     tasks,
   );
-  return local
-    ? `Keep my ${reviewFieldLabel(conflict.field, tasks)}: ${value}; queue for Save`
-    : `Keep YouTrack ${reviewFieldLabel(conflict.field, tasks)}: ${value}; archive mine`;
+  return local ? `Use my choice: ${value}` : `Keep YouTrack: ${value}`;
 };
 
 export const reviewResultMessage = (choice: "local" | "cloud" | "confirm") => {
   return choice === "local"
-    ? "Your changes are queued against the latest task, not sent. Review the other paused items, then close Connection Details and use Save Changes."
+    ? "Your choice is ready to save to YouTrack."
     : choice === "cloud"
-      ? "This pending change was stopped and archived. Earlier cloud changes were not undone. Review the remaining items before Save Changes."
-      : "This result was checked without resending. Review the remaining paused items before Save Changes.";
+      ? "Your pending change was set aside. Nothing already saved was undone."
+      : "Checked without sending the change again.";
 };
