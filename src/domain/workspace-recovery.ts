@@ -9,7 +9,12 @@ export const exportWorkspace = (data: WorkspaceData) => {
         ...data,
         editorRecovery: [
           ...(data.editorRecovery ?? []),
-          ...captureDraftEditors(),
+          ...captureDraftEditors(
+            (data.editorRecovery ?? []).flatMap((record) => {
+              const id = record.captureId ?? record.id;
+              return typeof id === "string" ? [id] : [];
+            }),
+          ),
         ],
       },
     },

@@ -39,7 +39,7 @@ const RecoveredEditors = ({ data }: { data: WorkspaceData }) => {
       </p>
       {data.editorRecovery.map((record, index) => {
         return (
-          <div key={nodeText(record, "id")}>
+          <div key={nodeText(record, "captureId") || nodeText(record, "id")}>
             <pre className="port-detail-text">
               {JSON.stringify(record, null, 2)}
             </pre>

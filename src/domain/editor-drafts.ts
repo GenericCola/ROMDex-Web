@@ -37,10 +37,19 @@ export const flushDraftEditors = async () => {
   for (const editor of editors) if (editor.dirty()) await editor.flush();
 };
 
-export const captureDraftEditors = () => {
+export const captureDraftEditors = (reservedIds: readonly string[] = []) => {
   const recovered: JsonObject[] = [];
-  for (const editor of editors)
-    if (editor.dirty() && editor.capture) recovered.push(editor.capture());
+  const used = new Set(reservedIds);
+  for (const editor of editors) {
+    if (!editor.dirty() || !editor.capture) continue;
+    const record = editor.capture();
+    const prefix = "capture:" + crypto.randomUUID();
+    let captureId = prefix,
+      suffix = 0;
+    while (used.has(captureId)) captureId = prefix + ":" + ++suffix;
+    used.add(captureId);
+    recovered.push({ ...record, captureId });
+  }
   return recovered;
 };
 

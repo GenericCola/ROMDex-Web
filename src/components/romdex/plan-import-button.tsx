@@ -4,6 +4,7 @@ import { trackWorkspaceWork } from "@/domain/workspace-work";
 import { BrowserPlanHost } from "@/rdx/plan-host";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { captureItemControls } from "./item-editor-recovery";
 import SessionNotice from "./session-notice";
 const PlanImportButton = () => {
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -52,19 +53,14 @@ const PlanImportButton = () => {
       capture: () => {
         return {
           kind: "rdx-plan-editor",
-          fields: [
-            ...mounted.dialog.querySelectorAll<
-              HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-            >("input:not([type=file]),textarea,select"),
-          ].map((control) => {
-            return {
-              label:
-                control.getAttribute("aria-label") ??
-                control.closest("label")?.textContent ??
-                "Plan field",
-              value: control.value,
-            };
-          }),
+          fields: captureItemControls(
+            [
+              ...mounted.dialog.querySelectorAll<
+                HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+              >("input:not([type=file]),textarea,select"),
+            ],
+            true,
+          ),
         };
       },
     });

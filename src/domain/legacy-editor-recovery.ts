@@ -4,8 +4,9 @@ import type { WorkspaceData } from "./types";
 export const identifyLegacyItemRecovery = (data: WorkspaceData) => {
   const entries = data.editorRecovery ?? [];
   const used = new Set(
-    entries.map((entry) => {
-      return jsonObject(entry).id;
+    entries.flatMap((entry) => {
+      const record = jsonObject(entry);
+      return [record.id, record.captureId];
     }),
   );
   for (const [index, entry] of entries.entries()) {
