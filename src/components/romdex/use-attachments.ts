@@ -4,8 +4,8 @@ import {
 } from "@/attachments/actions";
 import { cancelUnsentAttachmentDeletion } from "@/attachments/cancel-deletion";
 import { downloadFile } from "@/attachments/download";
+import { restoreUploadBytes } from "@/attachments/restore-upload";
 import type { Attachment, AttachmentOperation } from "@/attachments/types";
-import { stagedFile } from "@/attachments/validate";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { uploadStorage } from "@/storage/upload-storage";
@@ -34,10 +34,11 @@ export const useAttachments = (item: TaskItem, quietRead = false) => {
     file: File,
   ) => {
     work.run(async () => {
-      const value = await stagedFile(operation.uploadId, file, operation.file);
-      await uploadStorage.put(value);
+      const ready = await restoreUploadBytes(operation, file);
       work.setMessage(
-        "Queued file bytes restored and verified. Delivery review requirements are unchanged.",
+        ready
+          ? "Original file restored. Save Changes uploads it."
+          : "Queued file bytes restored and verified. Delivery review requirements are unchanged.",
       );
     });
   };

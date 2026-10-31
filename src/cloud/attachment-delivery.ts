@@ -1,46 +1,15 @@
-import type {
-  AttachmentOperation,
-  AttachmentPort,
-  UploadStore,
-} from "@/attachments/types";
+import type { AttachmentOperation, UploadStore } from "@/attachments/types";
 import {
   requireCloudUploadSize,
   sameAttachment,
   sameUploadFile,
-  uploadId,
 } from "@/attachments/validate";
-import { sha256 } from "@/domain/json";
 import { uploadStorage } from "@/storage/upload-storage";
 import { observeStatus } from "./assigned-status";
 import { acknowledge, attemptDelivery, recordDelivery } from "./journal";
 import { OperationReviewRequired } from "./review-isolation";
-import type { Commit, DeliveryPort } from "./types";
-export const verifiedAttachment = async (
-  operation: Extract<AttachmentOperation, { type: "attachment" }>,
-  files: AttachmentPort,
-  account: string,
-  id: string,
-  before: string[],
-) => {
-  if (!uploadId(id) || before.includes(id))
-    throw Error("Choose an exact new attachment receipt.");
-  const inventory = await files.list(operation.issueId),
-    file = inventory.find((value) => {
-      return value.id === id;
-    });
-  if (
-    file?.name !== operation.file.name ||
-    file.size !== operation.file.size ||
-    file.authorId !== account
-  )
-    throw Error("The exact attachment does not match this upload or account.");
-  if (
-    (await sha256(await files.download(operation.issueId, file))) !==
-    operation.file.hash
-  )
-    throw Error("The attachment bytes do not match the queued file.");
-  return inventory;
-};
+import { cloudData, type Commit, type DeliveryPort } from "./types";
+import { verifiedAttachment } from "./verified-attachment";
 export const deliverAttachment = async (
   operation: AttachmentOperation,
   commit: Commit,
@@ -58,6 +27,7 @@ export const deliverAttachment = async (
       operation.issueId +
       " is not readable. The queued file change is preserved; no file request was sent.";
     await commit((data) => {
+      delete cloudData(data).records[operation.opId]?.localFileState;
       recordDelivery(data, operation.opId, { status: "conflict", message });
     });
     throw new OperationReviewRequired(message);
@@ -82,8 +52,20 @@ export const deliverAttachment = async (
     requireCloudUploadSize(operation.file.size);
     files.requireUploadSize?.(operation.file.size);
     const value = await storage.get(operation.uploadId);
-    if (!value || !sameUploadFile(value.file, operation.file))
-      throw Error("Restore the queued file bytes before delivery.");
+    if (!value || !sameUploadFile(value.file, operation.file)) {
+      const message =
+        "Restore the original file for " +
+        operation.file.name +
+        ". No upload was sent; other tickets can sync.";
+      await commit((data) => {
+        recordDelivery(data, operation.opId, {
+          status: "conflict",
+          localFileState: "missing",
+          message,
+        });
+      });
+      throw new OperationReviewRequired(message);
+    }
   }
   await attemptDelivery(
     operation,
@@ -128,6 +110,7 @@ export const deliverAttachment = async (
     },
     operation.issueId,
     (data) => {
+      delete cloudData(data).records[operation.opId]?.localFileState;
       recordDelivery(data, operation.opId, {
         attachmentBeforeIds: before.map((file) => {
           return file.id;

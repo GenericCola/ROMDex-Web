@@ -7,6 +7,7 @@ import { conflictSummary } from "./conflict-summary";
 import DeletionReviewActions from "./deletion-review-actions";
 import DeliveryReceipt, { StopDeliveryLabel } from "./delivery-receipt";
 import DeliveryTechnicalDetails from "./delivery-technical-details";
+import LocalUploadReview from "./local-upload-review";
 import ReviewComparison from "./review-comparison";
 import ReviewGuidance from "./review-guidance";
 import {
@@ -36,14 +37,9 @@ const DeliveryReview = ({
   const operation = data.operations.find((entry) => {
     return entry.opId === id;
   });
-  const task =
-    operation?.type === "edit"
-      ? operation.base
-      : operation?.type === "create"
-        ? operation.item
-        : data.remote.find((entry) => {
-            return entry.id === operation?.issueId;
-          });
+  const task = data.remote.find((entry) => {
+    return entry.id === operation?.issueId;
+  });
   const summary = conflictSummary(operation, record, task?.summary);
   const run = (choice: "cloud" | "local" | "confirm") => {
     void execute(() => {
@@ -59,6 +55,10 @@ const DeliveryReview = ({
   const confirm = () => {
     run("confirm");
   };
+  if (operation?.type === "attachment" && record.localFileState === "missing")
+    return (
+      <LocalUploadReview operation={operation} busy={busy} execute={execute} />
+    );
   return (
     <section className="delivery-review-card">
       <h3>{summary.title}</h3>

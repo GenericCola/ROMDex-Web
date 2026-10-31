@@ -55,6 +55,7 @@ const TaskStatusPopup = ({
     return (
       <button
         key={optionColor}
+        aria-label={STATUS[optionColor]}
         disabled={busy}
         aria-pressed={base !== null && statusOf(base) === optionColor}
         onClick={choose}

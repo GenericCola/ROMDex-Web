@@ -1,4 +1,5 @@
 import type { WorkspaceData } from "@/domain/types";
+import { validateLocalFileReview } from "./local-file-review";
 import {
   invalidQueue as invalid,
   queueObject as object,
@@ -42,6 +43,7 @@ export const validateQueue = (data: WorkspaceData) => {
         return op.opId === id;
       }) ?? record.archivedOperation;
     validateTagJournal(record, operation);
+    validateLocalFileReview(record, operation);
     if (
       record.attachmentBeforeIds !== undefined &&
       (!Array.isArray(record.attachmentBeforeIds) ||
@@ -57,7 +59,9 @@ export const validateQueue = (data: WorkspaceData) => {
       record.status === "ready" &&
       !(
         operation?.type === "delete" ||
-        (operation?.type === "edit" && operation.purpose !== "rollup")
+        (operation?.type === "edit" && operation.purpose !== "rollup") ||
+        (operation?.type === "attachment" &&
+          record.localFileState === "restored")
       )
     )
       invalid();

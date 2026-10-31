@@ -73,7 +73,12 @@ export const conflictSummary = (
   record: DeliveryRecord,
   taskTitle?: string,
 ): ConflictSummary => {
-  const title = taskTitle ?? record.remote?.summary;
+  const title =
+    operation?.type === "edit"
+      ? operation.base.summary
+      : operation?.type === "create"
+        ? operation.item.summary
+        : (taskTitle ?? record.remote?.summary);
   const summary: ConflictSummary = {
     title: operation
       ? `Review ${operation.issueId}${title ? " · " + concise(title) : ""}`

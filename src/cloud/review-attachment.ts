@@ -2,10 +2,10 @@ import type { AttachmentOperation, UploadStore } from "@/attachments/types";
 import type { WorkspaceData } from "@/domain/types";
 import { uploadStorage } from "@/storage/upload-storage";
 import { observeStatus } from "./assigned-status";
-import { verifiedAttachment } from "./attachment-delivery";
 import { acknowledge, recordDelivery } from "./journal";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
+import { verifiedAttachment } from "./verified-attachment";
 export const reviewAttachment = async (
   data: WorkspaceData,
   operation: AttachmentOperation,
@@ -22,10 +22,14 @@ export const reviewAttachment = async (
     );
   if (choice === "cloud") {
     await commit((next) => {
+      const localOnly =
+        !!cloudData(next).records[operation.opId]?.localFileState;
+      delete cloudData(next).records[operation.opId]?.localFileState;
       acknowledge(next, operation);
       recordDelivery(next, operation.opId, {
-        message:
-          "File request explicitly stopped. A cloud file or deletion may already exist; its evidence remains archived.",
+        message: localOnly
+          ? "Local upload cancelled before any request. File metadata remains archived."
+          : "File request explicitly stopped. A cloud file or deletion may already exist; its evidence remains archived.",
       });
     });
     return;

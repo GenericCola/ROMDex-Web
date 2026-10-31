@@ -10,6 +10,7 @@ import type {
   SharedStatusWrite,
 } from "./shared-status-types";
 export interface DeliveryRecord {
+  localFileState?: "missing" | "restored";
   tagSteps?: import("./tag-types").TagStep[];
   metadataWrite?: SharedStatusWrite;
   attachmentBeforeIds?: string[];

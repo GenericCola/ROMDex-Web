@@ -1,5 +1,6 @@
 import { registerDraftEditor } from "@/domain/editor-drafts";
 import type { TaskItem } from "@/domain/types";
+import { captureItemControls } from "./item-editor-recovery";
 export const editorItemSeed = (item: TaskItem): TaskItem => {
   if (item.assignee !== undefined || !item.assignees?.length) return item;
   return {
@@ -54,15 +55,14 @@ export const registerItemDraft = (
     },
     capture: () => {
       return {
+        id: "item-editor:" + issueId + ":" + crypto.randomUUID(),
         kind: "item-editor",
         issueId,
-        fields: [
+        fields: captureItemControls([
           ...dialog.querySelectorAll<
             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
           >("input,textarea,select"),
-        ].map((control) => {
-          return { id: control.id, value: control.value };
-        }),
+        ]),
       };
     },
   });

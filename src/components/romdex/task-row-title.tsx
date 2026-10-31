@@ -8,7 +8,8 @@ import {
 } from "@/domain/task-rename";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useEffect, useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { useDelayedRowOpen } from "./use-delayed-row-open";
 import { useInlineAction } from "./use-inline-action";
 import { useTaskTextEditing } from "./use-task-text-editing";
 const TaskRowTitle = ({
@@ -21,8 +22,8 @@ const TaskRowTitle = ({
   select: () => void;
 }) => {
   const renaming = data.view.renameId === item.id;
-  const inputRef = useRef<HTMLInputElement>(null),
-    timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const delayed = useDelayedRowOpen(select);
   const editing = useTaskTextEditing(item.id, "inline-title");
   const { run, error, busy } = useInlineAction();
   useLayoutEffect(() => {
@@ -31,14 +32,9 @@ const TaskRowTitle = ({
       inputRef.current?.select();
     } else setTaskTextEditing(item.id + ":inline-title", false);
   }, [renaming, item.id]);
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
   const rename = () => {
     if (taskEditingLocked(item.id)) return;
-    if (timerRef.current) clearTimeout(timerRef.current);
+    delayed.cancel();
     run((next) => {
       beginInlineRename(next, item.id);
     });
@@ -107,10 +103,10 @@ const TaskRowTitle = ({
             }
           }}
           onClick={(event) => {
-            if (timerRef.current) clearTimeout(timerRef.current);
+            delayed.cancel();
             if (event.detail > 1) return;
             if (event.detail === 0) select();
-            else timerRef.current = setTimeout(select, 220);
+            else delayed.schedule();
           }}
         >
           {data.titleDrafts[item.id] ?? itemName(item)}
