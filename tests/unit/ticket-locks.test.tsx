@@ -45,6 +45,7 @@ const fixture = () => {
 void test("scalar locks allow sibling edits, drafts and navigation without locking shared parent", () => {
   const before = fixture(),
     after = structuredClone(before);
+  assert.ok(before.operations[0]);
   const locked = operationTicketIds(before.operations[0]);
   assert.deepEqual([...locked], ["a"]);
   after.view.selected = "b";
@@ -67,6 +68,7 @@ void test("locked operations, baselines and drafts cannot change or disappear", 
       ).patch.priority = "Low";
     },
     (data: typeof before) => {
+      assert.ok(data.remote[1]);
       data.remote[1].description = "Changed";
     },
     (data: typeof before) => {
@@ -138,6 +140,7 @@ void test("review locks include ready records and malformed unassociated journal
 void test("baseline hierarchy changes into locked tickets are rejected", () => {
   const before = fixture(),
     after = structuredClone(before);
+  assert.ok(after.remote[2]);
   after.remote[2].parentId = "a";
   assert.throws(() => {
     guardTicketChanges(before, after, new Set(["a"]));

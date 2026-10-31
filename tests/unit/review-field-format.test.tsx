@@ -124,15 +124,14 @@ test("proposed edit remains readable without conflict evidence; missing fields n
   assert.match(result, /change notes to content withheld/);
   assert.match(result, /No field comparison is available/);
   assert.doesNotMatch(result, /PRIVATE/);
-  assert.match(
-    proposedOperationSummary({
-      type: "delete",
-      opId: "d",
-      issueId: base.id,
-      ids: [base.id],
-    })[0],
-    /delete listed tasks: PMON-900099/,
-  );
+  const deletionSummary = proposedOperationSummary({
+    type: "delete",
+    opId: "d",
+    issueId: base.id,
+    ids: [base.id],
+  })[0];
+  assert.ok(deletionSummary);
+  assert.match(deletionSummary, /delete listed tasks: PMON-900099/);
 });
 
 test("supplied native labels are readable but conflicting saved names remain uncertain; dates are explicit", () => {

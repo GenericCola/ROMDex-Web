@@ -1,3 +1,4 @@
+import type { JsonValue } from "../../src/domain/json";
 export const rawIssue = () => {
   return {
     id: "3-1",
@@ -47,7 +48,7 @@ export const rawIssue = () => {
         $type: "PeriodIssueCustomField",
         value: null,
       },
-    ] as { id: string; name: string; $type: string; value: unknown }[],
+    ] as { id: string; name: string; $type: string; value: JsonValue }[],
   };
 };
 export const schema = [
@@ -71,7 +72,7 @@ export const schema = [
 export const nativeFixtureFetch = (
   raw: ReturnType<typeof rawIssue>,
   afterPost: (body: {
-    customFields: { id: string; value: unknown }[];
+    customFields: { id: string; value: JsonValue }[];
   }) => void = () => {
     return undefined;
   },
@@ -82,7 +83,7 @@ export const nativeFixtureFetch = (
     if (init?.method === "POST") {
       const body = JSON.parse(
         typeof init.body === "string" ? init.body : "",
-      ) as { customFields: { id: string; value: unknown }[] };
+      ) as { customFields: { id: string; value: JsonValue }[] };
       for (const field of body.customFields) {
         const target = raw.customFields.find((value) => {
           return value.id === field.id;

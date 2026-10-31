@@ -1,6 +1,7 @@
 import { customValue } from "@/domain/accepted/custom-editor.mjs";
 import { dateText } from "@/domain/accepted/item-editor.mjs";
 import type { JsonValue } from "@/domain/json";
+import type { TaskItem } from "@/domain/types";
 export interface NativeField {
   id?: string;
   name: string;
@@ -15,7 +16,11 @@ export const nativeObject = (value: JsonValue | undefined) => {
 export const nativeTaskFields = (
   fields: NativeField[] = [],
   tags: { id: string; name: string }[] = [],
-) => {
+): Pick<
+  Required<TaskItem>,
+  "_custom" | "assignees" | "assignee" | "dueDate" | "tags" | "tagNames"
+> &
+  Record<`custom:${string}`, JsonValue> => {
   const raw = fields.map((field) => {
     return {
       id: field.id ?? "",

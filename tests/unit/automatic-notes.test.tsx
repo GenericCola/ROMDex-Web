@@ -13,7 +13,12 @@ import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
 test("automatic delivery leaves unscoped dirty drafts alone; manual Save waits for composition then flushes once", async (t) => {
   const data = emptyWorkspace();
-  data.cloud = { ...data.cloud, autoSync: true, rollupPending: true };
+  data.cloud = {
+    records: {},
+    ...data.cloud,
+    autoSync: true,
+    rollupPending: true,
+  };
   const state: WorkspaceSnapshot = {
     ready: true,
     updating: false,

@@ -6,6 +6,7 @@ void test("committed changes debounce for 750ms; identical notifications do not 
   const h = harness(() => {
     calls++;
     h.change(null);
+    return undefined;
   });
   h.change("edit A");
   h.tick(749);
@@ -23,6 +24,7 @@ void test("a new edit restarts debounce rather than delivering an older snapshot
   const h = harness(() => {
     calls++;
     h.change(null);
+    return undefined;
   });
   h.change("A");
   h.tick(500);
@@ -40,6 +42,7 @@ void test("OFF or uncommitted drafts cancel eligibility until a later committed 
   const h = harness(() => {
     calls++;
     h.change(null);
+    return undefined;
   });
   h.change("A");
   h.tick(500);
@@ -64,6 +67,7 @@ void test("in-flight delivery never overlaps; newer committed work receives anot
     calls++;
     if (calls === 1) return pending;
     h.change(null);
+    return undefined;
   });
   h.change("A");
   h.tick(750);

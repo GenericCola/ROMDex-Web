@@ -40,6 +40,7 @@ void test("creation preparation preserves native extras without sending a reques
   const body = await adapter.creation(item, {
     customFields: [{ name: "Type", value: { name: "Epic" } }],
   });
+  assert.ok(Array.isArray(body.customFields));
   assert.equal(body.customFields.length, 4);
   assert.equal(writes, 0);
   const remote = { ...item, id: "PMON-1" };

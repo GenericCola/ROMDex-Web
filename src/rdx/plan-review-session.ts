@@ -6,6 +6,7 @@ import { uploadStorage } from "@/storage/upload-storage";
 import { readEditOptions } from "@/youtrack/edit-options";
 import { readPlanSchema } from "@/youtrack/plan-schema";
 import { sessionRequest } from "@/youtrack/request";
+import type { PlanBatchRecord } from "./plan-ledger";
 import { previewBrowserPlan } from "./plan-publication";
 import { preparePlanStage } from "./stage-plan";
 const strings = (value: unknown): Record<string, string> => {
@@ -100,7 +101,12 @@ export class PlanReviewSession {
     };
     return { request, assertCurrent };
   };
-  preview = async (bytes: Uint8Array, input: JsonObject) => {
+  preview = async (
+    bytes: Uint8Array,
+    input: JsonObject,
+  ): Promise<
+    Record<string, unknown> & { previous: PlanBatchRecord | undefined }
+  > => {
     const { request, assertCurrent } = await this.request(input),
       result = await previewBrowserPlan(bytes, request);
     assertCurrent();

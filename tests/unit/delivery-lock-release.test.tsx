@@ -62,6 +62,7 @@ test("multiple operations on one ticket retain lock until all are acknowledged",
   await store.change((data) => {
     data.operations.push({
       type: "comment",
+      created: 1,
       opId: "second-op",
       issueId: "PMON-900001",
       text: "Retain comment",
@@ -252,7 +253,10 @@ test("sibling deletion preserves parent/ancestor and reviewed dependency protect
     guardTicketChanges(before, ancestor, new Set(["PMON-900001"])),
   );
   const ordered = structuredClone(before);
-  ordered.order["PMON-900001"] = ["Synthetic invalid order mutation"];
+  // Deliberately malformed external data exercises the runtime guard.
+  Object.assign(ordered.order, {
+    "PMON-900001": ["Synthetic invalid order mutation"],
+  });
   assert.throws(() =>
     guardTicketChanges(before, ordered, new Set(["PMON-900001"])),
   );

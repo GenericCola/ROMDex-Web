@@ -13,6 +13,11 @@ import { editTask } from "../../src/domain/task-actions";
 import type { TaskItem, WorkspaceData } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { WorkspaceStore } from "../../src/domain/workspace-store";
+const required = <T,>(value: T | undefined): T => {
+  assert.notEqual(value, undefined, "Expected fixture entry to exist");
+  if (value === undefined) throw new Error("Missing fixture entry");
+  return value;
+};
 const task = (id: string, updated = 1): TaskItem => ({
   id,
   updated,
@@ -38,7 +43,7 @@ test("client B refreshes client A's completed edit before B edits: fresh base, n
   assert.equal(mergeIncoming(data, [incoming], new Set()), true);
   assert.equal(data.operations.length, 0);
   editTask(data, "PMON-1", { priority: "Low" });
-  const op = data.operations[0];
+  const op = required(data.operations[0]);
   assert.equal(op.type, "edit");
   if (op.type !== "edit") throw Error("edit expected");
   assert.equal(op.base.priority, "High");
@@ -66,22 +71,25 @@ test("pending edits keep unseen bases while unrelated tasks refresh; nonoverlap/
       new Set(),
     );
     assert.deepEqual(data.operations, before);
-    assert.equal(data.remote[0].updated, 1);
-    assert.equal(data.remote[1].summary, "new");
-    const op = data.operations[0];
+    assert.equal(required(data.remote[0]).updated, 1);
+    assert.equal(required(data.remote[1]).summary, "new");
+    const op = required(data.operations[0]);
     if (op.type !== "edit") throw Error("edit expected");
     const result = reconcile(op.base, op.patch, {
       ...task("PMON-1", 2),
       ...remote,
     });
     assert.equal(result.conflicts.length, remote.priority === "Low" ? 1 : 0);
-    assert.equal(materialize(data.remote, data.operations)[0].priority, "High");
+    assert.equal(
+      required(materialize(data.remote, data.operations)[0]).priority,
+      "High",
+    );
   }
 });
 test("held editors and reviewed tickets stay intact while unrelated updates apply; attachments and journals retained", () => {
   const data = fixture();
   editTask(data, "PMON-1", { description: "keep" });
-  data.cloud!.records[data.operations[0].opId] = {
+  data.cloud!.records[required(data.operations[0]).opId] = {
     status: "uncertain",
     message: "preserve",
   };
@@ -102,18 +110,18 @@ test("held editors and reviewed tickets stay intact while unrelated updates appl
     new Set(["PMON-2"]),
   );
   assert.deepEqual(data.remote.slice(0, 2), before.remote.slice(0, 2));
-  assert.equal(data.remote[2].summary, "new");
+  assert.equal(required(data.remote[2]).summary, "new");
   assertIncomingDelta(before, data);
   assert.deepEqual(data.operations, before.operations);
   assert.deepEqual(data.cloud!.records, before.cloud!.records);
 });
 test("older and equal revisions preserve newer content; complete-snapshot omissions are archived", () => {
   const data = fixture();
-  data.remote[0].updated = 4;
-  data.remote[0].comments = [
+  required(data.remote[0]).updated = 4;
+  required(data.remote[0]).comments = [
     { id: "c", text: "retained", author: "Fixture", created: 1 },
   ];
-  data.remote[0].commentCount = 1;
+  required(data.remote[0]).commentCount = 1;
   assert.equal(
     mergeIncoming(
       data,
@@ -137,8 +145,8 @@ test("older and equal revisions preserve newer content; complete-snapshot omissi
   mergeIncoming(data, [{ ...task("PMON-1", 5), summary: "latest" }], new Set());
   assert.equal(data.remote.length, 1);
   assert.deepEqual(data.cloud?.unavailable?.missingIds, ["PMON-2", "PMON-3"]);
-  assert.equal(data.remote[0].comments[0].text, "retained");
-  assert.equal(data.remote[0].commentCount, 1);
+  assert.equal(required(required(data.remote[0]).comments[0]).text, "retained");
+  assert.equal(required(data.remote[0]).commentCount, 1);
 });
 test("duplicates, invalid data and cycles fail atomically", () => {
   const incomingSets = [
@@ -160,7 +168,7 @@ test("duplicates, invalid data and cycles fail atomically", () => {
 });
 test("structural pending subtree is held without blocking independent remote tickets", () => {
   const data = fixture();
-  data.remote[1].parentId = "PMON-1";
+  required(data.remote[1]).parentId = "PMON-1";
   editTask(data, "PMON-1", { parentId: "PMON-3" });
   const before = structuredClone(data);
   const extra = task("PMON-4", 2);
@@ -177,7 +185,7 @@ test("structural pending subtree is held without blocking independent remote tic
     new Set(),
   );
   assert.deepEqual(data.remote.slice(0, 3), before.remote);
-  assert.equal(data.remote[3].id, "PMON-4");
+  assert.equal(required(data.remote[3]).id, "PMON-4");
   assert.deepEqual(data.operations, before.operations);
 });
 test("new shared status schedules derived status work without creating outgoing operations", () => {
@@ -193,7 +201,10 @@ test("new shared status schedules derived status work without creating outgoing 
       },
     };
     mergeIncoming(data, [{ ...task("PMON-1", 2), state: "Done" }], new Set());
-    assert.equal(data.cloud!.assigned!["PMON-1"].assignedState, "Done");
+    assert.equal(
+      required(data.cloud!.assigned!["PMON-1"]).assignedState,
+      "Done",
+    );
     assert.equal(data.cloud!.rollupPending, true);
     assert.equal(data.operations.length, 0);
     const before = JSON.stringify(data);
@@ -269,9 +280,9 @@ test("dirty title cannot be unheld by empty comment draft; blocked reparent does
     ],
     new Set(),
   );
-  assert.deepEqual(data.remote[0], before.remote[0]);
-  assert.deepEqual(data.remote[1], before.remote[1]);
-  assert.equal(data.remote[2].description, "independent");
+  assert.deepEqual(required(data.remote[0]), before.remote[0]);
+  assert.deepEqual(required(data.remote[1]), before.remote[1]);
+  assert.equal(required(data.remote[2]).description, "independent");
 });
 test("active delivery ticket remains protected while independent incoming change persists", async () => {
   let data = fixture(),
@@ -312,11 +323,11 @@ test("active delivery ticket remains protected while independent incoming change
       true,
     );
     assert.equal(store.getSnapshot().delivering, true);
-    assert.equal(data.remote[0].priority, "Normal");
-    assert.equal(data.remote[1].summary, "incoming");
+    assert.equal(required(data.remote[0]).priority, "Normal");
+    assert.equal(required(data.remote[1]).summary, "incoming");
     assert.throws(() =>
       store.change((next) => {
-        next.remote[0].summary = "unsafe";
+        required(next.remote[0]).summary = "unsafe";
       }),
     );
   } finally {
@@ -347,11 +358,11 @@ test("incoming persistence failure propagates without wiping queued data", async
 test("migration baseline assignment survives unrelated incoming update when assigned map is absent", () => {
   for (const changedState of [false, true]) {
     const data = fixture();
-    data.remote[0].state = "Done";
-    data.remote[0].assignedState = "Standby";
-    data.remote[1].state = "Done";
-    data.remote[1].assignedState = "In Development";
-    const beforeHeld = structuredClone(data.remote[1]);
+    required(data.remote[0]).state = "Done";
+    required(data.remote[0]).assignedState = "Standby";
+    required(data.remote[1]).state = "Done";
+    required(data.remote[1]).assignedState = "In Development";
+    const beforeHeld = structuredClone(required(data.remote[1]));
     const incoming = {
       ...task("PMON-1", 2),
       state: changedState ? "Needs Testing" : "Done",
@@ -363,15 +374,15 @@ test("migration baseline assignment survives unrelated incoming update when assi
       new Set(["PMON-2"]),
     );
     assert.equal(
-      data.remote[0].assignedState,
+      required(data.remote[0]).assignedState,
       changedState ? "Needs Testing" : "Standby",
     );
     assert.equal(
-      data.cloud!.assigned!["PMON-1"].assignedState,
+      required(data.cloud!.assigned!["PMON-1"]).assignedState,
       changedState ? "Needs Testing" : "Standby",
     );
     assert.equal(data.cloud!.assigned!["PMON-2"], undefined);
-    assert.deepEqual(data.remote[1], beforeHeld);
+    assert.deepEqual(required(data.remote[1]), beforeHeld);
     assert.equal(data.cloud!.rollupPending, true);
     assert.deepEqual(data.operations, []);
   }
@@ -379,9 +390,9 @@ test("migration baseline assignment survives unrelated incoming update when assi
 
 test("complete snapshot retires clean missing children without deleting their recovery copy; reappearance returns them", () => {
   const data = fixture();
-  data.remote[1].parentId = "PMON-1";
-  data.remote[1].description = "Keep archived notes";
-  const before = structuredClone(data.remote[1]);
+  required(data.remote[1]).parentId = "PMON-1";
+  required(data.remote[1]).description = "Keep archived notes";
+  const before = structuredClone(required(data.remote[1]));
   const full = [task("PMON-1", 2), task("PMON-3", 2)];
   mergeIncoming(data, full, new Set());
   assert.deepEqual(
@@ -399,7 +410,7 @@ test("complete snapshot retires clean missing children without deleting their re
 });
 test("omitted pending task and its ancestors remain recoverable; unrelated fresh tasks still apply", () => {
   const data = fixture();
-  data.remote[1].parentId = "PMON-1";
+  required(data.remote[1]).parentId = "PMON-1";
   editTask(data, "PMON-2", { summary: "Keep pending edit" });
   data.commentDrafts["PMON-2"] = "Keep draft";
   data.attachmentLists = { "PMON-2": [] };
@@ -433,7 +444,7 @@ test("fresh visible orphan preserves its actual parent ID and is not globally re
     new Set(),
   );
   assert.equal(data.remote.length, 1);
-  assert.equal(data.remote[0].parentId, "PMON-99");
+  assert.equal(required(data.remote[0]).parentId, "PMON-99");
   assert.equal(data.operations.length, 0);
 });
 
@@ -450,7 +461,10 @@ test("omitted local status intent remains held even without an operation", () =>
   mergeIncoming(data, [task("PMON-1", 2), task("PMON-3", 2)], new Set());
   assert.ok(data.remote.some((item) => item.id === "PMON-2"));
   assert.deepEqual(data.cloud?.unavailable?.blockedIds, ["PMON-2"]);
-  assert.equal(data.cloud?.assigned?.["PMON-2"].assignedState, "Done");
+  assert.equal(
+    required(data.cloud?.assigned?.["PMON-2"]).assignedState,
+    "Done",
+  );
   const before = JSON.stringify(data);
   assert.equal(
     mergeIncoming(data, [task("PMON-1", 2), task("PMON-3", 2)], new Set()),
@@ -481,7 +495,7 @@ test("single-ticket refresh never retires unrelated rows or their archive", () =
     data.remote.map((item) => item.id),
     ["PMON-1", "PMON-2", "PMON-3"],
   );
-  assert.equal(data.remote[0].summary, "Single fresh");
+  assert.equal(required(data.remote[0]).summary, "Single fresh");
   assert.deepEqual(data.cloud!.unavailable, archive);
 });
 
@@ -545,11 +559,11 @@ test("legacy cache-only deferral does not preserve obsolete fresh-parent blocks"
 
 test("omitted inherited Done parent with assigned Standby is not unsent local status intent", () => {
   const data = fixture();
-  data.remote[1].parentId = "PMON-1";
-  data.remote[1].state = "Done";
-  data.remote[1].assignedState = "Complete";
-  data.remote[0].state = "Done";
-  data.remote[0].assignedState = "Standby";
+  required(data.remote[1]).parentId = "PMON-1";
+  required(data.remote[1]).state = "Done";
+  required(data.remote[1]).assignedState = "Complete";
+  required(data.remote[0]).state = "Done";
+  required(data.remote[0]).assignedState = "Standby";
   data.cloud!.assigned = {
     "PMON-1": {
       assignedState: "Standby",
@@ -584,13 +598,13 @@ test("derived status debt follows complete visible tree changes, not notes, repe
     const data = fixture();
     const fresh = structuredClone(data.remote);
     if (change === "state") {
-      fresh[1].state = "Done";
-      fresh[1].updated = 2;
+      required(fresh[1]).state = "Done";
+      required(fresh[1]).updated = 2;
     }
     if (change === "membership") fresh.pop();
     if (change === "parent") {
-      fresh[1].parentId = "PMON-1";
-      fresh[1].updated = 2;
+      required(fresh[1]).parentId = "PMON-1";
+      required(fresh[1]).updated = 2;
     }
     mergeIncoming(data, fresh, new Set());
     assert.equal(data.cloud?.rollupPending, true, change);
@@ -626,8 +640,8 @@ test("derived status debt follows complete visible tree changes, not notes, repe
   );
   assert.equal(held.cloud?.rollupPending, undefined);
   const acknowledged = fixture();
-  acknowledged.remote[0].state = "Done";
-  acknowledged.remote[0].assignedState = "Done";
+  required(acknowledged.remote[0]).state = "Done";
+  required(acknowledged.remote[0]).assignedState = "Done";
   mergeIncoming(acknowledged, structuredClone(acknowledged.remote), new Set());
   assert.equal(acknowledged.cloud?.rollupPending, undefined);
   const bad = structuredClone(acknowledged);

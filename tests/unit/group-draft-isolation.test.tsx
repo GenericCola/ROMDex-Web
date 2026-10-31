@@ -56,6 +56,7 @@ test("group draft allows independent scalar work while holding members, parent a
   editTask(data, "PMON-2", { summary: "Member edit" });
   editTask(data, "PMON-1", { parentId: "PMON-4" });
   editTask(data, "PMON-4", { description: "Independent" });
+  assert.ok(data.operations[2]);
   const safe = data.operations[2].opId;
   createTask(data, null, "Unrelated new task");
   const unregister = registerDraftEditor({
@@ -96,6 +97,7 @@ test("independent scalar changes preserve group signature; changed hierarchy and
       (op) => op.type === "create" && op.issueId === parent,
     ),
   );
+  assert.ok(data.remote[2]);
   data.remote[2].parentId = "PMON-4";
   const before = structuredClone(data);
   assert.throws(
@@ -105,6 +107,7 @@ test("independent scalar changes preserve group signature; changed hierarchy and
   assert.deepEqual(data, before);
   const reviewed = fixture();
   editTask(reviewed, "PMON-2", { summary: "Held" });
+  assert.ok(reviewed.operations[0]);
   reviewed.cloud!.records[reviewed.operations[0].opId] = {
     status: "uncertain",
     message: "Keep receipt",

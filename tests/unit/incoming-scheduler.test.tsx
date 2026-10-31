@@ -8,6 +8,11 @@ import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
 import { normalize, type RawIssue } from "../../src/youtrack/read-tasks";
 
+const required = <T,>(value: T | undefined): T => {
+  assert.notEqual(value, undefined, "Expected fixture entry to exist");
+  if (value === undefined) throw new Error("Missing fixture entry");
+  return value;
+};
 test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces wakeups and cleans up", async () => {
   const saved = {
     fetch: globalThis.fetch,
@@ -99,20 +104,20 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
     stop = watchIncoming();
     await advance(100);
     assert.equal(requests, 1);
-    assert.equal([...timers.values()][0].at - now, 15000);
+    assert.equal(required([...timers.values()][0]).at - now, 15000);
     await advance(15000);
     assert.equal(requests, 2);
-    assert.equal([...timers.values()][0].at - now, 30000);
+    assert.equal(required([...timers.values()][0]).at - now, 30000);
     await advance(30000);
     assert.equal(requests, 3);
-    assert.equal([...timers.values()][0].at - now, 60000);
+    assert.equal(required([...timers.values()][0]).at - now, 60000);
     await advance(60000);
     assert.equal(requests, 4);
-    assert.equal([...timers.values()][0].at - now, 60000);
+    assert.equal(required([...timers.values()][0]).at - now, 60000);
     doc.visibilityState = "hidden";
     await advance(60000);
     assert.equal(requests, 4);
-    assert.equal([...timers.values()][0].at - now, 3000);
+    assert.equal(required([...timers.values()][0]).at - now, 3000);
     fail = false;
     doc.visibilityState = "visible";
     doc.dispatchEvent(new Event("visibilitychange"));
@@ -121,7 +126,7 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
     assert.equal(timers.size, 1);
     await advance(100);
     assert.equal(requests, 5);
-    assert.equal([...timers.values()][0].at - now, 3000);
+    assert.equal(required([...timers.values()][0]).at - now, 3000);
     await advance(3000);
     assert.equal(requests, 6);
     assert.equal(timers.size, 1);
@@ -136,12 +141,12 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
       1,
       "only the editor idle lease remains during the full read",
     );
-    assert.equal([...timers.values()][0].at - now, 297000);
+    assert.equal(required([...timers.values()][0]).at - now, 297000);
     setTaskTextEditing("PMON-1:title", false);
     releaseResponse?.(Response.json([raw]));
     await new Promise<void>((resolve) => saved.setTimeout(resolve, 0));
     assert.equal(
-      [...timers.values()][0].at - now,
+      required([...timers.values()][0]).at - now,
       250,
       "blur during busy schedules prompt reapply",
     );

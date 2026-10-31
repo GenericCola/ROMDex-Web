@@ -29,9 +29,15 @@ void test("schema loading returns the current item so original editor seeds newl
     ...emptyWorkspace(),
     remote: [{ ...item, "custom:f-period": 150 }],
   };
-  t.mock.method(workspaceStore, "change", async (update) => {
-    update(data);
-  });
+  t.mock.method(
+    workspaceStore,
+    "change",
+    async (
+      update: (data: import("../../src/domain/types").WorkspaceData) => void,
+    ) => {
+      update(data);
+    },
+  );
   t.mock.method(workspaceStore, "flush", async () => {});
   t.mock.method(workspaceStore, "getSnapshot", () => {
     return {

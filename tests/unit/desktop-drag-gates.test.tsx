@@ -66,7 +66,8 @@ test("desktop drag ignores unrelated checked locks except a genuine bulk grip ge
     }
     assert.equal(captures, 3);
     for (const pointerType of ["touch", "pen", ""]) {
-      const touch = { ...event(false), pointerType };
+      // Include the deliberately unsupported empty native pointer type.
+      const touch = Object.assign(event(false), { pointerType });
       assert.equal(startTaskDrag(touch, []), null);
     }
     assert.equal(captures, 3);

@@ -40,7 +40,12 @@ test("Save reason distinguishes local errors, writes, drafts, queue, rollups and
     text: "fixture",
     created: 1,
   });
-  state.data.cloud = { ...state.data.cloud, rollupPending: true };
+  state.data.cloud = {
+    autoSync: false,
+    records: {},
+    ...state.data.cloud,
+    rollupPending: true,
+  };
   assert.match(
     saveExplanation(state, true),
     /drafts; 1 queued change not yet confirmed in YouTrack; Parent status/,
@@ -123,11 +128,19 @@ test("Save light and its explanation use the same pending-work truth, independen
         created: 1,
       });
     if (kind === "parent")
-      state.data.cloud = { ...state.data.cloud, rollupPending: true };
+      state.data.cloud = {
+        autoSync: false,
+        records: {},
+        ...state.data.cloud,
+        rollupPending: true,
+      };
     if (kind === "review")
       state.data.cloud = {
+        autoSync: false,
         ...state.data.cloud,
-        records: { pending: { status: "uncertain" } },
+        records: {
+          pending: { status: "uncertain", message: "Outcome unknown" },
+        },
       };
     assert.equal(saveIndicator(state, false).color, "red");
     assert.doesNotMatch(saveIndicator(state, false).description, /No pending/);

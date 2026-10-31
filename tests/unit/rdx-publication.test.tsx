@@ -44,9 +44,9 @@ void test("publication requires the destination project and explicitly blocks un
     JSON.stringify(result.preview.blockers),
     /supported web field adapter/,
   );
-  assert.equal(
-    jsonObject((jsonObject(document.content).tasks as never[])[0]).fields
-      ?.length,
-    1,
-  );
+  const tasks = jsonObject(document.content).tasks;
+  assert.ok(Array.isArray(tasks));
+  const fields = jsonObject(tasks[0]).fields;
+  assert.ok(Array.isArray(fields));
+  assert.equal(fields.length, 1);
 });

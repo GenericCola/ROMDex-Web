@@ -52,6 +52,7 @@ void test("multiple existing review records do not globally prevent independent 
       first = f.edit(A, "one"),
       second: TaskOperation = {
         type: "comment",
+        created: 1,
         issueId: A,
         opId: "two",
         text: "Held comment",
@@ -87,6 +88,7 @@ void test("same-ticket comment, parent move, creation and ancestor rollup cannot
   rollup.purpose = "rollup";
   const same: TaskOperation = {
     type: "comment",
+    created: 1,
     issueId: A,
     opId: "same",
     text: "Held",

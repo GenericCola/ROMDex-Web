@@ -20,7 +20,7 @@ const fixture = () => {
       values.delete(key);
     },
   };
-  const record = {
+  const record: import("../../src/auth/resume-record").ResumeRecord = {
     version: 1 as const,
     instance: YOUTRACK_ORIGIN,
     token: "synthetic-no-access",

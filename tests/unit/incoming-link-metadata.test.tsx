@@ -41,12 +41,14 @@ test("equal revision hydrates only unknown link count without edits or status wo
     ),
     true,
   );
+  assert.ok(before.remote[0]);
   before.remote[0].dependencies = 4;
   assert.deepEqual(data, before);
   assert.equal(
     mergeIncoming(data, [{ ...task(), dependencies: 9 }], new Set()),
     false,
   );
+  assert.ok(data.remote[0]);
   assert.equal(data.remote[0].dependencies, 4);
 });
 test("zero is known metadata; missing and older values cannot change cache", () => {
@@ -61,6 +63,7 @@ test("zero is known metadata; missing and older values cannot change cache", () 
   );
   assert.equal(mergeIncoming(data, [{ ...task() }], new Set()), false);
   mergeIncoming(data, [{ ...task(), dependencies: 0 }], new Set());
+  assert.ok(data.remote[0]);
   assert.equal(data.remote[0].dependencies, 0);
 });
 test("focused, queued and newer observed baselines prevent metadata hydration", () => {

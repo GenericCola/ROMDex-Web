@@ -88,6 +88,7 @@ export const fixture = async () => {
     if (kind === "comment")
       return {
         type: "comment",
+        created: 1,
         issueId: B,
         opId: "safe",
         text: "Independent comment",

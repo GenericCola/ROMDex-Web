@@ -49,21 +49,31 @@ void test("native plan review retains old bytes and atomically saves the new pla
     data,
   }));
   t.mock.method(workspaceStore, "flush", async () => {});
-  t.mock.method(workspaceStore, "change", async (update) => {
-    update(data);
-  });
+  t.mock.method(
+    workspaceStore,
+    "change",
+    async (
+      update: (data: import("../../src/domain/types").WorkspaceData) => void,
+    ) => {
+      update(data);
+    },
+  );
   const fields = new PlanReviewSession();
   t.mock.method(fields, "refresh", async () => {});
   t.mock.method(fields, "fieldOptions", () => ({}));
   const methods: string[] = [];
-  t.mock.method(globalThis, "fetch", async (url, init) => {
-    methods.push(init?.method ?? "GET");
-    assert.equal(init?.method, "GET");
-    const path = new URL(String(url)).pathname;
-    return Response.json(
-      path.endsWith("/comments") || path.endsWith("/attachments") ? [] : raw,
-    );
-  });
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: Parameters<typeof fetch>[0], init: RequestInit | undefined) => {
+      methods.push(init?.method ?? "GET");
+      assert.equal(init?.method, "GET");
+      const path = new URL(String(url)).pathname;
+      return Response.json(
+        path.endsWith("/comments") || path.endsWith("/attachments") ? [] : raw,
+      );
+    },
+  );
   setAuthSession({
     token: "fixture-only",
     expiresAt: Date.now() + 60000,
@@ -149,10 +159,16 @@ void test("native plan review retains old bytes and atomically saves the new pla
   );
   assert.equal(data.rdxImports[key]?.review, undefined);
   // A concurrent local change cannot be overwritten by the prepared result.
-  t.mock.method(workspaceStore, "change", async (update) => {
-    data.remote[0]!.summary = "Concurrent local change";
-    update(data);
-  });
+  t.mock.method(
+    workspaceStore,
+    "change",
+    async (
+      update: (data: import("../../src/domain/types").WorkspaceData) => void,
+    ) => {
+      data.remote[0]!.summary = "Concurrent local change";
+      update(data);
+    },
+  );
   const retained = data.rdxFiles.length;
   await assert.rejects(session.review({ key }, fields), /workspace changed/);
   assert.equal(data.rdxFiles.length, retained);

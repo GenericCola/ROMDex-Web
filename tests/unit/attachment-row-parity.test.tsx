@@ -29,7 +29,7 @@ void test("original attachment row has one deletion state and retains missing-fi
   assert.equal(rows[0]?.status, "Queued for Deletion");
   data.attachmentLists["PMON-1"] = [];
   data.cloud = {
-    version: 1,
+    autoSync: false,
     records: { delete: { status: "uncertain", message: "Unknown outcome" } },
     sharedStatuses: false,
   };

@@ -63,6 +63,7 @@ test("dirty scoped tile draft holds only its ticket, preserves capture and still
   try {
     assert.equal(hasUnscopedDraftEdits(), false);
     assert.deepEqual([...draftTicketIds()], ["PMON-1"]);
+    assert.ok(data.operations[1]);
     assert.deepEqual([...automaticBatch(data)!], [data.operations[1].opId]);
     const before = structuredClone(data.operations);
     mergeIncoming(
@@ -74,10 +75,14 @@ test("dirty scoped tile draft holds only its ticket, preserves capture and still
       draftTicketIds(),
       false,
     );
+    assert.ok(data.remote[0]);
+    assert.ok(data.remote[2]);
     assert.equal(data.remote[0].summary, "PMON-1");
     assert.equal(data.remote[2].summary, "Fresh unrelated");
     assert.deepEqual(data.operations, before);
-    assert.equal(captureDraftEditors()[0].name, "Unapplied");
+    const capture = captureDraftEditors()[0];
+    assert.ok(capture);
+    assert.equal(capture.name, "Unapplied");
     await assert.rejects(flushDraftEditors(), /Apply or close/);
     dirty = false;
     assert.equal(automaticBatch(data), undefined);

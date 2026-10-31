@@ -85,6 +85,7 @@ test("invalid ranks and any mutation of locked remote, draft, operation or journ
   }
   const changes = [
     (data: ReturnType<typeof fixture>) => {
+      assert.ok(data.remote[0]);
       data.remote[0].summary = "unsafe";
     },
     (data: ReturnType<typeof fixture>) => {

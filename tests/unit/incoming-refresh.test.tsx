@@ -12,6 +12,11 @@ import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
 import { incomingRevision } from "../../src/youtrack/incoming-revision";
 import { normalize, type RawIssue } from "../../src/youtrack/read-tasks";
+const required = <T,>(value: T | undefined): T => {
+  assert.notEqual(value, undefined, "Expected fixture entry to exist");
+  if (value === undefined) throw new Error("Missing fixture entry");
+  return value;
+};
 const gate = <T,>() => {
   let release!: (value: T) => void;
   const promise = new Promise<T>((resolve) => {
@@ -140,11 +145,20 @@ test("real request pipeline coalesces reads; active editor A held while B update
     assert.equal(refreshIncoming(true), first);
     held.release();
     await first;
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].summary, "PMON-1");
-    assert.equal(workspaceStore.getSnapshot().data.remote[1].summary, "B new");
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
+      "PMON-1",
+    );
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[1]).summary,
+      "B new",
+    );
     setTaskTextEditing("PMON-1:title", false);
     await refreshIncoming();
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].summary, "A new");
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
+      "A new",
+    );
     assert.deepEqual(env.counts(), { reads: 1, probes: 0 });
     assert.equal(workspaceStore.getSnapshot().data.operations.length, 0);
   } finally {
@@ -170,7 +184,7 @@ test("account or project session change while full read is pending cannot apply 
       held.release();
       await rejected;
       assert.equal(
-        workspaceStore.getSnapshot().data.remote[0].summary,
+        required(workspaceStore.getSnapshot().data.remote[0]).summary,
         "PMON-1",
       );
     } finally {
@@ -190,7 +204,10 @@ test("delivery epoch change during read rejects snapshot; rejected refresh relea
     held.release();
     await rejected;
     await refreshIncoming(true);
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].summary, "new");
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
+      "new",
+    );
   } finally {
     env.close();
   }
@@ -205,7 +222,10 @@ test("older full response cannot undo newer per-ticket baseline, failures preser
     );
     env.setRemote([raw("PMON-1", 2)]);
     await refreshIncoming(true);
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].summary, "latest");
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
+      "latest",
+    );
     env.advance();
     env.fail(true);
     await assert.rejects(refreshIncoming(true), /offline fixture/);
@@ -237,7 +257,7 @@ test("queued deletion and attachment remain untouched while unrelated incoming t
           opId: "delete",
           issueId: "PMON-1",
           ids: ["PMON-1"],
-          bases: { "PMON-1": data.remote[0] },
+          bases: { "PMON-1": required(data.remote[0]) },
         },
         {
           type: "attachment",
@@ -263,10 +283,16 @@ test("queued deletion and attachment remain untouched while unrelated incoming t
     ]);
     await refreshIncoming(true);
     assert.deepEqual(workspaceStore.getSnapshot().data.operations, before);
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].updated, 1);
-    assert.equal(workspaceStore.getSnapshot().data.remote[1].updated, 1);
     assert.equal(
-      workspaceStore.getSnapshot().data.remote[2].summary,
+      required(workspaceStore.getSnapshot().data.remote[0]).updated,
+      1,
+    );
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[1]).updated,
+      1,
+    );
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[2]).summary,
       "independent",
     );
   } finally {
@@ -285,7 +311,7 @@ test("reconnecting creates a new port and cannot reuse held old-port cached snap
     setTaskTextEditing("PMON-1:title", false);
     await refreshIncoming();
     assert.equal(
-      workspaceStore.getSnapshot().data.remote[0].summary,
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
       "fresh port",
     );
     assert.equal(env.counts().reads, 2);
@@ -345,7 +371,10 @@ test("same-account persistence switch fences a pending read and stale cached aut
     env.session();
     setTaskTextEditing("PMON-1:title", false);
     await refreshIncoming();
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].summary, "PMON-1");
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
+      "PMON-1",
+    );
   } finally {
     env.close();
   }
@@ -361,7 +390,7 @@ test("incoming refresh remains available during active delivery for unrelated ti
         type: "edit",
         opId: "held",
         issueId: "PMON-1",
-        base: structuredClone(data.remote[0]),
+        base: structuredClone(required(data.remote[0])),
         patch: { priority: "High" },
       });
     });
@@ -376,9 +405,12 @@ test("incoming refresh remains available during active delivery for unrelated ti
     ]);
     await refreshIncoming(true);
     assert.equal(workspaceStore.getSnapshot().delivering, true);
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].summary, "PMON-1");
     assert.equal(
-      workspaceStore.getSnapshot().data.remote[1].summary,
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
+      "PMON-1",
+    );
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[1]).summary,
       "unrelated fresh",
     );
   } finally {
@@ -400,14 +432,20 @@ test("watcher shutdown prevents an in-flight snapshot from applying; malformed f
     alive = false;
     held.release();
     await rejected;
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].summary, "PMON-1");
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
+      "PMON-1",
+    );
     env.setRemote([raw("PMON-1", 2), raw("PMON-1", 2)]);
     await assert.rejects(refreshIncoming(true), /duplicate|invalid/i);
-    assert.equal(workspaceStore.getSnapshot().data.remote[0].updated, 1);
+    assert.equal(
+      required(workspaceStore.getSnapshot().data.remote[0]).updated,
+      1,
+    );
     env.setRemote([{ ...raw("PMON-1", 3), summary: "retry valid" }]);
     await refreshIncoming(true);
     assert.equal(
-      workspaceStore.getSnapshot().data.remote[0].summary,
+      required(workspaceStore.getSnapshot().data.remote[0]).summary,
       "retry valid",
     );
   } finally {

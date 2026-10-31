@@ -72,6 +72,8 @@ void test("signed-in plan review stages only its exact local batch and never sen
       bytes = await writeRdx(planDocument(), new Map());
     const preview = await session.preview(bytes, {});
     assert.equal(preview.ready, true);
+    assert.equal(typeof preview.token, "string");
+    if (typeof preview.token !== "string") throw Error("Missing preview token");
     assert.equal(data.operations.length, 0);
     await assert.rejects(
       session.queue(bytes, { token: preview.token }),

@@ -36,6 +36,7 @@ test("switching away and back retains conflict evidence, queue, and draft per wo
     created: 1,
   });
   original.cloud = {
+    accountId: "fixture",
     autoSync: false,
     records: { held: { status: "conflict", message: "Review" } },
   };
@@ -44,7 +45,8 @@ test("switching away and back retains conflict evidence, queue, and draft per wo
       revision = 0;
     return {
       load: async () => ({ revision, data: structuredClone(saved) }),
-      save: async (_expected: number, data: typeof original) => {
+      save: async (data: typeof original, expected: number) => {
+        assert.equal(expected, revision);
         saved = structuredClone(data);
         return ++revision;
       },
@@ -54,6 +56,11 @@ test("switching away and back retains conflict evidence, queue, and draft per wo
     second = persistence(emptyWorkspace());
   const store = new WorkspaceStore(first);
   await store.start();
+  await store.change((data) => {
+    data.commentDrafts["PMON-2"] = "Persisted before project switch";
+  });
+  await store.flush();
+  original.commentDrafts["PMON-2"] = "Persisted before project switch";
   await store.switchPersistence(second);
   assert.equal(store.getSnapshot().data.operations.length, 0);
   await store.switchPersistence(first);

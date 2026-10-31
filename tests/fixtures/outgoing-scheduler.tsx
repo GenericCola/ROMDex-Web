@@ -6,7 +6,7 @@ export const harness = (run: () => void | Promise<void>) => {
   let now = 0,
     serial = 0,
     key: string | null = null;
-  let notify = () => {
+  let notify: () => void = () => {
     return undefined;
   };
   let unsubscribed = false;

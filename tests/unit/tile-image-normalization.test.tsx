@@ -22,7 +22,7 @@ test("desktop tile size preserves aspect, small sizes and current decode bounds"
     [4096, 4096],
     [NaN, 1],
     [Infinity, 1],
-  ])
+  ] as const)
     assert.throws(() => tileImageSize(w, h), /dimensions/);
 });
 test("8MiB input normalizes through alpha-capable PNG canvas and closes bitmap on success/failure", async (t) => {
