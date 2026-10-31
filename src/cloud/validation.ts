@@ -6,8 +6,10 @@ import {
 } from "./queue-shape";
 import { validateStatuses } from "./status-validation";
 import { validateTagJournal } from "./tag-journal";
+import { validateUnavailable } from "./unavailable-tasks";
 import { validateOperation } from "./validate-operation";
 export const validateQueue = (data: WorkspaceData) => {
+  validateUnavailable(data);
   const ids = new Set<string>();
   for (const operation of data.operations) {
     if (

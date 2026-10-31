@@ -10,6 +10,7 @@ import { HierarchyQuarantine } from "./hierarchy-quarantine";
 import { finishLocalSave, saveLocalDrafts } from "./save-local-drafts";
 import { resumeDeletionReadback } from "./session-deletions";
 import { cloudData } from "./types";
+import { deliveryCompletion, statusReadNeeded } from "./unavailable-tasks";
 const hierarchyQuarantine = new HierarchyQuarantine();
 let client: DeliveryClient | null = null;
 let suspended = false;
@@ -107,9 +108,7 @@ export const saveDelivery = async (automatic = false) => {
     workspaceStore.setConnection(
       "YouTrack delivery connected for this session",
     );
-    return workspaceStore.getSnapshot().data.operations.length
-      ? "Current delivery finished. Additional changes remain safely queued."
-      : "Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.";
+    return deliveryCompletion(workspaceStore.getSnapshot().data);
   } catch (error) {
     if (isDeferredDelivery(error)) {
       suspended = false;
@@ -130,7 +129,7 @@ export const automaticDelivery = () => {
     state.delivering ||
     !cloudData(state.data).autoSync ||
     (!state.data.operations.length &&
-      !cloudData(state.data).rollupPending &&
+      !statusReadNeeded(state.data) &&
       !cloudData(state.data).sharedStatuses)
   )
     return;

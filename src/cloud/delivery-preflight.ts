@@ -10,6 +10,10 @@ export const deliveryPreflight = async (
   if (binding && binding !== port.accountId)
     throw Error("This browser queue belongs to a different YouTrack account.");
   await reconcileDeletionRecords(snapshot, commit, port);
+  if (cloudData(snapshot()).unavailable)
+    await commit((data) => {
+      data.cloud = { ...cloudData(data), rollupPending: true };
+    });
   const blocked = Object.entries(cloudData(snapshot()).records).find(
     ([id, record]) => {
       return (

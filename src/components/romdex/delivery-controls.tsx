@@ -99,6 +99,7 @@ const DeliveryControls = () => {
       {(deliveryPaused() ||
         data.operations.length > 0 ||
         !!cloudData(data).rollupPending ||
+        !!cloudData(data).unavailable ||
         records.length > 0) && (
         <SyncRecoveryPanel
           data={data}

@@ -9,6 +9,7 @@ import {
   deliveryPaused,
 } from "./session";
 import { cloudData } from "./types";
+import { statusReadNeeded } from "./unavailable-tasks";
 const outgoingWork = () => {
   const state = workspaceStore.getSnapshot(),
     cloud = cloudData(state.data);
@@ -22,7 +23,7 @@ const outgoingWork = () => {
     deliveryPaused() ||
     !cloud.autoSync ||
     (!state.data.operations.length &&
-      !cloud.rollupPending &&
+      !statusReadNeeded(state.data) &&
       !cloud.sharedStatuses)
   )
     return null;

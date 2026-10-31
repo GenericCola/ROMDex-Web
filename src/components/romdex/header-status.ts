@@ -43,6 +43,11 @@ export const saveExplanation = (state: WorkspaceSnapshot, drafts: boolean) => {
     );
   if (cloudData(state.data).rollupPending)
     reasons.push("Parent status calculation pending");
+  const deferred = cloudData(state.data).unavailable;
+  if (deferred?.blockedIds.length)
+    reasons.push(
+      `Status updates for ${deferred.blockedIds.join(", ")} await readable tasks: ${deferred.missingIds.join(", ")}`,
+    );
   if (
     Object.values(cloudData(state.data).records ?? {}).some((record) => {
       return ["conflict", "uncertain", "attempting"].includes(record.status);
@@ -71,6 +76,7 @@ export const saveIndicator = (state: WorkspaceSnapshot, drafts: boolean) => {
     drafts ||
     state.data.operations.length > 0 ||
     !!cloudData(state.data).rollupPending ||
+    !!cloudData(state.data).unavailable?.blockedIds.length ||
     Object.values(cloudData(state.data).records ?? {}).some((record) => {
       return ["conflict", "uncertain", "attempting"].includes(record.status);
     });

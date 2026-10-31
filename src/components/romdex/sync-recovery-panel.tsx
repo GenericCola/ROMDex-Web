@@ -21,7 +21,9 @@ const SyncRecoveryPanel = ({
   retry: () => void;
 }) => {
   const failure = /^(Automatic delivery paused|Save stopped):/.test(connection);
-  const statusPending = !!cloudData(data).rollupPending;
+  const { unavailable } = cloudData(data);
+  const statusPending =
+    !!cloudData(data).rollupPending || !!unavailable?.blockedIds.length;
   const pending = data.operations.length > 0 || statusPending;
   const hasMoves = data.operations.some((operation) => {
     return operation.type === "edit" && "parentId" in operation.patch;
@@ -72,6 +74,16 @@ const SyncRecoveryPanel = ({
                 : "Your changes are ready to save to YouTrack."}
         </p>
       )}
+      {unavailable && (
+        <p>
+          {unavailable.deniedIds?.length
+            ? `Access denied for ${unavailable.deniedIds.join(", ")}. `
+            : `Could not read ${unavailable.missingIds.join(", ") || "archived tasks"}. `}
+          Their local copies are kept.
+          {unavailable.blockedIds.length > 0 &&
+            ` Status updates for ${unavailable.blockedIds.join(", ")} are waiting; other changes can sync.`}
+        </p>
+      )}
       {connection && !failure && (
         <details>
           <summary>Connection details</summary>
@@ -101,7 +113,9 @@ const SyncRecoveryPanel = ({
           {otherChanges
             ? "SAVE OTHER CHANGES"
             : !data.operations.length
-              ? "SAVE STATUS UPDATES"
+              ? unavailable?.blockedIds.length
+                ? "CHECK UNAVAILABLE TASKS AGAIN"
+                : "SAVE STATUS UPDATES"
               : data.operations.length === 1
                 ? "SAVE CHANGE"
                 : `SAVE ${data.operations.length} CHANGES`}

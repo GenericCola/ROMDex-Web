@@ -67,8 +67,21 @@ test("durable assignment and rollup debt resume after a failed project read with
 test("a failed durable rollup marker prevents native writes while retaining the assignment",async()=>{
   const s=await setup([task(root)]);s.options.disk=true;await s.store.change(data=>editTask(data,root,{assignedState:"Done"}));await assert.rejects(s.run(),/disk full/);assert.equal(s.writes.length,0);assert.equal(s.saved().cloud?.assigned?.[root]?.assignedState,"Done");assert.equal(s.saved().cloud?.assigned?.[root]?.pendingState,null);
 });
-test("missing project tasks, external parents and undiscovered children block every rollup POST",async()=>{
-  for(const kind of ["missing","child","external","cycle"]){const s=await setup([task(root),task(child,"Done",root)]);await s.store.change(data=>editTask(data,root,{assignedState:"Standby"}));if(kind==="missing")s.options.omit=child;if(kind==="child")s.options.extraChild="PMON-999999";if(kind==="external")s.remote.get(root)!.parentId="OTHER-1";if(kind==="cycle")s.remote.get(root)!.parentId=child;await assert.rejects(s.run(),/missing|hierarchy|children|cycle/);assert.equal(s.writes.length,0);assert.equal(s.saved().cloud?.rollupPending,true);}
+test("listing omissions are read back while unreadable hierarchies defer only affected status writes",async()=>{
+  for(const kind of ["missing","child","external","cycle"]){
+    const s=await setup([task(root),task(child,"Done",root)]);
+    await s.store.change(data=>editTask(data,root,{assignedState:"Standby"}));
+    if(kind==="missing")s.options.omit=child;
+    if(kind==="child")s.options.extraChild="PMON-999999";
+    if(kind==="external")s.remote.get(root)!.parentId="OTHER-1";
+    if(kind==="cycle")s.remote.get(root)!.parentId=child;
+    if(kind==="cycle") { await assert.rejects(s.run(),/cycle/); assert.equal(s.writes.length,0); }
+    else { await s.run();
+      if(kind==="missing") assert.equal(s.remote.get(root)?.state,"Done");
+      else {assert.equal(s.writes.length,0);assert.ok(s.saved().cloud?.unavailable?.blockedIds.includes(root));}
+      assert.equal(s.saved().cloud?.rollupPending,false);
+    }
+  }
 });
 test("rollups recheck the target before POST and stale observations cannot change assignments",async()=>{
   const s=await setup([task(root)]);const get=s.port.get;s.port.get=async id=>{const item=await get(id);if(item)item.updated=99;return item;};await s.store.change(data=>editTask(data,root,{assignedState:"Done"}));await assert.rejects(s.run(),/older|changed/);assert.equal(s.writes.length,0);
@@ -95,5 +108,5 @@ test("a resumed rollup yields to a newly changed deeper subtree before checking 
   const s=await setup([task(root),task(child,"Done",root),task(other),task(middle,"To do",other),task(leaf,"To do",middle)]);
   const get=s.port.get;let stop=true;s.port.get=async id=>{const item=await get(id);const op=s.store.getSnapshot().data.operations[0];if(stop&&op?.type==="edit"&&op.purpose==="rollup"){stop=false;if(item)item.updated=99;}return item;};
   await s.store.change(data=>editTask(data,root,{assignedState:"In Development"}));await assert.rejects(s.run(),/target changed/);assert.equal(s.writes.length,0);
-  Object.assign(s.remote.get(leaf)!,{state:"Done",updated:2});s.options.extraChild="PMON-999999";await assert.rejects(s.run(),/unreadable children/);assert.deepEqual(s.writes.map(write=>write.id),[middle]);assert.equal(s.remote.get(root)?.state,"To do");
+  Object.assign(s.remote.get(leaf)!,{state:"Done",updated:2});s.options.extraChild="PMON-999999";await s.run();assert.ok(s.saved().cloud?.unavailable?.blockedIds.includes(root));assert.deepEqual(s.writes.map(write=>write.id),[middle,other]);assert.equal(s.remote.get(root)?.state,"To do");
 });

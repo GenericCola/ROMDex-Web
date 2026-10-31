@@ -10,6 +10,7 @@ import {
 } from "./shared-status-delivery";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
+import { availabilityFingerprint } from "./unavailable-tasks";
 type Edit = Extract<TaskOperation, { type: "edit" }>;
 export const planRollup = async (
   snapshot: () => WorkspaceData,
@@ -34,6 +35,21 @@ export const planRollup = async (
       });
       return { ...item, comments: previous?.comments ?? item.comments };
     });
+    if (tree.unavailable.length || tree.missingIds.length)
+      data.cloud.unavailable = {
+        accountId: port.accountId,
+        project: "PMON",
+        tasks: tree.unavailable,
+        missingIds: tree.missingIds,
+        deniedIds: tree.deniedIds,
+        blockedIds: tree.blockedIds,
+        fingerprint: availabilityFingerprint(
+          data,
+          tree.missingIds,
+          tree.blockedIds,
+        ),
+      };
+    else delete data.cloud.unavailable;
     if (tree.next) {
       operationId = crypto.randomUUID();
       data.operations.push({
@@ -95,9 +111,7 @@ export const deliverRollup = async (
     (current.sharedStatus !== undefined &&
       fresh.assignedState !== current.assignedState)
   )
-    throw Error(
-      "The rollup target changed. Refresh before sending its status.",
-    );
+    throw Error("The status target changed. Refresh before sending.");
   const { state } = operation.patch;
   if (!state) throw Error("Missing effective status.");
   const metadata = cloudData(snapshot()).sharedStatuses

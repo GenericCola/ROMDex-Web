@@ -2,39 +2,26 @@ import { indexTree, STATES, youTrackState } from "@/domain/accepted/core.mjs";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
 import { observeStatus } from "./assigned-status";
+import { readRollupAvailability } from "./rollup-availability";
+import { readableRollupSubtree } from "./rollup-subtree";
 import type { DeliveryPort } from "./types";
 export const readRollupTree = async (
   data: WorkspaceData,
   port: DeliveryPort,
 ) => {
-  const raw = await port.all();
+  const available = await readRollupAvailability(data, port);
   const ids = new Set(
-    raw.map((item) => {
+    available.items.map((item) => {
       return item.id;
     }),
   );
-  if (ids.size !== raw.length)
-    throw Error("Duplicate tasks block status rollups.");
-  if (
-    data.remote.some((item) => {
-      return !ids.has(item.id);
-    })
-  )
-    throw Error(
-      "A known task is missing or unreadable. Refresh before status rollups.",
-    );
-  for (const item of raw) {
+  const items = available.items.map((item) => {
     validateTask(item);
-    if (item.updated === null)
-      throw Error("A status rollup needs readable revision timestamps.");
-    if (
-      !/^PMON-\d+$/.test(item.id) ||
-      (item.parentId && !ids.has(item.parentId))
-    )
-      throw Error("An incomplete or external hierarchy blocks status rollups.");
-  }
-  const items = raw.map((item) => {
-    return observeStatus(data, item);
+    if (item.parentId && !ids.has(item.parentId))
+      throw Error("A task has an unreadable parent.");
+    return available.fresh.has(item.id) && !available.blocked.has(item.id)
+      ? observeStatus(data, item)
+      : item;
   });
   const tree = indexTree(items);
   const deepest = [...items].sort((a, b) => {
@@ -49,31 +36,36 @@ export const readRollupTree = async (
         : (item.assignedState ?? item.state),
     );
   };
-  const next = deepest.find((item) => {
-    return item.state !== desired(item);
-  });
-  // Only this subtree contributes to the next write; verify its leaves as well as its parents.
-  const pending = next ? [next] : [];
-  while (pending.length) {
-    const item = pending.pop();
-    if (!item) break;
-    const known = tree.children.get(item.id) ?? [];
-    pending.push(...known);
-    const children = await port.children(item.id);
-    const expected = new Set(
-      known.map((child) => {
-        return child.id;
-      }),
-    );
+  let next: TaskItem | undefined;
+  for (const item of deepest) {
     if (
-      children.length !== expected.size ||
-      children.some((id) => {
-        return !expected.has(id);
-      })
+      !available.fresh.has(item.id) ||
+      available.blocked.has(item.id) ||
+      item.state === desired(item)
     )
-      throw Error(
-        "The hierarchy changed or has unreadable children. Refresh before status rollups.",
-      );
+      continue;
+    if (
+      await readableRollupSubtree(
+        item,
+        items,
+        port,
+        available.blocked,
+        available.missingIds,
+      )
+    ) {
+      next = item;
+      break;
+    }
   }
-  return { items, desired, next };
+  return {
+    items,
+    desired,
+    next,
+    unavailable: available.unavailable,
+    missingIds: available.missingIds,
+    deniedIds: available.deniedIds,
+    blockedIds: [...available.blocked].filter((id) => {
+      return available.fresh.has(id) || available.pendingIds.has(id);
+    }),
+  };
 };

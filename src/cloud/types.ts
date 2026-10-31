@@ -36,6 +36,7 @@ export interface AssignedStatus {
   pendingState: string | null;
 }
 export interface CloudData {
+  unavailable?: import("./unavailable-tasks").UnavailableTasks;
   sharedStatuses?: boolean;
   assigned?: Record<string, AssignedStatus>;
   rollupPending?: boolean;

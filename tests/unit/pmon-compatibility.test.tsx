@@ -31,7 +31,7 @@ test("native testing payloads and creation readback map the label without changi
 
 test("a native Needs Testing leaf never schedules a spurious write and legacy labels converge once",async()=>{
   const data=emptyWorkspace(),native=item(child,"Needs Testing");data.remote=[native];
-  const port={all:async()=>[native],children:async()=>[]} as unknown as DeliveryPort;
+  const port={accountId:"fixture",all:async()=>[native],children:async()=>[]} as unknown as DeliveryPort;
   assert.equal((await readRollupTree(data,port)).next,undefined);
   data.remote=[{...native,assignedState:"Awaiting Testing"}];data.cloud={...data.cloud,assigned:{[child]:{assignedState:"Awaiting Testing",lastState:"Needs Testing",lastUpdated:1,pendingState:null}},accountId:"fixture",automaticSyncEnabled:false,records:{}};
   const tree=await readRollupTree(data,port);assert.equal(tree.desired(tree.items[0]!),"Needs Testing");assert.equal(tree.next,undefined);
