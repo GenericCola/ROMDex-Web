@@ -1,5 +1,6 @@
 import { draftMessage } from "@/domain/editor-drafts";
 import type { WorkspaceSnapshot } from "@/domain/types";
+import HierarchyRecovery from "./hierarchy-recovery";
 import OrderRecovery from "./order-recovery";
 import { exportRecovery } from "./recovery-export";
 const WorkspaceStatus = ({
@@ -34,6 +35,7 @@ const WorkspaceStatus = ({
       <button onClick={exportRecovery} disabled={!state.ready}>
         Export Recovery Copy
       </button>
+      <HierarchyRecovery state={state} />
       <OrderRecovery state={state} />
       <button
         onClick={openMigration}

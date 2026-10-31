@@ -81,6 +81,7 @@ export type TaskOperation =
 export type DetailsMode = "default" | "expanded" | "collapsed";
 export interface WorkspaceData {
   schemaVersion: 1;
+  hierarchyRecovery?: JsonObject[];
   attachmentLists?: Record<string, Attachment[]>;
   rdxFiles?: RdxFile[];
   rdxImports?: Record<string, PlanLedger>;

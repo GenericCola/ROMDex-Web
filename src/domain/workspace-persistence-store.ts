@@ -1,5 +1,6 @@
 import { verifyRetainedAssets } from "@/migration/verify-assets";
 import { WorkspaceStorage } from "@/storage/workspace-storage";
+import { persistHierarchyRecovery } from "./hierarchy-recovery-store";
 import type { WorkspaceData, WorkspaceSnapshot } from "./types";
 import { emptyWorkspace, validateWorkspace } from "./workspace-data";
 import type { WorkspacePersistence } from "./workspace-lifecycle";
@@ -120,6 +121,23 @@ export class WorkspacePersistenceStore {
       // Keep the queue usable; the caller and state retain the retry failure.
     });
     return result;
+  };
+  repairHierarchy = (
+    ...args: Parameters<typeof persistHierarchyRecovery> extends [
+      unknown,
+      unknown,
+      unknown,
+      ...infer Rest,
+    ]
+      ? Rest
+      : never
+  ) => {
+    return persistHierarchyRecovery(
+      this.state,
+      this.switching,
+      this.write,
+      ...args,
+    );
   };
   flush = async () => {
     let pending;

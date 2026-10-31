@@ -28,3 +28,15 @@ export const assertNotRecoveryMode = () => {
       "Recovery mode: delivery is disconnected. Navigation and recovery export are available; Save and Connect cannot send queued changes.",
     );
 };
+
+export const leaveRecoveryMode = () => {
+  // Caller must persist the reviewed queue and Auto-Sync off before this step.
+  // Remove the trigger before React renders again during navigation.
+  window.history.replaceState(window.history.state, "", "/?recovery=complete");
+  window.sessionStorage.removeItem(key);
+  if (window.sessionStorage.getItem(key) !== null)
+    throw Error(
+      "Recovery pause could not be cleared. Stay in this tab and retry.",
+    );
+  window.location.replace("/?recovery=complete");
+};
