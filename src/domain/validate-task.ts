@@ -8,6 +8,13 @@ export const validateTask: (value: unknown) => asserts value is TaskItem = (
   const item = value as TaskItem;
   validateNativeTask(item);
   if (
+    item.dependencies !== undefined &&
+    (!Number.isSafeInteger(item.dependencies) || item.dependencies < 0)
+  )
+    throw Error(
+      "Invalid linked-issue count. Existing browser data has been kept.",
+    );
+  if (
     item.assignees !== undefined &&
     (!Array.isArray(item.assignees) ||
       !item.assignees.every((person) => {

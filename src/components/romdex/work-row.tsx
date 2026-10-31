@@ -119,6 +119,11 @@ const WorkRow = ({
                 }) && <span className="pending-dot" title="Pending Changes" />}
               </span>
             </div>
+            {!!item.dependencies && (
+              <span className="dependency-count" title="Linked Issues">
+                ♧ {item.dependencies}
+              </span>
+            )}
           </div>
         </div>
       </td>

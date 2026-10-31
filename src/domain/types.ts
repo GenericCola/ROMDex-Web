@@ -15,6 +15,7 @@ export interface TaskComment {
   created: number;
 }
 export interface TaskItem {
+  dependencies?: number;
   [key: `custom:${string}`]: import("./json").JsonValue;
   _custom?: JsonObject[];
   assignee?: string | string[] | null;

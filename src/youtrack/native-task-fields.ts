@@ -85,4 +85,4 @@ export const nativeTaskFields = (
   };
 };
 export const nativeIssueFields =
-  "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(id,name,$type,value(name,id,login,fullName,minutes,text)),tags(id,name),commentsCount";
+  "id,idReadable,summary,description,updated,project(shortName),parent(issues(idReadable)),customFields(id,name,$type,value(name,id,login,fullName,minutes,text)),tags(id,name),commentsCount,links(linkType(name),issues(id))";

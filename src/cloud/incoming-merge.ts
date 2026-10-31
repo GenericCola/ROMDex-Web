@@ -8,6 +8,7 @@ import {
   retireIncoming,
   validateIncomingStatus,
 } from "./incoming-retirement";
+import { acceptIncomingRevision } from "./incoming-revision";
 import { cloudData } from "./types";
 export const incomingProtectedData = (data: WorkspaceData) => {
   return JSON.stringify({
@@ -92,15 +93,9 @@ export const mergeIncoming = (
       blocked.add(incoming.id);
       continue;
     }
-    // Equal revisions with different content are not reliable new evidence.
-    const revision = incoming.updated!;
     const observedRevision =
       cloudData(data).assigned?.[incoming.id]?.lastUpdated;
-    if (
-      (previous?.updated != null && revision <= previous.updated) ||
-      (observedRevision != null && revision < observedRevision)
-    )
-      continue;
+    if (!acceptIncomingRevision(previous, incoming, observedRevision)) continue;
     const item = structuredClone(incoming);
     if (previous) {
       const comments = new Map(

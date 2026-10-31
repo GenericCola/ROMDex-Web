@@ -2,6 +2,7 @@ import { cookieFetch, isCookieHandle } from "@/auth/cookie-client";
 import { authRequestGuard } from "@/auth/session";
 import type { TaskItem } from "@/domain/types";
 import { YouTrackHttpError } from "./http-error";
+import { linkedIssueCount } from "./linked-issue-count";
 import {
   nativeIssueFields,
   nativeObject,
@@ -10,6 +11,7 @@ import {
 } from "./native-task-fields";
 export const YOUTRACK_ORIGIN = "https://thegobindsingh.youtrack.cloud";
 export interface RawIssue {
+  links?: unknown;
   id: string;
   idReadable: string;
   summary: string;
@@ -42,8 +44,10 @@ export const normalize = (raw: RawIssue): TaskItem => {
     const nameValue = nativeObject(value)?.name;
     return typeof nameValue === "string" ? nameValue : undefined;
   };
+  const dependencies = linkedIssueCount(raw.links);
   return {
     ...nativeTaskFields(raw.customFields, raw.tags),
+    ...(dependencies === undefined ? {} : { dependencies }),
     id: raw.idReadable,
     dbId: raw.id,
     summary: raw.summary,

@@ -48,6 +48,11 @@ export const desktopTask = (value: JsonValue): TaskItem => {
         created: typeof c.created === "number" ? c.created : 0,
       };
     });
+  if (raw.dependencies !== undefined) {
+    if (typeof raw.dependencies !== "number")
+      throw Error("Invalid desktop linked-issue count.");
+    result.dependencies = raw.dependencies;
+  }
   Object.assign(result, desktopNativeFields(raw));
   validateTask(result);
   return result;
