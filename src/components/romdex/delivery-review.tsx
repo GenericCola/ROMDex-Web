@@ -62,7 +62,7 @@ const DeliveryReview = ({
   return (
     <section className="delivery-review-card">
       <h3>{summary.title}</h3>
-      {record.status === "conflict" ? (
+      {operation?.type === "delete" ? null : record.status === "conflict" ? (
         <p>This task also changed in YouTrack. Choose which version to keep.</p>
       ) : (
         <ReviewGuidance choice="check" />
@@ -112,9 +112,7 @@ const DeliveryReview = ({
               disabled={
                 busy ||
                 !operation ||
-                (["delete", "attachment-delete"].includes(
-                  operation?.type ?? "",
-                ) &&
+                (["delete", "attachment-delete"].includes(operation.type) &&
                   !missing)
               }
             >

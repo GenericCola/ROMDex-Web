@@ -47,7 +47,7 @@ const DeletionReviewActions = ({
         ? "Deletion targets rechecked and approved. The deletion is queued, not yet completed. Close Connection Details and use Save Changes to explicitly retry. Save runs another check before deleting; paused Auto-Sync does not resume from this approval."
         : choice === "cloud"
           ? "Remaining queued deletion cancelled. Earlier confirmed deletions were not undone."
-          : "Earlier deletion outcome checked. Review any remaining queued targets before Save Changes.",
+          : "Already-deleted targets cleared. No deletion request was sent.",
     );
   };
   const keep = () => {
@@ -63,42 +63,19 @@ const DeletionReviewActions = ({
     record.status === "uncertain" ||
     record.status === "attempting" ||
     record.status === "conflict";
+  const missingSnapshots = remaining.every((id) => {
+    return !record.remoteTasks?.some((item) => {
+      return item.id === id;
+    });
+  });
   return (
     <section
       className="deletion-review-actions"
       aria-label="Review queued deletion"
     >
-      <p>
-        No deletion is retried from this review. Keeping tasks cancels the
-        remaining queued deletion; any earlier confirmed deletion is not undone.
-      </p>
-      <button onClick={keep} disabled={busy}>
-        Keep tasks; cancel remaining queued deletion
-      </button>
-      <details>
-        <summary>I still want to delete the remaining tasks</summary>
-        <p>
-          Remaining targets: {remaining.join(", ") || "None"}. Approval reads
-          them again and stops if anything changed. It prepares the deletion for
-          a later Save or enabled delivery cycle; it is not an undoable local
-          edit.
-        </p>
-        <label className="deletion-review-confirmation">
-          <input
-            type="checkbox"
-            checked={approved === record}
-            onChange={approve}
-          />
-          I reviewed these exact targets and still want them permanently
-          deleted.
-        </label>
-        <button onClick={recheck} disabled={busy || approved !== record}>
-          Recheck and approve these deletions
-        </button>
-      </details>
       {uncertain && (
-        <details>
-          <summary>These tasks were already deleted in YouTrack</summary>
+        <details open={missingSnapshots}>
+          <summary>Already deleted in YouTrack?</summary>
           <label className="deletion-review-confirmation">
             <input
               type="checkbox"
@@ -117,6 +94,29 @@ const DeletionReviewActions = ({
           </button>
         </details>
       )}
+      <button onClick={keep} disabled={busy}>
+        Keep tasks; cancel remaining queued deletion
+      </button>
+      <details>
+        <summary>I still want to delete the remaining tasks</summary>
+        <p>
+          Remaining targets: {remaining.join(", ") || "None"}. Use this only for
+          tasks that still exist. Approval checks them again; Save Changes then
+          sends the deletion.
+        </p>
+        <label className="deletion-review-confirmation">
+          <input
+            type="checkbox"
+            checked={approved === record}
+            onChange={approve}
+          />
+          I reviewed these exact targets and still want them permanently
+          deleted.
+        </label>
+        <button onClick={recheck} disabled={busy || approved !== record}>
+          Recheck and approve these deletions
+        </button>
+      </details>
     </section>
   );
 };

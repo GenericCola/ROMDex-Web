@@ -103,7 +103,7 @@ export const conflictSummary = (
         );
       } else if (!base || !remote) {
         summary.items.push(
-          `${target}: ${!base ? "reviewed baseline" : "current task snapshot"} unavailable. Missing evidence does not prove deletion or access; inspect YouTrack.`,
+          `${target}: ${!remote ? "could not find the current task" : "original deletion review is unavailable"}.`,
         );
       } else {
         for (const change of differences(base, remote))

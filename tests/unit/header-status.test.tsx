@@ -141,7 +141,8 @@ test("Save light and its explanation use the same pending-work truth, independen
     "src/components/pwa-controls/check-update.ts",
     "utf8",
   );
-  assert.match(update, /latest ROMDex app version. Ticket syncing is separate/);
+  assert.match(update, /latest ROMDex app version/);
+  assert.doesNotMatch(update, /Ticket syncing is separate/);
 });
 
 test("header contains only fixed controls; expanding feedback is kept out of its layout", () => {

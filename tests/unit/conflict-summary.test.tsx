@@ -82,12 +82,12 @@ test("missing deletion evidence never claims that deletion succeeded", () => {
   const op = deletion();
   assert.match(
     conflictSummary(op, { status: "uncertain", message: "" }).items.join("\n"),
-    /snapshot unavailable.*does not prove deletion/,
+    /could not find the current task/,
   );
   if (op.type === "delete") delete op.bases;
   assert.match(
     conflictSummary(op, record()).items.join("\n"),
-    /baseline unavailable/,
+    /original deletion review is unavailable/,
   );
   assert.match(
     conflictSummary(undefined, record()).items.join("\n"),
