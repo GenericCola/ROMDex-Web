@@ -1,3 +1,4 @@
+import { preservesLockedOrder } from "./locked-ticket-order";
 import {
   changesLockedHierarchy,
   ticketDependencies as dependencies,
@@ -89,10 +90,10 @@ export const guardTicketChanges = (
   );
   if (!same(globalData(before), globalData(compared))) refused();
   const ids = new Set(locked);
+  if (!preservesLockedOrder(before, after, ids)) refused();
   for (const field of [
     "titleDrafts",
     "commentDrafts",
-    "order",
     "images",
     "attachmentLists",
   ] as const) {

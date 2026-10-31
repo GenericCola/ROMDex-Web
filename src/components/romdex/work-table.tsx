@@ -125,8 +125,8 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
               {rows.length} Visible / {scopeCount} in View
             </span>
             <span role="status">
-              {selection.message ||
-                drag.message ||
+              {drag.message ||
+                selection.message ||
                 "Drag to Reorder · Drag Sideways to Change Level"}
             </span>
           </footer>
