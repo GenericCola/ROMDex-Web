@@ -7,9 +7,11 @@ import { useRdx } from "./use-rdx";
 const RdxLibrary = ({
   data,
   close,
+  mode,
 }: {
   data: WorkspaceData;
   close: () => void;
+  mode?: "import" | "export";
 }) => {
   const model = useRdx(),
     conflicts = model.value?.preview
@@ -20,43 +22,51 @@ const RdxLibrary = ({
     });
   return (
     <Dialog
-      title="RDX Files"
+      title={
+        mode === "export"
+          ? "EXPORT RDX"
+          : mode === "import"
+            ? "IMPORT RDX"
+            : "RDX Files"
+      }
       close={close}
       className="rdx-plan-dialog rdx-browser-dialog"
     >
       <div className="rdx-library-body">
         <p>
-          Import maps and task plans into this browser. Source files and earlier
-          document revisions are retained. Exported files include their portable
-          history and assets.
+          {mode === "export"
+            ? "Choose a retained RDX document to export with its portable history and assets. This exports the selected document, not your entire PMON workspace."
+            : "Import maps and task plans into this browser. Source files and earlier document revisions are retained. Review the validated file before saving."}
         </p>
-        <label>
-          RDX file
-          <input
-            type="file"
-            accept=".rdx"
-            disabled={model.busy}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) void model.select(file);
-              event.target.value = "";
-            }}
-          />
-        </label>
+        {mode !== "export" && (
+          <label>
+            RDX file
+            <input
+              type="file"
+              accept=".rdx"
+              disabled={model.busy}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void model.select(file);
+                event.target.value = "";
+              }}
+            />
+          </label>
+        )}
         <p role="status">
           {model.busy ? "Validating RDX file…" : model.message}
         </p>
-        {model.value && (
+        {mode !== "export" && model.value && (
           <RdxPreview
             value={model.value}
             choices={model.choices}
             choose={model.choose}
           />
         )}
-        <RdxFileList data={data} model={model} />
+        <RdxFileList data={data} model={model} {...(mode ? { mode } : {})} />
       </div>
       <footer>
-        {model.value && (
+        {mode !== "export" && model.value && (
           <>
             <label className="port-check-line">
               <input

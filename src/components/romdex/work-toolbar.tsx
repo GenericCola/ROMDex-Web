@@ -1,10 +1,12 @@
 import type { emptyFilters } from "@/domain/task-filters";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { tw } from "@utils/tw";
 import type { ChangeEvent } from "react";
-import Lamp from "./lamp";
+import { completedControl } from "./indicator-status";
 import PlanImportButton from "./plan-import-button";
 import TaskFilterControl from "./task-filters";
 import WorkHeading from "./work-heading";
+import WorkspaceTools from "./workspace-tools";
 const WorkToolbar = ({
   items,
   data,
@@ -28,6 +30,7 @@ const WorkToolbar = ({
   addItem: () => void;
   completed: () => void;
 }) => {
+  const filter = completedControl(data.view.hideCompleted);
   return (
     <div className="work-header" inert={locked}>
       <WorkHeading items={items} data={data} />
@@ -53,14 +56,18 @@ const WorkToolbar = ({
           <button onClick={addItem}>+ Add Item</button>
           <PlanImportButton />
         </div>
-        <button
-          id="toggle-completed"
-          onClick={completed}
-          aria-pressed={data.view.hideCompleted}
-        >
-          {data.view.hideCompleted ? "Show Completed" : "Hide Completed"}
-          <Lamp color={data.view.hideCompleted ? "green" : "grey"} />
-        </button>
+        <div className="work-toolbar-actions">
+          <button
+            id="toggle-completed"
+            onClick={completed}
+            aria-pressed={data.view.hideCompleted}
+            title={filter.title}
+          >
+            {filter.label}
+            <span className={tw("bulb", filter.color)} aria-hidden="true" />
+          </button>
+          <WorkspaceTools />
+        </div>
       </div>
     </div>
   );

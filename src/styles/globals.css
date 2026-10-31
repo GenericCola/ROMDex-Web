@@ -4,6 +4,7 @@
 @import "./components.css";
 @import "./romdex-desktop.css";
 @import "./romdex-auth.css";
+@import "./romdex-tools.css";
 @source "../";
 
 /*
@@ -137,4 +138,7 @@
   --color-focus: var(--color-accent-500);
 }
 
-body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}

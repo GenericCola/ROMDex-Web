@@ -6,23 +6,17 @@ import {
 import { cloudData } from "@/cloud/types";
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
+import ConnectionIndicator from "./connection-indicator";
 import { deliveryMessage, saveExplanation, syncControl } from "./header-status";
 import Lamp from "./lamp";
 import WorkspaceMenu from "./workspace-menu";
-import WorkspaceTools from "./workspace-tools";
 interface HeaderProps {
   state: WorkspaceSnapshot;
   connect: () => void;
   unsavedDrafts?: boolean;
-  tools?: ReactNode;
 }
-const Header = ({
-  state,
-  connect,
-  unsavedDrafts = false,
-  tools,
-}: HeaderProps) => {
+const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
   const [message, setMessage] = useState<{
     text: string;
     connection: string;
@@ -73,7 +67,6 @@ const Header = ({
         </div>
         <div className="header-actions">
           <WorkspaceMenu workspace={state.data.view.workspace} />
-          {tools && <WorkspaceTools>{tools}</WorkspaceTools>}
           <button
             className="auto-sync-toggle"
             {...{ autoComplete: "off" }}
@@ -110,21 +103,12 @@ const Header = ({
                 }
               />
             </button>
-            <button
-              id="connect-open"
-              className="header-connection"
-              aria-label="Connection Details"
-              title="Connection Details"
-              onClick={connect}
-            >
-              <span className="connection-status">
-                <Lamp
-                  color={
-                    state.connection === "Not connected" ? "blue" : "yellow"
-                  }
-                />
-              </span>
-            </button>
+            <ConnectionIndicator
+              connected={sync.connected}
+              enabled={cloudData(state.data).autoSync}
+              paused={deliveryPaused()}
+              open={connect}
+            />
           </div>
         </div>
       </header>

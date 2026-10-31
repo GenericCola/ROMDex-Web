@@ -7,8 +7,8 @@ const SessionNotice = () => {
     <p className="port-recovery" role="alert">
       Your YouTrack session expired. Remote access is disconnected. Apply this
       dialog’s changes to preserve them, or close it to discard unapplied edits.
-      Then use Workspace tools to export recovery or retry local saving. Account
-      switching remains blocked until saving succeeds.
+      Then use the account recovery controls to export recovery or retry local
+      saving. Account switching remains blocked until saving succeeds.
     </p>
   );
 };

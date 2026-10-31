@@ -1,0 +1,45 @@
+.romdex-app .work-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.romdex-app .workspace-tools-trigger {
+  background: var(--yellow);
+  color: #243224;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+  padding: 6px 8px;
+  height: 29px;
+  min-height: 29px;
+}
+.romdex-update-dialog {
+  text-align: center;
+  max-width: 380px;
+}
+.romdex-update-progress {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  padding: 20px 8px;
+}
+.romdex-update-spinner {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  animation: romdex-update-spin 3s linear infinite;
+}
+@keyframes romdex-update-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .romdex-update-spinner {
+    animation-duration: 8s;
+  }
+}

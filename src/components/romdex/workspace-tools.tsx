@@ -1,32 +1,59 @@
-import Image from "next/image";
-import { useState, type ReactNode } from "react";
+import { use, useState } from "react";
 import Dialog from "./dialog";
-const WorkspaceTools = ({ children }: { children: ReactNode }) => {
+import {
+  WorkspaceToolsContext,
+  type WorkspaceTool,
+} from "./workspace-tools-context";
+const WorkspaceTools = () => {
+  const choose = use(WorkspaceToolsContext);
   const [open, setOpen] = useState(false);
-  const show = () => {
-    setOpen(true);
-  };
   const close = () => {
-    setOpen(false);
+    return setOpen(false);
+  };
+  const select = (tool: WorkspaceTool) => {
+    close();
+    choose?.(tool);
   };
   return (
     <>
       <button
-        className="suite-settings-slot"
-        aria-label="Workspace tools"
-        title="Workspace tools"
-        onClick={show}
+        className="workspace-tools-trigger"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => {
+          return setOpen(true);
+        }}
+        disabled={!choose}
       >
-        <Image
-          src="/romdex/standard-settings-icon.svg"
-          width={12}
-          height={12}
-          alt=""
-        />
+        TOOLS
       </button>
-      <Dialog title="Workspace tools" close={close} open={open}>
-        <div className="workspace-tools-panel">{children}</div>
-      </Dialog>
+      {open && (
+        <Dialog title="TOOLS" close={close}>
+          <div className="workspace-tools-panel">
+            <button
+              onClick={() => {
+                return select("export");
+              }}
+            >
+              EXPORT RDX
+            </button>
+            <button
+              onClick={() => {
+                return select("import");
+              }}
+            >
+              IMPORT RDX
+            </button>
+            <button
+              onClick={() => {
+                return select("updates");
+              }}
+            >
+              CHECK FOR UPDATES
+            </button>
+          </div>
+        </Dialog>
+      )}
     </>
   );
 };

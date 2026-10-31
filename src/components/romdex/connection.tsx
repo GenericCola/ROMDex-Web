@@ -6,11 +6,17 @@ import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { readTasks } from "@/youtrack/read-tasks";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useRef, useState } from "react";
 import DeliveryControls from "./delivery-controls";
 import Dialog from "./dialog";
-const Connection = ({ close }: { close: () => void }) => {
+const Connection = ({
+  close,
+  account,
+}: {
+  close: () => void;
+  account?: ReactNode;
+}) => {
   const previewEpochRef = useRef(0);
   const { delivering } = workspaceStore.getSnapshot();
   const [preview, setPreview] = useState<TaskItem[] | null>(null);
@@ -79,6 +85,7 @@ const Connection = ({ close }: { close: () => void }) => {
   };
   return (
     <Dialog title="Connection Details" close={close}>
+      {account}
       <p>thegobindsingh.youtrack.cloud · PMON</p>
       <DeliveryControls />
       <p className="port-notice">

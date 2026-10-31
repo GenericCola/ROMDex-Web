@@ -1,16 +1,36 @@
 "use client";
+import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useState } from "react";
 import { requestUpdate } from "./request-update";
+import { createUpdateActivation } from "./update-activation";
+import { useUpdateCheck } from "./use-update-check";
 interface InstallPrompt extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: string }>;
 }
-export const usePwa = (beforeUpdate?: () => Promise<void | (() => void)>) => {
+export const usePwa = (
+  beforeUpdate: () => Promise<
+    void | (() => void)
+  > = workspaceStore.prepareUpdate,
+) => {
   const [install, setInstall] = useState<InstallPrompt | null>(null);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [message, setMessage] = useState(
     "Chrome: use Install ROMDex or the address-bar install icon. Firefox on Windows: use the address-bar web apps button. On iPhone or iPad, choose Share, then Add to Home Screen.",
   );
+  const {
+    checking,
+    checkForUpdates: check,
+    registrationRef,
+  } = useUpdateCheck(setMessage, setWaiting);
+  const [applying, setApplying] = useState(false);
+  const [activation] = useState(() => {
+    return createUpdateActivation(setApplying);
+  });
+  const checkForUpdates = async () => {
+    if (activation.busy()) return;
+    await check();
+  };
   useEffect(() => {
     if (window.matchMedia("(display-mode: standalone)").matches)
       setMessage("ROMDex is running as an installed app.");
@@ -45,10 +65,18 @@ export const usePwa = (beforeUpdate?: () => Promise<void | (() => void)>) => {
     if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
       const register = async () => {
         try {
-          registration = await navigator.serviceWorker.register("/sw.js", {
+          const pending = navigator.serviceWorker.register("/sw.js", {
             scope: "/",
             updateViaCache: "none",
           });
+          registrationRef.current = pending;
+          try {
+            registration = await pending;
+          } catch (error) {
+            if (registrationRef.current === pending)
+              registrationRef.current = null;
+            throw error;
+          }
           if (disposed) return;
           registration.addEventListener("updatefound", track, options);
           track();
@@ -71,7 +99,7 @@ export const usePwa = (beforeUpdate?: () => Promise<void | (() => void)>) => {
       installing?.removeEventListener("statechange", inspect);
     };
     return cleanup;
-  }, []);
+  }, [registrationRef]);
   const installApp = async () => {
     if (!install) return;
     try {
@@ -88,14 +116,19 @@ export const usePwa = (beforeUpdate?: () => Promise<void | (() => void)>) => {
     }
   };
   const reloadToUpdate = async () => {
-    if (!waiting) return;
+    if (!waiting || checking) return;
     try {
-      await requestUpdate(waiting, beforeUpdate, setMessage);
+      await activation.run(() => {
+        return requestUpdate(waiting, beforeUpdate, setMessage);
+      });
     } catch {
       setMessage("Save or export your drafts before applying the update.");
     }
   };
   return {
+    checking,
+    applying,
+    checkForUpdates,
     canInstall: Boolean(install),
     hasUpdate: Boolean(waiting),
     message,

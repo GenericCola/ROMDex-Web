@@ -1,6 +1,7 @@
 "use client";
 import { WorkSelectionProvider } from "./work-selection-provider";
 
+import { recoveryMode } from "@/auth/recovery-mode";
 import { materialize } from "@/domain/accepted/core.mjs";
 import {
   hasDraftEdits,
@@ -11,7 +12,7 @@ import { beginInlineTask } from "@/domain/task-inline";
 import { workspaceStore } from "@/domain/workspace-store";
 import Npcdex from "@components/npcdex";
 import NpcdexSidebar from "@components/npcdex/sidebar";
-import PwaControls from "@components/pwa-controls";
+import { usePwa } from "@components/pwa-controls/use-pwa";
 import type { ReactNode } from "react";
 import { useState, useSyncExternalStore } from "react";
 import Connection from "./connection";
@@ -23,11 +24,16 @@ import LocalSaveRecovery from "./local-save-recovery";
 import Migration from "./migration";
 import RdxLibrary from "./rdx-library";
 import Selectors from "./selectors";
+import UpdateCheck from "./update-check";
 import { useInlineAction } from "./use-inline-action";
 import { useWorkspace } from "./use-workspace";
 import WorkTable from "./work-table";
 import WorkTrays from "./work-trays";
 import WorkspaceStatus from "./workspace-status";
+import {
+  WorkspaceToolsContext,
+  type WorkspaceTool,
+} from "./workspace-tools-context";
 const Romdex = ({ account }: { account?: ReactNode }) => {
   const state = useWorkspace();
   const inline = useInlineAction();
@@ -38,7 +44,12 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
   );
   const [connection, setConnection] = useState(false);
   const [migration, setMigration] = useState(false);
-  const [rdx, setRdx] = useState(false);
+  const [tool, setTool] = useState<WorkspaceTool | null>(null);
+  const update = usePwa(workspaceStore.prepareUpdate);
+  const chooseTool = (next: WorkspaceTool) => {
+    setTool(next);
+    if (next === "updates") void update.checkForUpdates();
+  };
   const openMigration = () => {
     setMigration(true);
   };
@@ -60,67 +71,76 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
   const { view } = state.data;
   const mode = view.detailsMode;
   return (
-    <WorkSelectionProvider>
-      <div className="romdex-app" inert={state.updating}>
-        <Header
-          state={state}
-          connect={openConnection}
-          unsavedDrafts={draftEdits}
-          tools={
-            <>
-              {account}
-              <WorkspaceStatus
-                state={state}
-                drafts={draftEdits}
-                openMigration={openMigration}
-                openRdx={() => {
-                  setRdx(true);
-                }}
-              />
-              <PwaControls beforeUpdate={workspaceStore.prepareUpdate} />
-            </>
-          }
-        />
-        {inline.error && (
-          <p className="port-recovery" role="alert">
-            {inline.error}
-          </p>
-        )}
-        {state.error && <LocalSaveRecovery state={state} />}
-        {state.ready && (
-          <DeviceBody enabled={view.workspace === "romdex"} inert={false}>
-            {view.workspace === "romdex" ? (
-              <Selectors data={state.data} items={items} add={add} />
-            ) : (
-              <NpcdexSidebar data={state.data} />
-            )}
-            {view.workspace === "romdex" ? (
-              <WorkTrays view={view}>
-                {mode !== "expanded" && (
-                  <WorkTable data={state.data} items={items} add={add} />
-                )}
-                <Divider view={view} />
-                {mode !== "collapsed" && (
-                  <Details data={state.data} items={items} />
-                )}
-              </WorkTrays>
-            ) : (
-              <Npcdex data={state.data} />
-            )}
-          </DeviceBody>
-        )}
-        {connection && <Connection close={closeConnection} />}
-        {migration && <Migration close={closeMigration} />}
-        {rdx && (
-          <RdxLibrary
-            data={state.data}
-            close={() => {
-              setRdx(false);
-            }}
+    <WorkspaceToolsContext value={chooseTool}>
+      <WorkSelectionProvider>
+        <div className="romdex-app" inert={state.updating}>
+          <Header
+            state={state}
+            connect={openConnection}
+            unsavedDrafts={draftEdits}
           />
-        )}
-      </div>
-    </WorkSelectionProvider>
+          {recoveryMode() && (
+            <WorkspaceStatus
+              state={state}
+              drafts={draftEdits}
+              openMigration={openMigration}
+              openRdx={() => {
+                return setTool("import");
+              }}
+            />
+          )}
+          {inline.error && (
+            <p className="port-recovery" role="alert">
+              {inline.error}
+            </p>
+          )}
+          {state.error && <LocalSaveRecovery state={state} />}
+          {state.ready && (
+            <DeviceBody enabled={view.workspace === "romdex"} inert={false}>
+              {view.workspace === "romdex" ? (
+                <Selectors data={state.data} items={items} add={add} />
+              ) : (
+                <NpcdexSidebar data={state.data} />
+              )}
+              {view.workspace === "romdex" ? (
+                <WorkTrays view={view}>
+                  {mode !== "expanded" && (
+                    <WorkTable data={state.data} items={items} add={add} />
+                  )}
+                  <Divider view={view} />
+                  {mode !== "collapsed" && (
+                    <Details data={state.data} items={items} />
+                  )}
+                </WorkTrays>
+              ) : (
+                <Npcdex data={state.data} />
+              )}
+            </DeviceBody>
+          )}
+          {connection && (
+            <Connection close={closeConnection} account={account} />
+          )}
+          {migration && <Migration close={closeMigration} />}
+          {(tool === "import" || tool === "export") && (
+            <RdxLibrary
+              data={state.data}
+              mode={tool}
+              close={() => {
+                setTool(null);
+              }}
+            />
+          )}
+          {tool === "updates" && (
+            <UpdateCheck
+              update={update}
+              close={() => {
+                return setTool(null);
+              }}
+            />
+          )}
+        </div>
+      </WorkSelectionProvider>
+    </WorkspaceToolsContext>
   );
 };
 export default Romdex;
