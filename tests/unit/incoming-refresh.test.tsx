@@ -56,13 +56,17 @@ const setup = async () => {
       probes++;
       if (fail) throw Error("offline fixture");
       return Response.json(
-        remote.map((item) => ({
-          idReadable: item.idReadable,
-          updated: item.updated,
-        })),
+        [...remote]
+          .sort((a, b) => b.updated! - a.updated!)
+          .slice(0, 10)
+          .map((item) => ({
+            idReadable: item.idReadable,
+            updated: item.updated,
+          })),
       );
     }
     reads++;
+    if (fail) throw Error("offline fixture");
     if (hold) {
       started?.release();
       return hold.promise;
@@ -92,8 +96,8 @@ const setup = async () => {
     setRemote: (items: RawIssue[]) => {
       remote = items;
     },
-    advance: () => {
-      now += 1100;
+    advance: (milliseconds = 1100) => {
+      now += milliseconds;
     },
     session,
     hold: () => {
@@ -141,7 +145,7 @@ test("real request pipeline coalesces reads; active editor A held while B update
     setTaskTextEditing("PMON-1:title", false);
     await refreshIncoming();
     assert.equal(workspaceStore.getSnapshot().data.remote[0].summary, "A new");
-    assert.deepEqual(env.counts(), { reads: 1, probes: 1 });
+    assert.deepEqual(env.counts(), { reads: 1, probes: 0 });
     assert.equal(workspaceStore.getSnapshot().data.operations.length, 0);
   } finally {
     env.close();
@@ -209,8 +213,15 @@ test("older full response cannot undo newer per-ticket baseline, failures preser
     env.setRemote([{ ...raw("PMON-2", 6), summary: "after retry" }]);
     await refreshIncoming(true);
     assert.equal(
-      workspaceStore.getSnapshot().data.remote[1].summary,
+      workspaceStore
+        .getSnapshot()
+        .data.remote.find((item) => item.id === "PMON-2")?.summary,
       "after retry",
+    );
+    assert.ok(
+      workspaceStore
+        .getSnapshot()
+        .data.cloud?.unavailable?.tasks.some((item) => item.id === "PMON-1"),
     );
   } finally {
     env.close();
@@ -399,6 +410,44 @@ test("watcher shutdown prevents an in-flight snapshot from applying; malformed f
       workspaceStore.getSnapshot().data.remote[0].summary,
       "retry valid",
     );
+  } finally {
+    env.close();
+  }
+});
+
+test("membership full refresh detects deletion older than the unchanged top ten revisions within six seconds", async () => {
+  const env = await setup();
+  try {
+    const items = Array.from({ length: 12 }, (_, index) =>
+      raw(`PMON-${index + 1}`, 12 - index),
+    );
+    env.setRemote(items);
+    await refreshIncoming();
+    assert.deepEqual(env.counts(), { reads: 1, probes: 0 });
+    assert.equal(workspaceStore.getSnapshot().data.remote.length, 12);
+    env.setRemote(items.slice(0, 11));
+    env.advance(3000);
+    await refreshIncoming();
+    assert.deepEqual(env.counts(), { reads: 1, probes: 1 });
+    assert.ok(
+      workspaceStore
+        .getSnapshot()
+        .data.remote.some((item) => item.id === "PMON-12"),
+    );
+    env.advance(3000);
+    await refreshIncoming();
+    assert.deepEqual(env.counts(), { reads: 2, probes: 1 });
+    assert.ok(
+      !workspaceStore
+        .getSnapshot()
+        .data.remote.some((item) => item.id === "PMON-12"),
+    );
+    assert.ok(
+      workspaceStore
+        .getSnapshot()
+        .data.cloud?.unavailable?.tasks.some((item) => item.id === "PMON-12"),
+    );
+    assert.deepEqual(workspaceStore.getSnapshot().data.operations, []);
   } finally {
     env.close();
   }

@@ -120,10 +120,10 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
     win.dispatchEvent(new Event("online"));
     assert.equal(timers.size, 1);
     await advance(100);
-    assert.equal(requests, 6);
+    assert.equal(requests, 5);
     assert.equal([...timers.values()][0].at - now, 3000);
     await advance(3000);
-    assert.equal(requests, 7);
+    assert.equal(requests, 6);
     assert.equal(timers.size, 1);
     raw.updated = 2;
     heldResponse = new Promise<Response>((resolve) => {

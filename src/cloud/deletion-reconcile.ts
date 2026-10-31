@@ -2,6 +2,7 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import type { Deletion } from "./deletion-checks";
 import { remainingDeletion } from "./deletion-checks";
 import { replaceRemote } from "./delivery-helpers";
+import { readFullSnapshot } from "./full-snapshot";
 import { acknowledge, recordDelivery } from "./journal";
 import { cloudData, type Commit, type DeliveryPort } from "./types";
 // A generic 404 is not proof: it can hide a task after visibility changes.
@@ -16,6 +17,8 @@ export const reconcileDeleted = async (
   if (cloudData(data).accountId !== port.accountId)
     throw Error("Deletion belongs to a different account.");
   const absent = new Set<string>();
+  const retired = new Set<string>();
+  let visible: Set<string> | undefined;
   for (const id of remainingDeletion(data, operation)) {
     const state = port.deletionState
       ? await port.deletionState(id)
@@ -27,7 +30,17 @@ export const reconcileDeleted = async (
         acknowledgedMissing.has(id))
     )
       absent.add(id);
-    else if (acknowledgedMissing.has(id) && state.item)
+    else if (!state.item) {
+      visible ??= new Set(
+        (await readFullSnapshot(port)).map((item) => {
+          return item.id;
+        }),
+      );
+      if (!visible.has(id)) {
+        absent.add(id);
+        retired.add(id);
+      }
+    } else if (acknowledgedMissing.has(id) && state.item)
       throw Error(
         id + " still exists. Nothing was removed from the deletion queue.",
       );
@@ -67,10 +80,20 @@ export const reconcileDeleted = async (
         )
           ? record.status
           : "ready",
-      deletedIds: [...new Set([...(record?.deletedIds ?? []), ...absent])],
-      message: acknowledgedMissing.size
-        ? "Already-deleted targets cleared from this browser queue by your confirmation. No deletion request was sent."
-        : "Previously completed deletions confirmed without another deletion request.",
+      deletedIds: [
+        ...new Set([
+          ...(record?.deletedIds ?? []),
+          ...[...absent].filter((id) => {
+            return !retired.has(id);
+          }),
+        ]),
+      ],
+      retiredIds: [...new Set([...(record?.retiredIds ?? []), ...retired])],
+      message: retired.size
+        ? "Targets absent from the current full YouTrack snapshot were removed from the active deletion queue. Original intent is archived; no DELETE was sent for them."
+        : acknowledgedMissing.size
+          ? "Already-deleted targets cleared from this browser queue by your confirmation. No deletion request was sent."
+          : "Previously completed deletions confirmed without another deletion request.",
     });
     if (!remainingDeletion(next, operation).length)
       acknowledge(next, operation);

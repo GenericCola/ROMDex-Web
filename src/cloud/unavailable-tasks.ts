@@ -7,6 +7,7 @@ export interface UnavailableTasks {
   tasks: TaskItem[];
   missingIds: string[];
   deniedIds?: string[];
+  linkedMissingIds?: string[];
   blockedIds: string[];
   fingerprint: string;
 }
@@ -60,7 +61,9 @@ export const validateUnavailable = (data: WorkspaceData) => {
     !Array.isArray(held.tasks) ||
     !Array.isArray(held.missingIds) ||
     !Array.isArray(held.blockedIds) ||
-    (held.deniedIds !== undefined && !Array.isArray(held.deniedIds))
+    (held.deniedIds !== undefined && !Array.isArray(held.deniedIds)) ||
+    (held.linkedMissingIds !== undefined &&
+      !Array.isArray(held.linkedMissingIds))
   )
     throw Error(
       "Unavailable task history belongs to a different workspace or is invalid.",
@@ -72,7 +75,12 @@ export const validateUnavailable = (data: WorkspaceData) => {
       throw Error("Invalid unavailable task history.");
     ids.add(item.id);
   }
-  for (const list of [held.missingIds, held.blockedIds, held.deniedIds ?? []])
+  for (const list of [
+    held.missingIds,
+    held.blockedIds,
+    held.deniedIds ?? [],
+    held.linkedMissingIds ?? [],
+  ])
     if (
       !Array.isArray(list) ||
       new Set(list).size !== list.length ||

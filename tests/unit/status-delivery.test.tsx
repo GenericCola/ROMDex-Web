@@ -67,7 +67,7 @@ test("durable assignment and rollup debt resume after a failed project read with
 test("a failed durable rollup marker prevents native writes while retaining the assignment",async()=>{
   const s=await setup([task(root)]);s.options.disk=true;await s.store.change(data=>editTask(data,root,{assignedState:"Done"}));await assert.rejects(s.run(),/disk full/);assert.equal(s.writes.length,0);assert.equal(s.saved().cloud?.assigned?.[root]?.assignedState,"Done");assert.equal(s.saved().cloud?.assigned?.[root]?.pendingState,null);
 });
-test("listing omissions are read back while unreadable hierarchies defer only affected status writes",async()=>{
+test("fresh snapshot projection drives statuses; explicit unknown children still defer and cycles reject",async()=>{
   for(const kind of ["missing","child","external","cycle"]){
     const s=await setup([task(root),task(child,"Done",root)]);
     await s.store.change(data=>editTask(data,root,{assignedState:"Standby"}));
@@ -77,7 +77,7 @@ test("listing omissions are read back while unreadable hierarchies defer only af
     if(kind==="cycle")s.remote.get(root)!.parentId=child;
     if(kind==="cycle") { await assert.rejects(s.run(),/cycle/); assert.equal(s.writes.length,0); }
     else { await s.run();
-      if(kind==="missing") assert.equal(s.remote.get(root)?.state,"Done");
+      if(kind==="external") assert.equal(s.remote.get(root)?.state,"Done");
       else {assert.equal(s.writes.length,0);assert.ok(s.saved().cloud?.unavailable?.blockedIds.includes(root));}
       assert.equal(s.saved().cloud?.rollupPending,false);
     }

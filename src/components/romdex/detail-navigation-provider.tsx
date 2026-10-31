@@ -5,6 +5,7 @@ import { flushDraftEditors } from "@/domain/editor-drafts";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useRef, useState, type PropsWithChildren } from "react";
 import { DetailNavigationContext } from "./detail-navigation-context";
+import { selectDetailView } from "./detail-navigation-presentation";
 import { useSelectionWork } from "./use-selection-work";
 import { useWorkspace } from "./use-workspace";
 import { useWorkSelection } from "./work-selection-context";
@@ -45,10 +46,9 @@ const DetailNavigationProvider = ({ children }: PropsWithChildren) => {
       await flushDraftEditors();
       const prior = workspaceStore.getSnapshot().data.view.selected;
       if (!tree().byId.has(id)) throw Error("This item no longer exists.");
+      let canFocusNotes = false;
       await workspaceStore.change((data) => {
-        data.view.selected = id;
-        if (data.view.detailsMode === "collapsed")
-          data.view.detailsMode = "default";
+        canFocusNotes = selectDetailView(data.view, id, notes);
       });
       navigationRef.current.open(prior, id, child);
       setPrevious(navigationRef.current.destination(tree().byId));
@@ -56,7 +56,7 @@ const DetailNavigationProvider = ({ children }: PropsWithChildren) => {
       setFocusNotes(null);
       if (notes) {
         setTab("notes");
-        setFocusNotes({ id });
+        if (canFocusNotes) setFocusNotes({ id });
       }
       if (!workspaceStore.getSnapshot().error) await workspaceStore.flush();
     });

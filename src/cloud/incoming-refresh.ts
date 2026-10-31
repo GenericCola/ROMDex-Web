@@ -9,6 +9,7 @@ import { draftTicketIds } from "@/domain/editor-drafts";
 import { editingTicketIds } from "@/domain/task-editing";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
+import { snapshotRevision } from "@/youtrack/incoming-revision";
 import { incomingStep, IncomingSuperseded } from "./incoming-error";
 import { deliveryConnected, requireDelivery } from "./session";
 const heldTickets = () => {
@@ -63,8 +64,8 @@ let previous: ReturnType<typeof incomingContext>;
 let revision = "",
   fullAt = 0,
   checkedAt = 0;
-let cached: TaskItem[] = [];
-let running: Promise<void> | null = null;
+let cached: TaskItem[] = [],
+  running: Promise<void> | null = null;
 export const refreshIncoming = (
   force = false,
   alive: () => boolean = () => {
@@ -99,22 +100,19 @@ export const refreshIncoming = (
   const run = async () => {
     current();
     if (Date.now() - checkedAt >= 1000) {
-      const read = context.client.latestRevision;
-      const next = await incomingStep("revision", read);
+      const membershipDue = force || !fullAt || Date.now() - fullAt >= 5000;
+      const next = membershipDue
+        ? null
+        : await incomingStep("revision", context.client.latestRevision);
       current();
-      if (
-        force ||
-        next !== revision ||
-        !fullAt ||
-        Date.now() - fullAt >= 60000
-      ) {
+      if (membershipDue || next !== revision) {
         const items = await incomingStep("tasks", context.client.all);
         current();
         await apply(items);
         current();
         cached = items;
         fullAt = Date.now();
-        revision = next;
+        revision = snapshotRevision(items);
       } else if (cached.length) {
         await apply(cached);
       }
@@ -128,17 +126,19 @@ export const refreshIncoming = (
   });
   return running;
 };
-// Explicit edit entry reads this ticket before the user chooses a new value.
 export const refreshIncomingTask = async (id: string) => {
   const context = incomingContext();
   if (context && /^PMON-\d+$/.test(id)) {
     const item = await context.client.get(id);
     context.current();
     if (!item)
-      throw Error(
-        "This ticket is no longer readable. Your pending changes are retained.",
-      );
-    await workspaceStore.applyIncoming([item], heldTickets(), context.current);
+      throw Error("Ticket unavailable. Your pending changes are retained.");
+    await workspaceStore.applyIncoming(
+      [item],
+      heldTickets(),
+      context.current,
+      false,
+    );
     context.current();
   }
   const { data } = workspaceStore.getSnapshot();

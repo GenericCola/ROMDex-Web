@@ -42,6 +42,7 @@ export const planRollup = async (
         tasks: tree.unavailable,
         missingIds: tree.missingIds,
         deniedIds: tree.deniedIds,
+        linkedMissingIds: tree.linkedMissingIds,
         blockedIds: tree.blockedIds,
         fingerprint: availabilityFingerprint(
           data,

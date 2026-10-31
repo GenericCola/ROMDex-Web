@@ -18,6 +18,7 @@ export interface DeliveryRecord {
   remoteId?: string;
   targetId?: string;
   deletedIds?: string[];
+  retiredIds?: string[];
   deleteReceipts?: string[];
   remoteTasks?: TaskItem[];
   archivedOperation?: TaskOperation;

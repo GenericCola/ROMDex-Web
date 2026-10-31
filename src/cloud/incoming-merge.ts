@@ -3,18 +3,29 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
 import { observeStatus } from "./assigned-status";
 import { incomingHierarchyHeld, incomingHolds } from "./incoming-holds";
+import {
+  incomingTreeChanged,
+  retireIncoming,
+  validateIncomingStatus,
+} from "./incoming-retirement";
 import { cloudData } from "./types";
 export const incomingProtectedData = (data: WorkspaceData) => {
   return JSON.stringify({
     ...data,
     remote: null,
-    cloud: { ...cloudData(data), assigned: null },
+    cloud: {
+      ...cloudData(data),
+      assigned: undefined,
+      unavailable: undefined,
+      rollupPending: undefined,
+    },
   });
 };
 export const assertIncomingDelta = (
   before: WorkspaceData,
   after: WorkspaceData,
 ) => {
+  validateIncomingStatus(before, after);
   if (incomingProtectedData(before) !== incomingProtectedData(after))
     throw Error(
       "An incoming refresh tried to change local work. Nothing was applied.",
@@ -24,6 +35,7 @@ export const mergeIncoming = (
   data: WorkspaceData,
   items: TaskItem[],
   held: Set<string>,
+  complete = true,
 ): boolean => {
   const ids = new Set<string>();
   for (const item of items) {
@@ -43,7 +55,17 @@ export const mergeIncoming = (
   if (blocked.has("*")) return false;
   const next = structuredClone(data);
   const byId = new Map(
-    next.remote.map((item) => {
+    [
+      ...next.remote,
+      ...(cloudData(next).unavailable?.tasks ?? []).filter((item) => {
+        return (
+          ids.has(item.id) &&
+          !next.remote.some((current) => {
+            return current.id === item.id;
+          })
+        );
+      }),
+    ].map((item) => {
       return [item.id, item];
     }),
   );
@@ -61,20 +83,20 @@ export const mergeIncoming = (
       assigned: structuredClone(cloudData(next).assigned ?? {}),
     },
   };
-  let changed = false;
   for (const incoming of items) {
     const previous = byId.get(incoming.id);
     if (
       blocked.has(incoming.id) ||
       incomingHierarchyHeld(data, all, incoming, blocked)
-    )
+    ) {
+      blocked.add(incoming.id);
       continue;
+    }
     // Equal revisions with different content are not reliable new evidence.
-    const revision = incoming.updated;
+    const revision = incoming.updated!;
     const observedRevision =
       cloudData(data).assigned?.[incoming.id]?.lastUpdated;
     if (
-      revision === null ||
       (previous?.updated != null && revision <= previous.updated) ||
       (observedRevision != null && revision < observedRevision)
     )
@@ -102,29 +124,27 @@ export const mergeIncoming = (
         pendingState: null,
       };
     }
-    const observed = observeStatus(statusData, item);
-    byId.set(item.id, observed);
-    changed = true;
+    byId.set(item.id, observeStatus(statusData, item));
   }
-  if (!changed) return false;
   next.remote = [...byId.values()];
-  const known = new Set(
-    next.remote.map((item) => {
-      return item.id;
-    }),
-  );
+  // Native status observations are read-only; full tree changes schedule later work.
+  next.cloud = { ...cloudData(data), assigned: statusData.cloud.assigned };
   if (
-    next.remote.some((item) => {
-      return item.parentId !== null && !known.has(item.parentId);
-    })
+    !cloudData(data).assigned &&
+    !Object.keys(statusData.cloud.assigned).length
   )
-    throw Error(
-      "Incoming hierarchy has an unreadable parent. Nothing was applied.",
-    );
+    delete next.cloud.assigned;
+  if (complete) {
+    retireIncoming(next, ids, blocked, data);
+    if (incomingTreeChanged(data, next)) next.cloud.rollupPending = true;
+  }
+  if (
+    JSON.stringify([next.remote, next.cloud]) ===
+    JSON.stringify([data.remote, data.cloud])
+  )
+    return false;
   indexTree(next.remote, next.order);
   indexTree(materialize(next.remote, next.operations), next.order);
-  // observeStatus may request rollups; inbound reads must never create writes.
-  next.cloud = { ...cloudData(data), assigned: statusData.cloud.assigned };
   assertIncomingDelta(data, next);
   data.remote = next.remote;
   data.cloud = next.cloud;

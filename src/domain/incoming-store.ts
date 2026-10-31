@@ -9,12 +9,13 @@ export const persistIncoming = async (
   items: TaskItem[],
   held: Set<string>,
   assertCurrent: () => void,
+  complete = true,
 ) => {
   if (switching || !state.ready || state.updating || state.error)
     throw Error("The workspace is not ready for incoming updates.");
   assertCurrent();
   const next = structuredClone(state.data);
-  if (!mergeIncoming(next, items, held)) return false;
+  if (!mergeIncoming(next, items, held, complete)) return false;
   await write((data) => {
     assertCurrent();
     assertIncomingDelta(data, next);

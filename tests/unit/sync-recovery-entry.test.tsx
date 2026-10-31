@@ -17,6 +17,7 @@ test("paused recovery identifies the route and only offers retry without unresol
   const original = globalThis.fetch;
   let reads = 0;
   let writes = 0;
+  let readableDeleteTarget = false;
   globalThis.fetch = async (input, options) => {
     if (options?.method !== "GET") {
       writes++;
@@ -25,6 +26,25 @@ test("paused recovery identifies the route and only offers retry without unresol
     reads++;
     if (String(input).includes("users/me"))
       return Response.json({ id: "fixture" });
+    if (readableDeleteTarget && String(input).includes("issues/PMON-499?"))
+      return Response.json({
+        id: "2-499",
+        idReadable: "PMON-499",
+        summary: "Synthetic readable target",
+        description: "",
+        updated: 1,
+        project: { shortName: "PMON" },
+        parent: { issues: [] },
+        customFields: [
+          {
+            id: "state",
+            name: "State",
+            $type: "StateIssueCustomField",
+            value: { name: "To do" },
+          },
+        ],
+        commentsCount: 0,
+      });
     if (String(input).includes("fields=idReadable"))
       return new Response(null, { status: 404 });
     throw Error("Synthetic connection interruption");
@@ -37,6 +57,7 @@ test("paused recovery identifies the route and only offers retry without unresol
       "attempting",
       "uncertain",
     ] as const) {
+      readableDeleteTarget = status === "ready";
       disconnectDelivery();
       const data = emptyWorkspace();
       data.operations = [

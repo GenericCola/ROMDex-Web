@@ -16,7 +16,8 @@ const fields = [
   "commentCount",
 ] as const;
 export const remainingDeletion = (data: WorkspaceData, operation: Deletion) => {
-  const done = cloudData(data).records[operation.opId]?.deletedIds ?? [];
+  const record = cloudData(data).records[operation.opId];
+  const done = [...(record?.deletedIds ?? []), ...(record?.retiredIds ?? [])];
   return operation.ids.filter((id) => {
     return !done.includes(id);
   });

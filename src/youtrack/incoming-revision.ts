@@ -1,3 +1,4 @@
+import type { TaskItem } from "@/domain/types";
 import type { YouTrackRequest } from "./request";
 export const incomingRevision = async (request: YouTrackRequest) => {
   const params = new URLSearchParams({
@@ -27,4 +28,17 @@ export const incomingRevision = async (request: YouTrackRequest) => {
     return `${entry.idReadable}:${entry.updated}`;
   });
   return revisions.sort().join("|");
+};
+
+export const snapshotRevision = (items: TaskItem[]) => {
+  return [...items]
+    .sort((a, b) => {
+      return (b.updated ?? 0) - (a.updated ?? 0);
+    })
+    .slice(0, 10)
+    .map((item) => {
+      return `${item.id}:${item.updated}`;
+    })
+    .sort()
+    .join("|");
 };

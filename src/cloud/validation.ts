@@ -55,16 +55,18 @@ export const validateQueue = (data: WorkspaceData) => {
       invalid();
     if (record.status === "ready" && operation?.type !== "delete") invalid();
     if (
-      [record.deletedIds, record.deleteReceipts].some((entries) => {
-        return (
-          entries !== undefined &&
-          (!Array.isArray(entries) ||
-            operation?.type !== "delete" ||
-            entries.some((entry) => {
-              return !operation.ids.includes(entry);
-            }))
-        );
-      })
+      [record.deletedIds, record.deleteReceipts, record.retiredIds].some(
+        (entries) => {
+          return (
+            entries !== undefined &&
+            (!Array.isArray(entries) ||
+              operation?.type !== "delete" ||
+              entries.some((entry) => {
+                return !operation.ids.includes(entry);
+              }))
+          );
+        },
+      )
     )
       invalid();
     if (
@@ -85,12 +87,14 @@ export const validateQueue = (data: WorkspaceData) => {
       (record.status !== "confirmed" && !text(cloud.accountId)) ||
       (record.remoteId !== undefined && !text(record.remoteId)) ||
       (record.status === "confirmed" ? ids.has(id) : !ids.has(id)) ||
-      [record.deletedIds, record.deleteReceipts].some((entries) => {
-        return (
-          entries !== undefined &&
-          (!Array.isArray(entries) || !entries.every(text))
-        );
-      })
+      [record.deletedIds, record.deleteReceipts, record.retiredIds].some(
+        (entries) => {
+          return (
+            entries !== undefined &&
+            (!Array.isArray(entries) || !entries.every(text))
+          );
+        },
+      )
     )
       invalid();
   }

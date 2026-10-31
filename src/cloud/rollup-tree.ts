@@ -10,21 +10,17 @@ export const readRollupTree = async (
   port: DeliveryPort,
 ) => {
   const available = await readRollupAvailability(data, port);
-  const ids = new Set(
-    available.items.map((item) => {
-      return item.id;
-    }),
-  );
   const items = available.items.map((item) => {
     validateTask(item);
-    if (item.parentId && !ids.has(item.parentId))
-      throw Error("A task has an unreadable parent.");
     return available.fresh.has(item.id) && !available.blocked.has(item.id)
       ? observeStatus(data, item)
       : item;
   });
-  const tree = indexTree(items);
-  const deepest = [...items].sort((a, b) => {
+  const calculation = items.filter((item) => {
+    return available.fresh.has(item.id);
+  });
+  const tree = indexTree(calculation);
+  const deepest = [...calculation].sort((a, b) => {
     return (tree.depths.get(b.id) ?? 0) - (tree.depths.get(a.id) ?? 0);
   });
   const desired = (item: TaskItem) => {
@@ -37,6 +33,7 @@ export const readRollupTree = async (
     );
   };
   let next: TaskItem | undefined;
+  const linkedMissingIds: string[] = [];
   for (const item of deepest) {
     if (
       !available.fresh.has(item.id) ||
@@ -47,10 +44,10 @@ export const readRollupTree = async (
     if (
       await readableRollupSubtree(
         item,
-        items,
+        calculation,
         port,
         available.blocked,
-        available.missingIds,
+        linkedMissingIds,
       )
     ) {
       next = item;
@@ -62,9 +59,12 @@ export const readRollupTree = async (
     desired,
     next,
     unavailable: available.unavailable,
-    missingIds: available.missingIds,
+    missingIds: [...new Set([...available.missingIds, ...linkedMissingIds])],
+    linkedMissingIds,
     deniedIds: available.deniedIds,
-    blockedIds: [...available.blocked].filter((id) => {
+    blockedIds: [
+      ...new Set([...available.blocked, ...available.pendingIds]),
+    ].filter((id) => {
       return available.fresh.has(id) || available.pendingIds.has(id);
     }),
   };

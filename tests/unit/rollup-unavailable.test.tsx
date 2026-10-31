@@ -58,63 +58,26 @@ test("unavailable clean standalone cache is archived, not a global status failur
   assert.ok(data.remote.some((x) => x.id === item.id));
   assert.equal(data.cloud?.unavailable, undefined);
 });
-test("missing child defers only its ancestors, not healthy sibling writes; no false Done", async () => {
+test("full-snapshot removal retires a cached child without retaining false parent dependencies", async () => {
   const f = await fixture();
   f.remote.delete("PMON-900001");
-  const data = structuredClone(f.store.getSnapshot().data);
-  const result = await readRollupTree(data, f.port);
-  assert.ok(result.blockedIds.includes("PMON-900000"));
-  assert.ok(!result.blockedIds.includes("PMON-900002"));
-  assert.notEqual(result.next?.id, "PMON-900000");
-  assert.ok(result.items.some((x) => x.id === "PMON-900001"));
-  await f.store.deliver((commit) =>
-    planRollup(() => f.store.getSnapshot().data, commit, f.port).then(() => {}),
-  );
+  const result = await readRollupTree(structuredClone(f.store.getSnapshot().data), f.port);
+  assert.deepEqual(result.blockedIds, []);
+  assert.ok(!result.items.some((x) => x.id === "PMON-900001"));
+  assert.ok(result.unavailable.some((x) => x.id === "PMON-900001"));
+  await f.store.deliver((commit) => planRollup(() => f.store.getSnapshot().data, commit, f.port).then(() => {}));
   assert.equal(deferredStatusChanged(f.store.getSnapshot().data), false);
-  const unrelated = structuredClone(f.store.getSnapshot().data);
-  unrelated.remote.push({
-    ...unrelated.remote[0]!,
-    id: "PMON-900088",
-    parentId: null,
-  });
-  assert.equal(deferredStatusChanged(unrelated), false);
-  unrelated.remote.find((x) => x.id === "PMON-900002")!.updated = 2;
-  assert.equal(deferredStatusChanged(unrelated), true);
 });
-test("omitted listing task is individually read; malformed full read and auth/network errors preserve data", async () => {
-  const f = await fixture();
-  const original = f.port.all;
-  f.port.all = async () =>
-    (await original()).filter((x) => x.id !== "PMON-900001");
-  const result = await readRollupTree(
-    structuredClone(f.store.getSnapshot().data),
-    f.port,
-  );
-  assert.deepEqual(result.missingIds, []);
-  f.remote.delete("PMON-900001");
-  for (const error of [new YouTrackHttpError(401), Error("network")]) {
-    f.port.get = async () => {
-      throw error;
-    };
+test("malformed or failed full snapshots never replace cached data", async () => {
+  const f = await fixture(); const original = f.port.all;
+  for (const error of [new YouTrackHttpError(401), new YouTrackHttpError(403), Error("page two failed")]) {
+    f.port.all = async () => { throw error; };
     const before = JSON.stringify(f.store.getSnapshot().data);
-    await assert.rejects(
-      readRollupTree(structuredClone(f.store.getSnapshot().data), f.port),
-    );
+    await assert.rejects(readRollupTree(structuredClone(f.store.getSnapshot().data), f.port));
     assert.equal(JSON.stringify(f.store.getSnapshot().data), before);
   }
-  f.port.get = async () => {
-    throw new YouTrackHttpError(403);
-  };
-  assert.ok(
-    (
-      await readRollupTree(structuredClone(f.store.getSnapshot().data), f.port)
-    ).blockedIds.includes("PMON-900000"),
-  );
-  f.port.all = async () => [...(await original()), (await original())[0]!];
-  await assert.rejects(
-    readRollupTree(structuredClone(f.store.getSnapshot().data), f.port),
-    /Duplicate/,
-  );
+  f.port.all = async () => [...await original(), (await original())[0]!];
+  await assert.rejects(readRollupTree(structuredClone(f.store.getSnapshot().data), f.port), /duplicate/i);
 });
 test("legacy cancelled deletion is not proof; tombstones are and local drafts stay recoverable", async () => {
   const f = await fixture();
@@ -153,20 +116,12 @@ test("legacy cancelled deletion is not proof; tombstones are and local drafts st
   );
   assert.ok(!result.items.some((x) => x.id === item.id));
 });
-test("moved or unreadable parent preserves old hierarchy and does not create a false root", async () => {
-  const f = await fixture();
-  const child = f.remote.get("PMON-900001")!;
+test("fresh visible orphan preserves its actual parent without fabricating old links", async () => {
+  const f = await fixture(); const child = f.remote.get("PMON-900001")!;
   child.parentId = "PMON-900099";
-  const result = await readRollupTree(
-    structuredClone(f.store.getSnapshot().data),
-    f.port,
-  );
-  assert.equal(
-    result.items.find((x) => x.id === child.id)?.parentId,
-    "PMON-900000",
-  );
-  assert.ok(result.blockedIds.includes(child.id));
-  assert.ok(result.unavailable.some((x) => x.parentId === "PMON-900099"));
+  const result = await readRollupTree(structuredClone(f.store.getSnapshot().data), f.port);
+  assert.equal(result.items.find((x) => x.id === child.id)?.parentId, "PMON-900099");
+  assert.ok(!result.blockedIds.includes(child.id));
 });
 
 test("unlisted live child prevents false Done while an independent complete parent can update", async () => {
@@ -286,6 +241,9 @@ test("unavailable/deferred history survives disk serialization, recovery export 
     data.titleDrafts["PMON-900002"] = "Keep title draft";
     data.commentDrafts["PMON-900002"] = "Keep comment draft";
     data.order["PMON-900002"] = 4;
+    data.cloud!.unavailable!.linkedMissingIds = ["PMON-900199"];
+    data.cloud!.unavailable!.missingIds.push("PMON-900199");
+    data.cloud!.unavailable!.blockedIds = ["PMON-900000"];
   });
   const source = new Map<string, StoredUpload>([
     [id, { id, file, blob: new Blob([bytes]) }],
@@ -346,6 +304,7 @@ test("unavailable/deferred history survives disk serialization, recovery export 
         (x) => x.id === archived.id && x.description === archived.description,
       ),
     );
+    assert.deepEqual(data.cloud?.unavailable?.linkedMissingIds, ["PMON-900199"]);
     assert.ok(data.cloud?.unavailable?.blockedIds.includes("PMON-900000"));
   } finally {
     await rm(folder, { recursive: true, force: true });

@@ -5,6 +5,7 @@ import { recordDelivery } from "../../src/cloud/journal";
 import { reviewDeletion } from "../../src/cloud/review-deletion";
 import { cloudData } from "../../src/cloud/types";
 import { deleteTask, editTask } from "../../src/domain/task-actions";
+import { YouTrackHttpError } from "../../src/youtrack/http-error";
 import { setup } from "../fixtures/delivery-navigation";
 import { navigationPort } from "../fixtures/navigation-port";
 const fixture = async () => {
@@ -46,22 +47,25 @@ test("durable DELETE receipt plus authenticated absence clears queued intent wit
     cloudData(s.store.getSnapshot().data).records[s.op.opId]?.archivedOperation,
   );
 });
-test("external verified Gone outcome completes without mutation, but generic missing does not", async () => {
-  const s = await fixture();
-  s.remote.delete(s.op.issueId);
-  await assert.rejects(s.run(), /deletion/);
-  assert.equal(s.store.getSnapshot().data.operations.length, 1);
-  s.port.deletionState = async (id) => ({
-    item: await s.port.get(id),
-    gone: id === s.op.issueId,
-  });
-  await s.run();
-  assert.equal(s.store.getSnapshot().data.operations.length, 0);
-  assert.deepEqual(s.removed, []);
+test("full-snapshot absence retires intent without claiming proven deletion; Gone remains proven", async () => {
+  for (const gone of [false, true]) {
+    const s = await fixture();
+    s.remote.delete(s.op.issueId);
+    s.port.deletionState = async (id) => ({ item: await s.port.get(id), gone });
+    await s.run();
+    const data = s.store.getSnapshot().data;
+    const record = cloudData(data).records[s.op.opId]!;
+    assert.equal(data.operations.length, 0);
+    assert.deepEqual(record.retiredIds ?? [], gone ? [] : [s.op.issueId]);
+    assert.deepEqual(record.deletedIds ?? [], gone ? [s.op.issueId] : []);
+    assert.deepEqual(record.archivedOperation, s.op);
+    assert.deepEqual(s.removed, []);
+  }
 });
 test("ambiguous deletion isolates its dependencies while unrelated queued edits deliver", async () => {
   const s = await fixture();
-  s.remote.delete(s.op.issueId);
+  const get = s.port.get;
+  s.port.get = async (id) => (id === s.op.issueId ? null : get(id));
   await s.store.change((data) =>
     editTask(data, "PMON-900002", { summary: "Independent" }),
   );
@@ -73,7 +77,12 @@ test("ambiguous deletion isolates its dependencies while unrelated queued edits 
 test("explicit already-deleted confirmation is read-only and retains archived intent", async () => {
   const s = await fixture();
   s.remote.delete(s.op.issueId);
-  await assert.rejects(s.run(), /deletion/);
+  await s.store.change((data) =>
+    recordDelivery(data, s.op.opId, {
+      status: "conflict",
+      message: "Legacy missing target",
+    }),
+  );
   await s.store.deliver((commit) =>
     reviewDeletion(
       s.store.getSnapshot().data,
@@ -91,7 +100,7 @@ test("explicit already-deleted confirmation is read-only and retains archived in
     [s.op.issueId],
   );
 });
-test("lost DELETE response never resends blindly; verified Gone readback can finish it", async () => {
+test("lost DELETE response is retired after full-snapshot absence without resending", async () => {
   const s = await fixture();
   s.port.remove = async (id) => {
     s.removed.push(id);
@@ -99,12 +108,6 @@ test("lost DELETE response never resends blindly; verified Gone readback can fin
     throw Error("lost response");
   };
   await assert.rejects(s.run(), /uncertain/);
-  await assert.rejects(s.run(), /uncertain/);
-  assert.equal(s.removed.length, 1);
-  s.port.deletionState = async (id) => ({
-    item: await s.port.get(id),
-    gone: !s.remote.has(id),
-  });
   await s.run();
   assert.equal(s.removed.length, 1);
   assert.equal(s.store.getSnapshot().data.operations.length, 0);
@@ -113,7 +116,9 @@ test("unauthorized and network failures preserve deletion and never become absen
   for (const message of ["401", "403", "offline"]) {
     const s = await fixture();
     s.port.get = async () => {
-      throw Error(message);
+      throw message === "offline"
+        ? Error(message)
+        : new YouTrackHttpError(Number(message));
     };
     await assert.rejects(s.run(), new RegExp(message));
     assert.equal(s.store.getSnapshot().data.operations.length, 1);
@@ -128,10 +133,6 @@ test("mixed cascade skips already-gone child and deletes only remaining reviewed
     deleteTask(data, "PMON-900000");
   });
   s.remote.delete("PMON-900001");
-  s.port.deletionState = async (id) => ({
-    item: await s.port.get(id),
-    gone: id === "PMON-900001",
-  });
   await s.run();
   assert.deepEqual(s.removed, ["PMON-900002", "PMON-900000"]);
   assert.equal(s.store.getSnapshot().data.operations.length, 0);
@@ -180,4 +181,37 @@ test("unverifiable surviving child prevents local deletion acknowledgement", asy
   await assert.rejects(s.run(), /surviving child/);
   assert.equal(s.store.getSnapshot().data.operations.length, 1);
   assert.deepEqual(s.removed, []);
+});
+
+test("failed or malformed full snapshots never retire missing targets or lose pending work", async () => {
+  for (const kind of ["401", "403", "partial-page-error", "duplicate"]) {
+    const s = await fixture();
+    s.remote.delete(s.op.issueId);
+    await s.store.change((data) => {
+      data.commentDrafts["PMON-900002"] = "Retained draft";
+      data.order["PMON-900002"] = 9;
+    });
+    const before = structuredClone(s.store.getSnapshot().data);
+    const all = s.port.all;
+    s.port.all = async () => {
+      if (kind === "duplicate") {
+        const rows = await all();
+        return [...rows, rows[0]!];
+      }
+      throw kind === "401" || kind === "403"
+        ? new YouTrackHttpError(Number(kind))
+        : Error(kind);
+    };
+    await assert.rejects(
+      s.run(),
+      kind === "duplicate" ? /duplicate/i : new RegExp(kind),
+    );
+    const data = s.store.getSnapshot().data;
+    assert.deepEqual(data.operations, before.operations);
+    assert.deepEqual(data.remote, before.remote);
+    assert.deepEqual(data.commentDrafts, before.commentDrafts);
+    assert.deepEqual(data.order, before.order);
+    assert.deepEqual(cloudData(data).records[s.op.opId]?.retiredIds ?? [], []);
+    assert.deepEqual(s.removed, []);
+  }
 });

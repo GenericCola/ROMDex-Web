@@ -5,10 +5,8 @@ import { persistIncoming } from "./incoming-store";
 import { guardReviewBrowsing } from "./review-browsing";
 import type { TaskItem, WorkspaceData } from "./types";
 import { emptyWorkspace } from "./workspace-data";
-import {
-  prepareWorkspaceUpdate,
-  type WorkspacePersistence,
-} from "./workspace-lifecycle";
+import type { WorkspacePersistence } from "./workspace-lifecycle";
+import { prepareWorkspaceUpdate } from "./workspace-lifecycle";
 import { WorkspacePersistenceStore } from "./workspace-persistence-store";
 import { exportWorkspace } from "./workspace-recovery";
 import { hasWorkspaceWork } from "./workspace-work";
@@ -40,6 +38,7 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
     items: TaskItem[],
     held: Set<string>,
     assertCurrent: () => void,
+    complete = true,
   ) => {
     return persistIncoming(
       this.state,
@@ -49,6 +48,7 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
       items,
       new Set([...held, ...this.activeTickets]),
       assertCurrent,
+      complete,
     );
   };
   deliver = async (
@@ -76,7 +76,6 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
     const commit = async (update: (data: WorkspaceData) => void) => {
       await this.write((data) => {
         update(data);
-        // Add dependencies immediately; release tickets only after durable acknowledgement.
         for (const id of deliveryTicketLocks(
           data,
           this.activeOperations,
@@ -135,8 +134,7 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
         error: "",
         connection: "Not connected",
       });
-      this.loading = this.load();
-      await this.loading;
+      await (this.loading = this.load());
     } finally {
       this.switching = false;
     }
