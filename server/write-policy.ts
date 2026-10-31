@@ -1,6 +1,5 @@
 import type { ApplicationDependencies } from "./application.ts";
 import type { authorizeCookie } from "./cookie-authorize.ts";
-import { guardHierarchyRecovery } from "./hierarchy-recovery.ts";
 import { HttpFailure } from "./runtime-types.ts";
 import { readJSON } from "./youtrack.ts";
 type Session = Awaited<ReturnType<typeof authorizeCookie>>;
@@ -53,14 +52,6 @@ export async function authorizeWrite(
   let existing: any;
   if (!creating)
     existing = await requireIssue(request, session, deps, parts[1]!);
-  await guardHierarchyRecovery(session.userId, parts, () =>
-    readJSON(
-      request,
-      session,
-      deps,
-      `issues/${parts[1]}/links?fields=id,direction,linkType(name)&$top=100`,
-    ),
-  );
   if (request.method === "DELETE") {
     if (raw !== undefined) throw new HttpFailure(400);
     if (parts[2] === "links")

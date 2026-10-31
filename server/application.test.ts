@@ -21,7 +21,8 @@ async function appFixture(userId = "non-owner") {
   const session = await (await f.handle(f.request("/api/auth/session"))).json();
   const calls: { url: URL; init: RequestInit }[] = [];
   let metadataURL = "/api/files/1-2/file.txt",
-    moved = false;
+    moved = false,
+    targetMoved = false;
   const upstream: typeof fetch = async (input, init = {}) => {
     const url = new URL(String(input));
     calls.push({ url, init });
@@ -54,10 +55,19 @@ async function appFixture(userId = "non-owner") {
     if (/^\/api\/issues\/(?:PMON-\d+|\d+-\d+)$/.test(url.pathname))
       return Response.json({
         id: "1-1",
-        idReadable: moved ? "NPCD-1" : "PMON-1",
+        idReadable:
+          moved || (targetMoved && url.pathname.endsWith("/1-2"))
+            ? "NPCD-1"
+            : "PMON-1",
         project: {
-          id: moved ? "0-2" : "0-1",
-          shortName: moved ? "NPCD" : "PMON",
+          id:
+            moved || (targetMoved && url.pathname.endsWith("/1-2"))
+              ? "0-2"
+              : "0-1",
+          shortName:
+            moved || (targetMoved && url.pathname.endsWith("/1-2"))
+              ? "NPCD"
+              : "PMON",
         },
         customFields: [
           { id: "f-1", name: "State", $type: "StateIssueCustomField" },
@@ -101,6 +111,9 @@ async function appFixture(userId = "non-owner") {
     session,
     move: () => {
       moved = true;
+    },
+    moveTarget: () => {
+      targetMoved = true;
     },
     metadataURL: (url: string) => {
       metadataURL = url;
@@ -421,24 +434,74 @@ test("actual Vercel entry exports the Web fetch handler and fails closed before 
   assert.equal(result.headers.get("cache-control"), "no-store");
 });
 
-test("old cached client cannot resend incident account hierarchy, ordinary edits still work", async () => {
+test("closed incident restores authorized parent add/remove for account 2-2", async () => {
   const f = await appFixture("2-2");
   for (const [route, method, body] of [
     ["issues/PMON-1/links/80-0t/issues", "POST", { id: "1-2" }],
     ["issues/PMON-1/links/80-0t/issues/1-2", "DELETE", undefined],
   ] as const) {
-    const result = await f.proxy(route, method, body);
-    assert.equal(result.status, 409);
-    assert.match((await result.json()).error, /Hierarchy recovery/);
+    assert.equal((await f.proxy(route, method, body)).status, 200);
   }
+  assert.equal(f.calls.filter((call) => call.init.method === "POST").length, 1);
+  assert.equal(
+    f.calls.filter((call) => call.init.method === "DELETE").length,
+    1,
+  );
+  assert.equal(
+    f.calls.filter((call) => call.url.pathname === "/api/issues/1-2").length,
+    2,
+  );
+});
+test("restored hierarchy writes still reject missing session, CSRF and foreign project", async () => {
+  const f = await appFixture("2-2");
+  const path =
+    "/api/youtrack?route=" +
+    encodeURIComponent("issues/PMON-1/links/80-0t/issues");
+  for (const [headers, status] of [
+    [{ cookie: "" }, 401],
+    [{ "x-romdex-csrf": "invalid" }, 403],
+    [{ origin: "https://evil.test" }, 403],
+  ] as const) {
+    const result = await f.handle(
+      f.request(path, "POST", JSON.stringify({ id: "1-2" }), {
+        "content-type": "application/json",
+        ...headers,
+      }),
+    );
+    assert.equal(result.status, status);
+  }
+  f.move();
+  assert.equal(
+    (await f.proxy("issues/PMON-1/links/80-0t/issues", "POST", { id: "1-2" }))
+      .status,
+    403,
+  );
+  assert.equal(
+    (await f.proxy("issues/PMON-1/links/80-0t/issues/1-2", "DELETE")).status,
+    403,
+  );
   assert.equal(
     f.calls.filter((call) => call.init.method && call.init.method !== "GET")
       .length,
     0,
   );
+});
+
+test("restored parent links still reject a destination outside PMON", async () => {
+  const f = await appFixture("2-2");
+  f.moveTarget();
   assert.equal(
-    (await f.proxy("issues/PMON-1", "POST", { summary: "ordinary edit" }))
+    (await f.proxy("issues/PMON-1/links/80-0t/issues", "POST", { id: "1-2" }))
       .status,
-    200,
+    403,
+  );
+  assert.equal(
+    (await f.proxy("issues/PMON-1/links/80-0t/issues/1-2", "DELETE")).status,
+    403,
+  );
+  assert.equal(
+    f.calls.filter((call) => call.init.method && call.init.method !== "GET")
+      .length,
+    0,
   );
 });
