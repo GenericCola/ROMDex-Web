@@ -29,3 +29,11 @@ export const hasTaskTextEditing = () => {
 export const hasTaskComposition = () => {
   return composing.size > 0;
 };
+
+export const editingTicketIds = () => {
+  return new Set(
+    [...active, ...composing].map((key) => {
+      return key.slice(0, key.lastIndexOf(":"));
+    }),
+  );
+};

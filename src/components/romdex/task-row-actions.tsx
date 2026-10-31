@@ -3,6 +3,7 @@ import type { TaskItem } from "@/domain/types";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
 import ItemEditDialog from "./item-edit-dialog";
+import { useFreshTask } from "./use-fresh-task";
 const TaskRowActions = ({
   item,
   items,
@@ -12,6 +13,7 @@ const TaskRowActions = ({
   items: TaskItem[];
   add: (parentId: string | null) => void;
 }) => {
+  const fresh = useFreshTask(item.id);
   const [editing, setEditing] = useState<TaskItem | null>(null);
   const [deleting, setDeleting] = useState(false);
   return (
@@ -27,11 +29,13 @@ const TaskRowActions = ({
         +
       </button>
       <button
-        disabled={taskEditingLocked(item.id)}
-        title="Edit Item"
+        disabled={taskEditingLocked(item.id) || fresh.checking}
+        title={fresh.checking ? "Checking latest ticket…" : "Edit Item"}
         aria-label={"Edit " + item.summary}
         onClick={() => {
-          setEditing(structuredClone(item));
+          fresh.open((current) => {
+            setEditing(structuredClone(current));
+          });
         }}
       >
         ✎
@@ -51,6 +55,7 @@ const TaskRowActions = ({
           />
         </svg>
       </button>
+      {fresh.error && <p role="status">{fresh.error}</p>}
       {editing && (
         <ItemEditDialog
           item={editing}

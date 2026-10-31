@@ -1,3 +1,4 @@
+import { watchIncoming } from "@/cloud/watch-incoming";
 import { watchOutgoing } from "@/cloud/watch-outgoing";
 import { hasDraftEdits } from "@/domain/editor-drafts";
 import { workspaceStore } from "@/domain/workspace-store";
@@ -12,9 +13,11 @@ const beforeUnload = (event: BeforeUnloadEvent) => {
 const connectWorkspace = () => {
   void workspaceStore.start();
   const stopOutgoing = watchOutgoing();
+  const stopIncoming = watchIncoming();
   window.addEventListener("beforeunload", beforeUnload);
   const cleanup = () => {
     stopOutgoing();
+    stopIncoming();
     return window.removeEventListener("beforeunload", beforeUnload);
   };
   return cleanup;

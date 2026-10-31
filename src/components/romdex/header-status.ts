@@ -23,7 +23,7 @@ export const syncControl = (
       : "Auto-Sync Data. Delivery disconnected. Open Connection Details",
     description:
       connected && paused
-        ? "Automatic delivery is paused after an earlier failure. Review the pending changes, then use Save Changes to explicitly retry; turning this switch on does not resend them."
+        ? "Automatic delivery is paused after an earlier failure. Choose Review sync problems below the header (or the connection light beside Save Changes), resolve the listed changes, then use Save Changes to explicitly retry; turning this switch on does not resend them."
         : connected
           ? "When enabled and not paused, sends committed changes after a short typing pause. Turning Off lets the current operation finish, then stops automatic delivery."
           : "Delivery is disconnected. Open Connection Details to retry the data connection. No changes are sent by opening it.",

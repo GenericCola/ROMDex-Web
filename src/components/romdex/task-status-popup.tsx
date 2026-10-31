@@ -1,13 +1,15 @@
 import { STATUS, statusOf } from "@/domain/accepted/core.mjs";
 import { assignTaskStatus } from "@/domain/assigned-status";
 import { taskEditingLocked } from "@/domain/task-edit-lock";
+import { setTaskTextEditing } from "@/domain/task-editing";
 import { itemName } from "@/domain/task-presentation";
 import type { LampColor, TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dialog from "./dialog";
 import Lamp from "./lamp";
 import { useAttachmentWork } from "./use-attachment-work";
+import { useFreshTask } from "./use-fresh-task";
 
 const TaskStatusPopup = ({
   item,
@@ -20,12 +22,22 @@ const TaskStatusPopup = ({
   inherited: boolean;
   compact?: boolean;
 }) => {
+  const fresh = useFreshTask(item.id);
   const [base, setBase] = useState<string | null>(null);
   const { busy, message, setMessage, run } = useAttachmentWork();
   const open = () => {
     setMessage("");
-    setBase(item.assignedState ?? item.state);
+    fresh.open((current) => {
+      setBase(current.assignedState ?? current.state);
+    });
   };
+  useEffect(() => {
+    const key = item.id + ":status";
+    setTaskTextEditing(key, base !== null);
+    return () => {
+      setTaskTextEditing(key, false);
+    };
+  }, [item.id, base]);
   const close = () => {
     if (!busy) setBase(null);
   };
@@ -65,12 +77,13 @@ const TaskStatusPopup = ({
           STATUS[color] +
           " · Click to Set Assigned Status"
         }
-        disabled={taskEditingLocked(item.id)}
+        disabled={taskEditingLocked(item.id) || fresh.checking}
         onClick={open}
       >
         <Lamp color={color} />
         <span className={compact ? "sr-only" : ""}>{STATUS[color]}</span>
       </button>
+      {fresh.error && <p role="status">{fresh.error}</p>}
       {base !== null && (
         <Dialog title="Set Status" close={close} canClose={!busy} desktop>
           <p className="muted">

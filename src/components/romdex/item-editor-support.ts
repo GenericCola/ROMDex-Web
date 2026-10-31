@@ -40,6 +40,7 @@ export const registerItemDraft = (
   issueId: string,
 ) => {
   return registerDraftEditor({
+    ticketIds: [issueId],
     label: "Save or cancel the item editor before continuing.",
     dirty: () => {
       return dialog.open;

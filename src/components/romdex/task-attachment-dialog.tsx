@@ -27,6 +27,7 @@ const TaskAttachmentDialog = ({
   }, [item.id, read]);
   useEffect(() => {
     return registerDraftEditor({
+      ticketIds: [item.id],
       label: "Close Attachments before switching accounts or updating.",
       dirty: () => {
         return true;
@@ -35,7 +36,7 @@ const TaskAttachmentDialog = ({
         return Promise.reject(Error("Close Attachments before continuing."));
       },
     });
-  }, []);
+  }, [item.id]);
   return (
     <Dialog
       id="attachments-dialog"

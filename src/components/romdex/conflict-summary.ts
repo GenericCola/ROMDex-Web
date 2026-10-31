@@ -1,40 +1,21 @@
 import { equal } from "@/cloud/delivery-helpers";
 import type { DeliveryRecord } from "@/cloud/types";
 import type { TaskItem, TaskOperation } from "@/domain/types";
+import {
+  reviewConcise as concise,
+  reviewFieldValue as display,
+  reviewLabels as labels,
+  reviewFieldLabel,
+} from "./review-field-format";
+import {
+  proposedOperationSummary,
+  reviewTaskSnapshots,
+} from "./review-operation-summary";
 export interface ConflictSummary {
   title: string;
   explanation: string;
   items: string[];
 }
-const labels: Record<string, string> = {
-  summary: "Title",
-  description: "Notes",
-  state: "State",
-  assignedState: "Assigned status",
-  priority: "Priority",
-  complexity: "Complexity",
-  parentId: "Parent",
-  type: "Task type",
-  assignee: "Assignee",
-  assignees: "Assignees",
-  dueDate: "Due date",
-  tags: "Tags",
-  tagNames: "Tags",
-};
-const concise = (value: string) => {
-  const text = value.replace(/\s+/g, " ").trim();
-  return text.length > 120 ? text.slice(0, 117) + "…" : text;
-};
-const display = (field: string, value: unknown): string => {
-  if (value === undefined) return "not available";
-  if (value === null || value === "") return "none";
-  if (!Object.hasOwn(labels, field) || field === "description")
-    return "content withheld";
-  if (typeof value === "string") return concise(value);
-  if (typeof value === "number" || typeof value === "boolean")
-    return String(value);
-  return "structured value";
-};
 const differences = (base: TaskItem, remote: TaskItem) => {
   const result: string[] = [];
   for (const field of Object.keys(labels)) {
@@ -44,7 +25,7 @@ const differences = (base: TaskItem, remote: TaskItem) => {
     result.push(
       field === "description"
         ? "Notes changed (text not shown)."
-        : `${labels[field]}: ${display(field, before)} → ${display(field, after)}.`,
+        : `${labels[field]}: ${display(field, before, [base, remote])} → ${display(field, after, [base, remote])}.`,
     );
   }
   const added = remote.commentCount - base.commentCount;
@@ -90,9 +71,13 @@ const differences = (base: TaskItem, remote: TaskItem) => {
 export const conflictSummary = (
   operation: TaskOperation | undefined,
   record: DeliveryRecord,
+  taskTitle?: string,
 ): ConflictSummary => {
+  const title = taskTitle ?? record.remote?.summary;
   const summary: ConflictSummary = {
-    title: operation ? `Review ${operation.issueId}` : "Review queued change",
+    title: operation
+      ? `Review ${operation.issueId}${title ? " · " + concise(title) : ""}`
+      : "Review queued change",
     explanation:
       "These are saved review snapshots, not a new read from YouTrack. Review the current task before deciding; nothing is resent by this summary.",
     items: [],
@@ -129,13 +114,15 @@ export const conflictSummary = (
       summary.items.push("No deletion targets are available for review.");
     return summary;
   }
+  const tasks = reviewTaskSnapshots(operation, record);
+  summary.items.push(...proposedOperationSummary(operation, record));
   for (const conflict of record.conflicts ?? []) {
     const { field, base, local, remote } = conflict;
     summary.items.push(
-      `${Object.hasOwn(labels, field) ? labels[field] : "Other task field"}: reviewed ${display(field, base)}; browser ${display(field, local)}; YouTrack ${display(field, remote)}.`,
+      `${reviewFieldLabel(field, tasks)}: reviewed ${display(field, base, tasks)}; browser ${display(field, local, tasks)}; YouTrack ${display(field, remote, tasks)}.`,
     );
   }
-  if (!summary.items.length)
+  if (!record.conflicts?.length)
     summary.items.push(
       "No field comparison is available. Inspect the current task and read back the result before retrying.",
     );

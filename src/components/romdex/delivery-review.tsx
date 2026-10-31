@@ -8,6 +8,11 @@ import { conflictSummary } from "./conflict-summary";
 import DeletionReviewActions from "./deletion-review-actions";
 import DeliveryReceipt, { StopDeliveryLabel } from "./delivery-receipt";
 import DeliveryTechnicalDetails from "./delivery-technical-details";
+import ReviewGuidance from "./review-guidance";
+import {
+  reviewChoiceLabel,
+  reviewResultMessage,
+} from "./review-operation-summary";
 const DeliveryReview = ({
   id,
   record,
@@ -19,37 +24,43 @@ const DeliveryReview = ({
   busy: boolean;
   execute: (action: () => Promise<void>, success?: string) => Promise<void>;
 }) => {
-  const [receipt, setReceipt] = useState("");
-  const [missing, setMissing] = useState(false);
+  const [receipt, setReceipt] = useState(""),
+    [missing, setMissing] = useState(false);
   const changeReceipt = (event: ChangeEvent<HTMLInputElement>) => {
     setReceipt(event.target.value);
   };
   const acknowledgeMissing = (event: ChangeEvent<HTMLInputElement>) => {
     setMissing(event.target.checked);
   };
-  const operation = workspaceStore
-    .getSnapshot()
-    .data.operations.find((entry) => {
-      return entry.opId === id;
-    });
-  const summary = conflictSummary(operation, record);
+  const { data } = workspaceStore.getSnapshot();
+  const operation = data.operations.find((entry) => {
+    return entry.opId === id;
+  });
+  const task =
+    operation?.type === "edit"
+      ? operation.base
+      : operation?.type === "create"
+        ? operation.item
+        : data.remote.find((entry) => {
+            return entry.id === operation?.issueId;
+          });
+  const summary = conflictSummary(operation, record, task?.summary);
   const renderChange = (text: string, index: number) => {
     return <li key={index}>{text}</li>;
   };
-  const cloud = () => {
+  const run = (choice: "cloud" | "local" | "confirm") => {
     void execute(() => {
-      return reviewDelivery(id, "cloud");
-    });
+      return reviewDelivery(id, choice, receipt, missing);
+    }, reviewResultMessage(choice));
+  };
+  const cloud = () => {
+    run("cloud");
   };
   const local = () => {
-    void execute(() => {
-      return reviewDelivery(id, "local");
-    });
+    run("local");
   };
   const confirm = () => {
-    void execute(() => {
-      return reviewDelivery(id, "confirm", receipt, missing);
-    });
+    run("confirm");
   };
   return (
     <section className="delivery-review-card">
@@ -59,16 +70,16 @@ const DeliveryReview = ({
           ? "Changed in YouTrack — your queued change is paused."
           : "Earlier delivery has an unknown outcome — nothing will be resent automatically."}
       </p>
+      <p>
+        <strong>Why this needs review:</strong>{" "}
+        {record.message || "No failure details were saved."}
+      </p>
       <p>{summary.explanation}</p>
       <ul>{summary.items.map(renderChange)}</ul>
       {operation?.type === "edit" && operation.purpose === "rollup" && (
-        <p>
-          This is a calculated status; your assigned choice is kept. Confirm the
-          result or keep the current YouTrack value. The next Save recalculates
-          from fresh tasks.
-        </p>
+        <ReviewGuidance choice="rollup" />
       )}
-      <DeliveryTechnicalDetails operation={operation} record={record} />
+      {operation?.type !== "delete" && <ReviewGuidance choice="check" />}
       {operation?.type === "delete" ? (
         <DeletionReviewActions
           operation={operation}
@@ -88,7 +99,6 @@ const DeliveryReview = ({
             value={receipt}
             change={changeReceipt}
           />
-
           {operation?.type === "attachment-delete" && (
             <label className="port-check-line">
               <input
@@ -100,39 +110,40 @@ const DeliveryReview = ({
               lost access; confirming will never resend its deletion.
             </label>
           )}
-          {operation?.type === "create" && (
-            <p>
-              Confirm by exact ID and matching task fields. Stopping creation
-              archives dependent browser changes; a cloud task may already
-              exist. Inspect YouTrack before creating again.
-            </p>
-          )}
+          {operation?.type === "create" && <ReviewGuidance choice="create" />}
           <div className="port-actions">
             <button
               onClick={confirm}
               disabled={
                 busy ||
+                !operation ||
                 (["delete", "attachment-delete"].includes(
                   operation?.type ?? "",
                 ) &&
                   !missing)
               }
             >
-              Read back and confirm; do not resend
+              Check YouTrack; confirm without resending
             </button>
             {operation?.type === "edit" && operation.purpose !== "rollup" && (
-              <button onClick={local} disabled={busy}>
-                {record.status === "conflict"
-                  ? "Keep my edit; rebase for next Save"
-                  : "Rebase remaining edit after readback"}
-              </button>
+              <div>
+                <ReviewGuidance choice="keep" />
+                <button onClick={local} disabled={busy}>
+                  {reviewChoiceLabel(operation, record, true) ??
+                    "Keep my changes for next Save"}
+                </button>
+              </div>
             )}
-            <button onClick={cloud} disabled={busy}>
-              <StopDeliveryLabel type={operation?.type} />
+            <ReviewGuidance choice="stop" />
+            <button onClick={cloud} disabled={busy || !operation}>
+              {reviewChoiceLabel(operation, record, false) ?? (
+                <StopDeliveryLabel type={operation?.type} />
+              )}
             </button>
           </div>
         </>
       )}
+      <DeliveryTechnicalDetails operation={operation} record={record} />
     </section>
   );
 };

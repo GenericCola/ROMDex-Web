@@ -1,5 +1,6 @@
 import type { JsonObject } from "./json";
 interface EditorDraft {
+  ticketIds?: string[];
   label?: string;
   dirty: () => boolean;
   capture?: () => JsonObject;
@@ -47,4 +48,12 @@ export const draftMessage = () => {
   for (const editor of editors)
     if (editor.dirty()) return editor.label ?? "Unsaved NPCDex draft";
   return "";
+};
+
+export const draftTicketIds = () => {
+  return new Set(
+    [...editors].flatMap((editor) => {
+      return editor.dirty() ? (editor.ticketIds ?? []) : [];
+    }),
+  );
 };

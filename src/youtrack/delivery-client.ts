@@ -1,3 +1,4 @@
+import { authRequestGuard } from "@/auth/session";
 import type { DeliveryPort } from "@/cloud/types";
 import { nativeEditKey } from "@/domain/native-edit-fields";
 import type { TaskItem, TaskPatch } from "@/domain/types";
@@ -6,6 +7,7 @@ import { AttachmentClient } from "./attachment-client";
 import { postComment, verifyComment } from "./comments";
 import { readDeliveryTasks } from "./delivery-read";
 import { changeParent, childrenOf } from "./hierarchy";
+import { incomingRevision } from "./incoming-revision";
 import type { Field } from "./issue-body";
 import { creationBody, issueBody } from "./issue-body";
 import { NativeEditAdapter } from "./native-edit-adapter";
@@ -16,6 +18,7 @@ import { SharedStatusClient } from "./shared-status-client";
 import { TagClient } from "./tags";
 export class DeliveryClient implements DeliveryPort {
   accountId = "";
+  readonly assertCurrent: () => void;
   files: AttachmentClient;
   tags: TagClient;
   metadata?: SharedStatusClient;
@@ -24,6 +27,7 @@ export class DeliveryClient implements DeliveryPort {
   private native: NativeEditAdapter;
   private creations = new Map<string, unknown>();
   constructor(token: string, shared = false) {
+    this.assertCurrent = authRequestGuard(token);
     this.request = sessionRequest(token);
     this.native = new NativeEditAdapter(this.request, this.get, (id) => {
       return this.fields.get(id) ?? [];
@@ -40,6 +44,9 @@ export class DeliveryClient implements DeliveryPort {
       throw Error("Could not verify the YouTrack account.");
     this.accountId = user.id;
     await this.metadata?.probe();
+  };
+  latestRevision = () => {
+    return incomingRevision(this.request);
   };
   all = async () => {
     const items = await readDeliveryTasks(this.request);

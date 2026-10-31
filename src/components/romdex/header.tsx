@@ -1,3 +1,4 @@
+import { incomingMessage, subscribeIncoming } from "@/cloud/incoming-status";
 import {
   deliveryConnected,
   deliveryPaused,
@@ -6,7 +7,7 @@ import {
 import { cloudData } from "@/cloud/types";
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import ConnectionIndicator from "./connection-indicator";
 import { deliveryMessage, saveExplanation, syncControl } from "./header-status";
 import Lamp from "./lamp";
@@ -17,6 +18,13 @@ interface HeaderProps {
   unsavedDrafts?: boolean;
 }
 const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
+  const incoming = useSyncExternalStore(
+    subscribeIncoming,
+    incomingMessage,
+    () => {
+      return "";
+    },
+  );
   const [message, setMessage] = useState<{
     text: string;
     connection: string;
@@ -112,6 +120,20 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
           </div>
         </div>
       </header>
+      {incoming && (
+        <p className="port-notice" role="status">
+          {incoming}
+        </p>
+      )}
+      {deliveryPaused() && (
+        <div className="port-notice" role="status">
+          <span>
+            Auto-Sync is paused. Your pending changes are kept in this
+            browser.{" "}
+          </span>
+          <button onClick={connect}>Review sync problems</button>
+        </div>
+      )}
       {status && (
         <p className="port-notice" role="status">
           {status}

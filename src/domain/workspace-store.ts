@@ -1,8 +1,9 @@
 import { guardDeliveryBrowsing } from "./delivery-browsing";
 import { deliveryTicketLocks } from "./delivery-locks";
 import { hasDraftEdits } from "./editor-drafts";
+import { persistIncoming } from "./incoming-store";
 import { guardReviewBrowsing } from "./review-browsing";
-import type { WorkspaceData } from "./types";
+import type { TaskItem, WorkspaceData } from "./types";
 import { emptyWorkspace } from "./workspace-data";
 import {
   prepareWorkspaceUpdate,
@@ -19,6 +20,9 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
   deliveryTickets = () => {
     return new Set(this.activeTickets);
   };
+  workspaceEpoch = () => {
+    return this.generation;
+  };
   deliveryEpoch = () => {
     return this.deliveryCount;
   };
@@ -31,6 +35,21 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
         guardDeliveryBrowsing(this.state.data, data, this.activeTickets);
       guardReviewBrowsing(this.state.data, data);
     });
+  };
+  applyIncoming = (
+    items: TaskItem[],
+    held: Set<string>,
+    assertCurrent: () => void,
+  ) => {
+    return persistIncoming(
+      this.state,
+      this.switching,
+      this.write,
+      this.flush,
+      items,
+      new Set([...held, ...this.activeTickets]),
+      assertCurrent,
+    );
   };
   deliver = async (
     run: (
@@ -61,8 +80,7 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
     const commit = async (update: (data: WorkspaceData) => void) => {
       await this.write((data) => {
         update(data);
-        // Add new server IDs and rollup dependencies immediately, but release
-        // completed tickets only once the acknowledgement is durably saved.
+        // Add dependencies immediately; release tickets only after durable acknowledgement.
         for (const id of deliveryTicketLocks(data, this.activeOperations))
           this.activeTickets.add(id);
       });

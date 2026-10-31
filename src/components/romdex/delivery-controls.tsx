@@ -1,35 +1,45 @@
 import { authIdentity, authToken, hasAuthSession } from "@/auth/session";
-import { connectDelivery, deliveryConnected } from "@/cloud/session";
+import {
+  connectDelivery,
+  deliveryConnected,
+  deliveryPaused,
+  saveDelivery,
+} from "@/cloud/session";
 import { cloudData } from "@/cloud/types";
 import { needsDeliveryReview, reviewNotice } from "@/domain/review-browsing";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import DeliveryFeedback from "./delivery-feedback";
 import DeliveryReview from "./delivery-review";
+import SyncRecoveryPanel from "./sync-recovery-panel";
 const DeliveryControls = () => {
-  const { delivering } = workspaceStore.getSnapshot();
+  const { delivering, data, connection } = workspaceStore.getSnapshot();
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const runningRef = useRef(false);
   const execute = async (
-    action: () => Promise<void>,
+    action: () => Promise<void | string>,
     success = "Saved. Use Save Changes to run one delivery cycle.",
   ) => {
+    if (runningRef.current) return;
     if (workspaceStore.getSnapshot().delivering) {
       setMessage(
         "Delivery is running. Review actions resume when it finishes.",
       );
       return;
     }
+    runningRef.current = true;
     setBusy(true);
     setMessage("Checking…");
     try {
-      await action();
-      setMessage(success);
+      const result = await action();
+      setMessage(result ?? success);
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Delivery setup failed.",
       );
     } finally {
+      runningRef.current = false;
       setBusy(false);
     }
   };
@@ -44,6 +54,11 @@ const DeliveryControls = () => {
   ).filter(([, record]) => {
     return record.status !== "confirmed" && record.status !== "ready";
   });
+  const retry = () => {
+    void execute(() => {
+      return saveDelivery();
+    });
+  };
   const render = ([id, record]: (typeof records)[number]) => {
     return (
       <DeliveryReview
@@ -71,7 +86,9 @@ const DeliveryControls = () => {
       </p>
       <p role="status">
         {deliveryConnected()
-          ? "Data connection ready."
+          ? deliveryPaused()
+            ? "Signed in, but delivery is paused. Follow the steps below; turning Auto-Sync on does not resolve a failed change."
+            : "Data connection ready."
           : "Data connection unavailable. No queued changes will be sent."}
       </p>
       {!deliveryConnected() && (
@@ -82,10 +99,21 @@ const DeliveryControls = () => {
           Retry data connection
         </button>
       )}
+      {deliveryPaused() && (
+        <SyncRecoveryPanel
+          data={data}
+          connection={connection}
+          reviews={records.length}
+          connected={deliveryConnected()}
+          busy={busy || delivering}
+          retry={retry}
+        />
+      )}
       {needsDeliveryReview(workspaceStore.getSnapshot().data) && (
         <p>
           {reviewNotice(workspaceStore.getSnapshot().data)} Browsing is
-          available; task edits are paused until review and delivery complete.
+          available. Only affected tickets and their dependencies are locked;
+          other tickets remain editable.
         </p>
       )}
       {records.map(render)}
