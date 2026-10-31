@@ -34,6 +34,7 @@ const GroupDraftRow = ({
   }, []);
   useLayoutEffect(() => {
     return registerDraftEditor({
+      ticketIds: [...draft.ids, ...(draft.parentId ? [draft.parentId] : [])],
       label: "Unfinished new parent",
       dirty: () => {
         return titleRef.current.trim().length > 0;

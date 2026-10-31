@@ -36,6 +36,7 @@ const TileSettings = ({
   const { busy, message, run } = useAttachmentWork();
   useLayoutEffect(() => {
     return registerDraftEditor({
+      ticketIds: [item.id],
       label: "Unapplied Tile Settings",
       dirty: () => {
         return (
@@ -55,7 +56,7 @@ const TileSettings = ({
         );
       },
     });
-  }, [draft]);
+  }, [draft, item.id]);
   const dismiss = () => {
     if (!busy) close();
   };
