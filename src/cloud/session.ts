@@ -1,12 +1,12 @@
 import { ResumeRejected } from "@/auth/resume-failure";
 import { authRequestGuard } from "@/auth/session";
-import { flushDraftEditors } from "@/domain/editor-drafts";
 import { hasTaskComposition } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { deliverQueue } from "./delivery";
 import { DeliveryInputsChanged } from "./delivery-inputs";
 import { HierarchyQuarantine } from "./hierarchy-quarantine";
+import { finishLocalSave, saveLocalDrafts } from "./save-local-drafts";
 import { cloudData } from "./types";
 const hierarchyQuarantine = new HierarchyQuarantine();
 let client: DeliveryClient | null = null;
@@ -71,17 +71,16 @@ export const deliveryConnected = () => {
 };
 export const saveDelivery = async (automatic = false) => {
   hierarchyQuarantine.assertSafe(workspaceStore.getSnapshot().data);
-  await flushDraftEditors();
+  const alreadyDelivering = await saveLocalDrafts();
+  if (alreadyDelivering || workspaceStore.getSnapshot().delivering)
+    return finishLocalSave();
   if (
     automatic &&
     (hasTaskComposition() ||
       !cloudData(workspaceStore.getSnapshot().data).autoSync)
   )
     return "Saved in this browser. Automatic delivery is waiting.";
-  if (!client) {
-    await workspaceStore.flush();
-    return "Saved in this browser. Connect cloud delivery to send queued changes.";
-  }
+  if (!client) return finishLocalSave(true);
   const active = client;
   try {
     await workspaceStore.deliver(async (commit) => {

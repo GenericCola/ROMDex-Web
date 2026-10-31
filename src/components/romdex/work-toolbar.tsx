@@ -57,6 +57,7 @@ const WorkToolbar = ({
           <PlanImportButton />
         </div>
         <div className="work-toolbar-actions">
+          <WorkspaceTools />
           <button
             id="toggle-completed"
             onClick={completed}
@@ -66,7 +67,6 @@ const WorkToolbar = ({
             {filter.label}
             <span className={tw("bulb", filter.color)} aria-hidden="true" />
           </button>
-          <WorkspaceTools />
         </div>
       </div>
     </div>

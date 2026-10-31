@@ -15,7 +15,7 @@ test("TOOLS replaces header gear beside completed filter with exactly three acti
     header,
     /WorkspaceTools|suite-settings-slot|standard-settings-icon/,
   );
-  assert.match(toolbar, /id="toggle-completed"[\s\S]*<WorkspaceTools/);
+  assert.match(toolbar, /<WorkspaceTools[\s\S]*id="toggle-completed"/);
   for (const label of ["EXPORT RDX", "IMPORT RDX", "CHECK FOR UPDATES"])
     assert.equal(tools.split(label).length - 1, 1);
   assert.equal((tools.match(/<button/g) ?? []).length, 4);
@@ -46,6 +46,10 @@ test("exact GenDex spinner is visible only during real checking and offers separ
   assert.match(dialog, /disabled=\{update.checking \|\| update.applying\}/);
   assert.match(dialog, /role="status"/);
   const css = readFileSync("src/styles/romdex-tools.css", "utf8");
+  assert.match(
+    css,
+    /\.workspace-tools-panel\s*\{[^}]*display: flex;[^}]*flex-wrap: wrap;[^}]*gap: 10px;/,
+  );
   assert.match(css, /3s linear infinite/);
   assert.match(css, /prefers-reduced-motion[\s\S]*8s/);
 });

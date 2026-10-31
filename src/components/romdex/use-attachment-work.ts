@@ -17,8 +17,6 @@ export const useAttachmentWork = () => {
           : "Attachment operation failed. Keep the original file.",
       );
       throw error;
-    } finally {
-      setBusy(false);
     }
   };
   const runAwaitable = (action: () => Promise<void>) => {
@@ -29,7 +27,11 @@ export const useAttachmentWork = () => {
     pendingRef.current = pending;
     void pending
       .finally(() => {
-        if (pendingRef.current === pending) pendingRef.current = null;
+        if (pendingRef.current === pending) {
+          pendingRef.current = null;
+          // Notify draft subscribers only after the pending work is cleared.
+          setBusy(false);
+        }
       })
       .catch(() => {
         return undefined;

@@ -1,3 +1,8 @@
+.romdex-app .workspace-tools-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 .romdex-app .work-toolbar-actions {
   display: flex;
   align-items: center;

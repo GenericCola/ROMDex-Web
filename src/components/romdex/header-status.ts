@@ -31,7 +31,7 @@ export const syncControl = (
 };
 export const saveExplanation = (state: WorkspaceSnapshot, drafts: boolean) => {
   if (state.delivering)
-    return "Cloud delivery is running. Browsing and unrelated ticket edits remain available.";
+    return "Save current drafts in this browser while background delivery continues. Additional changes stay queued.";
   if (state.error) return `Local save needs attention: ${state.error}`;
   if (state.pendingWrites) return "Saving changes in this browser.";
   const reasons: string[] = [];
@@ -52,8 +52,9 @@ export const deliveryMessage = (
   state: WorkspaceSnapshot,
   message: { text: string; connection: string } | null,
 ) => {
-  if (state.delivering) return "";
   if (message?.connection === state.connection) return message.text;
+  if (state.delivering)
+    return "Background delivery is running. You can save additional work in this browser.";
   return state.connection.startsWith("Automatic delivery paused")
     ? state.connection
     : "";

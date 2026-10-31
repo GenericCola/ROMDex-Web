@@ -118,7 +118,14 @@ export const guardTicketChanges = (
     const structural =
       operation.type === "delete" ||
       (operation.type === "edit" && "parentId" in operation.patch);
-    const touched = structural ? dependencies(before, after, targets) : targets;
+    // A shared parent is a direct dependency, not a reason to lock siblings.
+    // Descendants matter only below the subtree actually being moved/deleted.
+    const roots = new Set(
+      operation.type === "delete" ? operation.ids : [operation.issueId],
+    );
+    const touched = structural
+      ? new Set([...targets, ...dependencies(before, after, roots)])
+      : targets;
     return [...touched].some((id) => {
       return ids.has(id);
     });

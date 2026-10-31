@@ -1,7 +1,7 @@
 import { guardDeliveryBrowsing } from "./delivery-browsing";
+import { deliveryTicketLocks } from "./delivery-locks";
 import { hasDraftEdits } from "./editor-drafts";
 import { guardReviewBrowsing } from "./review-browsing";
-import { operationTicketIds } from "./ticket-locks";
 import type { WorkspaceData } from "./types";
 import { emptyWorkspace } from "./workspace-data";
 import {
@@ -52,41 +52,26 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
           : [op.opId];
       }),
     );
-    this.activeTickets = new Set(
-      this.state.data.operations.flatMap((op) => {
-        return [...operationTicketIds(op)];
-      }),
+    this.activeTickets = deliveryTicketLocks(
+      this.state.data,
+      this.activeOperations,
     );
     this.deliveryCount++;
     this.publish({ delivering: true });
     const commit = async (update: (data: WorkspaceData) => void) => {
       await this.write((data) => {
         update(data);
-        for (const op of data.operations) {
-          if (
-            this.activeOperations.has(op.opId) ||
-            (op.type === "edit" && op.purpose === "rollup")
-          ) {
-            for (const id of operationTicketIds(op)) this.activeTickets.add(id);
-            if (op.type === "edit" && op.purpose === "rollup") {
-              let changed = true;
-              while (changed) {
-                changed = false;
-                for (const item of data.remote)
-                  if (
-                    item.parentId &&
-                    this.activeTickets.has(item.parentId) &&
-                    !this.activeTickets.has(item.id)
-                  ) {
-                    this.activeTickets.add(item.id);
-                    changed = true;
-                  }
-              }
-            }
-          }
-        }
+        // Add new server IDs and rollup dependencies immediately, but release
+        // completed tickets only once the acknowledgement is durably saved.
+        for (const id of deliveryTicketLocks(data, this.activeOperations))
+          this.activeTickets.add(id);
       });
       await this.flush();
+      this.activeTickets = deliveryTicketLocks(
+        this.state.data,
+        this.activeOperations,
+      );
+      this.publish({});
     };
     try {
       await this.flush();

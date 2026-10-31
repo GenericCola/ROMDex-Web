@@ -83,7 +83,7 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
               id="save"
               className="save"
               onClick={save}
-              disabled={!state.ready || state.delivering}
+              disabled={!state.ready}
               title={saveReason}
               aria-label={`Save Changes. ${saveReason}`}
             >
