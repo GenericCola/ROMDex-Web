@@ -69,7 +69,6 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
     });
   };
   const { view } = state.data;
-  const mode = view.detailsMode;
   return (
     <WorkspaceToolsContext value={chooseTool}>
       <WorkSelectionProvider>
@@ -104,13 +103,9 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
               )}
               {view.workspace === "romdex" ? (
                 <WorkTrays view={view}>
-                  {mode !== "expanded" && (
-                    <WorkTable data={state.data} items={items} add={add} />
-                  )}
+                  <WorkTable data={state.data} items={items} add={add} />
                   <Divider view={view} />
-                  {mode !== "collapsed" && (
-                    <Details data={state.data} items={items} />
-                  )}
+                  <Details data={state.data} items={items} />
                 </WorkTrays>
               ) : (
                 <Npcdex data={state.data} />

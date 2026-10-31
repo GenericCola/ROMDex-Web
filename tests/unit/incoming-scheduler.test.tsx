@@ -131,7 +131,12 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
     });
     setTaskTextEditing("PMON-1:title", true);
     await advance(3000);
-    assert.equal(timers.size, 0, "full read is held in flight");
+    assert.equal(
+      timers.size,
+      1,
+      "only the editor idle lease remains during the full read",
+    );
+    assert.equal([...timers.values()][0].at - now, 297000);
     setTaskTextEditing("PMON-1:title", false);
     releaseResponse?.(Response.json([raw]));
     await new Promise<void>((resolve) => saved.setTimeout(resolve, 0));

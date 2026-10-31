@@ -82,6 +82,7 @@ const NewItem = ({
               value={draft.title}
               readOnly={busy}
               onFocus={editing.focus}
+              onInput={editing.activity}
               onBlur={editing.blur}
               onKeyDown={key}
               onChange={(event) => {

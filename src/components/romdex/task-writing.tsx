@@ -84,6 +84,7 @@ const TaskWriting = ({
             onCompositionStart={editing.compositionStart}
             onCompositionEnd={editing.compositionEnd}
             onFocus={editing.focus}
+            onInput={editing.activity}
             onBlur={editing.blur}
             placeholder="Notes, Instructions, or a Development Prompt…"
           />
@@ -92,7 +93,7 @@ const TaskWriting = ({
               ? "Local saving needs attention. Editing is paused; you can browse, export a recovery copy, or retry local saving."
               : readOnly
                 ? "This ticket is being synchronized or needs delivery review. You can still browse and edit unrelated tickets."
-                : "Edits save locally. When connected, Auto-Sync sends committed edits after a short typing pause. Save Changes can send the current version."}
+                : "Edits save locally. When connected, Auto-Sync waits five minutes after typing while this editor stays focused. Leaving the editor or Save Changes can send the current version."}
           </p>
         </section>
       ) : (

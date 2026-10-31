@@ -4,11 +4,12 @@ import type { WorkspaceData } from "./types";
 export const deliveryTicketLocks = (
   data: WorkspaceData,
   activeOperations: Set<string>,
+  includeRollup = true,
 ) => {
   const tickets = new Set<string>();
   for (const op of data.operations) {
     const rollup = op.type === "edit" && op.purpose === "rollup";
-    if (!activeOperations.has(op.opId) && !rollup) continue;
+    if (!activeOperations.has(op.opId) && !(rollup && includeRollup)) continue;
     const locked = operationTicketIds(op);
     if (rollup) {
       let changed = true;
@@ -28,4 +29,21 @@ export const deliveryTicketLocks = (
     for (const id of locked) tickets.add(id);
   }
   return tickets;
+};
+
+export const batchOperationIds = (
+  data: WorkspaceData,
+  selected?: Set<string>,
+) => {
+  return new Set(
+    data.operations
+      .filter((op) => {
+        return !selected || selected.has(op.opId);
+      })
+      .flatMap((op) => {
+        return op.type === "create"
+          ? [op.opId, op.opId + ":parent", op.opId + ":tags"]
+          : [op.opId];
+      }),
+  );
 };

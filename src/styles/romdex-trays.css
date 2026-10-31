@@ -1,0 +1,17 @@
+/* Keep tray instances mounted so resize modes retain scroll, filters and drafts. */
+.romdex-app .work-trays > #work-tray {
+  grid-row: 1;
+}
+.romdex-app .work-trays > #pane-divider {
+  grid-row: 2;
+}
+.romdex-app .work-trays > #details {
+  grid-row: 3;
+}
+.romdex-app .work-trays.details-full > :is(#work-tray, #pane-divider),
+.romdex-app .work-trays.details-collapsed > #details {
+  display: none;
+}
+.romdex-app .work-trays.details-full > #details {
+  grid-row: 1;
+}

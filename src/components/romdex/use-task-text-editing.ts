@@ -1,7 +1,14 @@
-import { setTaskComposition, setTaskTextEditing } from "@/domain/task-editing";
+import {
+  setTaskComposition,
+  setTaskTextEditing,
+  touchTaskTextEditing,
+} from "@/domain/task-editing";
 import { useLayoutEffect } from "react";
 export const useTaskTextEditing = (id: string, field: string) => {
   const key = id + ":" + field;
+  const activity = () => {
+    touchTaskTextEditing(key);
+  };
   const focus = () => {
     setTaskTextEditing(key, true);
   };
@@ -20,5 +27,5 @@ export const useTaskTextEditing = (id: string, field: string) => {
     };
   };
   useLayoutEffect(track, [key]);
-  return { focus, blur, compositionStart, compositionEnd };
+  return { focus, blur, activity, compositionStart, compositionEnd };
 };

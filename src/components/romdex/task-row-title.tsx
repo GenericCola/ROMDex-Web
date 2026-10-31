@@ -1,4 +1,5 @@
 import { taskEditingLocked } from "@/domain/task-edit-lock";
+import { setTaskTextEditing } from "@/domain/task-editing";
 import { itemName } from "@/domain/task-presentation";
 import {
   beginInlineRename,
@@ -28,8 +29,8 @@ const TaskRowTitle = ({
     if (renaming) {
       inputRef.current?.focus();
       inputRef.current?.select();
-    }
-  }, [renaming]);
+    } else setTaskTextEditing(item.id + ":inline-title", false);
+  }, [renaming, item.id]);
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -77,6 +78,7 @@ const TaskRowTitle = ({
           onCompositionStart={editing.compositionStart}
           onCompositionEnd={editing.compositionEnd}
           onFocus={editing.focus}
+          onInput={editing.activity}
           onBlur={editing.blur}
           onKeyDown={key}
           onChange={(event) => {

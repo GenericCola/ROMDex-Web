@@ -11,7 +11,7 @@ import { setTaskComposition } from "../../src/domain/task-editing";
 import type { WorkspaceSnapshot } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
-test("automatic delivery rechecks IME composition after asynchronous editor preparation; explicit Save remains allowed", async (t) => {
+test("automatic delivery leaves unscoped dirty drafts alone; manual Save waits for composition then flushes once", async (t) => {
   const data = emptyWorkspace();
   data.cloud = { ...data.cloud, autoSync: true, rollupPending: true };
   const state: WorkspaceSnapshot = {
@@ -24,14 +24,8 @@ test("automatic delivery rechecks IME composition after asynchronous editor prep
     connection: "",
   };
   let deliveries = 0,
-    begin!: () => void,
-    release!: () => void;
-  const began = new Promise<void>((resolve) => {
-      begin = resolve;
-    }),
-    hold = new Promise<void>((resolve) => {
-      release = resolve;
-    });
+    flushes = 0,
+    dirty = true;
   t.mock.method(workspaceStore, "start", async () => {});
   t.mock.method(workspaceStore, "getSnapshot", () => {
     return state;
@@ -54,27 +48,29 @@ test("automatic delivery rechecks IME composition after asynchronous editor prep
   });
   const unregister = registerDraftEditor({
     dirty: () => {
-      return true;
+      return dirty;
     },
     flush: async () => {
-      begin();
-      await hold;
+      flushes++;
+      dirty = false;
     },
   });
   try {
     await connectDelivery("fictional-session-token");
-    automaticDelivery();
-    await began;
-    setTaskComposition("task:notes", true);
-    release();
-    await new Promise<void>((resolve) => {
-      setTimeout(resolve, 0);
-    });
+    await automaticDelivery();
+    assert.equal(flushes, 0);
+    assert.equal(dirty, true);
     assert.equal(deliveries, 0);
+    setTaskComposition("task:notes", true);
+    await assert.rejects(saveDelivery(), /compos|typing|finish/i);
+    assert.equal(flushes, 0);
+    assert.equal(deliveries, 0);
+    setTaskComposition("task:notes", false);
     await saveDelivery();
+    assert.equal(flushes, 1);
+    assert.equal(dirty, false);
     assert.equal(deliveries, 1);
   } finally {
-    release();
     setTaskComposition("task:notes", false);
     unregister();
     disconnectDelivery();

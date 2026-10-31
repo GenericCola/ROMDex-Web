@@ -1,4 +1,5 @@
 import type { UploadStore } from "@/attachments/types";
+import { batchOperationIds } from "@/domain/delivery-locks";
 import type { WorkspaceData } from "@/domain/types";
 import { seedAssigned } from "./assigned-status";
 import { deliverAttachment } from "./attachment-delivery";
@@ -21,15 +22,15 @@ export const deliverQueue = async (
   keepGoing: () => boolean = () => {
     return true;
   },
+  selected?: Set<string>,
 ) => {
   validateQueue(snapshot());
-  const batch = new Set(
-    snapshot().operations.flatMap((op) => {
-      return op.type === "create"
-        ? [op.opId, op.opId + ":parent", op.opId + ":tags"]
-        : [op.opId];
+  const initial = new Set(
+    snapshot().operations.map((op) => {
+      return op.opId;
     }),
   );
+  const batch = batchOperationIds(snapshot(), selected);
   const blocked = Object.values(cloudData(snapshot()).records).find(
     (record) => {
       return ["attempting", "uncertain", "conflict"].includes(record.status);
@@ -45,7 +46,7 @@ export const deliverQueue = async (
   if (binding && binding !== port.accountId)
     throw Error("This browser queue belongs to a different YouTrack account.");
   await commit((data) => {
-    cancelLocalDeletions(data);
+    if (!selected) cancelLocalDeletions(data);
     seedAssigned(data);
     data.cloud = { ...cloudData(data), accountId: port.accountId };
   });
@@ -54,7 +55,14 @@ export const deliverQueue = async (
     if (!keepGoing()) return;
     if (
       snapshot().operations.some((op) => {
-        return !batch.has(op.opId);
+        return !initial.has(op.opId) && !batch.has(op.opId);
+      })
+    )
+      return;
+    if (
+      selected &&
+      !snapshot().operations.some((op) => {
+        return batch.has(op.opId);
       })
     )
       return;
@@ -62,17 +70,20 @@ export const deliverQueue = async (
       ? await planRollup(snapshot, commit, port)
       : undefined;
     if (!keepGoing()) return;
-    const first = snapshot().operations[0];
+    const first =
+      snapshot().operations.find((op) => {
+        return batch.has(op.opId);
+      }) ?? (!selected ? snapshot().operations[0] : undefined);
     if (!first) return;
     if (planned?.operationId) batch.add(planned.operationId);
     if (
       snapshot().operations.some((op) => {
-        return !batch.has(op.opId);
+        return !initial.has(op.opId) && !batch.has(op.opId);
       })
     )
       return;
     if (planned) assertDeliveryInputs(planned.inputs, snapshot());
-    const dependency = creationDependency(snapshot());
+    const dependency = selected ? undefined : creationDependency(snapshot());
     if (dependency && dependency !== first.opId) {
       await commit((data) => {
         const index = data.operations.findIndex((op) => {

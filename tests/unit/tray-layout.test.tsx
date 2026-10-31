@@ -71,3 +71,26 @@ void test("original automatic default adapts to viewport without rewriting an ex
   assert.equal(moved.automaticTrayHeight, false);
   assert.equal(trayLayout({ ...fresh, ...moved }, 650, 240, 254).work, 320);
 });
+
+void test("tray modes retain mounted content and give expanded Details the only grid row", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(
+    new URL("../../src/components/romdex/index.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /<WorkTable[^]*?<Divider[^]*?<Details/);
+  assert.doesNotMatch(source, /mode !== "(?:expanded|collapsed)"/);
+  const css = await readFile(
+    new URL("../../src/styles/romdex-trays.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(css, /\.work-trays > #work-tray\s*\{\s*grid-row: 1/);
+  assert.match(css, /\.work-trays > #pane-divider\s*\{\s*grid-row: 2/);
+  assert.match(css, /\.work-trays > #details\s*\{\s*grid-row: 3/);
+  assert.match(
+    css,
+    /details-full > :is\(#work-tray, #pane-divider\),[^]*?display: none/,
+  );
+  assert.match(css, /details-collapsed > #details\s*\{\s*display: none/);
+  assert.match(css, /details-full > #details\s*\{\s*grid-row: 1/);
+});

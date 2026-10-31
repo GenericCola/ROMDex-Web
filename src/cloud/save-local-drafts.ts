@@ -1,7 +1,10 @@
 import { flushDraftEditors } from "@/domain/editor-drafts";
+import { hasTaskComposition } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 let savingDrafts: Promise<void> | undefined;
 export const saveLocalDrafts = async () => {
+  if (hasTaskComposition())
+    throw Error("Finish composing text before saving to YouTrack.");
   const alreadyDelivering = workspaceStore.getSnapshot().delivering;
   savingDrafts ??= flushDraftEditors().finally(() => {
     savingDrafts = undefined;

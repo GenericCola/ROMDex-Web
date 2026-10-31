@@ -57,3 +57,9 @@ export const draftTicketIds = () => {
     }),
   );
 };
+
+export const hasUnscopedDraftEdits = () => {
+  return [...editors].some((editor) => {
+    return editor.dirty() && !editor.ticketIds?.length;
+  });
+};

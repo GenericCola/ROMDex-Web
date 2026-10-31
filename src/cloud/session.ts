@@ -1,8 +1,8 @@
 import { ResumeRejected } from "@/auth/resume-failure";
 import { authRequestGuard } from "@/auth/session";
-import { hasTaskComposition } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
+import { automaticBatch } from "./automatic-batch";
 import { deliverQueue } from "./delivery";
 import { reportDeliveryFailure } from "./delivery-failure";
 import { DeliveryInputsChanged } from "./delivery-inputs";
@@ -72,16 +72,19 @@ export const deliveryConnected = () => {
 };
 export const saveDelivery = async (automatic = false) => {
   hierarchyQuarantine.assertSafe(workspaceStore.getSnapshot().data);
-  const alreadyDelivering = await saveLocalDrafts();
+  const alreadyDelivering = automatic
+    ? workspaceStore.getSnapshot().delivering
+    : await saveLocalDrafts();
   if (alreadyDelivering || workspaceStore.getSnapshot().delivering)
     return finishLocalSave();
-  if (
-    automatic &&
-    (hasTaskComposition() ||
-      !cloudData(workspaceStore.getSnapshot().data).autoSync)
-  )
+  if (automatic && !cloudData(workspaceStore.getSnapshot().data).autoSync)
     return "Saved in this browser. Automatic delivery is waiting.";
   if (!client) return finishLocalSave(true);
+  const selected = automatic
+    ? automaticBatch(workspaceStore.getSnapshot().data)
+    : undefined;
+  if (selected && !selected.size)
+    return "Saved in this browser. Your active edits are waiting.";
   const active = client;
   try {
     await workspaceStore.deliver(async (commit) => {
@@ -97,8 +100,9 @@ export const saveDelivery = async (automatic = false) => {
             !automatic || cloudData(workspaceStore.getSnapshot().data).autoSync
           );
         },
+        selected,
       );
-    });
+    }, selected);
     suspended = false;
     workspaceStore.setConnection(
       "YouTrack delivery connected for this session",
@@ -120,7 +124,6 @@ export const automaticDelivery = () => {
   const state = workspaceStore.getSnapshot();
   if (
     !client ||
-    hasTaskComposition() ||
     suspended ||
     state.error ||
     state.updating ||

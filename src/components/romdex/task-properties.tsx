@@ -64,6 +64,7 @@ const TaskProperties = ({
         onCompositionStart={editing.compositionStart}
         onCompositionEnd={editing.compositionEnd}
         onFocus={editing.focus}
+        onInput={editing.activity}
         onBlur={commitTitle}
       />
       {data.titleDrafts[item.id] !== undefined &&

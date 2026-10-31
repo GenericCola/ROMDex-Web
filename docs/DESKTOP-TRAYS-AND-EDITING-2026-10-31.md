@@ -1,0 +1,9 @@
+# Desktop trays and editing window
+
+The desktop web app's expanded Details mode formerly left the divider in the only explicit grid row. Details therefore occupied a small implicit row below a large blank area. Both tray instances now remain mounted; explicit grid rows and display rules hide the unused panes. This preserves local filters, editor contents and list scroll across keyboard and mouse toggles. Textarea scroll may naturally clamp when its visible area becomes larger.
+
+Focused notes/title/inline editors protect automatic sending for five minutes after the latest input. Typing resets that window; blur or closing the editor releases it. IME composition remains protected beyond timer expiry. Incoming refresh still protects focused fields independently of the outgoing timer. Explicit Save sends the current committed changes without waiting for the timer, but refuses unfinished IME composition.
+
+Automatic delivery selects an immutable subset before taking ticket locks. Held tickets and registered dirty editors stay local while independent scalar edits, comments and file operations can proceed. Structural operations (creation, deletion and reparenting), local creation dependencies and parent-status calculation wait until the active editing window ends, or until explicit Save. Existing uncertain-result/review safeguards are not relaxed. This is not a network lease and does not lock unrelated local UI actions.
+
+Verification uses synthetic workspaces and intercepted transport, not user queues. Native desktop-browser Tab/mouse cycles, ordinary form/dialog navigation, repeated transitions and retained list scroll were checked. Focused typing, an unrelated ticket's background save, blur delivery and explicit Save were checked through the actual app and delivery adapter. Installed Windows PWA launch and actual authenticated user transport are separate acceptance gaps; browser fixtures or standalone CSS emulation do not certify them.

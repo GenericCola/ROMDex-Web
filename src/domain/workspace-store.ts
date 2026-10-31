@@ -1,5 +1,5 @@
 import { guardDeliveryBrowsing } from "./delivery-browsing";
-import { deliveryTicketLocks } from "./delivery-locks";
+import { batchOperationIds, deliveryTicketLocks } from "./delivery-locks";
 import { hasDraftEdits } from "./editor-drafts";
 import { persistIncoming } from "./incoming-store";
 import { guardReviewBrowsing } from "./review-browsing";
@@ -55,6 +55,7 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
     run: (
       commit: (update: (data: WorkspaceData) => void) => Promise<void>,
     ) => Promise<void>,
+    selected?: Set<string>,
   ) => {
     if (
       this.switching ||
@@ -64,16 +65,11 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
       this.state.error
     )
       throw Error("The workspace is not ready for cloud delivery.");
-    this.activeOperations = new Set(
-      this.state.data.operations.flatMap((op) => {
-        return op.type === "create"
-          ? [op.opId, op.opId + ":parent", op.opId + ":tags"]
-          : [op.opId];
-      }),
-    );
+    this.activeOperations = batchOperationIds(this.state.data, selected);
     this.activeTickets = deliveryTicketLocks(
       this.state.data,
       this.activeOperations,
+      !selected,
     );
     this.deliveryCount++;
     this.publish({ delivering: true });
@@ -81,13 +77,18 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
       await this.write((data) => {
         update(data);
         // Add dependencies immediately; release tickets only after durable acknowledgement.
-        for (const id of deliveryTicketLocks(data, this.activeOperations))
+        for (const id of deliveryTicketLocks(
+          data,
+          this.activeOperations,
+          !selected,
+        ))
           this.activeTickets.add(id);
       });
       await this.flush();
       this.activeTickets = deliveryTicketLocks(
         this.state.data,
         this.activeOperations,
+        !selected,
       );
       this.publish({});
     };

@@ -1,9 +1,7 @@
-import { hasDraftEdits, subscribeDraftEditors } from "@/domain/editor-drafts";
-import {
-  hasTaskComposition,
-  subscribeTaskEditing,
-} from "@/domain/task-editing";
+import { subscribeDraftEditors } from "@/domain/editor-drafts";
+import { subscribeTaskEditing } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
+import { automaticBatch } from "./automatic-batch";
 import { startOutgoingScheduler } from "./outgoing-scheduler";
 import {
   automaticDelivery,
@@ -23,15 +21,17 @@ const outgoingWork = () => {
     !deliveryConnected() ||
     deliveryPaused() ||
     !cloud.autoSync ||
-    hasDraftEdits() ||
-    hasTaskComposition() ||
     (!state.data.operations.length &&
       !cloud.rollupPending &&
       !cloud.sharedStatuses)
   )
     return null;
+  const selected = automaticBatch(state.data);
+  if (selected && !selected.size) return null;
   return JSON.stringify([
-    state.data.operations,
+    state.data.operations.filter((op) => {
+      return !selected || selected.has(op.opId);
+    }),
     cloud.rollupPending,
     cloud.records,
   ]);
