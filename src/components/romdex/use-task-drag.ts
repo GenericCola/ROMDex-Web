@@ -16,6 +16,8 @@ export const useTaskDrag = (
   const [message, setMessage] = useState("");
   const [dragId, setDragId] = useState<string | null>(null);
   const cancel = () => {
+    if (dragRef.current?.active)
+      suppressClickUntilRef.current = Date.now() + 350;
     dragRef.current = null;
     setPreview(null);
     setDragId(null);
@@ -78,10 +80,7 @@ export const useTaskDrag = (
   const up = (event: PointerEvent<HTMLElement>) => {
     const { current } = dragRef;
     if (current?.pointer !== event.pointerId) return;
-    if (current.active) {
-      move(event);
-      suppressClickUntilRef.current = Date.now() + 350;
-    }
+    if (current.active) move(event);
     cancel();
     if (!current.active || !current.intent) return;
     const { intent } = current;
