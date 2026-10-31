@@ -12,7 +12,7 @@ import {
 import type { TaskItem } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
-test("reapproving deletion retains suspension; automatic delivery never silently resends", async () => {
+test("deletion review is isolated; reapproval never silently resends", async () => {
   const original = globalThis.fetch;
   let requests = 0;
   const base: TaskItem = {
@@ -87,14 +87,14 @@ test("reapproving deletion retains suspension; automatic delivery never silently
       expiresAt: Date.now() + 60000,
     });
     await connectDelivery("synthetic");
-    await assert.rejects(saveDelivery());
-    assert.equal(deliveryPaused(), true);
+    assert.match(await saveDelivery(), /review/i);
+    assert.equal(deliveryPaused(), false);
     await reviewDelivery("held", "local");
     assert.equal(
       workspaceStore.getSnapshot().data.cloud?.records.held?.status,
       "ready",
     );
-    assert.equal(deliveryPaused(), true);
+    assert.equal(deliveryPaused(), false);
     const before = requests;
     automaticDelivery();
     assert.equal(requests, before);

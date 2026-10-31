@@ -1,4 +1,5 @@
 import type { WorkspaceData } from "@/domain/types";
+import { DeletionReviewRequired } from "./deletion-isolation";
 import { cloudData } from "./types";
 export class DeliveryInputsChanged extends Error {
   constructor() {
@@ -15,4 +16,11 @@ export const deliveryInputs = (data: WorkspaceData) => {
 };
 export const assertDeliveryInputs = (before: string, data: WorkspaceData) => {
   if (before !== deliveryInputs(data)) throw new DeliveryInputsChanged();
+};
+
+export const isDeferredDelivery = (error: unknown): error is Error => {
+  return (
+    error instanceof DeliveryInputsChanged ||
+    error instanceof DeletionReviewRequired
+  );
 };

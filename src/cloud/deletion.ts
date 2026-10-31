@@ -5,6 +5,8 @@ import {
   remainingDeletion,
   sameDeletion,
 } from "./deletion-checks";
+import { DeletionReviewRequired } from "./deletion-isolation";
+import { reconcileDeleted } from "./deletion-reconcile";
 import { acknowledge, attemptDelivery, recordDelivery } from "./journal";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
@@ -15,6 +17,7 @@ export const deliverDeletion = async (
   commit: Commit,
   port: DeliveryPort,
 ) => {
+  await reconcileDeleted(snapshot(), operation, commit, port);
   const ids = remainingDeletion(snapshot(), operation);
   if (!ids.length) {
     await commit((data) => {
@@ -26,6 +29,7 @@ export const deliverDeletion = async (
   try {
     items = await readDeletion(ids, port);
   } catch (error) {
+    if (!(error instanceof DeletionReviewRequired)) throw error;
     await commit((data) => {
       recordDelivery(data, operation.opId, {
         status: "conflict",
@@ -46,7 +50,7 @@ export const deliverDeletion = async (
           remoteTasks: items,
         });
       });
-      throw Error(
+      throw new DeletionReviewRequired(
         "Review changed deletion targets. Nothing further was deleted.",
       );
     }
@@ -72,7 +76,7 @@ export const deliverDeletion = async (
           ...(leaf ? { remoteTasks: [leaf] } : {}),
         });
       });
-      throw Error(
+      throw new DeletionReviewRequired(
         "Review changed deletion targets. Nothing further was deleted.",
       );
     }

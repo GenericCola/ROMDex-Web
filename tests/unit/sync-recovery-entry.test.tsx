@@ -25,6 +25,8 @@ test("paused recovery identifies the route and only offers retry without unresol
     reads++;
     if (String(input).includes("users/me"))
       return Response.json({ id: "fixture" });
+    if (String(input).includes("fields=idReadable"))
+      return new Response(null, { status: 404 });
     throw Error("Synthetic connection interruption");
   };
   try {

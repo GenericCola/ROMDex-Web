@@ -7,7 +7,13 @@ import { cancelLocalDeletions } from "./cancel-local-deletions";
 import { deliverCreation } from "./creation";
 import { creationDependency } from "./creation-dependency";
 import { deliverDeletion } from "./deletion";
+import {
+  assertNoBlockedDeletion,
+  blockedByDeletion,
+  DeletionReviewRequired,
+} from "./deletion-isolation";
 import { assertDeliveryInputs } from "./delivery-inputs";
+import { deliveryPreflight } from "./delivery-preflight";
 import { deliverExisting } from "./existing-delivery";
 import { deliverRollup, planRollup } from "./rollup";
 import { refreshShared } from "./shared-status-delivery";
@@ -31,20 +37,7 @@ export const deliverQueue = async (
     }),
   );
   const batch = batchOperationIds(snapshot(), selected);
-  const blocked = Object.values(cloudData(snapshot()).records).find(
-    (record) => {
-      return ["attempting", "uncertain", "conflict"].includes(record.status);
-    },
-  );
-  if (blocked)
-    throw Error(
-      blocked.status === "conflict"
-        ? "Review the conflicting operation before continuing."
-        : "An earlier request has an uncertain result. Review it before sending more changes.",
-    );
-  const binding = cloudData(snapshot()).accountId;
-  if (binding && binding !== port.accountId)
-    throw Error("This browser queue belongs to a different YouTrack account.");
+  await deliveryPreflight(snapshot, commit, port);
   await commit((data) => {
     if (!selected) cancelLocalDeletions(data);
     seedAssigned(data);
@@ -53,6 +46,17 @@ export const deliverQueue = async (
   await refreshShared(snapshot, commit, port);
   while (snapshot().operations.length || cloudData(snapshot()).rollupPending) {
     if (!keepGoing()) return;
+    for (const op of snapshot().operations)
+      if (blockedByDeletion(op, snapshot())) batch.delete(op.opId);
+    if (
+      snapshot().operations.length &&
+      !snapshot().operations.some((op) => {
+        return batch.has(op.opId);
+      })
+    ) {
+      assertNoBlockedDeletion(snapshot());
+      return;
+    }
     if (
       snapshot().operations.some((op) => {
         return !initial.has(op.opId) && !batch.has(op.opId);
@@ -64,8 +68,10 @@ export const deliverQueue = async (
       !snapshot().operations.some((op) => {
         return batch.has(op.opId);
       })
-    )
+    ) {
+      assertNoBlockedDeletion(snapshot());
       return;
+    }
     const planned = !snapshot().operations.length
       ? await planRollup(snapshot, commit, port)
       : undefined;
@@ -126,7 +132,11 @@ export const deliverQueue = async (
       continue;
     }
     if (operation.type === "delete") {
-      await deliverDeletion(operation, snapshot, commit, port);
+      try {
+        await deliverDeletion(operation, snapshot, commit, port);
+      } catch (error) {
+        if (!(error instanceof DeletionReviewRequired)) throw error;
+      }
       continue;
     }
     if (operation.type === "edit" && operation.purpose === "rollup")

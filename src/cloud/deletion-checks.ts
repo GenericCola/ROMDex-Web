@@ -1,4 +1,5 @@
 import type { TaskItem, TaskOperation, WorkspaceData } from "@/domain/types";
+import { DeletionReviewRequired } from "./deletion-isolation";
 import { equal } from "./delivery-helpers";
 import type { DeliveryPort } from "./types";
 import { cloudData } from "./types";
@@ -25,18 +26,20 @@ export const readDeletion = async (ids: string[], port: DeliveryPort) => {
   for (const id of ids) {
     const item = await port.get(id);
     if (!item)
-      throw Error(
+      throw new DeletionReviewRequired(
         "A deletion target is missing or unreadable. Review it; no retry was sent.",
       );
     if (!Number.isFinite(item.updated))
-      throw Error("A deletion target has no verifiable revision timestamp.");
+      throw new DeletionReviewRequired(
+        "A deletion target has no verifiable revision timestamp.",
+      );
     const children = await port.children(id);
     if (
       children.some((child) => {
         return !ids.includes(child);
       })
     )
-      throw Error(
+      throw new DeletionReviewRequired(
         "An unreviewed child blocks deletion. Refresh and review the exact list first.",
       );
     items.push(item);

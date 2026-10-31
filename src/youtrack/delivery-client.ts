@@ -11,6 +11,7 @@ import { incomingRevision } from "./incoming-revision";
 import type { Field } from "./issue-body";
 import { creationBody, issueBody } from "./issue-body";
 import { NativeEditAdapter } from "./native-edit-adapter";
+import { readDeletionState } from "./read-deletion-state";
 import { readDeliveryIssue } from "./read-delivery-issue";
 import type { YouTrackRequest } from "./request";
 import { issueId, sessionRequest } from "./request";
@@ -58,6 +59,9 @@ export class DeliveryClient implements DeliveryPort {
     const { item, fields } = result;
     this.fields.set(id, fields);
     return this.metadata ? this.metadata.annotate(item) : item;
+  };
+  deletionState = (id: string) => {
+    return readDeletionState(this.request, this.get, id, this.accountId);
   };
   prepareUpdate = (id: string, patch: TaskPatch, expected: TaskItem) => {
     return this.native.prepare(id, patch, expected);

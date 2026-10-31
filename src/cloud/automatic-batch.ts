@@ -2,13 +2,18 @@ import { draftTicketIds, hasUnscopedDraftEdits } from "@/domain/editor-drafts";
 import { automaticEditingTicketIds } from "@/domain/task-editing";
 import { operationTicketIds } from "@/domain/ticket-locks";
 import type { WorkspaceData } from "@/domain/types";
+import { deletionReviewTickets } from "./deletion-isolation";
 // An edited ticket stays local; independent scalar/file/comment changes can proceed.
 export const automaticBatch = (
   data: WorkspaceData,
 ): Set<string> | undefined => {
   const drafts = draftTicketIds();
   if (hasUnscopedDraftEdits()) return new Set<string>();
-  const held = new Set([...automaticEditingTicketIds(), ...drafts]);
+  const held = new Set([
+    ...automaticEditingTicketIds(),
+    ...drafts,
+    ...deletionReviewTickets(data, true),
+  ]);
   if (!held.size) return undefined;
   return new Set(
     data.operations

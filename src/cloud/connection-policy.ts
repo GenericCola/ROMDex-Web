@@ -7,7 +7,12 @@ export const initializeAutomaticSync = (
   if (isNew && !data.cloud) data.cloud = { autoSync: true, records: {} };
 };
 export const connectionNeedsManualSave = (data: WorkspaceData) => {
-  return Object.values(cloudData(data).records ?? {}).some((record) => {
-    return record.status !== "confirmed";
+  return Object.entries(cloudData(data).records ?? {}).some(([id, record]) => {
+    return (
+      record.status !== "confirmed" &&
+      data.operations.find((op) => {
+        return op.opId === id;
+      })?.type !== "delete"
+    );
   });
 };

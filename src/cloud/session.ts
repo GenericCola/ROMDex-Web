@@ -5,9 +5,10 @@ import { DeliveryClient } from "@/youtrack/delivery-client";
 import { automaticBatch } from "./automatic-batch";
 import { deliverQueue } from "./delivery";
 import { reportDeliveryFailure } from "./delivery-failure";
-import { DeliveryInputsChanged } from "./delivery-inputs";
+import { isDeferredDelivery } from "./delivery-inputs";
 import { HierarchyQuarantine } from "./hierarchy-quarantine";
 import { finishLocalSave, saveLocalDrafts } from "./save-local-drafts";
+import { resumeDeletionReadback } from "./session-deletions";
 import { cloudData } from "./types";
 const hierarchyQuarantine = new HierarchyQuarantine();
 let client: DeliveryClient | null = null;
@@ -31,9 +32,7 @@ export const connectDelivery = async (
   if (!opened.ready || opened.error)
     throw Error(opened.error || "Wait for your workspace to open.");
   if (cloudData(opened.data).sharedStatuses)
-    throw Error(
-      "Shared status remains disabled until its concurrency safety check passes.",
-    );
+    throw Error("Shared status sync requires its safety check to pass.");
   const next = new DeliveryClient(
     token,
     cloudData(workspaceStore.getSnapshot().data).sharedStatuses ?? false,
@@ -52,6 +51,7 @@ export const connectDelivery = async (
   });
   await workspaceStore.flush();
   assertCurrent();
+  await resumeDeletionReadback(next, assertCurrent);
   suspended = hierarchyQuarantine.capture(workspaceStore.getSnapshot().data);
   client = next;
   workspaceStore.setConnection(
@@ -111,7 +111,7 @@ export const saveDelivery = async (automatic = false) => {
       ? "Current delivery finished. Additional changes remain safely queued."
       : "Queued supported changes confirmed by YouTrack. Auto-Sync preference unchanged.";
   } catch (error) {
-    if (error instanceof DeliveryInputsChanged) {
+    if (isDeferredDelivery(error)) {
       suspended = false;
       return error.message;
     }

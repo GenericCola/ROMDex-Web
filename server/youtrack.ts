@@ -38,7 +38,7 @@ export async function upstream(
   alive(request, session, deps);
   if (!result.ok)
     throw new HttpFailure(
-      [400, 401, 403, 404, 409, 413, 429].includes(result.status)
+      [400, 401, 403, 404, 409, 410, 413, 429].includes(result.status)
         ? result.status
         : 502,
     );

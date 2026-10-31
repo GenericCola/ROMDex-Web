@@ -60,7 +60,9 @@ const DeletionReviewActions = ({
     run("confirm");
   };
   const uncertain =
-    record.status === "uncertain" || record.status === "attempting";
+    record.status === "uncertain" ||
+    record.status === "attempting" ||
+    record.status === "conflict";
   return (
     <section
       className="deletion-review-actions"
@@ -96,18 +98,22 @@ const DeletionReviewActions = ({
       </details>
       {uncertain && (
         <details>
-          <summary>Check whether an earlier deletion already happened</summary>
+          <summary>These tasks were already deleted in YouTrack</summary>
           <label className="deletion-review-confirmation">
             <input
               type="checkbox"
               checked={missing === record}
               onChange={acknowledgeMissing}
             />
-            I checked {record.targetId ?? operation.issueId} in YouTrack.
-            Missing can mean lost access. This check never resends deletion.
+            I verified{" "}
+            {record.status === "conflict"
+              ? remaining.join(", ")
+              : (record.targetId ?? operation.issueId)}{" "}
+            in YouTrack’s Deleted Items. Clear only their queued deletions; do
+            not send another delete.
           </label>
           <button onClick={confirm} disabled={busy || missing !== record}>
-            Read back the earlier outcome; do not resend
+            Clear already-deleted targets from the queue
           </button>
         </details>
       )}

@@ -5,6 +5,7 @@ import {
   remainingDeletion,
   sameDeletion,
 } from "./deletion-checks";
+import { reconcileDeleted } from "./deletion-reconcile";
 import { replaceRemote } from "./delivery-helpers";
 import { acknowledge, recordDelivery } from "./journal";
 import type { Commit, DeliveryPort } from "./types";
@@ -24,28 +25,14 @@ export const reviewDeletion = async (
       throw Error(
         "Explicitly acknowledge that a missing task can mean lost access before confirming this deletion.",
       );
-    const id = record.targetId;
-    if (
-      !id ||
-      !operation.ids.includes(id) ||
-      (record.status !== "attempting" && record.status !== "uncertain")
-    )
-      throw Error("No uncertain deletion target to confirm.");
-    if (await port.get(id))
-      throw Error("The task is still readable. Nothing was resent.");
-    await commit((next) => {
-      recordDelivery(next, operation.opId, {
-        status: "ready",
-        deletedIds: [...new Set([...(record.deletedIds ?? []), id])],
-        message:
-          "User acknowledged that this exact target is missing or inaccessible. Remaining deletion requires Save.",
-      });
-      next.remote = next.remote.filter((item) => {
-        return item.id !== id;
-      });
-      if (!remainingDeletion(next, operation).length)
-        acknowledge(next, operation);
-    });
+    const ids =
+      record.status === "conflict"
+        ? remainingDeletion(data, operation)
+        : record.targetId && operation.ids.includes(record.targetId)
+          ? [record.targetId]
+          : [];
+    if (!ids.length) throw Error("No missing deletion targets to confirm.");
+    await reconcileDeleted(data, operation, commit, port, new Set(ids));
     return;
   }
   const ids = remainingDeletion(data, operation);

@@ -50,6 +50,9 @@ export interface DeliveryPort {
   accountId: string;
   all: () => Promise<TaskItem[]>;
   get: (id: string) => Promise<TaskItem | null>;
+  deletionState?: (
+    id: string,
+  ) => Promise<{ item: TaskItem | null; gone: boolean }>;
   prepareUpdate?: (
     id: string,
     patch: TaskPatch,

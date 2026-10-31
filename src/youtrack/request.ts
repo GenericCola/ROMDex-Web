@@ -6,12 +6,18 @@ export type YouTrackRequest = (
   route: string,
   method?: string,
   body?: unknown,
+  missingIsError?: boolean,
 ) => Promise<unknown>;
 export const sessionRequest = (value: string): YouTrackRequest => {
   const token = value.trim();
   if (!token) throw Error("Enter a YouTrack token.");
   const assertSession = authRequestGuard(token);
-  const request: YouTrackRequest = async (route, method = "GET", body) => {
+  const request: YouTrackRequest = async (
+    route,
+    method = "GET",
+    body,
+    missingIsError = false,
+  ) => {
     assertSession();
     const form = body instanceof FormData;
     const response = isCookieHandle(token)
@@ -47,7 +53,8 @@ export const sessionRequest = (value: string): YouTrackRequest => {
             : {}),
         });
     assertSession();
-    if (response.status === 404 && method === "GET") return null;
+    if (response.status === 404 && method === "GET" && !missingIsError)
+      return null;
     if (!response.ok) throw new YouTrackHttpError(response.status);
     const text = await response.text();
     assertSession();

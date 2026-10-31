@@ -1,3 +1,7 @@
+import {
+  blockedByDeletion,
+  deletionReviewTickets,
+} from "@/cloud/deletion-isolation";
 import { cloudData } from "@/cloud/types";
 import type { WorkspaceData } from "@/domain/types";
 import { proposedOperationSummary } from "./review-operation-summary";
@@ -22,6 +26,12 @@ const SyncRecoveryPanel = ({
   const hasMoves = data.operations.some((operation) => {
     return operation.type === "edit" && "parentId" in operation.patch;
   });
+  const otherChanges =
+    reviews > 0 &&
+    deletionReviewTickets(data).size > 0 &&
+    data.operations.some((op) => {
+      return !blockedByDeletion(op, data) && op.type !== "delete";
+    });
   return (
     <section aria-label="Sync recovery">
       <h3>
@@ -42,7 +52,11 @@ const SyncRecoveryPanel = ({
         </p>
       )}
       {reviews ? (
-        <p>Resolve the changes below before saving.</p>
+        <p>
+          {otherChanges
+            ? "The deletion below needs checking. Other changes can still sync."
+            : "Resolve the changes below before saving."}
+        </p>
       ) : hasMoves ? (
         <p>A task move needs review in recovery mode before it can be saved.</p>
       ) : (
@@ -82,13 +96,15 @@ const SyncRecoveryPanel = ({
           )}
         </>
       )}
-      {!reviews && !hasMoves && connected && pending && (
+      {(!reviews || otherChanges) && !hasMoves && connected && pending && (
         <button onClick={retry} disabled={busy}>
-          {!data.operations.length
-            ? "SAVE STATUS UPDATES"
-            : data.operations.length === 1
-              ? "SAVE CHANGE"
-              : `SAVE ${data.operations.length} CHANGES`}
+          {otherChanges
+            ? "SAVE OTHER CHANGES"
+            : !data.operations.length
+              ? "SAVE STATUS UPDATES"
+              : data.operations.length === 1
+                ? "SAVE CHANGE"
+                : `SAVE ${data.operations.length} CHANGES`}
         </button>
       )}
     </section>
