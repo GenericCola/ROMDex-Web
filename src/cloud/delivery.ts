@@ -2,20 +2,17 @@ import type { UploadStore } from "@/attachments/types";
 import { batchOperationIds } from "@/domain/delivery-locks";
 import type { WorkspaceData } from "@/domain/types";
 import { seedAssigned } from "./assigned-status";
-import { deliverAttachment } from "./attachment-delivery";
 import { cancelLocalDeletions } from "./cancel-local-deletions";
-import { deliverCreation } from "./creation";
 import { creationDependency } from "./creation-dependency";
-import { deliverDeletion } from "./deletion";
 import {
   assertNoBlockedDeletion,
   blockedByDeletion,
-  DeletionReviewRequired,
 } from "./deletion-isolation";
 import { assertDeliveryInputs } from "./delivery-inputs";
 import { deliveryPreflight } from "./delivery-preflight";
-import { deliverExisting } from "./existing-delivery";
-import { deliverRollup, planRollup } from "./rollup";
+import { dispatchOperation } from "./dispatch-operation";
+import { assertNoBlockedReview, blockedByReview } from "./review-isolation";
+import { planRollup } from "./rollup";
 import { refreshShared } from "./shared-status-delivery";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
@@ -47,14 +44,24 @@ export const deliverQueue = async (
   while (snapshot().operations.length || cloudData(snapshot()).rollupPending) {
     if (!keepGoing()) return;
     for (const op of snapshot().operations)
-      if (blockedByDeletion(op, snapshot())) batch.delete(op.opId);
+      if (blockedByDeletion(op, snapshot()) || blockedByReview(op, snapshot()))
+        batch.delete(op.opId);
     if (
       snapshot().operations.length &&
       !snapshot().operations.some((op) => {
         return batch.has(op.opId);
       })
     ) {
+      if (!selected && cloudData(snapshot()).rollupPending) {
+        const planned = await planRollup(snapshot, commit, port);
+        for (const id of planned.createdIds) initial.add(id);
+        if (planned.operationId) {
+          batch.add(planned.operationId);
+          continue;
+        }
+      }
       assertNoBlockedDeletion(snapshot());
+      assertNoBlockedReview(snapshot());
       return;
     }
     if (
@@ -70,11 +77,13 @@ export const deliverQueue = async (
       })
     ) {
       assertNoBlockedDeletion(snapshot());
+      assertNoBlockedReview(snapshot());
       return;
     }
     const planned = !snapshot().operations.length
       ? await planRollup(snapshot, commit, port)
       : undefined;
+    for (const id of planned?.createdIds ?? []) initial.add(id);
     if (!keepGoing()) return;
     const first =
       snapshot().operations.find((op) => {
@@ -89,7 +98,9 @@ export const deliverQueue = async (
     )
       return;
     if (planned) assertDeliveryInputs(planned.inputs, snapshot());
-    const dependency = selected ? undefined : creationDependency(snapshot());
+    const dependency = selected
+      ? undefined
+      : creationDependency(snapshot(), first);
     if (dependency && dependency !== first.opId) {
       await commit((data) => {
         const index = data.operations.findIndex((op) => {
@@ -120,27 +131,13 @@ export const deliverQueue = async (
       await commit((data) => {
         data.cloud = { ...cloudData(data), rollupPending: true };
       });
-    if (
-      operation.type === "attachment" ||
-      operation.type === "attachment-delete"
-    ) {
-      await deliverAttachment(operation, commit, port, uploads);
-      continue;
-    }
-    if (operation.type === "create") {
-      await deliverCreation(operation, commit, port);
-      continue;
-    }
-    if (operation.type === "delete") {
-      try {
-        await deliverDeletion(operation, snapshot, commit, port);
-      } catch (error) {
-        if (!(error instanceof DeletionReviewRequired)) throw error;
-      }
-      continue;
-    }
-    if (operation.type === "edit" && operation.purpose === "rollup")
-      await deliverRollup(operation, snapshot, commit, port, planned);
-    else await deliverExisting(operation, snapshot, commit, port);
+    await dispatchOperation(
+      operation,
+      snapshot,
+      commit,
+      port,
+      uploads,
+      planned,
+    );
   }
 };

@@ -5,6 +5,7 @@ import { equal, supported } from "./delivery-helpers";
 import { nativeTagBaseline, prepareEditPatch } from "./edit-patch-delivery";
 import { finishExisting } from "./finish-existing";
 import { attemptDelivery, recordDelivery } from "./journal";
+import { OperationReviewRequired } from "./review-isolation";
 import {
   confirmStatusAttempt,
   saveStatusAttempt,
@@ -28,10 +29,15 @@ export const deliverExisting = async (
       "Unsupported task operation remains queued. Nothing was sent for it.",
     );
   const received = await port.get(operation.issueId);
-  if (!received)
-    throw Error(
-      "A queued task is no longer readable. Nothing was sent for it.",
-    );
+  if (!received) {
+    const message =
+      operation.issueId +
+      " is no longer readable. Its change is preserved; nothing was sent for it.";
+    await commit((data) => {
+      recordDelivery(data, operation.opId, { status: "conflict", message });
+    });
+    throw new OperationReviewRequired(message);
+  }
   const receivedBaseline = await nativeTagBaseline(operation, received, port);
   let remote = receivedBaseline;
   await commit((data) => {
@@ -72,7 +78,9 @@ export const deliverExisting = async (
           conflicts: result.conflicts,
         });
       });
-      throw Error("Review conflicting edits. Both versions were preserved.");
+      throw new OperationReviewRequired(
+        "Review conflicting edits. Both versions were preserved.",
+      );
     }
   }
   const { assignedState, ...nativePatch } = patch;

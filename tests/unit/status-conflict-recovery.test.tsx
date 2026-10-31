@@ -88,7 +88,7 @@ test("concurrent status choices resolve generically by readback, never write or 
           assert.equal(retained.patch.assignedState, "Done");
           assert.equal(retained.base.state, "Needs Testing");
         }
-        assert.equal(data.cloud?.records.status, undefined);
+        assert.equal(data.cloud?.records.status?.status, "ready");
       } else {
         assert.equal(
           data.operations.some((op) => op.opId === "status"),

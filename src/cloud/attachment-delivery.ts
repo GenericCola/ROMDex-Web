@@ -13,6 +13,7 @@ import { sha256 } from "@/domain/json";
 import { uploadStorage } from "@/storage/upload-storage";
 import { observeStatus } from "./assigned-status";
 import { acknowledge, attemptDelivery, recordDelivery } from "./journal";
+import { OperationReviewRequired } from "./review-isolation";
 import type { Commit, DeliveryPort } from "./types";
 export const verifiedAttachment = async (
   operation: Extract<AttachmentOperation, { type: "attachment" }>,
@@ -52,10 +53,15 @@ export const deliverAttachment = async (
     );
   const { files } = port,
     task = await port.get(operation.issueId);
-  if (!task)
-    throw Error(
-      "The attachment's task is not readable. No file request was sent.",
-    );
+  if (!task) {
+    const message =
+      operation.issueId +
+      " is not readable. The queued file change is preserved; no file request was sent.";
+    await commit((data) => {
+      recordDelivery(data, operation.opId, { status: "conflict", message });
+    });
+    throw new OperationReviewRequired(message);
+  }
   const before = await files.list(operation.issueId);
   if (operation.type === "attachment-delete") {
     const current = before.find((file) => {
@@ -65,11 +71,12 @@ export const deliverAttachment = async (
       await commit((data) => {
         recordDelivery(data, operation.opId, {
           status: "conflict",
-          message:
-            "The attachment changed or is no longer readable. Review before deleting it.",
+          message: "Review the changed attachment. No deletion was sent.",
         });
       });
-      throw Error("Review the changed attachment. No deletion was sent.");
+      throw new OperationReviewRequired(
+        "Review the changed attachment. No deletion was sent.",
+      );
     }
   } else {
     requireCloudUploadSize(operation.file.size);

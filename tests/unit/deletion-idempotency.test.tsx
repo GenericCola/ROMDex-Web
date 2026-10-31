@@ -163,7 +163,7 @@ test("confirmed missing parent refreshes surviving child rather than deleting or
   assert.deepEqual(s.removed, []);
 });
 
-test("unverifiable surviving child prevents local deletion acknowledgement", async () => {
+test("a child present in the full snapshot but individually unreadable prevents acknowledgement", async () => {
   const s = await fixture();
   const child = {
     ...structuredClone(s.store.getSnapshot().data.remote[1]!),
@@ -174,6 +174,9 @@ test("unverifiable surviving child prevents local deletion acknowledgement", asy
     data.remote.push(child);
   });
   s.remote.delete(s.op.issueId);
+  s.remote.set(child.id, child);
+  const get = s.port.get;
+  s.port.get = async (id) => (id === child.id ? null : get(id));
   s.port.deletionState = async (id) => ({
     item: await s.port.get(id),
     gone: id === s.op.issueId,

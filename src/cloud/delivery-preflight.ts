@@ -14,20 +14,6 @@ export const deliveryPreflight = async (
     await commit((data) => {
       data.cloud = { ...cloudData(data), rollupPending: true };
     });
-  const blocked = Object.entries(cloudData(snapshot()).records).find(
-    ([id, record]) => {
-      return (
-        ["attempting", "uncertain", "conflict"].includes(record.status) &&
-        snapshot().operations.find((op) => {
-          return op.opId === id;
-        })?.type !== "delete"
-      );
-    },
-  );
-  if (blocked)
-    throw Error(
-      "Review the conflicting or uncertain operation before continuing.",
-    );
 };
 
 export const reconcileDeletionRecords = async (

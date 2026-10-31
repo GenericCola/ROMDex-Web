@@ -12,6 +12,7 @@ export const rebaseEdit = (
   });
   const operation = data.operations[at];
   if (operation?.type !== "edit") throw Error("Only an edit can be rebased.");
+  let readyId = opId;
   if (operation.patch.tags !== undefined && cloudData(data).records[opId]) {
     const replacement = {
       ...operation,
@@ -19,6 +20,7 @@ export const rebaseEdit = (
       base: remote,
     };
     data.operations.splice(at, 1, replacement);
+    readyId = replacement.opId;
     recordDelivery(data, opId, {
       status: "confirmed",
       archivedOperation: structuredClone(operation),
@@ -31,9 +33,10 @@ export const rebaseEdit = (
     recordDelivery(data, opId, {
       message: "Previous edit archived after explicit shared-status rebase.",
     });
+    readyId = crypto.randomUUID();
     data.operations.splice(at, 0, {
       ...operation,
-      opId: crypto.randomUUID(),
+      opId: readyId,
       base: remote,
     });
   } else {
@@ -42,4 +45,9 @@ export const rebaseEdit = (
     delete cloud.records[opId];
     data.cloud = cloud;
   }
+  recordDelivery(data, readyId, {
+    status: "ready",
+    message:
+      "Your reviewed choice is saved in this browser. Save Changes sends it after a fresh check.",
+  });
 };

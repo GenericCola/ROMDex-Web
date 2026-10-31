@@ -53,7 +53,14 @@ export const validateQueue = (data: WorkspaceData) => {
         !["attachment", "attachment-delete"].includes(operation.type))
     )
       invalid();
-    if (record.status === "ready" && operation?.type !== "delete") invalid();
+    if (
+      record.status === "ready" &&
+      !(
+        operation?.type === "delete" ||
+        (operation?.type === "edit" && operation.purpose !== "rollup")
+      )
+    )
+      invalid();
     if (
       [record.deletedIds, record.deleteReceipts, record.retiredIds].some(
         (entries) => {

@@ -1,6 +1,8 @@
 import type { TaskOperation, WorkspaceData } from "@/domain/types";
-export const creationDependency = (data: WorkspaceData): string | undefined => {
-  const first = data.operations[0];
+export const creationDependency = (
+  data: WorkspaceData,
+  first = data.operations[0],
+): string | undefined => {
   if (first?.type !== "create") return undefined;
   let operation: Extract<TaskOperation, { type: "create" }> = first;
   const seen = new Set([operation.issueId]);

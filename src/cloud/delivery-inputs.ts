@@ -1,5 +1,6 @@
 import type { WorkspaceData } from "@/domain/types";
 import { DeletionReviewRequired } from "./deletion-isolation";
+import { OperationReviewRequired } from "./review-isolation";
 import { cloudData } from "./types";
 export class DeliveryInputsChanged extends Error {
   constructor() {
@@ -21,6 +22,7 @@ export const assertDeliveryInputs = (before: string, data: WorkspaceData) => {
 export const isDeferredDelivery = (error: unknown): error is Error => {
   return (
     error instanceof DeliveryInputsChanged ||
-    error instanceof DeletionReviewRequired
+    error instanceof DeletionReviewRequired ||
+    error instanceof OperationReviewRequired
   );
 };

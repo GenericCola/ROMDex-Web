@@ -2,6 +2,7 @@ import type { TaskOperation, WorkspaceData } from "@/domain/types";
 import { observeStatus } from "./assigned-status";
 import { assertDeliveryInputs, deliveryInputs } from "./delivery-inputs";
 import { acknowledge, attemptDelivery } from "./journal";
+import { queueRollup } from "./rollup-operations";
 import { readRollupTree } from "./rollup-tree";
 import {
   confirmStatusAttempt,
@@ -21,6 +22,7 @@ export const planRollup = async (
   const copy = structuredClone(snapshot());
   const tree = await readRollupTree(copy, port);
   let operationId: string | undefined;
+  const createdIds: string[] = [];
   let committedInputs = inputs;
   await commit((data) => {
     assertDeliveryInputs(inputs, data);
@@ -51,23 +53,21 @@ export const planRollup = async (
         ),
       };
     else delete data.cloud.unavailable;
-    if (tree.next) {
-      operationId = crypto.randomUUID();
-      data.operations.push({
-        opId: operationId,
-        type: "edit",
-        purpose: "rollup",
-        issueId: tree.next.id,
-        base: tree.next,
-        patch: {
-          state: tree.desired(tree.next),
-          assignedState: tree.next.assignedState ?? tree.next.state,
-        },
-      });
+    for (const item of tree.deferred) {
+      const id = queueRollup(data, item, tree.desired(item));
+      if (id) createdIds.push(id);
     }
+    if (tree.next)
+      operationId = queueRollup(data, tree.next, tree.desired(tree.next));
+    if (operationId) createdIds.push(operationId);
+    data.cloud.rollupPending =
+      !!tree.next ||
+      data.operations.some((op) => {
+        return op.type === "edit" && op.purpose === "rollup";
+      });
     committedInputs = deliveryInputs(data);
   });
-  return { ...tree, operationId, inputs: committedInputs };
+  return { ...tree, operationId, createdIds, inputs: committedInputs };
 };
 export const deliverRollup = async (
   operation: Edit,

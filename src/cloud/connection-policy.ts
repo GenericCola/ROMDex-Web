@@ -10,9 +10,9 @@ export const connectionNeedsManualSave = (data: WorkspaceData) => {
   return Object.entries(cloudData(data).records ?? {}).some(([id, record]) => {
     return (
       record.status !== "confirmed" &&
-      data.operations.find((op) => {
+      !data.operations.some((op) => {
         return op.opId === id;
-      })?.type !== "delete"
+      })
     );
   });
 };

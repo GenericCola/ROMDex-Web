@@ -51,6 +51,17 @@ export const reconcileDeleted = async (
     if (!item.parentId || !absent.has(item.parentId) || absent.has(item.id))
       continue;
     const fresh = await port.get(item.id);
+    if (!fresh) {
+      visible ??= new Set(
+        (await readFullSnapshot(port)).map((task) => {
+          return task.id;
+        }),
+      );
+      // A legacy deletion can omit a cached descendant. Its absence from the
+      // complete current projection must not block the parent's completion.
+      // Keep its local snapshot and intent; never extend the deletion targets.
+      if (!visible.has(item.id)) continue;
+    }
     if (!fresh || (fresh.parentId && absent.has(fresh.parentId)))
       throw Error(
         "Cannot verify surviving child " +

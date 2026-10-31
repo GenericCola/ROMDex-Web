@@ -85,7 +85,7 @@ export const saveDelivery = async (automatic = false) => {
     ? automaticBatch(workspaceStore.getSnapshot().data)
     : undefined;
   if (selected && !selected.size)
-    return "Saved in this browser. Your active edits are waiting.";
+    return "Saved in this browser. Some changes need review or are still being edited.";
   const active = client;
   try {
     await workspaceStore.deliver(async (commit) => {
@@ -112,6 +112,7 @@ export const saveDelivery = async (automatic = false) => {
   } catch (error) {
     if (isDeferredDelivery(error)) {
       suspended = false;
+      workspaceStore.setConnection(error.message);
       return error.message;
     }
     suspended = true;

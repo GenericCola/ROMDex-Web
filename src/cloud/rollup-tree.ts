@@ -2,24 +2,38 @@ import { indexTree, STATES, youTrackState } from "@/domain/accepted/core.mjs";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { validateTask } from "@/domain/validate-task";
 import { observeStatus } from "./assigned-status";
+import { reviewStatusBlocks, reviewTickets } from "./review-isolation";
 import { readRollupAvailability } from "./rollup-availability";
 import { readableRollupSubtree } from "./rollup-subtree";
-import type { DeliveryPort } from "./types";
+import { cloudData, type DeliveryPort } from "./types";
 export const readRollupTree = async (
   data: WorkspaceData,
   port: DeliveryPort,
 ) => {
   const available = await readRollupAvailability(data, port);
+  const reviewed = reviewTickets(data);
   const items = available.items.map((item) => {
     validateTask(item);
-    return available.fresh.has(item.id) && !available.blocked.has(item.id)
-      ? observeStatus(data, item)
-      : item;
+    if (!available.fresh.has(item.id) || available.blocked.has(item.id))
+      return item;
+    // Read the current status for calculation without changing a held ticket's
+    // pending assignment/receipt bookkeeping.
+    const target = reviewed.has(item.id)
+      ? {
+          ...data,
+          cloud: {
+            ...cloudData(data),
+            assigned: { ...cloudData(data).assigned },
+          },
+        }
+      : data;
+    return observeStatus(target, item);
   });
   const calculation = items.filter((item) => {
     return available.fresh.has(item.id);
   });
   const tree = indexTree(calculation);
+  const reviewBlocked = reviewStatusBlocks(data, calculation);
   const deepest = [...calculation].sort((a, b) => {
     return (tree.depths.get(b.id) ?? 0) - (tree.depths.get(a.id) ?? 0);
   });
@@ -33,6 +47,7 @@ export const readRollupTree = async (
     );
   };
   let next: TaskItem | undefined;
+  const deferred: TaskItem[] = [];
   const linkedMissingIds: string[] = [];
   for (const item of deepest) {
     if (
@@ -41,6 +56,10 @@ export const readRollupTree = async (
       item.state === desired(item)
     )
       continue;
+    if (reviewBlocked.has(item.id)) {
+      deferred.push(item);
+      continue;
+    }
     if (
       await readableRollupSubtree(
         item,
@@ -58,6 +77,7 @@ export const readRollupTree = async (
     items,
     desired,
     next,
+    deferred,
     unavailable: available.unavailable,
     missingIds: [...new Set([...available.missingIds, ...linkedMissingIds])],
     linkedMissingIds,
