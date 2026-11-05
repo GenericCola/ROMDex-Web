@@ -14,8 +14,10 @@ const serverOrigin = () => {
 const AuthSignIn = ({
   busy,
   signIn,
+  signedIn = false,
 }: {
   busy: boolean;
+  signedIn?: boolean;
   signIn: (rememberDevice?: boolean) => Promise<void>;
 }) => {
   const [rememberDevice, setRememberDevice] = useState(false);
@@ -57,7 +59,11 @@ const AuthSignIn = ({
         in again.
       </p>
       <button className="primary" disabled={busy} onClick={open}>
-        {busy ? "Signing in…" : "Sign in with YouTrack"}
+        {busy
+          ? "Signing in…"
+          : signedIn
+            ? "Sign in again with YouTrack"
+            : "Sign in with YouTrack"}
       </button>
     </>
   );

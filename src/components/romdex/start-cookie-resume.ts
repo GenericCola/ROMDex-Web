@@ -32,10 +32,15 @@ export const startCookieResume = (
   const current = () => {
     return run === generationRef.current;
   };
+  sessionRef.current = null;
+  setIdentity(null);
+  setSelected(null);
+  setIssues([]);
   setBusy(true);
   setRetryable(false);
   setMessage("");
   const restore = async () => {
+    let project: AuthorizedProject | undefined;
     try {
       disconnectDelivery();
       setAuthSession(null);
@@ -44,14 +49,17 @@ export const startCookieResume = (
       if (!auth) return;
       sessionRef.current = auth;
       const check = () => {
-        if (!current() || Date.now() >= auth.expiresAt) return false;
+        if (!current()) return false;
+        if (Date.now() >= auth.expiresAt)
+          throw Error(
+            "Sign-in expired. Sign in again; local work is preserved.",
+          );
         assertCookieHandle(auth.token);
         return true;
       };
-      const project = preferredCookieProject(auth.identity);
+      project = preferredCookieProject(auth.identity);
       // Only a verified cookie session may migrate away the legacy tab token.
       rememberSession(auth, auth.identity.id, project?.id ?? null);
-      setIdentity(auth.identity);
       setMessage(auth.notice);
       if (project) {
         const opened = await openProject(
@@ -65,15 +73,20 @@ export const startCookieResume = (
         setSelected(project);
         setMessage([auth.notice, opened.warning].filter(Boolean).join(" "));
       }
+      if (check()) setIdentity(auth.identity);
     } catch (error) {
       if (!current()) return;
       disconnectDelivery();
       setAuthSession(null);
+      sessionRef.current = null;
+      setSelected(null);
+      setIssues([]);
       setRetryable(true);
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Could not verify sign-in. Retry; local work is preserved.",
+        (project ? `Could not open ${project.shortName}. ` : "") +
+          (error instanceof Error
+            ? error.message
+            : "Could not verify sign-in. Retry; local work is preserved."),
       );
     } finally {
       if (current()) setBusy(false);

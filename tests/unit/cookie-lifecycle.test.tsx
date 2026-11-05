@@ -84,7 +84,7 @@ test("current cookie resume releases busy on anonymous and expired replies witho
       stop = startCookieResume(f.options);
       await f.done;
       assert.deepEqual(f.busy, [true, false]);
-      assert.deepEqual(f.identities, []);
+      assert.deepEqual(f.identities, [null]);
       assert.equal(f.values.get("draft"), "Keep this draft");
       assert.equal(f.values.has(RESUME_KEY), true);
       if (expired) assert.match(f.messages.at(-1)!, /Invalid server sign-in/);
@@ -109,7 +109,7 @@ test("verified cookie resume removes only legacy auth record and preserves draft
     stop = startCookieResume(f.options);
     await f.done;
     assert.deepEqual(f.busy, [true, false]);
-    assert.equal(f.identities.length, 1);
+    assert.equal(f.identities.filter(Boolean).length, 1);
     assert.equal(f.values.has(RESUME_KEY), false);
     assert.equal(f.values.get("draft"), "Keep this draft");
   } finally {
@@ -137,7 +137,7 @@ test("cancelled cookie resume cannot expose a late identity or migrate local aut
       }),
     );
     await new Promise<void>((done) => setImmediate(done));
-    assert.deepEqual(f.identities, []);
+    assert.deepEqual(f.identities, [null]);
     assert.equal(f.options.sessionRef.current, null);
     assert.equal(f.values.has(RESUME_KEY), true);
     assert.equal(f.values.get("draft"), "Keep this draft");
@@ -243,10 +243,183 @@ test("cookie resume works when optional browser storage is unavailable", async (
     });
     await f.done;
     assert.deepEqual(opened, ["pmon"]);
-    assert.equal(f.identities.length, 1);
+    assert.equal(f.identities.filter(Boolean).length, 1);
     assert.equal(f.messages.at(-1), "");
   } finally {
     stop();
+    f.cleanup();
+  }
+});
+
+const projectSession = () =>
+  Response.json({
+    userId: "fixture",
+    projects: [
+      { id: "other", name: "Other", shortName: "OTHER" },
+      { id: "pmon", name: "PMON", shortName: "PMON" },
+    ],
+    csrf: "synthetic",
+    expiresAt: Date.now() / 1000 + 300,
+  });
+
+test("cookie resume publishes no identity or chooser while the preferred project is opening", async () => {
+  const f = fixture();
+  let stop = () => {},
+    release = () => {},
+    entered = () => {};
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const opening = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const selected: unknown[] = [];
+  try {
+    globalThis.fetch = async () => projectSession();
+    stop = startCookieResume(
+      {
+        ...f.options,
+        setSelected: (value) => {
+          selected.push(value);
+        },
+      },
+      async () => {
+        entered();
+        await pending;
+        return { items: [], warning: "" };
+      },
+    );
+    await opening;
+    assert.deepEqual(f.identities, [null]);
+    assert.deepEqual(selected, [null]);
+    assert.deepEqual(f.busy, [true]);
+    release();
+    await f.done;
+    assert.equal(f.identities.filter(Boolean).length, 1);
+    assert.deepEqual(selected.at(-1), {
+      id: "pmon",
+      name: "PMON",
+      shortName: "PMON",
+    });
+    assert.deepEqual(f.busy, [true, false]);
+  } finally {
+    release();
+    stop();
+    f.cleanup();
+  }
+});
+
+test("failed automatic PMON opening clears partial access and exposes retry without the chooser", async () => {
+  const f = fixture();
+  let stop = () => {},
+    retry = false;
+  try {
+    globalThis.fetch = async () => projectSession();
+    stop = startCookieResume(
+      {
+        ...f.options,
+        setRetryable: (value) => {
+          retry = value;
+        },
+      },
+      async () => {
+        throw Error("Synthetic project read failed");
+      },
+    );
+    await f.done;
+    assert.equal(retry, true);
+    assert.deepEqual(f.identities, [null]);
+    assert.equal(f.options.sessionRef.current, null);
+    assert.match(
+      f.messages.at(-1)!,
+      /^Could not open PMON\. Synthetic project read failed/,
+    );
+    assert.equal(f.values.get("draft"), "Keep this draft");
+    assert.equal(f.values.get("romdex-cookie-project-v1:fixture"), "pmon");
+    let finish = () => {};
+    const retried = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    stop();
+    stop = startCookieResume(
+      {
+        ...f.options,
+        setBusy: (value) => {
+          if (!value) finish();
+        },
+      },
+      async () => ({ items: [], warning: "" }),
+    );
+    await retried;
+    assert.equal(f.identities.filter(Boolean).length, 1);
+    assert.equal(f.values.get("draft"), "Keep this draft");
+  } finally {
+    stop();
+    f.cleanup();
+  }
+});
+
+test("expiry or a new account during project opening cannot publish stale workspace access", async () => {
+  for (const change of ["expiry", "account"] as const) {
+    const f = fixture(),
+      now = Date.now;
+    let stop = () => {};
+    try {
+      globalThis.fetch = async () => projectSession();
+      stop = startCookieResume(f.options, async () => {
+        if (change === "expiry") Date.now = () => now() + 301000;
+        else document.cookie = "__Host-romdex-generation=" + "b".repeat(43);
+        return { items: [], warning: "" };
+      });
+      await f.done;
+      assert.deepEqual(f.identities, [null]);
+      assert.equal(f.options.sessionRef.current, null);
+      assert.match(f.messages.at(-1)!, /^Could not open PMON\./);
+      assert.equal(f.values.get("draft"), "Keep this draft");
+    } finally {
+      Date.now = now;
+      stop();
+      f.cleanup();
+    }
+  }
+});
+
+test("cancelling a pending project open cannot publish its late identity or selection", async () => {
+  const f = fixture();
+  let release = () => {},
+    entered = () => {};
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const opening = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const selected: unknown[] = [];
+  try {
+    globalThis.fetch = async () => projectSession();
+    const stop = startCookieResume(
+      {
+        ...f.options,
+        setSelected: (value) => {
+          selected.push(value);
+        },
+      },
+      async () => {
+        entered();
+        await pending;
+        return { items: [], warning: "" };
+      },
+    );
+    await opening;
+    stop();
+    release();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.deepEqual(f.identities, [null]);
+    assert.deepEqual(selected, [null]);
+    assert.equal(f.options.sessionRef.current, null);
+    assert.deepEqual(f.busy, [true]);
+  } finally {
+    release();
     f.cleanup();
   }
 });
