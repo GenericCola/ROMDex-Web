@@ -174,3 +174,79 @@ test("logout local persistence failure preserves identity and never sends logout
     f.cleanup();
   }
 });
+
+test("cookie resume defaults to PMON and preserves an authorized account-specific choice", async () => {
+  for (const saved of [null, "other", "revoked"]) {
+    const f = fixture();
+    let stop = () => {};
+    const opened: string[] = [];
+    try {
+      if (saved) f.values.set("romdex-cookie-project-v1:fixture", saved);
+      f.values.set("romdex-cookie-project-v1:another-account", "other");
+      globalThis.fetch = async () =>
+        Response.json({
+          userId: "fixture",
+          projects: [
+            { id: "other", name: "Other", shortName: "OTHER" },
+            { id: "pmon", name: "PMON", shortName: "PMON" },
+          ],
+          csrf: "synthetic",
+          expiresAt: Date.now() / 1000 + 300,
+        });
+      stop = startCookieResume(
+        f.options,
+        async (_auth, _user, project, current) => {
+          assert.equal(current(), true);
+          opened.push(project.id);
+          return { items: [], warning: "" };
+        },
+      );
+      await f.done;
+      assert.deepEqual(opened, [saved === "other" ? "other" : "pmon"]);
+      assert.equal(f.values.get("draft"), "Keep this draft");
+    } finally {
+      stop();
+      f.cleanup();
+    }
+  }
+});
+
+test("cookie resume works when optional browser storage is unavailable", async () => {
+  const f = fixture();
+  let stop = () => {};
+  const opened: string[] = [];
+  try {
+    Object.defineProperty(window, "sessionStorage", {
+      get: () => {
+        throw Error("Storage denied");
+      },
+    });
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      get: () => {
+        throw Error("Storage denied");
+      },
+    });
+    globalThis.fetch = async () =>
+      Response.json({
+        userId: "fixture",
+        projects: [
+          { id: "other", name: "Other", shortName: "OTHER" },
+          { id: "pmon", name: "PMON", shortName: "PMON" },
+        ],
+        csrf: "synthetic",
+        expiresAt: Date.now() / 1000 + 300,
+      });
+    stop = startCookieResume(f.options, async (_auth, _user, project) => {
+      opened.push(project.id);
+      return { items: [], warning: "" };
+    });
+    await f.done;
+    assert.deepEqual(opened, ["pmon"]);
+    assert.equal(f.identities.length, 1);
+    assert.equal(f.messages.at(-1), "");
+  } finally {
+    stop();
+    f.cleanup();
+  }
+});

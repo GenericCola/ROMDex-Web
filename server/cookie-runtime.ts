@@ -8,6 +8,7 @@ import {
   type CookieEnvelope,
 } from "./cookie-codec.ts";
 import { begin, callback } from "./cookie-login.ts";
+import { renewalChallenge, renewSession } from "./cookie-renewal.ts";
 import { response, sameOrigin, validIdentity } from "./runtime-http.ts";
 import { HttpFailure, type OAuthPort } from "./runtime-types.ts";
 import { ORIGIN } from "./session-contract.ts";
@@ -16,7 +17,8 @@ export interface CookieDependencies {
   now(): number;
   entropy(): string;
   clientId: string;
-  oauth: Pick<OAuthPort, "exchange" | "verify">;
+  oauth: Pick<OAuthPort, "exchange" | "verify"> &
+    Partial<Pick<OAuthPort, "refresh">>;
   maxSeconds: number;
 }
 export const COOKIE_CALLBACK = ORIGIN + "/api/auth/callback";
@@ -36,12 +38,21 @@ export async function bound(
   const value = await openCookie(cookie, kind, deps.key, deps.now());
   if (!equal(value.fence, readCookie(request, FENCE) ?? ""))
     throw new HttpFailure(401);
+  if (value.clientId !== undefined && value.clientId !== deps.clientId)
+    throw new HttpFailure(401);
   return value;
 }
 async function session(request: Request, deps: CookieDependencies) {
   if (request.headers.get("sec-fetch-site") !== "same-origin")
     throw new HttpFailure(403);
-  const value = await bound(request, SESSION, "session", deps);
+  let value: CookieEnvelope;
+  try {
+    value = await bound(request, SESSION, "session", deps);
+  } catch (error) {
+    if (error instanceof HttpFailure && error.status === 401)
+      return renewalChallenge(request, deps);
+    throw error;
+  }
   const identity = await deps.oauth.verify(value.accessToken!);
   validIdentity(identity);
   if (
@@ -56,6 +67,15 @@ async function session(request: Request, deps: CookieDependencies) {
     projects: identity.projects,
     csrf: value.csrf,
     expiresAt: value.expiresAt,
+    ...(value.rememberDevice === true
+      ? {
+          rememberDeviceRequested: true,
+          remembered: value.renewUntil !== undefined,
+          ...(value.renewUntil !== undefined
+            ? { renewUntil: value.renewUntil }
+            : {}),
+        }
+      : {}),
   });
 }
 async function logout(
@@ -99,6 +119,8 @@ export function createCookieHandler(deps: CookieDependencies) {
         return await callback(request, deps);
       if (url.pathname === "/api/auth/session" && request.method === "GET")
         return await session(request, deps);
+      if (url.pathname === "/api/auth/renew" && request.method === "POST")
+        return await renewSession(request, deps);
       if (url.pathname === "/api/auth/logout" && request.method === "POST")
         return await logout(request, deps, false);
       if (url.pathname === "/api/auth/cancel" && request.method === "POST")

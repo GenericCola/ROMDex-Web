@@ -5,6 +5,7 @@ export const cookieSignIn = async (
   clearIdentity: () => void,
   setBusy: (value: boolean) => void,
   setMessage: (value: string) => void,
+  rememberDevice = false,
 ) => {
   setBusy(true);
   setMessage("");
@@ -12,7 +13,7 @@ export const cookieSignIn = async (
     await flushLocal();
     if (!isCurrent()) return;
     clearIdentity();
-    await startCookieLogin();
+    await startCookieLogin(rememberDevice);
   } catch (error) {
     if (isCurrent())
       setMessage(error instanceof Error ? error.message : "Sign-in failed.");

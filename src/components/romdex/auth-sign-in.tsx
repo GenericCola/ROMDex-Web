@@ -1,5 +1,5 @@
 import { isOAuthOrigin, OAUTH_ORIGIN } from "@/auth/oauth";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 const subscribe = () => {
   return () => {
     return undefined;
@@ -16,8 +16,9 @@ const AuthSignIn = ({
   signIn,
 }: {
   busy: boolean;
-  signIn: () => Promise<void>;
+  signIn: (rememberDevice?: boolean) => Promise<void>;
 }) => {
+  const [rememberDevice, setRememberDevice] = useState(false);
   const canonical = useSyncExternalStore(
     subscribe,
     canonicalOrigin,
@@ -36,12 +37,29 @@ const AuthSignIn = ({
       </>
     );
   const open = () => {
-    void signIn();
+    void signIn(rememberDevice);
   };
   return (
-    <button className="primary" disabled={busy} onClick={open}>
-      {busy ? "Signing in…" : "Sign in with YouTrack"}
-    </button>
+    <>
+      <label>
+        <input
+          type="checkbox"
+          checked={rememberDevice}
+          disabled={busy}
+          onChange={(event) => {
+            setRememberDevice(event.target.checked);
+          }}
+        />
+        Keep me signed in on this device (30 days)
+      </label>
+      <p>
+        Use this only on a device you trust. YouTrack may still ask you to sign
+        in again.
+      </p>
+      <button className="primary" disabled={busy} onClick={open}>
+        {busy ? "Signing in…" : "Sign in with YouTrack"}
+      </button>
+    </>
   );
 };
 export default AuthSignIn;

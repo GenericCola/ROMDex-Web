@@ -1,6 +1,50 @@
 import { HttpFailure, type Identity, type Tokens } from "./runtime-types.ts";
 import { boundedText } from "./transport-bounds.ts";
 const root = "https://thegobindsingh.youtrack.cloud";
+const readTokens = (
+  result: Record<string, unknown>,
+  rememberDevice: boolean,
+): Tokens => {
+  if (
+    typeof result.access_token !== "string" ||
+    !result.access_token ||
+    /[\r\n\0]/.test(result.access_token) ||
+    typeof result.expires_in !== "number" ||
+    !Number.isFinite(result.expires_in) ||
+    result.expires_in <= 0 ||
+    typeof result.token_type !== "string" ||
+    result.token_type.toLowerCase() !== "bearer"
+  )
+    throw new HttpFailure(502);
+  const tokens: Tokens = {
+    accessToken: result.access_token,
+    expiresIn: result.expires_in,
+  };
+  if (result.scope !== undefined) {
+    if (
+      typeof result.scope !== "string" ||
+      !result.scope.trim() ||
+      result.scope.length > 2048 ||
+      /[^\x20-\x7E]/.test(result.scope)
+    )
+      throw new HttpFailure(502);
+    tokens.scope = [...new Set(result.scope.trim().split(/ +/))]
+      .sort()
+      .join(" ");
+    // We request one resource only. Hub may return its opaque service ID instead of its alias.
+    if (tokens.scope.split(" ").length !== 1) throw new HttpFailure(502);
+  }
+  if (rememberDevice && result.refresh_token !== undefined) {
+    if (
+      typeof result.refresh_token !== "string" ||
+      !result.refresh_token ||
+      /[\r\n\0]/.test(result.refresh_token)
+    )
+      throw new HttpFailure(502);
+    tokens.refreshToken = result.refresh_token;
+  }
+  return tokens;
+};
 export const oauthUpstream = (
   clientId: string,
   fetcher: typeof fetch = fetch,
@@ -34,6 +78,7 @@ export const oauthUpstream = (
     code: string,
     verifier: string,
     callback: string,
+    rememberDevice = false,
   ): Promise<Tokens> => {
     if (
       callback !== "https://romdex.vercel.app/api/auth/callback" ||
@@ -56,18 +101,31 @@ export const oauthUpstream = (
         redirect_uri: callback,
       }),
     });
+    // Existing online sessions still discard unsolicited renewal authority.
+    return readTokens(result, rememberDevice);
+  };
+  const refresh = async (refreshToken: string): Promise<Tokens> => {
     if (
-      typeof result.access_token !== "string" ||
-      !result.access_token ||
-      typeof result.expires_in !== "number" ||
-      !Number.isFinite(result.expires_in) ||
-      result.expires_in <= 0 ||
-      typeof result.token_type !== "string" ||
-      result.token_type.toLowerCase() !== "bearer"
+      !refreshToken ||
+      refreshToken.length > 8192 ||
+      /[\r\n\0]/.test(refreshToken)
     )
-      throw new HttpFailure(502);
-    // Deliberately discard any refresh_token, even if an unexpected provider returns one.
-    return { accessToken: result.access_token, expiresIn: result.expires_in };
+      throw new HttpFailure(400);
+    return readTokens(
+      await json(root + "/hub/api/rest/oauth2/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          client_id: clientId,
+          refresh_token: refreshToken,
+        }),
+      }),
+      true,
+    );
   };
   const verify = async (accessToken: string): Promise<Identity> => {
     const headers = {
@@ -118,5 +176,5 @@ export const oauthUpstream = (
     }
     throw new HttpFailure(502);
   };
-  return { exchange, verify };
+  return { exchange, refresh, verify };
 };

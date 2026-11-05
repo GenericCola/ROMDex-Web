@@ -27,7 +27,7 @@ export const useAuthWorkspace = () => {
   const [message, setMessage] = useState("");
   const sessionRef = useRef<{ token: string; expiresAt: number } | null>(null);
   const generationRef = useRef(0);
-  const signIn = async () => {
+  const signIn = async (rememberDevice = false) => {
     if (recoveryBlocked || busy) return;
     setRetryable(false);
     const run = ++generationRef.current;
@@ -45,6 +45,7 @@ export const useAuthWorkspace = () => {
       },
       setBusy,
       setMessage,
+      rememberDevice,
     );
   };
   const closeProject = async () => {
@@ -114,7 +115,6 @@ export const useAuthWorkspace = () => {
     });
   };
   const session = { sessionRef, generationRef, setBusy, setMessage };
-  useSessionExpiry({ ...session, finishExpired });
   const resume = () => {
     return startCookieResume({
       sessionRef,
@@ -127,6 +127,7 @@ export const useAuthWorkspace = () => {
       setRetryable,
     });
   };
+  useSessionExpiry({ ...session, finishExpired, resume });
   useEffect(resume, []);
   return {
     retryable,

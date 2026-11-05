@@ -15,7 +15,11 @@ export const useSessionExpiry = ({
   setBusy,
   setMessage,
   finishExpired,
-}: SessionRefs & { finishExpired: () => Promise<void> }) => {
+  resume,
+}: SessionRefs & {
+  finishExpired: () => Promise<boolean>;
+  resume: () => unknown;
+}) => {
   const monitor = () => {
     const check = () => {
       if (!sessionRef.current) return;
@@ -27,7 +31,8 @@ export const useSessionExpiry = ({
         changed = true;
       }
       if (!changed && !expired(sessionRef.current.expiresAt)) return;
-      ++generationRef.current;
+      const canRenew = !changed && isCookieHandle(sessionRef.current.token);
+      const run = ++generationRef.current;
       disconnectDelivery();
       setAuthSession(null);
       sessionRef.current = null;
@@ -38,7 +43,9 @@ export const useSessionExpiry = ({
         // The persisted expiry is independently enforced before any resume.
         setMessage("Session expired. Browser storage could not be cleared.");
       }
-      void finishExpired();
+      void finishExpired().then((saved) => {
+        if (saved && canRenew && run === generationRef.current) resume();
+      });
     };
     const timer = window.setInterval(check, 1000);
     window.addEventListener("focus", check);
@@ -51,6 +58,7 @@ export const useSessionExpiry = ({
   };
   useEffect(monitor, [
     finishExpired,
+    resume,
     generationRef,
     sessionRef,
     setBusy,

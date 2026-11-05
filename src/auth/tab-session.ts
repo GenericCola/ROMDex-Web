@@ -15,7 +15,11 @@ export const rememberSession = (
 ) => {
   if (isCookieHandle(auth.token)) {
     saveCookieProject(userId, projectId);
-    clearResumeRecord(tabStorage());
+    try {
+      clearResumeRecord(tabStorage());
+    } catch {
+      // Legacy tab storage is optional for the verified HttpOnly session.
+    }
     return;
   }
   writeResumeRecord(tabStorage(), {

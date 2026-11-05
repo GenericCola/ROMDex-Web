@@ -92,6 +92,10 @@
       "destination": "/api"
     },
     {
+      "source": "/api/auth/renew",
+      "destination": "/api"
+    },
+    {
       "source": "/api/auth/logout",
       "destination": "/api"
     },

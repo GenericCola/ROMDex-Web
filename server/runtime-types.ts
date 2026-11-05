@@ -2,6 +2,7 @@ export interface Tokens {
   accessToken: string;
   expiresIn: number;
   refreshToken?: string;
+  scope?: string;
 }
 export interface Identity {
   id: string;
@@ -9,7 +10,12 @@ export interface Identity {
   projects: { id: string; name: string; shortName: string }[];
 }
 export interface OAuthPort {
-  exchange(code: string, verifier: string, callback: string): Promise<Tokens>;
+  exchange(
+    code: string,
+    verifier: string,
+    callback: string,
+    rememberDevice?: boolean,
+  ): Promise<Tokens>;
   refresh(refreshToken: string): Promise<Tokens>;
   verify(accessToken: string): Promise<Identity>;
 }

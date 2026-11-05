@@ -8,7 +8,7 @@ const AuthSignInSection = ({
   busy: boolean;
   retryable: boolean;
   retryResume: () => unknown;
-  signIn: () => Promise<void>;
+  signIn: (rememberDevice?: boolean) => Promise<void>;
 }) => {
   return (
     <>

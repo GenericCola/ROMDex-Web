@@ -1,4 +1,5 @@
 import { createGeneration } from "./cookie-generation";
+import { renewCookieSession } from "./cookie-renewal";
 import type { YouTrackIdentity } from "./identity";
 import { preserveRecoverySignIn } from "./recovery-mode";
 const prefix = "romdex-cookie:";
@@ -28,7 +29,14 @@ export const assertCookieHandle = (value: string) => {
   if (!isCookieHandle(value)) throw Error("Server sign-in required.");
   cookieGeneration().assertCurrent(value.slice(prefix.length));
 };
-export const cookieSession = async () => {
+export const cookieSession = async (
+  allowRenewal = true,
+): Promise<{
+  token: string;
+  expiresAt: number;
+  identity: YouTrackIdentity;
+  notice: string;
+} | null> => {
   const generation = cookieGeneration().current();
   if (!generation) return null;
   const response = await fetch("/api/auth/session", {
@@ -38,7 +46,46 @@ export const cookieSession = async () => {
     signal: AbortSignal.timeout(30000),
   });
   cookieGeneration().assertCurrent(generation);
-  if (response.status === 401) return null;
+  if (response.status === 401) {
+    if (!allowRenewal) return null;
+    const challenge = (await response.json().catch(() => null)) as {
+      renewable?: unknown;
+      csrf?: unknown;
+      renewalId?: unknown;
+      renewUntil?: unknown;
+    } | null;
+    cookieGeneration().assertCurrent(generation);
+    if (challenge?.renewable !== true) return null;
+    if (
+      typeof challenge.csrf !== "string" ||
+      !/^[A-Za-z0-9_-]{43}$/.test(challenge.csrf) ||
+      typeof challenge.renewalId !== "string" ||
+      !/^[A-Za-z0-9_-]{43}$/.test(challenge.renewalId) ||
+      typeof challenge.renewUntil !== "number" ||
+      !Number.isFinite(challenge.renewUntil) ||
+      challenge.renewUntil * 1000 <= Date.now()
+    )
+      throw Error("Invalid renewal response.");
+    await renewCookieSession(
+      generation,
+      {
+        csrf: challenge.csrf,
+        renewalId: challenge.renewalId,
+        renewUntil: challenge.renewUntil,
+      },
+      async () => {
+        return (await cookieSession(false)) !== null;
+      },
+      () => cookieGeneration().assertCurrent(generation),
+    );
+    cookieGeneration().assertCurrent(generation);
+    const renewed = await cookieSession(false);
+    if (!renewed)
+      throw Error(
+        "Sign in again to renew this session. Local work is preserved.",
+      );
+    return renewed;
+  }
   if (!response.ok)
     throw Error("Could not verify sign-in. Retry; local work is preserved.");
   const value = (await response.json()) as {
@@ -46,6 +93,8 @@ export const cookieSession = async () => {
     projects?: unknown;
     csrf?: unknown;
     expiresAt?: unknown;
+    rememberDeviceRequested?: unknown;
+    remembered?: unknown;
   };
   cookieGeneration().assertCurrent(generation);
   if (
@@ -75,13 +124,19 @@ export const cookieSession = async () => {
     token: prefix + generation,
     expiresAt: value.expiresAt * 1000,
     identity: { id: value.userId, name: value.userId, projects },
+    notice:
+      value.rememberDeviceRequested === true && value.remembered === false
+        ? "YouTrack did not allow this device to stay signed in. This session will expire normally."
+        : "",
   };
 };
-export const startCookieLogin = async () => {
+export const startCookieLogin = async (rememberDevice = false) => {
   preserveRecoverySignIn();
   const generation = cookieGeneration().rotate();
   const response = await fetch("/api/auth/start", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rememberDevice }),
     credentials: "same-origin",
     cache: "no-store",
     redirect: "error",

@@ -11,11 +11,13 @@ export const finishExpiredSession = async (
     setRecoveryBlocked(false);
     clearView();
     setMessage("Session expired. Sign in again; local work is preserved.");
+    return true;
   } catch {
     setRecoveryBlocked(true);
     setMessage(
       "Export recovery or retry saving. Account switching stays blocked.",
     );
+    return false;
   } finally {
     setBusy(false);
   }

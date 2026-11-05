@@ -4,8 +4,10 @@ import { ORIGIN } from "./session-contract.ts";
 export const SESSION = "__Host-romdex-access";
 export const LOGIN = "__Host-romdex-pkce";
 export const FENCE = "__Host-romdex-generation";
+export const RENEWAL = "__Host-romdex-renewal";
+export const REMEMBER_SECONDS = 30 * 86400;
 export interface CookieEnvelope {
-  kind: "session" | "login";
+  kind: "session" | "login" | "renewal";
   fence: string;
   csrf: string;
   expiresAt: number;
@@ -13,6 +15,15 @@ export interface CookieEnvelope {
   userId?: string;
   state?: string;
   verifier?: string;
+  rememberDevice?: boolean;
+  clientId?: string;
+  refreshToken?: string;
+  sessionId?: string;
+  renewalId?: string;
+  issuedAt?: number;
+  accessExpiresAt?: number;
+  scope?: string;
+  renewUntil?: number;
 }
 export function readCookie(request: Request, name: string): string | null {
   const values = (request.headers.get("cookie") ?? "")
@@ -74,8 +85,50 @@ export async function openCookie(
     )
       throw new Error("invalid");
     if (
+      kind === "session" &&
+      payload.renewUntil !== undefined &&
+      (payload.rememberDevice !== true ||
+        typeof payload.renewUntil !== "number" ||
+        !Number.isSafeInteger(payload.renewUntil) ||
+        typeof payload.issuedAt !== "number" ||
+        !Number.isSafeInteger(payload.issuedAt) ||
+        payload.renewUntil > payload.issuedAt + REMEMBER_SECONDS ||
+        payload.expiresAt > payload.renewUntil)
+    )
+      throw new Error("invalid");
+    if (
       kind === "login" &&
-      [payload.state, payload.verifier].some((v) => typeof v !== "string" || !v)
+      ([payload.state, payload.verifier].some(
+        (v) => typeof v !== "string" || !v,
+      ) ||
+        (payload.rememberDevice !== undefined &&
+          typeof payload.rememberDevice !== "boolean"))
+    )
+      throw new Error("invalid");
+    if (
+      kind === "renewal" &&
+      ([
+        payload.refreshToken,
+        payload.userId,
+        payload.clientId,
+        payload.scope,
+      ].some((v) => typeof v !== "string" || !v) ||
+        [
+          payload.sessionId,
+          payload.renewalId,
+          payload.fence,
+          payload.csrf,
+        ].some(
+          (v) => typeof v !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(v),
+        ) ||
+        typeof payload.issuedAt !== "number" ||
+        !Number.isSafeInteger(payload.issuedAt) ||
+        payload.issuedAt > now ||
+        payload.expiresAt > payload.issuedAt + REMEMBER_SECONDS ||
+        typeof payload.accessExpiresAt !== "number" ||
+        !Number.isSafeInteger(payload.accessExpiresAt) ||
+        payload.accessExpiresAt > payload.expiresAt ||
+        payload.accessExpiresAt <= payload.issuedAt)
     )
       throw new Error("invalid");
     return payload as unknown as CookieEnvelope;

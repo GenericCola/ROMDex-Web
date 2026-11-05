@@ -53,10 +53,18 @@ export const validTokens = (value: import("./runtime-types.ts").Tokens) => {
   if (
     typeof value.accessToken !== "string" ||
     !value.accessToken ||
+    /[\r\n\0]/.test(value.accessToken) ||
     !Number.isFinite(value.expiresIn) ||
     value.expiresIn <= 0 ||
     (value.refreshToken !== undefined &&
-      (typeof value.refreshToken !== "string" || value.refreshToken === ""))
+      (typeof value.refreshToken !== "string" ||
+        value.refreshToken === "" ||
+        /[\r\n\0]/.test(value.refreshToken))) ||
+    (value.scope !== undefined &&
+      (typeof value.scope !== "string" ||
+        !value.scope ||
+        value.scope.length > 2048 ||
+        /[^\x20-\x7E]/.test(value.scope)))
   )
     throw new HttpFailure(502);
 };

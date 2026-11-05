@@ -1,3 +1,4 @@
+import type { YouTrackIdentity } from "./identity";
 const key = "romdex-cookie-project-v1:";
 export const savedCookieProject = (userId: string) => {
   try {
@@ -23,4 +24,17 @@ export const cookieResumeWanted = (value?: boolean) => {
   } catch {
     return false;
   }
+};
+
+export const preferredCookieProject = (identity: YouTrackIdentity) => {
+  const saved = savedCookieProject(identity.id);
+  return (
+    identity.projects.find((project) => {
+      return project.id === saved;
+    }) ??
+    identity.projects.find((project) => {
+      return project.shortName === "PMON";
+    }) ??
+    (identity.projects.length === 1 ? identity.projects[0] : undefined)
+  );
 };
