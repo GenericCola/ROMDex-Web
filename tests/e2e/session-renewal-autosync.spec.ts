@@ -53,12 +53,12 @@ for (const status of ["attempting", "uncertain"] as const)
       const f = await durableCookieFixture(page);
       await f.login();
       const held = item("PMON-900001"),
-        ready = item("PMON-900002");
+        eligible = item("PMON-900002");
       const data: WorkspaceData = {
         schemaVersion: 1,
         newTask: null,
         titleDrafts: {},
-        remote: [held, ready],
+        remote: [held, eligible],
         operations: [
           {
             opId: "held-comment",
@@ -68,11 +68,11 @@ for (const status of ["attempting", "uncertain"] as const)
             created: 1,
           },
           {
-            opId: "ready-edit",
+            opId: "eligible-edit",
             type: "edit",
-            issueId: ready.id,
-            base: ready,
-            patch: { description: "Ready independent work" },
+            issueId: eligible.id,
+            base: eligible,
+            patch: { description: "Eligible independent work" },
           },
         ],
         cloud: {
@@ -84,7 +84,9 @@ for (const status of ["attempting", "uncertain"] as const)
               targetId: held.id,
               message: "Synthetic interrupted delivery",
             },
-            "ready-edit": { status: "ready", message: "Ready" },
+            // Ordinary unsent work has no delivery record. A status="ready"
+            // record means an explicit review choice awaiting manual consent;
+            // the real scheduler intentionally never sends that automatically.
           },
         },
         order: {},
@@ -128,7 +130,7 @@ for (const status of ["attempting", "uncertain"] as const)
         },
         { key, serialized: JSON.stringify(data) },
       );
-      const raw = [held, ready].map((task) => ({
+      const raw = [held, eligible].map((task) => ({
         id: task.id,
         idReadable: task.id,
         summary: task.summary,
@@ -210,7 +212,9 @@ for (const status of ["attempting", "uncertain"] as const)
       });
       expect(stored.operations).toContainEqual(data.operations[0]);
       expect(
-        stored.operations.some((operation) => operation.opId === "ready-edit"),
+        stored.operations.some(
+          (operation) => operation.opId === "eligible-edit",
+        ),
       ).toBe(!autoSync);
       expect(writes).toEqual(autoSync ? ["/api/issues/PMON-900002"] : []);
       await page.reload();
