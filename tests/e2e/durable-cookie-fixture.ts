@@ -1,6 +1,12 @@
 import { expect, type Page } from "@playwright/test";
 import { randomBytes } from "node:crypto";
-import { FENCE, openCookie, RENEWAL, SESSION } from "../../server/cookie-codec";
+import {
+  FENCE,
+  LOGIN,
+  openCookie,
+  RENEWAL,
+  SESSION,
+} from "../../server/cookie-codec";
 import {
   createCookieHandler,
   type CookieDependencies,
@@ -12,7 +18,10 @@ import { APP, installCookieFixture } from "./cookie-fixture";
 // adapter synthesizes ONLY missing Sec-Fetch-Site after checking the caller frame
 // and browser Origin. Cookie requests, Set-Cookie acceptance and response ordering
 // remain real browser behavior; production Fetch Metadata enforcement is covered
-// by server unit tests, not claimed as browser evidence from this adapter.
+// by server unit tests. Playwright does not route later HTTP redirect requests.
+// The adapter asserts the handler's exact callback 303/Location, then replaces
+// that redirect with a fresh test-only document navigation (or a fetch reply).
+// Native HTTP redirect following is not claimed by this isolated harness.
 export async function durableCookieFixture(
   page: Page,
   options: { preserveGeneration?: boolean } = {},
@@ -50,6 +59,14 @@ export async function durableCookieFixture(
     },
   };
   const handle = createCookieHandler(deps);
+  const callbacks: {
+    status: number;
+    navigation: boolean;
+    providerReturn: boolean;
+    hasFence: boolean;
+    hasLogin: boolean;
+    expectedRedirect: boolean;
+  }[] = [];
   let rejectCookie: string | undefined;
   await page.route(APP + "/__cookie-harness", (route) =>
     route.fulfill({
@@ -60,21 +77,39 @@ export async function durableCookieFixture(
   await page.route(APP + "/api/auth/**", async (route) => {
     const request = route.request();
     const browserHeaders = await request.allHeaders();
-    // Fail closed before bridging requests from another/opaque frame. Never
-    // replace Origin, Cookie, CSRF, or an explicitly supplied Fetch Metadata value.
-    expect(
-      new URL(request.frame().url()).origin,
-      "Synthetic caller frame origin",
-    ).toBe(APP);
+    // A controlled synthetic provider document may return only to the main-frame
+    // GET callback. All other callers must still have the exact app origin.
+    const source = new URL(request.frame().url());
+    const callback = new URL(request.url()).pathname === "/api/auth/callback";
+    const providerReturn = source.origin !== APP;
+    if (providerReturn) {
+      expect(
+        callback && request.isNavigationRequest() && request.method() === "GET",
+        "Only a top-level provider callback may be cross-origin",
+      ).toBe(true);
+      expect(request.frame() === page.mainFrame()).toBe(true);
+      expect(source.origin).toBe("https://thegobindsingh.youtrack.cloud");
+      expect(source.pathname).toBe("/hub/api/rest/oauth2/auth");
+      expect(source.searchParams.get("client_id")).toBe("synthetic-client");
+      expect(source.searchParams.get("redirect_uri")).toBe(
+        APP + "/api/auth/callback",
+      );
+      expect(new URL(request.url()).searchParams.get("code")).toBe("synthetic");
+    } else expect(source.origin, "Synthetic caller frame origin").toBe(APP);
+    // Never replace Origin, Cookie, CSRF, or supplied Fetch Metadata values.
     expect(new URL(request.url()).origin, "Synthetic request destination").toBe(
       APP,
     );
     if (request.method() === "POST" || browserHeaders.origin !== undefined)
-      expect(browserHeaders.origin, "Real browser Origin").toBe(APP);
+      expect(browserHeaders.origin, "Real browser Origin").toBe(
+        providerReturn ? source.origin : APP,
+      );
     const handlerHeaders = { ...browserHeaders };
     if (browserHeaders["sec-fetch-site"] === undefined) {
       expect(Object.hasOwn(browserHeaders, "sec-fetch-site")).toBe(false);
-      handlerHeaders["sec-fetch-site"] = "same-origin";
+      handlerHeaders["sec-fetch-site"] = providerReturn
+        ? "cross-site"
+        : "same-origin";
     }
     // Boolean assertion avoids printing cookie values even on a fixture failure.
     expect(
@@ -88,6 +123,30 @@ export async function durableCookieFixture(
         ...(request.postData() ? { body: request.postData()! } : {}),
       }),
     );
+    if (callback) {
+      const names = (browserHeaders.cookie ?? "")
+        .split(";")
+        .map((cookie) => cookie.trim().split("=")[0]);
+      const diagnostic = {
+        status: response.status,
+        navigation: request.isNavigationRequest(),
+        providerReturn,
+        hasFence: names.includes(FENCE),
+        hasLogin: names.includes(LOGIN),
+        expectedRedirect:
+          response.headers.get("location") === APP + "/?auth=complete",
+      };
+      callbacks.push(diagnostic);
+      expect(
+        diagnostic,
+        "Synthetic callback status and browser cookie delivery",
+      ).toMatchObject({
+        status: 303,
+        hasFence: true,
+        hasLogin: true,
+        expectedRedirect: true,
+      });
+    }
     const cookies = response.headers
       .getSetCookie()
       .map((cookie) =>
@@ -96,13 +155,26 @@ export async function durableCookieFixture(
           : cookie,
       );
     const headers = Object.fromEntries(
-      [...response.headers].filter(([key]) => key !== "set-cookie"),
+      [...response.headers].filter(
+        ([key]) => key !== "set-cookie" && !(callback && key === "location"),
+      ),
     );
     if (cookies.length) headers["set-cookie"] = cookies.join("\n");
     await route.fulfill({
-      status: response.status,
-      headers,
-      body: await response.text(),
+      status: callback ? 200 : response.status,
+      headers: callback
+        ? {
+            ...headers,
+            "content-type": request.isNavigationRequest()
+              ? "text/html"
+              : "application/json",
+          }
+        : headers,
+      body: callback
+        ? request.isNavigationRequest()
+          ? '<!doctype html><title>Synthetic callback return</title><script>location.replace("/?auth=complete")</script>'
+          : JSON.stringify({ callbackComplete: true })
+        : await response.text(),
     });
   });
   await page.goto(APP + "/__cookie-harness");
@@ -138,7 +210,8 @@ export async function durableCookieFixture(
     const state = new URL(start.body.authorizationUrl).searchParams.get(
       "state",
     );
-    // Fetch follows the actual callback redirect but remains inside the synthetic routes.
+    // The adapter validates the callback's redirect and stores the real cookies,
+    // without letting a redirect escape Playwright routing to the live origin.
     await page.evaluate(async (state) => {
       await fetch("/api/auth/callback?state=" + state + "&code=synthetic");
     }, state);
@@ -157,6 +230,7 @@ export async function durableCookieFixture(
     );
   return {
     deps,
+    callbacks,
     call,
     login,
     cookie,

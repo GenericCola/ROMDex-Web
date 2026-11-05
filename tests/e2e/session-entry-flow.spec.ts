@@ -133,55 +133,83 @@ test("actual synthetic callback navigation opens PMON and signed-in opt-in requi
       expect(url.searchParams.get("state")).toMatch(/^[A-Za-z0-9_-]{43}$/);
       expect(url.searchParams.get("code_challenge_method")).toBe("S256");
       accessTypes.push(url.searchParams.get("access_type")!);
+      const callback =
+        APP +
+        "/api/auth/callback?code=synthetic&state=" +
+        url.searchParams.get("state");
+      // A fresh navigation is routed; an HTTP redirect could bypass the fixture.
       return route.fulfill({
-        status: 302,
-        headers: {
-          location:
-            APP +
-            "/api/auth/callback?code=synthetic&state=" +
-            url.searchParams.get("state"),
-        },
+        contentType: "text/html",
+        body:
+          "<!doctype html><title>Synthetic YouTrack sign-in</title><script>location.replace(" +
+          JSON.stringify(callback) +
+          ")</script>",
       });
     },
   );
-  await page.goto(APP);
-  await expect(remember(page)).toBeVisible();
-  await expect(remember(page)).not.toBeChecked();
-  expect(requests).toEqual([]);
-  await page
-    .getByRole("button", { name: "Sign in with YouTrack", exact: true })
-    .click();
-  await expect(page).toHaveURL(APP + "/?auth=complete");
-  await expect(pmon(page)).toBeVisible();
-  await noChooser(page);
-  expect(requests).toEqual([{ rememberDevice: false }]);
-  expect(accessTypes).toEqual(["online"]);
-  expect(await f.cookie(RENEWAL)).toBeUndefined();
+  try {
+    await page.goto(APP);
+    await expect(remember(page)).toBeVisible();
+    await expect(remember(page)).not.toBeChecked();
+    expect(requests).toEqual([]);
+    await page
+      .getByRole("button", { name: "Sign in with YouTrack", exact: true })
+      .click();
+    await expect(page).toHaveURL(APP + "/?auth=complete");
+    await expect(pmon(page)).toBeVisible();
+    await noChooser(page);
+    expect(requests).toEqual([{ rememberDevice: false }]);
+    expect(accessTypes).toEqual(["online"]);
+    expect(await f.cookie(RENEWAL)).toBeUndefined();
 
-  await page.getByRole("button", { name: /^Connection Details/ }).click();
-  await page.getByText("Keep this device signed in", { exact: true }).click();
-  await expect(remember(page)).not.toBeChecked();
-  await remember(page).check();
-  expect(requests).toEqual([{ rememberDevice: false }]);
-  expect(await f.cookie(RENEWAL)).toBeUndefined();
-  const returned = page.waitForEvent("framenavigated", {
-    predicate: (frame) =>
-      frame === page.mainFrame() && frame.url() === APP + "/?auth=complete",
-  });
-  await page
-    .getByRole("button", { name: "Sign in again with YouTrack", exact: true })
-    .click();
-  await returned;
-  await expect(pmon(page)).toBeVisible();
-  await expect
-    .poll(() => requests)
-    .toEqual([{ rememberDevice: false }, { rememberDevice: true }]);
-  await expect.poll(() => accessTypes).toEqual(["online", "offline"]);
-  await expect.poll(async () => Boolean(await f.cookie(RENEWAL))).toBe(true);
-  await expect(page).toHaveURL(APP + "/?auth=complete");
-  await expect(pmon(page)).toBeVisible();
-  await noChooser(page);
-  await page.reload();
-  await expect(pmon(page)).toBeVisible();
-  expect(requests).toHaveLength(2);
+    await page.getByRole("button", { name: /^Connection Details/ }).click();
+    await page.getByText("Keep this device signed in", { exact: true }).click();
+    await expect(remember(page)).not.toBeChecked();
+    await remember(page).check();
+    expect(requests).toEqual([{ rememberDevice: false }]);
+    expect(await f.cookie(RENEWAL)).toBeUndefined();
+    const returned = page.waitForEvent("framenavigated", {
+      predicate: (frame) =>
+        frame === page.mainFrame() && frame.url() === APP + "/?auth=complete",
+    });
+    await page
+      .getByRole("button", { name: "Sign in again with YouTrack", exact: true })
+      .click();
+    await returned;
+    await expect(pmon(page)).toBeVisible();
+    await expect
+      .poll(() => requests)
+      .toEqual([{ rememberDevice: false }, { rememberDevice: true }]);
+    await expect.poll(() => accessTypes).toEqual(["online", "offline"]);
+    await expect.poll(async () => Boolean(await f.cookie(RENEWAL))).toBe(true);
+    await expect(page).toHaveURL(APP + "/?auth=complete");
+    await expect(pmon(page)).toBeVisible();
+    await noChooser(page);
+    await page.reload();
+    await expect(pmon(page)).toBeVisible();
+    expect(requests).toHaveLength(2);
+    expect(f.callbacks).toEqual([
+      {
+        status: 303,
+        navigation: true,
+        providerReturn: true,
+        hasFence: true,
+        hasLogin: true,
+        expectedRedirect: true,
+      },
+      {
+        status: 303,
+        navigation: true,
+        providerReturn: true,
+        hasFence: true,
+        hasLogin: true,
+        expectedRedirect: true,
+      },
+    ]);
+  } finally {
+    console.log(
+      "ROMDEX_SYNTHETIC_CALLBACK_DIAGNOSTICS",
+      JSON.stringify(f.callbacks),
+    );
+  }
 });
