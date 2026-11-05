@@ -325,3 +325,51 @@ test("server sign-in validates every selected file against 4 MB before staging a
   ).toHaveCount(0);
   expect(f.posts()).toBe(0);
 });
+for (const status of [401, 403])
+  test(`post-dispatch HTTP ${status} preserves the upload and accurately reports connection state`, async ({
+    page,
+  }) => {
+    const f = await fixture(page);
+    await page
+      .getByRole("switch", { name: "Auto-Sync Data", exact: true })
+      .click();
+    await f.stage(["one.txt"]);
+    let attempts = 0;
+    await page.route("**/api/youtrack?*", async (route) => {
+      const url = new URL(route.request().url());
+      if (
+        route.request().method() === "POST" &&
+        url.searchParams.get("route")?.includes("/attachments?")
+      ) {
+        attempts++;
+        await route.fulfill({ status, json: { error: "synthetic refusal" } });
+        return;
+      }
+      await route.fallback();
+    });
+    await page.getByRole("button", { name: /^Save Changes/ }).click();
+    await expect(
+      page.getByRole("button", { name: "Review saved changes", exact: true }),
+    ).toBeVisible();
+    await expect.poll(() => attempts).toBe(1);
+    if (status === 401) {
+      await expect(
+        page
+          .getByRole("status")
+          .filter({ hasText: "Sign in with YouTrack again" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", {
+          name: /^Auto-Sync Data. Delivery disconnected/,
+        }),
+      ).toBeVisible();
+    } else
+      await expect(
+        page.getByRole("switch", { name: "Auto-Sync Data", exact: true }),
+      ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Cancel Upload", exact: true }),
+    ).toHaveCount(1);
+    await page.getByRole("button", { name: /^Save Changes/ }).click();
+    expect(attempts).toBe(1);
+  });
