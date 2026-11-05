@@ -22,5 +22,5 @@ run("corepack", ["pnpm", "build"]);
 run("corepack", ["pnpm", "check"]);
 run("dnf", ["install", "-y", "nss", "atk", "at-spi2-atk", "cups-libs", "libdrm", "libXcomposite", "libXdamage", "libXext", "libXfixes", "libXrandr", "libxkbcommon", "pango", "alsa-lib", "mesa-libgbm"]);
 run("node", ["scripts/playwright.mjs", "install", "chromium", "--only-shell"]);
-run("node", ["scripts/playwright.mjs", "test", "--project=chromium", "--project=mobile-chromium", "tests/e2e/session-resume.spec.ts", "tests/e2e/session-cookie-ordering.spec.ts", "tests/e2e/session-renewal-autosync.spec.ts", "--reporter=line"], 600000);
+run("node", ["scripts/playwright.mjs", "test", "--project=chromium", "--project=mobile-chromium", "tests/e2e/session-resume.spec.ts", "tests/e2e/session-browser-restart.spec.ts", "tests/e2e/session-cookie-ordering.spec.ts", "tests/e2e/session-renewal-autosync.spec.ts", "--reporter=line"], 600000);
 console.log("ROMDEX_SYNTHETIC_SESSION_QA_COMPLETE");
