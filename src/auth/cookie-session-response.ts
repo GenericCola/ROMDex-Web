@@ -1,5 +1,12 @@
 import type { YouTrackIdentity } from "./identity";
 
+export interface CookieSession {
+  token: string;
+  expiresAt: number;
+  identity: YouTrackIdentity;
+  notice: string;
+}
+
 export const parseCookieSession = (input: unknown) => {
   const value = input as {
     userId?: unknown;

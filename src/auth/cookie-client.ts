@@ -1,7 +1,9 @@
 import { createGeneration } from "./cookie-generation";
-import { renewCookieSession } from "./cookie-renewal";
-import { parseCookieSession } from "./cookie-session-response";
-import type { YouTrackIdentity } from "./identity";
+import { parseRenewalChallenge, renewCookieSession } from "./cookie-renewal";
+import {
+  type CookieSession,
+  parseCookieSession,
+} from "./cookie-session-response";
 import { preserveRecoverySignIn } from "./recovery-mode";
 const prefix = "romdex-cookie:";
 let csrf = "";
@@ -32,12 +34,7 @@ export const assertCookieHandle = (value: string) => {
 };
 export const cookieSession = async (
   allowRenewal = true,
-): Promise<{
-  token: string;
-  expiresAt: number;
-  identity: YouTrackIdentity;
-  notice: string;
-} | null> => {
+): Promise<CookieSession | null> => {
   const generation = cookieGeneration().current();
   if (!generation) return null;
   const response = await fetch("/api/auth/session", {
@@ -49,31 +46,13 @@ export const cookieSession = async (
   cookieGeneration().assertCurrent(generation);
   if (response.status === 401) {
     if (!allowRenewal) return null;
-    const challenge = (await response.json().catch(() => null)) as {
-      renewable?: unknown;
-      csrf?: unknown;
-      renewalId?: unknown;
-      renewUntil?: unknown;
-    } | null;
+    const value: unknown = await response.json().catch(() => null);
     cookieGeneration().assertCurrent(generation);
-    if (challenge?.renewable !== true) return null;
-    if (
-      typeof challenge.csrf !== "string" ||
-      !/^[A-Za-z0-9_-]{43}$/.test(challenge.csrf) ||
-      typeof challenge.renewalId !== "string" ||
-      !/^[A-Za-z0-9_-]{43}$/.test(challenge.renewalId) ||
-      typeof challenge.renewUntil !== "number" ||
-      !Number.isFinite(challenge.renewUntil) ||
-      challenge.renewUntil * 1000 <= Date.now()
-    )
-      throw Error("Invalid renewal response.");
+    const challenge = parseRenewalChallenge(value);
+    if (!challenge) return null;
     await renewCookieSession(
       generation,
-      {
-        csrf: challenge.csrf,
-        renewalId: challenge.renewalId,
-        renewUntil: challenge.renewUntil,
-      },
+      challenge,
       async () => {
         return (await cookieSession(false)) !== null;
       },
