@@ -1,8 +1,8 @@
 # Session resume candidate, November 5
 
-This cloud-only candidate is prepared for a nonproduction preview. It changes no
-live grants, credentials, account settings or YouTrack data. Production remains
-unchanged; browser acceptance gates must pass before release.
+This change was developed and verified in an isolated cloud workspace and the
+existing Vercel preview workflow. No live grant, credential, account setting or
+YouTrack data was changed during development. Release evidence is recorded below.
 
 ## Opening the project
 
@@ -25,7 +25,8 @@ A new, initially unchecked choice reads “Keep me signed in on this device
 (30 days).” Only a new sign-in with that choice requests offline OAuth access,
 using the existing public client, PKCE and YouTrack scope. Existing online
 sessions retain their original expiry and do not acquire refresh authority.
-Production enablement and creation of a real grant require separate approval.
+Creating a real persistent grant requires the user to select this option and
+complete the provider sign-in. The assistant does not create a grant for them.
 If YouTrack omits the requested refresh token, sign-in remains access-only and
 a notice explains that it will expire normally.
 
@@ -63,7 +64,8 @@ account-generation change cannot trigger renewal of the previous account.
 This is bounded, best-effort persistence, not a guarantee of uninterrupted
 sign-in. Provider revocation, a lost rotation response, unavailable browser APIs
 or concurrent server requests can still require sign-in. Renewal itself does not replay mutations. Reconnecting delivery can resume
-previously enabled autosync for eligible ready operations. Existing delivery guards
+previously enabled autosync for ordinary eligible unsent operations. A delivery
+record marked ready after review still requires the existing manual consent. Existing delivery guards
 continue to block operations marked attempting or uncertain. Failed renewal
 requests never clear or rewrite cookies.
 
@@ -81,27 +83,45 @@ of an already-dispatched mutation. No upstream revocation API is used.
 
 ## Verification
 
-The safe project/storage baseline passed 653 unit tests and 29 server tests.
-Source, test and server typechecks passed. The final extended candidate passed 663 unit tests, 47 server tests, and 30
-worker/build/hosting/native-script tests. Source, test and server typechecks
-passed. Source formatting passed. Independent source review found no demonstrated
-credential leak, cross-account bypass or deadline extension. The Vercel rewrite
-for renewal is covered by the hosting allowlist test. Detailed commands and
-remaining gates are in the accompanying verification report.
+The normal production build passes in the existing Vercel preview environment,
+including lint, TypeScript, Turbopack compilation and the 87-asset PWA export.
+The full aggregate check passes: 671 unit tests, 47 server tests and 30
+worker/build/hosting/native-script tests, plus source, test and server typechecks.
+No lint, security, package-version or hosting checks were weakened.
 
-Standard check/build attempts hit cloud memory limits at ESLint or the Next
-TypeScript child. A split Next compile/generate plus PWA export succeeded to
-prepare synthetic browser assets, but is not reported as a standard build pass.
-Fifteen browser cases cover reopen, PMON default, explicit switching, account
-isolation, storage failure, expiry, opt-in, renewal and lost-response reload.
-Additional cases route real encrypted Set-Cookie responses through the actual
-auth handler to test late different-account responses, reversed concurrent
-renewals, rejection of one cookie, and attempting/uncertain persisted queue
-records with autosync off/on. These are discovered, not executed.
-Browser execution is currently blocked before app execution: the pinned binary
-is absent, its official download failed, and system Chromium's Unix socket is
-not permitted by this cloud sandbox. No real YouTrack calls are used in tests.
+Independent security review approved the final runtime. All 509 runtime/server/
+API/configuration Git blobs matched the reviewed local source and published
+candidate. The renewal rewrite is included in the hosting allowlist test.
+
+Actual Chromium desktop/mobile runs pass all 32 targeted session cases. Firefox
+passes 15, with one intentional Chromium-only browser-restart skip. They
+include a real browser-process close/restart with persisted encrypted cookies,
+automatic PMON selection, account isolation, optional storage failure, explicit
+opt-in, fixed expiry, lost-response no-replay, late different-account response,
+reverse renewal responses, and one-cookie rejection. With autosync off and on,
+attempting and uncertain work survives renewal and reload without replay, while
+an ordinary independent eligible edit sends once only when autosync was already
+enabled. Review-ready work is not treated as an ordinary automatic edit.
+
+The cookie tests use the actual server handler, encrypted Set-Cookie responses
+and browser cookie storage with synthetic OAuth. Playwright omits Fetch Metadata
+in intercepted requests, so the test adapter verifies the frame origin and real
+POST Origin, and fills only an absent Sec-Fetch-Site header. Production metadata
+checks are unchanged and separately server-tested. No actual YouTrack requests,
+OAuth grants, production queues or user computer are used in this acceptance run.
+
+The QA-only runner uses an environment allowlist for child build/test processes,
+restores normal configuration before checks, and is never a release candidate.
+The Vercel platform still manages its install/runtime environment. No new paid
+service, sandbox, billing change or security setting was introduced. Earlier
+local build/browser restrictions were resolved through the existing preview
+workflow rather than by weakening checks.
+
+The complete historical browser suite and live provider/device acceptance are
+not claimed by this targeted verification. Older fixtures still assume removed
+permanent-token controls. Safari/iPhone execution is not covered here.
 
 References checked November 5, 2026:
+
 - https://www.jetbrains.com/help/hub/authorization-code.html
 - https://www.jetbrains.com/help/hub/refresh-token.html
