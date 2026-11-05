@@ -1,5 +1,6 @@
 import { createGeneration } from "./cookie-generation";
 import { renewCookieSession } from "./cookie-renewal";
+import { parseCookieSession } from "./cookie-session-response";
 import type { YouTrackIdentity } from "./identity";
 import { preserveRecoverySignIn } from "./recovery-mode";
 const prefix = "romdex-cookie:";
@@ -88,47 +89,11 @@ export const cookieSession = async (
   }
   if (!response.ok)
     throw Error("Could not verify sign-in. Retry; local work is preserved.");
-  const value = (await response.json()) as {
-    userId?: unknown;
-    projects?: unknown;
-    csrf?: unknown;
-    expiresAt?: unknown;
-    rememberDeviceRequested?: unknown;
-    remembered?: unknown;
-  };
+  const value: unknown = await response.json();
   cookieGeneration().assertCurrent(generation);
-  if (
-    typeof value.userId !== "string" ||
-    !value.userId ||
-    !Array.isArray(value.projects) ||
-    typeof value.csrf !== "string" ||
-    typeof value.expiresAt !== "number" ||
-    !Number.isFinite(value.expiresAt) ||
-    value.expiresAt * 1000 <= Date.now()
-  )
-    throw Error("Invalid server sign-in response.");
-  const projects = value.projects as YouTrackIdentity["projects"];
-  if (
-    projects.some((p) => {
-      return (
-        !p ||
-        typeof p.id !== "string" ||
-        typeof p.name !== "string" ||
-        typeof p.shortName !== "string"
-      );
-    })
-  )
-    throw Error("Invalid authorized project list.");
-  ({ csrf } = value);
-  return {
-    token: prefix + generation,
-    expiresAt: value.expiresAt * 1000,
-    identity: { id: value.userId, name: value.userId, projects },
-    notice:
-      value.rememberDeviceRequested === true && value.remembered === false
-        ? "YouTrack did not allow this device to stay signed in. This session will expire normally."
-        : "",
-  };
+  const { csrf: nextCsrf, ...session } = parseCookieSession(value);
+  csrf = nextCsrf;
+  return { token: prefix + generation, ...session };
 };
 export const startCookieLogin = async (rememberDevice = false) => {
   preserveRecoverySignIn();
