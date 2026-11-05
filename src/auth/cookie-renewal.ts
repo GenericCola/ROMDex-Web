@@ -3,6 +3,32 @@ export interface RenewalChallenge {
   renewalId: string;
   renewUntil: number;
 }
+export const parseRenewalChallenge = (
+  input: unknown,
+): RenewalChallenge | null => {
+  const challenge = input as {
+    renewable?: unknown;
+    csrf?: unknown;
+    renewalId?: unknown;
+    renewUntil?: unknown;
+  } | null;
+  if (challenge?.renewable !== true) return null;
+  if (
+    typeof challenge.csrf !== "string" ||
+    !/^[A-Za-z0-9_-]{43}$/.test(challenge.csrf) ||
+    typeof challenge.renewalId !== "string" ||
+    !/^[A-Za-z0-9_-]{43}$/.test(challenge.renewalId) ||
+    typeof challenge.renewUntil !== "number" ||
+    !Number.isFinite(challenge.renewUntil) ||
+    challenge.renewUntil * 1000 <= Date.now()
+  )
+    throw Error("Invalid renewal response.");
+  return {
+    csrf: challenge.csrf,
+    renewalId: challenge.renewalId,
+    renewUntil: challenge.renewUntil,
+  };
+};
 const markerPrefix = "romdex-renew-attempt-v1:";
 const unavailable = () => {
   return Error("Sign in again to renew this session. Local work is preserved.");
