@@ -55,13 +55,31 @@ export async function durableCookieFixture(
   );
   await page.route(APP + "/api/auth/**", async (route) => {
     const request = route.request();
+    const browserHeaders = await request.allHeaders();
     const response = await handle(
       new Request(request.url(), {
         method: request.method(),
-        headers: await request.allHeaders(),
+        headers: browserHeaders,
         ...(request.postData() ? { body: request.postData()! } : {}),
       }),
     );
+    if (response.status === 403) {
+      // Diagnostic allowlist only. Never print the full header map, request
+      // body, cookies, callback query/state, credentials, or response headers.
+      // Do not fill in missing security metadata: this run must establish
+      // what Playwright actually exposes before choosing a bridge workaround.
+      const url = new URL(request.url());
+      console.info(
+        "Synthetic cookie bridge rejected request metadata",
+        JSON.stringify({
+          url: url.origin + url.pathname,
+          method: request.method(),
+          origin: browserHeaders.origin ?? null,
+          "sec-fetch-site": browserHeaders["sec-fetch-site"] ?? null,
+          "sec-fetch-mode": browserHeaders["sec-fetch-mode"] ?? null,
+        }),
+      );
+    }
     const cookies = response.headers
       .getSetCookie()
       .map((cookie) =>
