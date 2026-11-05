@@ -9,8 +9,11 @@ import { APP, installCookieFixture } from "./cookie-fixture";
 
 // Real encrypted envelopes and handler responses; only the upstream OAuth port is
 // synthetic. Browser acceptance, Cookie requests and response ordering are real.
-export async function durableCookieFixture(page: Page) {
-  await installCookieFixture(page);
+export async function durableCookieFixture(
+  page: Page,
+  options: { preserveGeneration?: boolean } = {},
+) {
+  await installCookieFixture(page, options);
   let now = Math.floor(Date.now() / 1000),
     user = "fixture-owner";
   const owners = new Map<string, string>();
@@ -100,7 +103,7 @@ export async function durableCookieFixture(page: Page) {
     user = account;
     await page.evaluate(
       ({ name, value }) => {
-        document.cookie = `${name}=${value}; Path=/; Secure; SameSite=Lax`;
+        document.cookie = `${name}=${value}; Path=/; Secure; SameSite=Lax; Max-Age=31536000`;
       },
       { name: FENCE, value: deps.entropy() },
     );

@@ -2,7 +2,10 @@ import { expect, type Page, type Route } from "@playwright/test";
 import { resolve } from "node:path";
 export const APP = "https://romdex.vercel.app";
 const YOUTRACK = "https://thegobindsingh.youtrack.cloud";
-export const installCookieFixture = async (page: Page) => {
+export const installCookieFixture = async (
+  page: Page,
+  { preserveGeneration = false }: { preserveGeneration?: boolean } = {},
+) => {
   await page.context().route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (url.origin !== APP) return route.abort();
@@ -21,9 +24,9 @@ export const installCookieFixture = async (page: Page) => {
       throw Error("Invalid synthetic asset path");
     await route.fulfill({ path: file });
   });
-  await page
-    .context()
-    .addCookies([
+  // Reopen tests must not replace the generation loaded from the disk profile.
+  if (!preserveGeneration)
+    await page.context().addCookies([
       {
         name: "__Host-romdex-generation",
         value: "f".repeat(43),
