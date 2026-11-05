@@ -1,7 +1,7 @@
 "use client";
-import type { AuthorizedProject } from "@/auth/identity";
 import AuthShell from "./auth-shell";
 import AuthSignInSection from "./auth-sign-in-section";
+import AuthSignedIn from "./auth-signed-in";
 import Romdex from "./index";
 import { ProjectSelectionContext } from "./project-selection-context";
 import { exportRecovery } from "./recovery-export";
@@ -24,20 +24,6 @@ const AuthGate = () => {
     recoveryBlocked,
     finishExpired,
   } = useAuthWorkspace();
-  const renderProject = (project: AuthorizedProject) => {
-    const open = () => {
-      void choose(project);
-    };
-    return (
-      <button
-        key={project.id}
-        disabled={busy || recoveryBlocked || delivering}
-        onClick={open}
-      >
-        {project.name} ({project.shortName})
-      </button>
-    );
-  };
   const connected = !!identity && selected?.shortName === "PMON";
   const account = (
     <section
@@ -51,30 +37,28 @@ const AuthGate = () => {
       {!connected && (
         <div>
           <span className="eyebrow">Connection</span>
-          <h2>{identity ? "Choose your project" : "Sign in to ROMDex"}</h2>
+          <h2>
+            {busy && !identity
+              ? "Opening ROMDex…"
+              : retryable
+                ? "Connection needs attention"
+                : identity
+                  ? "Choose your project"
+                  : "Sign in to ROMDex"}
+          </h2>
         </div>
       )}
-      {identity ? (
-        <>
-          <p>
-            Signed in as {identity.name} ·{" "}
-            {selected?.name ?? "Choose a project"}
-          </p>
-          <div className="port-actions">
-            {!connected && identity.projects.map(renderProject)}
-            <button
-              disabled={busy || recoveryBlocked || delivering}
-              onClick={() => {
-                void signOut();
-              }}
-            >
-              Sign out
-            </button>
-          </div>
-          {!identity.projects.length && (
-            <p>YouTrack returned no accessible projects.</p>
-          )}
-        </>
+      {!identity && busy ? (
+        <p role="status">Checking sign-in and opening your workspace…</p>
+      ) : identity ? (
+        <AuthSignedIn
+          identity={identity}
+          selected={selected}
+          disabled={busy || recoveryBlocked || delivering}
+          choose={choose}
+          signIn={signIn}
+          signOut={signOut}
+        />
       ) : (
         <AuthSignInSection
           busy={busy || recoveryBlocked}

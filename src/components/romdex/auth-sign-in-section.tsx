@@ -23,7 +23,7 @@ const AuthSignInSection = ({
             retryResume();
           }}
         >
-          Retry sign-in verification
+          Retry opening ROMDex
         </button>
       )}
       <AuthSignIn busy={busy} signIn={signIn} />

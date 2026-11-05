@@ -87,7 +87,7 @@ test("recovery-blocked gate disables signed-out sign-in and retry controls", asy
       signIn={async () => {}}
     />,
   );
-  assert.match(html, /<button[^>]*disabled=""[^>]*>Retry sign-in verification/);
+  assert.match(html, /<button[^>]*disabled=""[^>]*>Retry opening ROMDex/);
   const gate = readFileSync("src/components/romdex/auth-gate.tsx", "utf8");
   assert.match(gate, /<AuthSignInSection\s+busy=\{busy \|\| recoveryBlocked\}/);
   const hook = readFileSync(
