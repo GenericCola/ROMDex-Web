@@ -7,8 +7,12 @@ import {
 } from "../../server/cookie-runtime";
 import { APP, installCookieFixture } from "./cookie-fixture";
 
-// Real encrypted envelopes and handler responses; only the upstream OAuth port is
-// synthetic. Browser acceptance, Cookie requests and response ordering are real.
+// Real encrypted envelopes and handler responses with a synthetic OAuth port.
+// Playwright interception omits Fetch Metadata in the QA Chromium runtime. This
+// adapter synthesizes ONLY missing Sec-Fetch-Site after checking the caller frame
+// and browser Origin. Cookie requests, Set-Cookie acceptance and response ordering
+// remain real browser behavior; production Fetch Metadata enforcement is covered
+// by server unit tests, not claimed as browser evidence from this adapter.
 export async function durableCookieFixture(
   page: Page,
   options: { preserveGeneration?: boolean } = {},
@@ -56,30 +60,34 @@ export async function durableCookieFixture(
   await page.route(APP + "/api/auth/**", async (route) => {
     const request = route.request();
     const browserHeaders = await request.allHeaders();
+    // Fail closed before bridging requests from another/opaque frame. Never
+    // replace Origin, Cookie, CSRF, or an explicitly supplied Fetch Metadata value.
+    expect(
+      new URL(request.frame().url()).origin,
+      "Synthetic caller frame origin",
+    ).toBe(APP);
+    expect(new URL(request.url()).origin, "Synthetic request destination").toBe(
+      APP,
+    );
+    if (request.method() === "POST" || browserHeaders.origin !== undefined)
+      expect(browserHeaders.origin, "Real browser Origin").toBe(APP);
+    const handlerHeaders = { ...browserHeaders };
+    if (browserHeaders["sec-fetch-site"] === undefined) {
+      expect(Object.hasOwn(browserHeaders, "sec-fetch-site")).toBe(false);
+      handlerHeaders["sec-fetch-site"] = "same-origin";
+    }
+    // Boolean assertion avoids printing cookie values even on a fixture failure.
+    expect(
+      handlerHeaders.cookie === browserHeaders.cookie,
+      "Browser Cookie header is forwarded unchanged",
+    ).toBe(true);
     const response = await handle(
       new Request(request.url(), {
         method: request.method(),
-        headers: browserHeaders,
+        headers: handlerHeaders,
         ...(request.postData() ? { body: request.postData()! } : {}),
       }),
     );
-    if (response.status === 403) {
-      // Diagnostic allowlist only. Never print the full header map, request
-      // body, cookies, callback query/state, credentials, or response headers.
-      // Do not fill in missing security metadata: this run must establish
-      // what Playwright actually exposes before choosing a bridge workaround.
-      const url = new URL(request.url());
-      console.info(
-        "Synthetic cookie bridge rejected request metadata",
-        JSON.stringify({
-          url: url.origin + url.pathname,
-          method: request.method(),
-          origin: browserHeaders.origin ?? null,
-          "sec-fetch-site": browserHeaders["sec-fetch-site"] ?? null,
-          "sec-fetch-mode": browserHeaders["sec-fetch-mode"] ?? null,
-        }),
-      );
-    }
     const cookies = response.headers
       .getSetCookie()
       .map((cookie) =>
