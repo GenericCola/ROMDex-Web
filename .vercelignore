@@ -5,10 +5,7 @@
 .env*
 artifacts
 docs
-tests
 patches
-youtrack-app
-youtrack-acceptance
 node_modules
 .next
 out
@@ -26,5 +23,3 @@ playwright-report
 media
 coverage
 
-server/*.test.ts
-server/*fixture.ts
