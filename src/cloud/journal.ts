@@ -3,6 +3,7 @@ import { planReceipt } from "@/rdx/plan-ledger";
 import { replaceRemote } from "./delivery-helpers";
 import type { Commit, DeliveryRecord } from "./types";
 import { cloudData } from "./types";
+export class DeliveryUncertain extends Error {}
 export const recordDelivery = (
   data: WorkspaceData,
   id: string,
@@ -59,7 +60,7 @@ export const attemptDelivery = async (
           "Delivery or confirmation was interrupted. Do not resend without review.",
       });
     });
-    throw Error(
+    throw new DeliveryUncertain(
       "The delivery result is uncertain. Your queued change is preserved for review.",
     );
   }

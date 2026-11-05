@@ -5,6 +5,7 @@ import { observeStatus } from "./assigned-status";
 import { acknowledge, recordDelivery } from "./journal";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
+import { uploadReceiptClaimed } from "./upload-receipt";
 import { verifiedAttachment } from "./verified-attachment";
 export const reviewAttachment = async (
   data: WorkspaceData,
@@ -46,6 +47,10 @@ export const reviewAttachment = async (
   if (operation.type === "attachment") {
     if (!Array.isArray(record?.attachmentBeforeIds))
       throw Error("Upload baseline evidence is missing. Do not resend.");
+    if (uploadReceiptClaimed(data, operation, record.remoteId ?? receipt))
+      throw Error(
+        "This attachment receipt already belongs to another upload. Preserve both requests for review.",
+      );
     inventory = await verifiedAttachment(
       operation,
       port.files,

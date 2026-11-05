@@ -171,7 +171,12 @@ test("failed file attempt journal prevents all upload mutations", async () => {
 });
 test("lost upload receipt survives restart and requires exact new ID and bytes, never another upload", async () => {
   const s = await setup({ lostUpload: true });
+  const download = s.port.files!.download;
+  s.port.files!.download = async () => {
+    throw Error("Readback temporarily unavailable");
+  };
   await assert.rejects(s.run(), /uncertain/);
+  s.port.files!.download = download;
   const restored = JSON.parse(JSON.stringify(s.data()));
   validateWorkspace(restored);
   assert.deepEqual(restored.cloud.records[s.value.id].attachmentBeforeIds, []);
@@ -230,9 +235,14 @@ test("an already-existing receipt and a changed author cannot acknowledge an unc
     updated: 1,
     authorId: "fixture-owner",
   };
+  const download = s.port.files!.download;
+  s.port.files!.download = async () => {
+    throw Error("Readback temporarily unavailable");
+  };
   s.files.set(old.id, old);
   s.bytes.set(old.id, new Uint8Array(await s.value.blob.arrayBuffer()));
   await assert.rejects(s.run(), /uncertain/);
+  s.port.files!.download = download;
   await assert.rejects(
     reviewQueue(
       s.data(),
@@ -379,7 +389,11 @@ test("10 MiB uploads are allowed; oversized legacy bytes remain recoverable with
   await s.cache.storage.put(legacy);
   await assert.rejects(s.run(), /up to 10 MiB/);
   assert.equal(s.uploads(), 0);
-  assert.equal(s.data().cloud?.records[legacy.id], undefined);
+  assert.equal(s.data().cloud?.records[legacy.id]?.status, "conflict");
+  assert.equal(
+    s.data().cloud?.records[legacy.id]?.attachmentBeforeIds,
+    undefined,
+  );
   assert.equal(s.data().operations.length, 1);
   assert.ok(s.cache.values.has(legacy.id));
 });

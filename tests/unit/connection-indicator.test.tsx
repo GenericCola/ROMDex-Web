@@ -52,8 +52,7 @@ test("connection lens has specific readable status and no side effects; Save sem
   const header = readFileSync("src/components/romdex/header.tsx", "utf8");
   const save = readFileSync("src/components/romdex/header-status.ts", "utf8");
   assert.match(header, /color=\{indicator.color\}/);
-  assert.match(save, /state\.error\s*\? "red"/);
-  assert.match(save, /state\.pendingWrites\s*\? "yellow"/);
+  assert.match(save, /state\.error \|\| attention \|\| overdue \? "red"/);
   assert.match(save, /: "green"/);
   assert.doesNotMatch(
     header,

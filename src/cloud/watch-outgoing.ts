@@ -7,6 +7,7 @@ import {
   automaticDelivery,
   deliveryConnected,
   deliveryPaused,
+  uploadRecoveryDue,
 } from "./session";
 import { cloudData } from "./types";
 import { statusReadNeeded } from "./unavailable-tasks";
@@ -28,7 +29,7 @@ const outgoingWork = () => {
   )
     return null;
   const selected = automaticBatch(state.data);
-  if (selected && !selected.size) return null;
+  if (selected && !selected.size && !uploadRecoveryDue()) return null;
   return JSON.stringify([
     state.data.operations.filter((op) => {
       return !selected || selected.has(op.opId);
@@ -44,12 +45,14 @@ export const watchOutgoing = () => {
       await automaticDelivery();
     },
     (changed) => {
+      const readbackTimer = setInterval(changed, 60_000);
       const stops = [
         workspaceStore.subscribe(changed),
         subscribeDraftEditors(changed),
         subscribeTaskEditing(changed),
       ];
       return () => {
+        clearInterval(readbackTimer);
         for (const stop of stops) stop();
       };
     },

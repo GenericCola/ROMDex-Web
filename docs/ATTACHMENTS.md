@@ -4,7 +4,9 @@ Files are staged in a separate browser IndexedDB store. Staging saves verified
 bytes before adding the upload request to the workspace journal. Save Changes
 sends supported requests only after the owner enables session delivery.
 
-New files are limited to the tenant's unchanged 10 MiB upload limit. Older
+Server sign-in uploads are limited to 4,000,000 bytes per file. Direct token
+connections retain the tenant's 10 MiB limit. A connected file selection checks
+the effective limit before staging any of its files. Older
 recovery files up to 50 MiB remain readable and exportable, but oversized uploads
 stop before an attempt is recorded or a network mutation is sent. Staged bytes
 are limited to 64 MiB per browser workspace. Keep original files and recovery
@@ -20,11 +22,34 @@ sends nothing. Confirmation queues a deletion; connected Save Changes performs
 it only if the exact attachment metadata still matches. Recovery cannot recreate
 a deleted native attachment ID.
 
-A lost upload or deletion response blocks delivery. Restarting does not resend
-it. Connection Details can read the current attachment IDs and confirm an exact
-upload by matching bytes. Deletion absence requires an explicit acknowledgement
+A lost upload or deletion response holds the affected ticket while unrelated
+eligible changes continue. Restarting does not resend it. Uploads get automatic
+read-only confirmation on reconnect and while Auto-Sync is enabled, at most once
+per minute per pending operation. Confirmation requires a new attachment ID
+against the saved pre-upload inventory, matching filename, size, author and
+SHA-256 bytes. A missing receipt can be discovered only from one unambiguous
+candidate. Overlapping identical pending uploads and claimed receipts prevent
+automatic discovery; a receipt cannot confirm two operations. Failed reads,
+missing baselines and mismatches preserve the queue and staged bytes for review.
+Connection Details retains explicit review controls. Deletion absence requires an explicit acknowledgement
 that the owner checked the exact file and their access. Stopping a request
 archives its evidence. Re-staging after review is an explicit new operation.
+
+Select up to ten files at once or add more later. Additional uploads can be
+staged while earlier uploads on that ticket await confirmation; they stay local
+until the hold clears. Repeated identical selections remain separate operations
+with separate IDs and receipts. There is no automatic file deduplication.
+Unsent additions can be cancelled individually when delivery is idle. Structural
+and other ticket review locks remain in force. The cumulative staged-byte limit
+stays 64 MiB, and a partial storage failure retains its successfully staged prefix.
+
+The save light stays green during ordinary pending work and delivery, with text
+distinguishing local saves from YouTrack confirmation. Local save errors,
+unresolved review and paused-delivery errors turn it red immediately. Otherwise
+an item waiting ten minutes turns it red. Ages track each operation independently;
+new edits do not reset older work. Reopened work with no known age gets ten
+minutes from observation. This allows the existing five-minute focused-editor
+delay without treating normal typing as a failed save.
 
 Recovery exports include staged bytes and hashes. Import verifies these before
 storing them, retains uncertain-request review requirements, disconnects delivery

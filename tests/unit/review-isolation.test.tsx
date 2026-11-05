@@ -128,10 +128,10 @@ void test("lost response after dispatch stays uncertain and cannot masquerade as
     return Promise.reject(Error("Response lost after request"));
   };
   assert.ok(await f.run());
-  assert.equal(attempts, 1);
+  assert.equal(attempts, 2);
   assert.deepEqual(f.state().operations, [bad, safe]);
   assert.equal(cloudData(f.state()).records.lost?.status, "uncertain");
-  assert.equal(cloudData(f.state()).records.safe, undefined);
+  assert.equal(cloudData(f.state()).records.safe?.status, "uncertain");
 });
 
 void test("reviewed create at queue head cannot starve independent work by repeated dependency promotion", async () => {

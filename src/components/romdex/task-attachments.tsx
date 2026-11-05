@@ -1,4 +1,4 @@
-import { taskEditingLocked } from "@/domain/task-edit-lock";
+import { uploadStagingLocked } from "@/domain/task-edit-lock";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { attachmentsReadable } from "@/youtrack/attachment-reader";
 import AttachmentCache from "./attachment-cache";
@@ -24,7 +24,7 @@ const TaskAttachments = ({
           className="sr-only"
           aria-label="Attach Files"
           multiple
-          disabled={model.busy || taskEditingLocked(item.id)}
+          disabled={model.busy || uploadStagingLocked(item.id)}
           onChange={(event) => {
             const files = [...(event.target.files ?? [])];
             if (files.length) model.stageMany(files);
@@ -41,8 +41,10 @@ const TaskAttachments = ({
         Refresh Attachments
       </button>
       <p className="muted small">
-        Cached metadata stays available offline. Up to 10 files at once, 10 MiB
-        per file.
+        Cached metadata stays available offline. Select up to 10 files at once
+        or add more later. Server sign-in supports 4 MB per file; direct token
+        connections support 10 MiB. If an earlier upload needs confirmation,
+        additional files stay saved locally until it is resolved.
       </p>
       <p className="small" role="status" hidden={!model.busy && !model.message}>
         {model.busy ? "Attachment operation in progress" : model.message}

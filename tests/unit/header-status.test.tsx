@@ -102,10 +102,7 @@ test("Save light and its explanation use the same pending-work truth, independen
           connection: "Connected",
         };
         const indicator = saveIndicator(state, drafts);
-        assert.equal(
-          indicator.color,
-          failed ? "red" : writes ? "yellow" : drafts ? "red" : "green",
-        );
+        assert.equal(indicator.color, failed ? "red" : "green");
         assert.equal(indicator.description, saveExplanation(state, drafts));
         assert.doesNotMatch(indicator.description, /up to date/i);
       }
@@ -142,10 +139,16 @@ test("Save light and its explanation use the same pending-work truth, independen
           pending: { status: "uncertain", message: "Outcome unknown" },
         },
       };
-    assert.equal(saveIndicator(state, false).color, "red");
+    assert.equal(
+      saveIndicator(state, false).color,
+      kind === "review" ? "red" : "green",
+    );
     assert.doesNotMatch(saveIndicator(state, false).description, /No pending/);
     state.delivering = true;
-    assert.equal(saveIndicator(state, false).color, "red");
+    assert.equal(
+      saveIndicator(state, false).color,
+      kind === "review" ? "red" : "green",
+    );
   }
   const source = readFileSync("src/components/romdex/header.tsx", "utf8");
   assert.match(source, /color=\{indicator.color\}/);

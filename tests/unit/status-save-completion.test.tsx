@@ -68,7 +68,8 @@ test("saved child plus failed parent read remains honestly pending; safe next Sa
   assert.equal(remote.get(base.id)?.state, "Done");
   assert.equal(data.operations.length, 0);
   assert.equal(data.cloud?.rollupPending, true);
-  assert.equal(saveIndicator(state, false).color, "red");
+  assert.equal(saveIndicator(state, false).color, "green");
+  assert.equal(saveIndicator(state, false, true).color, "red");
   assert.match(
     saveIndicator(state, false).description,
     /Parent status calculation pending/,

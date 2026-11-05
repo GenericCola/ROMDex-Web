@@ -49,8 +49,23 @@ export const deliverAttachment = async (
       );
     }
   } else {
-    requireCloudUploadSize(operation.file.size);
-    files.requireUploadSize?.(operation.file.size);
+    try {
+      requireCloudUploadSize(operation.file.size);
+      files.requireUploadSize?.(operation.file.size);
+    } catch (error) {
+      const message =
+        (error instanceof Error
+          ? error.message
+          : "Upload size is not supported.") +
+        " No upload was sent. Export the staged file or stop this upload in Connection Details.";
+      await commit((data) => {
+        return recordDelivery(data, operation.opId, {
+          status: "conflict",
+          message,
+        });
+      });
+      throw new OperationReviewRequired(message);
+    }
     const value = await storage.get(operation.uploadId);
     if (!value || !sameUploadFile(value.file, operation.file)) {
       const message =

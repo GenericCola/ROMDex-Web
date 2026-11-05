@@ -71,21 +71,28 @@ export const deliveryMessage = (
     : "";
 };
 
-export const saveIndicator = (state: WorkspaceSnapshot, drafts: boolean) => {
-  const pending =
-    drafts ||
-    state.data.operations.length > 0 ||
-    !!cloudData(state.data).rollupPending ||
+export const saveIndicator = (
+  state: WorkspaceSnapshot,
+  drafts: boolean,
+  overdue = false,
+) => {
+  const attention =
+    /^(Automatic delivery paused|Save stopped):/.test(state.connection) ||
     !!cloudData(state.data).unavailable?.blockedIds.length ||
     Object.values(cloudData(state.data).records ?? {}).some((record) => {
-      return ["conflict", "uncertain", "attempting"].includes(record.status);
+      return (
+        ["conflict", "uncertain"].includes(record.status) ||
+        (record.status === "attempting" && !state.delivering)
+      );
     });
-  const color: LampColor = state.error
-    ? "red"
-    : state.pendingWrites
-      ? "yellow"
-      : pending
-        ? "red"
-        : "green";
-  return { color, description: saveExplanation(state, drafts) };
+  const color: LampColor =
+    state.error || attention || overdue ? "red" : "green";
+  return {
+    color,
+    description:
+      saveExplanation(state, drafts) +
+      (overdue
+        ? " Changes have been waiting at least 10 minutes. Open Connection Details."
+        : ""),
+  };
 };

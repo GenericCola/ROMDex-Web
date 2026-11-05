@@ -74,9 +74,11 @@ const TaskStatusPopup = ({
         }
         aria-label={"Set Status for " + item.summary}
         title={
-          (inherited ? "Inherited from Children: " : "") +
-          STATUS[color] +
-          " · Click to Set Assigned Status"
+          taskEditingLocked(item.id)
+            ? "This task is syncing or awaiting confirmation. Open Review saved changes or Connection Details."
+            : (inherited ? "Inherited from Children: " : "") +
+              STATUS[color] +
+              " · Click to Set Assigned Status"
         }
         disabled={taskEditingLocked(item.id) || fresh.checking}
         onClick={open}

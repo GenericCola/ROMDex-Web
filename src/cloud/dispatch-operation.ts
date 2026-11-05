@@ -5,6 +5,8 @@ import { deliverCreation } from "./creation";
 import { deliverDeletion } from "./deletion";
 import { DeletionReviewRequired } from "./deletion-isolation";
 import { deliverExisting } from "./existing-delivery";
+import { DeliveryUncertain } from "./journal";
+import { reconcileUploads } from "./reconcile-uploads";
 import { OperationReviewRequired } from "./review-isolation";
 import { deliverRollup } from "./rollup";
 import type { readRollupTree } from "./rollup-tree";
@@ -31,9 +33,25 @@ export const dispatchOperation = async (
       await deliverRollup(operation, snapshot, commit, port, planned);
     else await deliverExisting(operation, snapshot, commit, port);
   } catch (error) {
+    const isolated =
+      error instanceof DeliveryUncertain &&
+      (operation.type === "attachment" ||
+        operation.type === "attachment-delete" ||
+        operation.type === "comment" ||
+        (operation.type === "edit" &&
+          operation.purpose !== "rollup" &&
+          !["state", "assignedState", "parentId"].some((key) => {
+            return Object.hasOwn(operation.patch, key);
+          })));
+    if (
+      (isolated || error instanceof OperationReviewRequired) &&
+      operation.type === "attachment"
+    )
+      await reconcileUploads(snapshot, commit, port, uploads);
     if (
       !(error instanceof OperationReviewRequired) &&
-      !(error instanceof DeletionReviewRequired)
+      !(error instanceof DeletionReviewRequired) &&
+      !isolated
     )
       throw error;
   }

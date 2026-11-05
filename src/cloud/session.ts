@@ -1,14 +1,20 @@
-import { ResumeRejected } from "@/auth/resume-failure";
 import { authRequestGuard } from "@/auth/session";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { automaticBatch } from "./automatic-batch";
+import { DeletionReviewRequired } from "./deletion-isolation";
 import { deliverQueue } from "./delivery";
 import { reportDeliveryFailure } from "./delivery-failure";
 import { isDeferredDelivery } from "./delivery-inputs";
 import { HierarchyQuarantine } from "./hierarchy-quarantine";
+import { openDelivery } from "./open-delivery";
+import { uploadReadbackDue } from "./reconcile-uploads";
+import { OperationReviewRequired } from "./review-isolation";
 import { finishLocalSave, saveLocalDrafts } from "./save-local-drafts";
-import { resumeDeletionReadback } from "./session-deletions";
+import {
+  resumeDeletionReadback,
+  resumeUploadReadback,
+} from "./session-deletions";
 import { cloudData } from "./types";
 import { deliveryCompletion, statusReadNeeded } from "./unavailable-tasks";
 const hierarchyQuarantine = new HierarchyQuarantine();
@@ -27,32 +33,10 @@ export const connectDelivery = async (
     if (generation !== connectionGeneration)
       throw Error("Connection changed. Enable delivery again.");
   };
-  await workspaceStore.start();
-  assertCurrent();
-  const opened = workspaceStore.getSnapshot();
-  if (!opened.ready || opened.error)
-    throw Error(opened.error || "Wait for your workspace to open.");
-  if (cloudData(opened.data).sharedStatuses)
-    throw Error("Shared status sync requires its safety check to pass.");
-  const next = new DeliveryClient(
-    token,
-    cloudData(workspaceStore.getSnapshot().data).sharedStatuses ?? false,
-  );
-  await next.connect();
-  assertCurrent();
-  if (expectedUserId && next.accountId !== expectedUserId)
-    throw new ResumeRejected(
-      "The data connection identity differs from the signed-in account.",
-    );
-  const bound = cloudData(workspaceStore.getSnapshot().data).accountId;
-  if (bound && bound !== next.accountId)
-    throw Error("The queue is bound to a different account.");
-  await workspaceStore.change((data) => {
-    data.cloud = { ...cloudData(data), accountId: next.accountId };
-  });
-  await workspaceStore.flush();
-  assertCurrent();
+  const next = await openDelivery(token, expectedUserId, assertCurrent);
   await resumeDeletionReadback(next, assertCurrent);
+  await resumeUploadReadback(next);
+  assertCurrent();
   suspended = hierarchyQuarantine.capture(workspaceStore.getSnapshot().data);
   client = next;
   workspaceStore.setConnection(
@@ -71,6 +55,11 @@ export const deliveryPaused = () => {
 export const deliveryConnected = () => {
   return client !== null;
 };
+export const uploadRecoveryDue = () => {
+  return (
+    !!client && uploadReadbackDue(workspaceStore.getSnapshot().data, client)
+  );
+};
 export const saveDelivery = async (automatic = false) => {
   hierarchyQuarantine.assertSafe(workspaceStore.getSnapshot().data);
   const alreadyDelivering = automatic
@@ -81,12 +70,13 @@ export const saveDelivery = async (automatic = false) => {
   if (automatic && !cloudData(workspaceStore.getSnapshot().data).autoSync)
     return "Saved in this browser. Automatic delivery is waiting.";
   if (!client) return finishLocalSave(true);
+  const active = client;
+  await resumeUploadReadback(active);
   const selected = automatic
     ? automaticBatch(workspaceStore.getSnapshot().data)
     : undefined;
   if (selected && !selected.size)
     return "Saved in this browser. Some changes need review or are still being edited.";
-  const active = client;
   try {
     await workspaceStore.deliver(async (commit) => {
       await deliverQueue(
@@ -110,7 +100,11 @@ export const saveDelivery = async (automatic = false) => {
     );
     return deliveryCompletion(workspaceStore.getSnapshot().data);
   } catch (error) {
-    if (isDeferredDelivery(error)) {
+    if (
+      error instanceof OperationReviewRequired ||
+      error instanceof DeletionReviewRequired ||
+      isDeferredDelivery(error)
+    ) {
       suspended = false;
       workspaceStore.setConnection(error.message);
       return error.message;

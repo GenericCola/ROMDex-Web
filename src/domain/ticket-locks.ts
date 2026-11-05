@@ -1,4 +1,5 @@
 import { preservesLockedOrder } from "./locked-ticket-order";
+import { operationTicketIds } from "./operation-tickets";
 import {
   changesLockedHierarchy,
   ticketDependencies as dependencies,
@@ -6,6 +7,8 @@ import {
 } from "./ticket-lock-dependencies";
 import type { TaskOperation, WorkspaceData } from "./types";
 import { withoutUnsentArchives } from "./unsent-archives";
+import { independentUploadChange } from "./upload-staging";
+export { operationTicketIds } from "./operation-tickets";
 const same = (left: unknown, right: unknown) => {
   return JSON.stringify(left) === JSON.stringify(right);
 };
@@ -13,37 +16,6 @@ const refused = () => {
   throw Error(
     "This ticket or its dependencies are being synchronized or need review.",
   );
-};
-export const operationTicketIds = (operation: TaskOperation): Set<string> => {
-  const ids = new Set<string>();
-  const add = (id: string | null | undefined) => {
-    if (id != null) {
-      if (typeof id !== "string" || !id || id === "*") refused();
-      ids.add(id);
-    }
-  };
-  if (!operation.issueId || !operation.opId) refused();
-  add(operation.issueId);
-  if (operation.type === "delete") {
-    operation.ids.forEach(add);
-    for (const item of Object.values(operation.bases ?? {})) {
-      add(item.id);
-      add(item.parentId);
-    }
-  } else if (operation.type === "edit" && "parentId" in operation.patch) {
-    add(operation.base.parentId);
-    add(operation.patch.parentId);
-  } else if (operation.type === "create") {
-    add(operation.item.id);
-    add(operation.item.parentId);
-  } else if (
-    !["edit", "comment", "attachment", "attachment-delete"].includes(
-      operation.type,
-    )
-  ) {
-    refused();
-  }
-  return ids;
 };
 export const reviewedTicketIds = (data: WorkspaceData): Set<string> => {
   const ids = new Set<string>();
@@ -76,6 +48,7 @@ export const guardTicketChanges = (
   before: WorkspaceData,
   after: WorkspaceData,
   locked: Set<string>,
+  allowUnsentUploadCancellation = false,
 ) => {
   if (!locked.size) return;
   if (locked.has("*")) {
@@ -87,6 +60,7 @@ export const guardTicketChanges = (
     after,
     locked,
     operationTicketIds,
+    allowUnsentUploadCancellation,
   );
   if (!same(globalData(before), globalData(compared))) refused();
   const ids = new Set(locked);
@@ -115,6 +89,15 @@ export const guardTicketChanges = (
   }
   if (changesLockedHierarchy(before, after, ids)) refused();
   const affected = (operation: TaskOperation) => {
+    if (
+      independentUploadChange(
+        before,
+        after,
+        operation,
+        allowUnsentUploadCancellation,
+      )
+    )
+      return false;
     const targets = operationTicketIds(operation);
     const structural =
       operation.type === "delete" ||

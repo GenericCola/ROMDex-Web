@@ -23,6 +23,7 @@ import Header from "./header";
 import LocalSaveRecovery from "./local-save-recovery";
 import Migration from "./migration";
 import RdxLibrary from "./rdx-library";
+import SaveFeedback from "./save-feedback";
 import Selectors from "./selectors";
 import UpdateCheck from "./update-check";
 import { useInlineAction } from "./use-inline-action";
@@ -88,6 +89,7 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
               }}
             />
           )}
+          <SaveFeedback state={state} review={openConnection} />
           {inline.error && (
             <p className="port-recovery" role="alert">
               {inline.error}

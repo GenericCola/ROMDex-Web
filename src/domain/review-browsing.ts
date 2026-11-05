@@ -18,6 +18,7 @@ export const guardReviewBrowsing = (
     { ...before, cloud: cloudData(before) },
     { ...after, cloud },
     reviewedTicketIds(before),
+    true,
   );
 };
 

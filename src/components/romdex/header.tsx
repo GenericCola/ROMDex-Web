@@ -11,6 +11,7 @@ import { useSyncExternalStore } from "react";
 import ConnectionIndicator from "./connection-indicator";
 import { saveIndicator, syncControl } from "./header-status";
 import Lamp from "./lamp";
+import { useSaveOverdue } from "./use-save-overdue";
 import WorkspaceMenu from "./workspace-menu";
 interface HeaderProps {
   state: WorkspaceSnapshot;
@@ -30,7 +31,8 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
     cloudData(state.data).autoSync,
     deliveryPaused(),
   );
-  const indicator = saveIndicator(state, unsavedDrafts);
+  const overdue = useSaveOverdue(state, unsavedDrafts);
+  const indicator = saveIndicator(state, unsavedDrafts, overdue);
   const saveReason = indicator.description;
   const save = () => {
     const done = (value: string) => {

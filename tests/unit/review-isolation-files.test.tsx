@@ -51,7 +51,7 @@ for (const mode of ["missing", "changed"]) {
     assert.deepEqual(f.sent(), ["scalar:" + B]);
   });
 }
-void test("attachment post-dispatch response loss is uncertain and aborts this batch", async () => {
+void test("attachment post-dispatch response loss holds its ticket while independent work finishes", async () => {
   const f = await fixture(),
     bad = f.independent("file"),
     unrelated = f.edit(A, "independent");
@@ -65,9 +65,9 @@ void test("attachment post-dispatch response loss is uncertain and aborts this b
   };
   assert.ok(await f.run());
   assert.equal(attempts, 1);
-  assert.deepEqual(f.state().operations, [bad, unrelated]);
+  assert.deepEqual(f.state().operations, [bad]);
   assert.equal(cloudData(f.state()).records.safe?.status, "uncertain");
-  assert.equal(cloudData(f.state()).records.independent, undefined);
+  assert.equal(cloudData(f.state()).records.independent?.status, "confirmed");
   assert.equal(f.uploads.size, 1);
   await f.run();
   assert.equal(attempts, 1, "uncertain upload cannot be resent");

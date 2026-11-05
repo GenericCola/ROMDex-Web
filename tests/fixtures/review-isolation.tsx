@@ -147,6 +147,7 @@ export const fixture = async () => {
     store,
     ...transport,
     uploads,
+    storage,
     edit,
     independent,
     run,

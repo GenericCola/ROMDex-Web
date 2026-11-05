@@ -1,4 +1,5 @@
 import type { TaskOperation, WorkspaceData } from "./types";
+import { canStageAlongsideUploads } from "./upload-staging";
 // Project only proven local cancellation receipts out of the metadata comparison.
 // Existing journal entries and all other metadata remain subject to exact checks.
 export const withoutUnsentArchives = (
@@ -6,6 +7,7 @@ export const withoutUnsentArchives = (
   after: WorkspaceData,
   locked: Set<string>,
   ticketIds: (operation: TaskOperation) => Set<string>,
+  allowUnsentUploadCancellation = false,
 ): WorkspaceData => {
   if (!after.cloud) return after;
   const records = { ...after.cloud.records };
@@ -28,7 +30,14 @@ export const withoutUnsentArchives = (
         return next.opId === id;
       }) ||
       [...ticketIds(operation)].some((ticket) => {
-        return locked.has(ticket);
+        return (
+          locked.has(ticket) &&
+          !(
+            allowUnsentUploadCancellation &&
+            operation.type === "attachment" &&
+            canStageAlongsideUploads(before, ticket)
+          )
+        );
       })
     )
       continue;

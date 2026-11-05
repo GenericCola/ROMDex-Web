@@ -3,9 +3,10 @@ import { cloudData } from "@/cloud/types";
 import { materialize } from "@/domain/accepted/core.mjs";
 import { reviewedTicketIds } from "@/domain/ticket-locks";
 import type { WorkspaceData } from "@/domain/types";
+import { canStageAlongsideUploads } from "@/domain/upload-staging";
 import type { Attachment, UploadFile } from "./types";
 import { validateAttachment, validateUploadFile } from "./validate";
-const ready = (data: WorkspaceData, issue: string) => {
+const ready = (data: WorkspaceData, issue: string, upload = false) => {
   if (
     !materialize(data.remote, data.operations).some((item) => {
       return item.id === issue;
@@ -13,7 +14,10 @@ const ready = (data: WorkspaceData, issue: string) => {
   )
     throw Error("The task no longer exists.");
   const locked = reviewedTicketIds(data);
-  if (locked.has("*") || locked.has(issue))
+  if (
+    locked.has("*") ||
+    (locked.has(issue) && !(upload && canStageAlongsideUploads(data, issue)))
+  )
     throw Error("Review this ticket before changing its attachments.");
 };
 export const queueUpload = (
@@ -22,7 +26,7 @@ export const queueUpload = (
   id: string,
   file: UploadFile,
 ) => {
-  ready(data, issueId);
+  ready(data, issueId, true);
   validateUploadFile(file);
   if (
     data.operations.some((operation) => {
@@ -92,7 +96,7 @@ export const cancelUnsentUpload = (data: WorkspaceData, id: string) => {
   });
   if (operation?.type !== "attachment")
     throw Error("Upload is no longer pending.");
-  ready(data, operation.issueId);
+  ready(data, operation.issueId, true);
   if (cloudData(data).records[id])
     throw Error(
       "This file request has delivery evidence. Use delivery review instead of cancelling it.",
