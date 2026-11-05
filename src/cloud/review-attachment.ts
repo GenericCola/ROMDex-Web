@@ -43,7 +43,7 @@ export const reviewAttachment = async (
       "The task is unreadable. Preserve recovery and resolve access first.",
     );
   const record = cloudData(data).records[operation.opId];
-  let inventory;
+  let inventory, verifiedReceipt: string | undefined;
   if (operation.type === "attachment") {
     if (!Array.isArray(record?.attachmentBeforeIds))
       throw Error("Upload baseline evidence is missing. Do not resend.");
@@ -58,6 +58,7 @@ export const reviewAttachment = async (
       record.remoteId ?? receipt,
       record.attachmentBeforeIds,
     );
+    verifiedReceipt = record.remoteId ?? receipt;
   } else {
     if (!missing)
       throw Error(
@@ -74,6 +75,13 @@ export const reviewAttachment = async (
       );
   }
   await commit((next) => {
+    if (operation.type === "attachment" && verifiedReceipt) {
+      if (uploadReceiptClaimed(next, operation, verifiedReceipt))
+        throw Error(
+          "This attachment receipt already belongs to another upload.",
+        );
+      recordDelivery(next, operation.opId, { remoteId: verifiedReceipt });
+    }
     next.attachmentLists ??= {};
     next.attachmentLists[operation.issueId] = inventory;
     acknowledge(next, operation, observeStatus(next, current));

@@ -6,6 +6,7 @@ import { DeletionReviewRequired } from "./deletion-isolation";
 import { deliverQueue } from "./delivery";
 import { reportDeliveryFailure } from "./delivery-failure";
 import { isDeferredDelivery } from "./delivery-inputs";
+import { globalDeliveryFailure } from "./global-delivery-failure";
 import { HierarchyQuarantine } from "./hierarchy-quarantine";
 import { openDelivery } from "./open-delivery";
 import { uploadReadbackDue } from "./reconcile-uploads";
@@ -71,13 +72,13 @@ export const saveDelivery = async (automatic = false) => {
     return "Saved in this browser. Automatic delivery is waiting.";
   if (!client) return finishLocalSave(true);
   const active = client;
-  await resumeUploadReadback(active);
-  const selected = automatic
-    ? automaticBatch(workspaceStore.getSnapshot().data)
-    : undefined;
-  if (selected && !selected.size)
-    return "Saved in this browser. Some changes need review or are still being edited.";
   try {
+    await resumeUploadReadback(active);
+    const selected = automatic
+      ? automaticBatch(workspaceStore.getSnapshot().data)
+      : undefined;
+    if (selected && !selected.size)
+      return "Saved in this browser. Some changes need review or are still being edited.";
     await workspaceStore.deliver(async (commit) => {
       await deliverQueue(
         () => {
@@ -110,6 +111,7 @@ export const saveDelivery = async (automatic = false) => {
       return error.message;
     }
     suspended = true;
+    if (globalDeliveryFailure(error)) disconnectDelivery();
     reportDeliveryFailure(error);
     throw error;
   }

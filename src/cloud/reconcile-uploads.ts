@@ -1,13 +1,16 @@
-import type { AttachmentOperation, UploadStore } from "@/attachments/types";
+import type { UploadStore } from "@/attachments/types";
 import type { WorkspaceData } from "@/domain/types";
 import { uploadStorage } from "@/storage/upload-storage";
 import { observeStatus } from "./assigned-status";
+import { globalDeliveryFailure } from "./global-delivery-failure";
 import { acknowledge, recordDelivery } from "./journal";
 import { cloudData, type Commit, type DeliveryPort } from "./types";
-import { uploadReceiptClaimed } from "./upload-receipt";
+import {
+  uploadCandidateAmbiguous,
+  uploadReceiptClaimed,
+} from "./upload-receipt";
 import { verifiedAttachment } from "./verified-attachment";
 
-type Upload = Extract<AttachmentOperation, { type: "attachment" }>;
 const checks = new WeakMap<DeliveryPort, Map<string, number>>();
 export const uploadReadbackDue = (
   data: WorkspaceData,
@@ -28,25 +31,6 @@ export const uploadReadbackDue = (
       );
     })
   );
-};
-const competing = (data: WorkspaceData, operation: Upload, id: string) => {
-  return data.operations.some((other) => {
-    if (
-      other.type !== "attachment" ||
-      other.opId === operation.opId ||
-      other.issueId !== operation.issueId
-    )
-      return false;
-    const record = cloudData(data).records[other.opId];
-    return (
-      record &&
-      ["attempting", "uncertain"].includes(record.status) &&
-      !record.attachmentBeforeIds?.includes(id) &&
-      other.file.name === operation.file.name &&
-      other.file.size === operation.file.size &&
-      other.file.hash === operation.file.hash
-    );
-  });
 };
 export const reconcileUploads = async (
   snapshot: () => WorkspaceData,
@@ -89,7 +73,11 @@ export const reconcileUploads = async (
         );
         if (candidates.length !== 1) continue;
         receipt = candidates[0]?.id;
-        if (!receipt || competing(snapshot(), operation, receipt)) continue;
+        if (
+          !receipt ||
+          uploadCandidateAmbiguous(snapshot(), operation, receipt)
+        )
+          continue;
       }
       if (uploadReceiptClaimed(snapshot(), operation, receipt)) continue;
       inventory = await verifiedAttachment(
@@ -101,7 +89,8 @@ export const reconcileUploads = async (
       );
       current = await port.get(operation.issueId);
       if (!current) continue;
-    } catch {
+    } catch (error) {
+      if (globalDeliveryFailure(error)) throw error;
       // Read failures retain the original evidence; never infer absence or resend.
       continue;
     }

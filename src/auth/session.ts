@@ -1,4 +1,5 @@
 import { assertCookieHandle, isCookieHandle } from "./cookie-client";
+import { AuthenticationChanged } from "./cookie-generation";
 let current: {
   token: string;
   expiresAt: number;
@@ -31,7 +32,7 @@ export const authRequestGuard = (token: string) => {
         current.token !== token ||
         Date.now() >= current.expiresAt)
     )
-      throw Error(
+      throw new AuthenticationChanged(
         "The signed-in session changed. Review any pending cloud outcome before retrying.",
       );
   };

@@ -35,6 +35,14 @@ Connection Details retains explicit review controls. Deletion absence requires a
 that the owner checked the exact file and their access. Stopping a request
 archives its evidence. Re-staging after review is an explicit new operation.
 
+Manual confirmation saves the verified receipt ID in the same durable write as
+its acknowledgement. Later manual and automatic checks retain that claim.
+HTTP 401 and typed sign-in session changes disconnect delivery and show a
+sign-in-needed message, including when the last operation or a readback fails.
+The uncertain request and its bytes stay preserved. Ticket-specific HTTP 403
+and interrupted responses retain their operation review hold; they do not by
+themselves pause unrelated work.
+
 Select up to ten files at once or add more later. Additional uploads can be
 staged while earlier uploads on that ticket await confirmation; they stay local
 until the hold clears. Repeated identical selections remain separate operations

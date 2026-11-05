@@ -52,7 +52,7 @@ export const attemptDelivery = async (
   });
   try {
     await action();
-  } catch {
+  } catch (error) {
     await commit((data) => {
       recordDelivery(data, operation.opId, {
         status: "uncertain",
@@ -62,6 +62,7 @@ export const attemptDelivery = async (
     });
     throw new DeliveryUncertain(
       "The delivery result is uncertain. Your queued change is preserved for review.",
+      { cause: error },
     );
   }
 };

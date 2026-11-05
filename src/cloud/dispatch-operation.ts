@@ -5,6 +5,7 @@ import { deliverCreation } from "./creation";
 import { deliverDeletion } from "./deletion";
 import { DeletionReviewRequired } from "./deletion-isolation";
 import { deliverExisting } from "./existing-delivery";
+import { globalDeliveryFailure } from "./global-delivery-failure";
 import { DeliveryUncertain } from "./journal";
 import { reconcileUploads } from "./reconcile-uploads";
 import { OperationReviewRequired } from "./review-isolation";
@@ -35,6 +36,7 @@ export const dispatchOperation = async (
   } catch (error) {
     const isolated =
       error instanceof DeliveryUncertain &&
+      !globalDeliveryFailure(error) &&
       (operation.type === "attachment" ||
         operation.type === "attachment-delete" ||
         operation.type === "comment" ||

@@ -198,6 +198,80 @@ void test("explicit review cannot reuse another upload's receipt", async () => {
   assert.equal(f.uploads.size, 1);
   assert.equal(cloudData(f.state()).records.safe?.status, "uncertain");
 });
+for (const next of ["automatic", "manual"])
+  void test(`manual receipt acknowledgement durably prevents ${next} reuse for an overlapping identical upload`, async () => {
+    const f = await setup(false);
+    const second = { ...f.op, opId: "second", uploadId: "second" };
+    const firstBytes = f.uploads.get(f.op.uploadId);
+    if (!firstBytes) throw Error("fixture bytes missing");
+    f.uploads.set(second.uploadId, { ...firstBytes, id: second.uploadId });
+    await f.store.deliver(async (commit) =>
+      commit((data) => {
+        data.operations.push(second);
+        cloudData(data).records.second = {
+          status: "uncertain",
+          message: "overlapping lost receipt",
+          attachmentBeforeIds: [],
+        };
+      }),
+    );
+    await f.store.deliver((commit) =>
+      reviewAttachment(
+        f.state(),
+        f.op,
+        "confirm",
+        commit,
+        f.port,
+        f.file.id,
+        false,
+        f.storage,
+      ),
+    );
+    assert.equal(cloudData(f.state()).records.safe?.remoteId, f.file.id);
+    assert.equal(cloudData(f.state()).records.safe?.status, "confirmed");
+    if (next === "automatic") await f.run();
+    else
+      await assert.rejects(
+        f.store.deliver((commit) =>
+          reviewAttachment(
+            f.state(),
+            second,
+            "confirm",
+            commit,
+            f.port,
+            f.file.id,
+            false,
+            f.storage,
+          ),
+        ),
+        /already belongs/,
+      );
+    assert.equal(cloudData(f.state()).records.second?.status, "uncertain");
+    assert.equal(f.state().operations[0]?.opId, second.opId);
+    assert.ok(f.uploads.has(second.uploadId));
+  });
+void test("a historical confirmed upload without its receipt keeps overlapping candidate discovery ambiguous", async () => {
+  const f = await setup(false);
+  await f.store.deliver(async (commit) =>
+    commit((data) => {
+      cloudData(data).records.historical = {
+        status: "confirmed",
+        message: "Previously confirmed manually",
+        attachmentBeforeIds: [],
+        archivedOperation: {
+          ...f.op,
+          opId: "historical",
+          uploadId: "historical",
+        },
+      };
+    }),
+  );
+  await f.run();
+  assert.equal(cloudData(f.state()).records.safe?.status, "uncertain");
+  assert.equal(f.state().operations.length, 1);
+  assert.equal(f.uploads.size, 1);
+  assert.equal(f.downloads(), 0);
+});
 void test("fresh accepted upload with lost response recovers without replay and continues another ticket", async () => {
   const f = await fixture();
   const op = f.independent("file");

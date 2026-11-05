@@ -2,6 +2,7 @@
 // Application must rotate before start/account-switch/cancel/logout, clear visible
 // identity immediately, and check captured generation after EVERY awaited read.
 export const GENERATION_COOKIE = "__Host-romdex-generation";
+export class AuthenticationChanged extends Error {}
 const FENCE = GENERATION_COOKIE;
 export interface GenerationPort {
   readCookie(): string;
@@ -35,7 +36,8 @@ export const createGeneration = (port: GenerationPort) => {
     return value;
   };
   const assertCurrent = (captured: string): void => {
-    if (current() !== captured) throw new Error("Authentication changed");
+    if (current() !== captured)
+      throw new AuthenticationChanged("Authentication changed");
   };
   return { current, rotate, assertCurrent };
 };

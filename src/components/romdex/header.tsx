@@ -1,3 +1,4 @@
+import { reportDeliveryFailure } from "@/cloud/delivery-failure";
 import { incomingMessage, subscribeIncoming } from "@/cloud/incoming-status";
 import {
   deliveryConnected,
@@ -39,12 +40,7 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
       workspaceStore.setConnection(value);
     };
     const failed = (error: unknown) => {
-      workspaceStore.setConnection(
-        "Save stopped: " +
-          (error instanceof Error
-            ? error.message
-            : "Check Connection Details."),
-      );
+      reportDeliveryFailure(error);
     };
     void saveDelivery().then(done, failed);
   };
