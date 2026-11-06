@@ -29,15 +29,23 @@ const TaskDropGuide = ({
       const styles = getComputedStyle(scroller);
       const step =
         parseFloat(styles.getPropertyValue("--hierarchy-step")) || 21;
-      const left =
-        hierarchy.getBoundingClientRect().left -
-        viewport.left +
-        scroller.scrollLeft +
-        Math.max(0, target.depth - scopeDepth) * step;
-      guide.style.top = `${(target.after ? bounds.bottom : bounds.top) - viewport.top + scroller.scrollTop}px`;
+      const left = Math.max(
+        viewport.left,
+        hierarchy.getBoundingClientRect().left +
+          Math.max(0, target.depth - scopeDepth) * step,
+      );
+      const right = viewport.left + scroller.clientLeft + scroller.clientWidth;
+      const top = target.after ? bounds.bottom : bounds.top;
+      const header = scroller.querySelector("thead")?.getBoundingClientRect();
+      // A fixed overlay preserves the exact boundary without being clipped by
+      // the scroll viewport when its last visible row touches the footer.
+      guide.style.top = `${top}px`;
       guide.style.left = `${left}px`;
-      guide.style.width = `${Math.max(24, bounds.right - viewport.left + scroller.scrollLeft - left)}px`;
-      guide.hidden = false;
+      guide.style.width = `${Math.max(0, Math.min(bounds.right, right) - left)}px`;
+      guide.hidden =
+        top < (header?.bottom ?? viewport.top) ||
+        top > viewport.bottom + 2 ||
+        left >= right;
     };
     position();
     scroller.addEventListener("scroll", position);

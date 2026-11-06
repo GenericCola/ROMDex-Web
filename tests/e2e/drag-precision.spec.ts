@@ -32,6 +32,7 @@ test("title drag shows exact destination, expands a collapsed parent and commits
   await expect(row(page, 900003)).toBeVisible();
   const guide = page.locator(".drop-guide");
   await expect(guide).toBeVisible();
+  await expect(guide).toHaveCSS("position", "fixed");
   await expect
     .poll(async () => {
       const g = await bounds(guide),

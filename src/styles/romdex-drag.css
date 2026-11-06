@@ -2,7 +2,7 @@
 .device-body.drag-active{user-select:none;cursor:grabbing}
 .device-body.drag-active button{cursor:grabbing}
 .device-body .drop-before td,.device-body .drop-after td{border-top-width:0;border-bottom:1px solid var(--line)}
-.drop-guide{height:3px;box-shadow:0 0 0 1px var(--screen)}
+.device-body .drop-guide{position:fixed;z-index:5;height:3px;box-shadow:0 0 0 1px var(--screen)}
 .exact-move-fields{display:grid;gap:14px}
 .exact-move-fields label{display:grid;gap:5px}
 .exact-move-fields input,.exact-move-fields select{width:100%;max-width:100%}
