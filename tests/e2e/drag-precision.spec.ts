@@ -185,19 +185,22 @@ test("exact placement flushes notes and scoped drag guides use relative depth", 
   ).toHaveAttribute("aria-current", "true");
   await expect(row(page, 900001)).toHaveCount(0);
   await row(page, 900003).scrollIntoViewIfNeeded();
-  const source = await bounds(row(page, 900002).locator(".grip"));
+  const grip = row(page, 900002).locator(".grip");
+  await expect(grip).toBeEnabled();
+  await grip.hover();
+  const source = await bounds(grip);
   const child = await bounds(row(page, 900003));
+  const header = await bounds(page.locator("thead"));
   await page.mouse.move(source.x + 8, source.y + 10);
   await page.mouse.down();
   await page.keyboard.down("Shift");
-  await page.mouse.move(source.x + 8, child.y + 4, { steps: 5 });
-  console.log("ROMDEX_SCOPED_POINTER", await page.evaluate(({ x, y }) => ({
-    x, y, hit: document.elementFromPoint(x, y)?.outerHTML.slice(0, 800),
-    rows: [...document.querySelectorAll("[data-row]")].map(e => ({ id: e.getAttribute("data-row"), box: e.getBoundingClientRect().toJSON() })),
-    head: document.querySelector("thead")?.getBoundingClientRect().toJSON(),
-    scroll: document.querySelector(".table-scroll")?.scrollTop,
-    status: document.querySelector(".work-footer [role=status]")?.textContent,
-  }), { x: source.x + 8, y: child.y + 4 }));
+  // A locator box can be behind the sticky header. Enter the visible top edge
+  // and let stationary autoscroll reveal the intended first sibling.
+  await page.mouse.move(
+    source.x + 8,
+    Math.max(child.y, header.y + header.height) + 4,
+    { steps: 5 },
+  );
   await expect(page.locator(".work-footer [role=status]")).toContainText(
     "before Fixture Child",
   );
@@ -226,19 +229,23 @@ test("checked siblings retain order when moved together", async ({ page }) => {
       exact: true,
     }),
   ).toBeChecked();
-  const source = await bounds(row(page, 900002).locator(".grip"));
+  const grip = row(page, 900002).locator(".grip");
+  await expect(grip).toBeEnabled();
+  await grip.hover();
+  const source = await bounds(grip);
   const target = await bounds(row(page, 900001));
+  const header = await bounds(page.locator("thead"));
   await page.mouse.move(source.x + 8, source.y + 10);
   await page.mouse.down();
   await page.keyboard.down("Shift");
-  await page.mouse.move(source.x + 8, target.y + 4, { steps: 5 });
-  console.log("ROMDEX_BULK_POINTER", await page.evaluate(({ x, y }) => ({
-    x, y, hit: document.elementFromPoint(x, y)?.outerHTML.slice(0, 800),
-    rows: [...document.querySelectorAll("[data-row]")].map(e => ({ id: e.getAttribute("data-row"), box: e.getBoundingClientRect().toJSON() })),
-    head: document.querySelector("thead")?.getBoundingClientRect().toJSON(),
-    scroll: document.querySelector(".table-scroll")?.scrollTop,
-    status: document.querySelector(".work-footer [role=status]")?.textContent,
-  }), { x: source.x + 8, y: target.y + 4 }));
+  await page.mouse.move(
+    source.x + 8,
+    Math.max(target.y, header.y + header.height) + 4,
+    { steps: 5 },
+  );
+  await expect(page.locator(".work-footer [role=status]")).toContainText(
+    "before Fixture Root",
+  );
   await page.mouse.up();
   await page.keyboard.up("Shift");
   await expect
