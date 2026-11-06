@@ -1,0 +1,44 @@
+[
+  {
+    "source_commit": "2cf9b1f88fec6c8769573eeb88c06a21c5a65033",
+    "source_path": ".vercelignore",
+    "archive_path": "docs/qa-archive/drag-precision-qa-20261106/.vercelignore",
+    "blob_sha": "d495a082e372027b82711f28b304eba11f05b287"
+  },
+  {
+    "source_commit": "2cf9b1f88fec6c8769573eeb88c06a21c5a65033",
+    "source_path": "vercel.json",
+    "archive_path": "docs/qa-archive/drag-precision-qa-20261106/vercel.json",
+    "blob_sha": "9703d63acb0165ccbf758cec1de48902a464026f"
+  },
+  {
+    "source_commit": "2cf9b1f88fec6c8769573eeb88c06a21c5a65033",
+    "source_path": "scripts/verify-drag-preview.mjs",
+    "archive_path": "docs/qa-archive/drag-precision-qa-20261106/scripts/verify-drag-preview.mjs",
+    "blob_sha": "ab101625b88fac4473d03da4db84ce4d5e2a6870"
+  },
+  {
+    "source_commit": "2cf9b1f88fec6c8769573eeb88c06a21c5a65033",
+    "source_path": "docs/DRAG-PRECISION-2026-11-06.md",
+    "archive_path": "docs/qa-archive/drag-precision-qa-20261106/docs/DRAG-PRECISION-2026-11-06.md",
+    "blob_sha": "23666968c2d8b19974ee88ce7c0d4c26f5acb91d"
+  },
+  {
+    "source_commit": "d58cfb3a3fd31c0a69962e07c1ce25c571a05481",
+    "source_path": ".vercelignore",
+    "archive_path": "docs/qa-archive/session-synthetic-qa-20261105/.vercelignore",
+    "blob_sha": "d495a082e372027b82711f28b304eba11f05b287"
+  },
+  {
+    "source_commit": "d58cfb3a3fd31c0a69962e07c1ce25c571a05481",
+    "source_path": "vercel.json",
+    "archive_path": "docs/qa-archive/session-synthetic-qa-20261105/vercel.json",
+    "blob_sha": "16b448ccaef9eb0fe8ba27279284b5c1a681b4a6"
+  },
+  {
+    "source_commit": "d58cfb3a3fd31c0a69962e07c1ce25c571a05481",
+    "source_path": "scripts/verify-session-preview.mjs",
+    "archive_path": "docs/qa-archive/session-synthetic-qa-20261105/scripts/verify-session-preview.mjs",
+    "blob_sha": "b045ae7e793eff91db319828b048006de762ff83"
+  }
+]
