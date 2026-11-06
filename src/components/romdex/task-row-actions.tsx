@@ -1,16 +1,16 @@
 import { taskEditingLocked } from "@/domain/task-edit-lock";
 import type { TaskItem } from "@/domain/types";
+import { workspaceItems } from "@/domain/workspace-derived";
+import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
 import ItemEditDialog from "./item-edit-dialog";
 import { useFreshTask } from "./use-fresh-task";
 const TaskRowActions = ({
   item,
-  items,
   add,
 }: {
   item: TaskItem;
-  items: TaskItem[];
   add: (parentId: string | null) => void;
 }) => {
   const fresh = useFreshTask(item.id);
@@ -67,7 +67,7 @@ const TaskRowActions = ({
       {deleting && (
         <DeleteReview
           item={item}
-          items={items}
+          items={workspaceItems(workspaceStore.getSnapshot().data)}
           close={() => {
             setDeleting(false);
           }}

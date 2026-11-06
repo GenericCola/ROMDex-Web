@@ -27,6 +27,7 @@ import SaveFeedback from "./save-feedback";
 import Selectors from "./selectors";
 import UpdateCheck from "./update-check";
 import { useInlineAction } from "./use-inline-action";
+import { useStableCallback } from "./use-stable-callback";
 import { useWorkspace } from "./use-workspace";
 import WorkTable from "./work-table";
 import WorkTrays from "./work-trays";
@@ -64,11 +65,11 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
   const closeConnection = () => {
     return setConnection(false);
   };
-  const add = (parentId: string | null) => {
+  const add = useStableCallback((parentId: string | null) => {
     inline.run((data) => {
       beginInlineTask(data, parentId);
     });
-  };
+  });
   const { view } = state.data;
   return (
     <WorkspaceToolsContext value={chooseTool}>

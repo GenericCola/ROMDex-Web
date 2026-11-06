@@ -3,10 +3,17 @@ import { DetailNavigation } from "@/domain/accepted/detail-navigation.mjs";
 import { flushDraftEditors } from "@/domain/editor-drafts";
 import { workspaceItems, workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useEffect, useRef, useState, type PropsWithChildren } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PropsWithChildren,
+} from "react";
 import { DetailNavigationContext } from "./detail-navigation-context";
 import { selectDetailView } from "./detail-navigation-presentation";
 import { useSelectionWork } from "./use-selection-work";
+import { useStableCallback } from "./use-stable-callback";
 import { useWorkspace } from "./use-workspace";
 import { useWorkSelection } from "./work-selection-context";
 const DetailNavigationProvider = ({ children }: PropsWithChildren) => {
@@ -41,27 +48,29 @@ const DetailNavigationProvider = ({ children }: PropsWithChildren) => {
     if (focusNotes && focusNotes.id !== state.data.view.selected)
       setFocusNotes(null);
   }, [state.data, focusNotes]);
-  const open = (id: string, child = false, notes = false) => {
-    work.run(async () => {
-      await flushDraftEditors();
-      const prior = workspaceStore.getSnapshot().data.view.selected;
-      if (!tree().byId.has(id)) throw Error("This item no longer exists.");
-      let canFocusNotes = false;
-      await workspaceStore.change((data) => {
-        canFocusNotes = selectDetailView(data.view, id, notes);
+  const open = useStableCallback<[string, boolean?, boolean?], void>(
+    (id, child = false, notes = false) => {
+      work.run(async () => {
+        await flushDraftEditors();
+        const prior = workspaceStore.getSnapshot().data.view.selected;
+        if (!tree().byId.has(id)) throw Error("This item no longer exists.");
+        let canFocusNotes = false;
+        await workspaceStore.change((data) => {
+          canFocusNotes = selectDetailView(data.view, id, notes);
+        });
+        navigationRef.current.open(prior, id, child);
+        setPrevious(navigationRef.current.destination(tree().byId));
+        selection.clear();
+        setFocusNotes(null);
+        if (notes) {
+          setTab("notes");
+          if (canFocusNotes) setFocusNotes({ id });
+        }
+        if (!workspaceStore.getSnapshot().error) await workspaceStore.flush();
       });
-      navigationRef.current.open(prior, id, child);
-      setPrevious(navigationRef.current.destination(tree().byId));
-      selection.clear();
-      setFocusNotes(null);
-      if (notes) {
-        setTab("notes");
-        if (canFocusNotes) setFocusNotes({ id });
-      }
-      if (!workspaceStore.getSnapshot().error) await workspaceStore.flush();
-    });
-  };
-  const back = () => {
+    },
+  );
+  const back = useStableCallback(() => {
     work.run(async () => {
       await flushDraftEditors();
       const id = navigationRef.current.destination(tree().byId);
@@ -78,11 +87,12 @@ const DetailNavigationProvider = ({ children }: PropsWithChildren) => {
       selection.clear();
       if (!workspaceStore.getSnapshot().error) await workspaceStore.flush();
     });
-  };
+  });
+  const value = useMemo(() => {
+    return { tab, setTab, focusNotes, open, previous, back };
+  }, [tab, focusNotes, open, previous, back]);
   return (
-    <DetailNavigationContext
-      value={{ tab, setTab, focusNotes, open, previous, back }}
-    >
+    <DetailNavigationContext value={value}>
       {children}
       {work.message && <p role="alert">{work.message}</p>}
     </DetailNavigationContext>

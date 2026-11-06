@@ -27,7 +27,7 @@ void test("original attachment entry points count queued files only for the targ
   assert.equal(knownAttachmentCount(data, id), 1);
   assert.equal(knownAttachmentCount(data, "other"), 0);
   const html = renderToStaticMarkup(
-    <TaskAttachmentButton item={item} data={data} />,
+    <TaskAttachmentButton item={item} count={knownAttachmentCount(data, id)} />,
   );
   assert.match(html, /note-button attachment-button/);
   assert.match(html, /Attachments for Fixture/);
