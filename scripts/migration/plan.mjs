@@ -4,11 +4,10 @@
 // write step can take the plan as is.
 import {
   decodePart,
-  encodePart,
+  encodeParts,
   joinMetadata,
   joinNpcdex,
   MAX_PART_BYTES,
-  oversized,
   splitMetadata,
   splitNpcdex,
 } from "./parts.mjs";
@@ -38,8 +37,8 @@ export const TARGETS = {
     npcdex: { project: "NPCD", projectId: "0-2", title: "NPCDex data" },
   },
   test: {
-    metadata: { project: "TST", title: "ROMDex data (test)" },
-    npcdex: { project: "TST", title: "NPCDex data (test)" },
+    metadata: { project: "TST", projectId: "0-4", title: "ROMDex data (test)" },
+    npcdex: { project: "TST", projectId: "0-4", title: "NPCDex data (test)" },
   },
 };
 
@@ -139,7 +138,7 @@ const draftManifest = ({ store, encoded, source }) => ({
   source,
 });
 
-const storePlan = ({ store, target, encoded, source, extra }) => ({
+const storePlan = ({ store, target, encoded, refused, source, extra }) => ({
   store,
   article: target,
   parts: describeParts(encoded),
@@ -153,14 +152,26 @@ const storePlan = ({ store, target, encoded, source, extra }) => ({
         [...encoded].sort((a, b) => b.size - a.size).slice(0, 1),
       )[0] ?? null,
   },
-  oversized: describeParts(oversized(encoded)),
+  oversized: refused.map(function describe({
+    key,
+    name,
+    size,
+    rawSize,
+    message,
+  }) {
+    return { key, name, size, rawSize, message };
+  }),
   manifest: draftManifest({ store, encoded, source }),
   ...extra,
 });
 
 // Decodes every encoded part and joins it back, so the plan proves the split
-// loses nothing before anything is uploaded.
-const decodeAll = (encoded) => encoded.map(decodePart);
+// loses nothing before anything is uploaded. With a part refused for size the
+// join cannot run; the report shows the refused part instead.
+const rejoin = async ({ encoded, refused }, join, hash) =>
+  refused.length > 0
+    ? null
+    : hash(join(await Promise.all(encoded.map(decodePart))));
 
 /**
  * @param {{ source: ReturnType<import("./github-source.mjs").createGitHubSource>, target?: "production" | "test", log?: (line: string) => void }} options
@@ -244,21 +255,23 @@ export const buildPlan = async ({
   const unused = [...layout.objects.keys()].filter((sha) => !used.has(sha));
 
   // Split, encode, then prove the round trip from the encoded bytes.
-  const metadataEncoded = splitMetadata(metadata.document).map(encodePart);
-  const metadataRejoined = metadataHash(
-    joinMetadata(decodeAll(metadataEncoded)),
+  const metadataEncoded = await encodeParts(splitMetadata(metadata.document));
+  const metadataRejoined = await rejoin(
+    metadataEncoded,
+    joinMetadata,
+    metadataHash,
   );
-  if (metadataRejoined !== metadata.sha256) {
+  if (metadataRejoined !== null && metadataRejoined !== metadata.sha256) {
     throw new Error(
       `Metadata parts rebuild to ${metadataRejoined}, expected ${metadata.sha256}`,
     );
   }
-  const npcdexSplit = splitNpcdex(npcdex.document);
-  const npcdexEncoded = npcdexSplit.parts.map(encodePart);
-  const npcdexRejoined = sha256Hex(
-    Buffer.from(JSON.stringify(joinNpcdex(decodeAll(npcdexEncoded)))),
+  const npcdexSplit = await splitNpcdex(npcdex.document);
+  const npcdexEncoded = await encodeParts(npcdexSplit.parts);
+  const npcdexRejoined = await rejoin(npcdexEncoded, joinNpcdex, (doc) =>
+    sha256Hex(Buffer.from(JSON.stringify(doc))),
   );
-  if (npcdexRejoined !== npcdex.sha256) {
+  if (npcdexRejoined !== null && npcdexRejoined !== npcdex.sha256) {
     throw new Error(
       `NPCDex parts rebuild to ${npcdexRejoined}, expected ${npcdex.sha256}`,
     );
@@ -290,7 +303,8 @@ export const buildPlan = async ({
     metadata: storePlan({
       store: "romdex-metadata",
       target: articles.metadata,
-      encoded: metadataEncoded,
+      encoded: metadataEncoded.encoded,
+      refused: metadataEncoded.refused,
       source: { ...sourceBase, head: metadata.head, sha256: metadata.sha256 },
       extra: {
         verified: {
@@ -323,7 +337,8 @@ export const buildPlan = async ({
     npcdex: storePlan({
       store: "npcdex",
       target: articles.npcdex,
-      encoded: npcdexEncoded,
+      encoded: npcdexEncoded.encoded,
+      refused: npcdexEncoded.refused,
       source: { ...sourceBase, head: npcdex.recordId, sha256: npcdex.sha256 },
       extra: {
         verified: {
@@ -353,17 +368,20 @@ const kb = (n) =>
       ? `${(n / 1024).toFixed(1)} KiB`
       : `${(n / 1024 / 1024).toFixed(2)} MiB`;
 
-const partLines = (store) =>
-  store.parts.map(function line(p) {
-    const flag = p.size > MAX_PART_BYTES ? "  OVER 4,000,000 BYTES" : "";
-    return `    ${p.key.padEnd(30)} ${String(p.size).padStart(9)} B stored  ${String(p.rawSize).padStart(9)} B raw  ${p.sha256}  ${p.name}${flag}`;
-  });
+const partLines = (store) => [
+  ...store.parts.map(function line(p) {
+    return `    ${p.key.padEnd(30)} ${String(p.size).padStart(9)} B stored  ${String(p.rawSize).padStart(9)} B raw  ${p.sha256}  ${p.name}`;
+  }),
+  ...store.oversized.map(function refusedLine(p) {
+    return `    ${p.key.padEnd(30)} ${String(p.size).padStart(9)} B stored  ${String(p.rawSize).padStart(9)} B raw  OVER ${MAX_PART_BYTES} BYTES, REFUSED  ${p.name}`;
+  }),
+];
 
 const storeSection = (title, store) => [
   `${title}: "${store.article.title}" in ${store.article.project}`,
   `  Would upload ${store.totals.parts} parts, ${store.totals.stored} B stored (${kb(store.totals.stored)}), ${store.totals.raw} B before gzip`,
   `  Largest part: ${store.totals.largest ? `${store.totals.largest.key} ${store.totals.largest.size} B` : "none"}`,
-  `  Over 4,000,000 bytes after gzip: ${store.oversized.length === 0 ? "none" : store.oversized.map((p) => `${p.key} ${p.size} B`).join(", ")}`,
+  `  Over 4,000,000 bytes after gzip: ${store.oversized.length === 0 ? "none" : store.oversized.map((p) => `${p.key} ${p.size} B (refused: ${p.message})`).join(", ")}`,
   `  Manifest source: ${JSON.stringify(store.manifest.source)}`,
   "  Parts:",
   ...partLines(store),
@@ -384,7 +402,7 @@ export const formatReport = (plan) => {
     `  ${m.verified.records} records (${JSON.stringify(m.verified.kinds)}), ${m.verified.versionsVerified} versions rebuilt with before/after hashes`,
     `  Head ${m.verified.head} (sequence ${m.verified.headSequence}), canonical SHA-256 ${m.verified.canonicalSha256}`,
     `  Document ${m.verified.documentBytes} B: ${JSON.stringify(m.verified.counts)}`,
-    `  Parts rejoin to ${m.verified.rejoinedSha256}`,
+    `  Parts rejoin to ${m.verified.rejoinedSha256 ?? "(not checked: a part was refused)"}`,
     "",
     "NPCDex verified",
     `  Import record ${n.verified.record} (${n.verified.createdAt}), ${n.verified.objects} objects`,
@@ -394,7 +412,7 @@ export const formatReport = (plan) => {
     `  Recovery draft: ${JSON.stringify(n.verified.recoveryDraft)} (reported, not stored)`,
     `  Retired provider: ${JSON.stringify(n.verified.retired)}`,
     ...n.verified.warnings.map((w) => `  WARNING: ${w}`),
-    `  Parts rejoin to ${n.verified.rejoinedSha256}`,
+    `  Parts rejoin to ${n.verified.rejoinedSha256 ?? "(not checked: a part was refused)"}`,
     "",
     ...storeSection("ROMDex data", m),
     "",
