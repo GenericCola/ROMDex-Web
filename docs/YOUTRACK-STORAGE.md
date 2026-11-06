@@ -574,6 +574,31 @@ Expected size: ROMDex data is two parts of a few KB (no images today). NPCDex
 data is about 45 attachments: 4 towns, `annotations`, `plans`, `history`, `root`
 and 39 images, about 1.5 MB in all.
 
+### The migration as built
+
+`scripts/migrate-youtrack-storage.mjs` with its modules in `scripts/migration/`
+(`github-source`, `romdex-data`, `parts` over `src/store/parts`, `plan`, and
+`write` over `src/store/core`). It differs from the steps above in these ways:
+
+- **Both stores are checked before anything is written.** If either article
+  holds other content, the run stops (exit 5) and creates, uploads and changes
+  nothing, not even for the other store.
+- **"Already migrated"** means the manifest's `source` has the same repo, head
+  and hash, the parts are the planned ones, and the parts downloaded from
+  YouTrack rebuild to the source hash. A different `source.commit` alone does
+  not count as different; the receipt shows it.
+- **An article with the right title but no usable manifest** stops the run
+  rather than getting a second article next to it.
+- **The production guard.** `--write --target production` is refused without
+  `--i-have-quit-the-desktop-app`. `--target test` writes to TST (0-4) with
+  titles ending "(migration test, safe to delete)". `--test-label <label>` makes
+  a separate pair.
+- **Exit codes:** 0 written or already migrated, 2 usage, 3 a part over 4 MB,
+  4 ROMDex-Data moved during the run, 5 other content, 1 any other error.
+- **Credentials.** The write needs `YOUTRACK_URL` and `YOUTRACK_TOKEN`; GitHub
+  uses `GITHUB_TOKEN` or `gh auth token`. The receipt and the download cache
+  must be outside the repository.
+
 ## 5. Rollback
 
 ROMDex-Data, the desktop app and NPCD-660 are not changed by any step. Going back
