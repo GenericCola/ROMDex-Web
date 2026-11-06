@@ -1,6 +1,9 @@
 const entity = "[-A-Za-z0-9_]{1,100}";
 const issue = "(?:PMON-[0-9]+|[0-9]+-[0-9]+)";
+const article = "(?:[0-9]+-[0-9]+|[A-Z][A-Z0-9_]*-A-[0-9]+)";
 const reads = [
+  /^articles$/,
+  new RegExp(`^articles/${article}(?:/attachments(?:/${entity})?)?$`),
   /^users\/me$/,
   /^issues$/,
   /^admin\/projects$/,
@@ -18,6 +21,8 @@ const reads = [
   ),
 ];
 const posts = [
+  /^articles$/,
+  new RegExp(`^articles/${article}(?:/attachments)?$`),
   /^issues$/,
   new RegExp(
     `^issues/PMON-[0-9]+(?:/(?:comments|attachments|tags)|/links/${entity}/issues)?$`,

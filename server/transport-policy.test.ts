@@ -35,3 +35,34 @@ test("transport permits existing task routes but not a generic authenticated pro
   );
   assert.throws(() => transportRoute("users/me?access_token=synthetic", "GET"));
 });
+test("transport permits the two store article routes and nothing else on articles", () => {
+  for (const route of [
+    "articles?fields=id&query=project:PMON&$top=5",
+    "articles/186-6?fields=id,content",
+    "articles/PMON-A-12",
+    "articles/186-6/attachments?fields=id",
+    "articles/186-6/attachments/1-2",
+  ])
+    assert.equal(
+      transportRoute(route, "GET").pathname.slice(0, 13),
+      "/api/articles",
+    );
+  for (const route of [
+    "articles",
+    "articles/186-6",
+    "articles/PMON-A-12/attachments",
+  ])
+    transportRoute(route, "POST");
+  for (const [route, method] of [
+    ["articles/186-6", "DELETE"],
+    ["articles/186-6/attachments/1-2", "DELETE"],
+    ["articles/186-6/comments", "POST"],
+    ["articles/186-6/comments", "GET"],
+    ["articles/%2e%2e", "GET"],
+    ["articles/../users/me", "GET"],
+    ["articles/pmon-a-1", "GET"],
+    ["articles/186-6/attachments/1-2", "POST"],
+    ["articles/186-6?access_token=x", "GET"],
+  ] as const)
+    assert.throws(() => transportRoute(route, method), route + " " + method);
+});
