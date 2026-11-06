@@ -31,3 +31,13 @@ _TBD: patterns worth keeping consistent (buttons, cards, forms)._
 ## Motion
 
 Keep it subtle. `prefers-reduced-motion` is respected globally in `src/styles/defaults.css`.
+
+## Loading states
+
+One approach for every wait: `Pending`, `useDelayedFlag` and the `.romdex-spinner` / `.romdex-skeleton` classes (`src/components/romdex`, `src/styles/romdex-tools.css`).
+
+- **Delay plus minimum.** A loader appears only after the work has run for 250 ms, and once shown stays for at least 400 ms. Fast IndexedDB reads show nothing; medium waits do not flicker. The delay only hides the loader, it never slows the work.
+- **Reserved status line.** Render `Pending` in a fixed place. It always outputs the same `role="status"` line, so the spinner and label replace the message in place and nothing below jumps.
+- **Label swap on the trigger.** The button that started the work changes its own text while busy ("Moving…", "Deleting…", "Applying…") and stays disabled.
+- **Skeleton where the layout is known.** Use `.romdex-skeleton` blocks (opacity pulse only, `aria-hidden`) inside a container with `role="status"` and a label. Use a spinner when the shape is unknown.
+- **Errors and empty states.** Errors use `role="alert"`. Show an empty state ("No comments yet.") only after loading has finished, never while the first read is in flight.

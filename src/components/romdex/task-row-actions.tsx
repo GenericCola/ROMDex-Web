@@ -30,6 +30,8 @@ const TaskRowActions = ({
       </button>
       <button
         disabled={taskEditingLocked(item.id) || fresh.checking}
+        className={fresh.slow ? "romdex-fresh-checking" : undefined}
+        aria-busy={fresh.slow ? "true" : undefined}
         title={fresh.checking ? "Checking latest ticket…" : "Edit Item"}
         aria-label={"Edit " + item.summary}
         onClick={() => {

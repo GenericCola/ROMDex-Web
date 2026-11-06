@@ -55,7 +55,7 @@ const DeleteReview = ({
           Cancel
         </button>
         <button className="danger" onClick={confirm} disabled={busy}>
-          Delete Listed Items
+          {busy ? "Deleting…" : "Delete Listed Items"}
         </button>
       </div>
     </Dialog>

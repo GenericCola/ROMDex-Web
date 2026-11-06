@@ -3,9 +3,11 @@ import { useRef, useState } from "react";
 export const useRdxOperation = () => {
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
+    [label, setLabel] = useState(""),
     generationRef = useRef(0);
-  const run = async (task: () => Promise<void>) => {
+  const run = async (what: string, task: () => Promise<void>) => {
     const generation = ++generationRef.current;
+    setLabel(what);
     setBusy(true);
     setMessage("");
     try {
@@ -21,5 +23,5 @@ export const useRdxOperation = () => {
       if (generation === generationRef.current) setBusy(false);
     }
   };
-  return { busy, message, setMessage, run };
+  return { busy, label, message, setMessage, run };
 };

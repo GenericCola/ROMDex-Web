@@ -1,6 +1,7 @@
 import type { WorkspaceData } from "@/domain/types";
 import { nodes } from "@/npcdex/model";
 import Dialog from "./dialog";
+import Pending from "./pending";
 import RdxFileList from "./rdx-file-list";
 import RdxPreview from "./rdx-preview";
 import { useRdx } from "./use-rdx";
@@ -53,9 +54,11 @@ const RdxLibrary = ({
             />
           </label>
         )}
-        <p role="status">
-          {model.busy ? "Validating RDX file…" : model.message}
-        </p>
+        <Pending
+          active={model.busy}
+          label={model.label}
+          message={model.message}
+        />
         {mode !== "export" && model.value && (
           <RdxPreview
             value={model.value}

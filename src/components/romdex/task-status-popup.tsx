@@ -70,8 +70,10 @@ const TaskStatusPopup = ({
         className={
           "status-button" +
           (compact ? " row-status" : "") +
-          (inherited ? " inherited" : "")
+          (inherited ? " inherited" : "") +
+          (fresh.slow ? " romdex-fresh-checking" : "")
         }
+        aria-busy={fresh.slow ? "true" : undefined}
         aria-label={"Set Status for " + item.summary}
         title={
           taskEditingLocked(item.id)

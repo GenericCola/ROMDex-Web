@@ -31,6 +31,7 @@ import { useStableCallback } from "./use-stable-callback";
 import { useWorkspace } from "./use-workspace";
 import WorkTable from "./work-table";
 import WorkTrays from "./work-trays";
+import WorkspaceSkeleton from "./workspace-skeleton";
 import WorkspaceStatus from "./workspace-status";
 import {
   WorkspaceToolsContext,
@@ -97,6 +98,7 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
             </p>
           )}
           {state.error && <LocalSaveRecovery state={state} />}
+          {!state.ready && !state.error && <WorkspaceSkeleton />}
           {state.ready && (
             <DeviceBody enabled={view.workspace === "romdex"} inert={false}>
               {view.workspace === "romdex" ? (

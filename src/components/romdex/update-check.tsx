@@ -16,15 +16,17 @@ const UpdateCheck = ({
       canClose={!update.applying}
     >
       <div className="romdex-update-progress" data-checking={update.checking}>
-        {update.checking && (
-          <Image
-            className="romdex-update-spinner"
-            src="/romdex/update-pokeball.svg"
-            width={64}
-            height={64}
-            alt=""
-          />
-        )}
+        <span className="romdex-update-spinner-slot">
+          {update.checking && (
+            <Image
+              className="romdex-update-spinner"
+              src="/romdex/update-pokeball.svg"
+              width={64}
+              height={64}
+              alt=""
+            />
+          )}
+        </span>
         <p role="status" aria-live="polite">
           {update.message}
         </p>

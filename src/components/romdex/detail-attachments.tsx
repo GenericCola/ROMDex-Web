@@ -4,6 +4,7 @@ import { attachmentsReadable } from "@/youtrack/attachment-reader";
 import { useEffect, useRef } from "react";
 import AttachmentDeleteReview from "./attachment-delete-review";
 import AttachmentPreview from "./attachment-preview";
+import AttachmentStatus from "./attachment-status";
 import NativeAttachmentList from "./native-attachment-list";
 import QueuedAttachments from "./queued-attachments";
 import { useOpenAttachments } from "./task-attachment-context";
@@ -43,11 +44,12 @@ const DetailAttachments = ({
       </div>
       <NativeAttachmentList data={data} id={item.id} model={model} />
       <QueuedAttachments data={data} id={item.id} model={model} />
-      {model.message && (
-        <p className="muted small" role="status">
-          {model.message}
-        </p>
-      )}
+      <AttachmentStatus
+        className="muted small"
+        data={data}
+        id={item.id}
+        model={model}
+      />
       <AttachmentDeleteReview model={model} issueId={item.id} />
       {model.preview && (
         <AttachmentPreview

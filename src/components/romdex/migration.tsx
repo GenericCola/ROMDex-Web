@@ -1,4 +1,5 @@
 import Dialog from "./dialog";
+import Pending from "./pending";
 import { useMigration } from "./use-migration";
 const Migration = ({ close }: { close: () => void }) => {
   const {
@@ -31,7 +32,15 @@ const Migration = ({ close }: { close: () => void }) => {
           disabled={busy}
         />
       </label>
-      <p role="status">{message}</p>
+      <Pending
+        active={busy}
+        label={
+          (preview ?? recovery)
+            ? "Importing reviewed data…"
+            : "Reading and verifying the file…"
+        }
+        message={message}
+      />
       {preview && (
         <>
           <p>

@@ -3,6 +3,7 @@ import { fileSize, nativeAttachmentRows } from "@/attachments/rows";
 import { taskEditingLocked } from "@/domain/task-edit-lock";
 import type { WorkspaceData } from "@/domain/types";
 import { attachmentsReadable } from "@/youtrack/attachment-reader";
+import { attachmentsReading } from "./attachments-reading";
 import type { useAttachments } from "./use-attachments";
 const NativeAttachmentList = ({
   data,
@@ -19,13 +20,15 @@ const NativeAttachmentList = ({
   });
   return (
     <ul className="attachment-list">
-      {!rows.length && !pendingUploads && (
-        <li className="muted small">
-          {data.attachmentLists?.[id] || id.startsWith("local-")
-            ? "No Attachments"
-            : "No Cached Attachments"}
-        </li>
-      )}
+      {!rows.length &&
+        !pendingUploads &&
+        !attachmentsReading(data, id, model) && (
+          <li className="muted small">
+            {data.attachmentLists?.[id] || id.startsWith("local-")
+              ? "No Attachments"
+              : "No Cached Attachments"}
+          </li>
+        )}
       {rows.map(({ file, deletion, held, status }) => {
         return (
           <li key={file.id}>

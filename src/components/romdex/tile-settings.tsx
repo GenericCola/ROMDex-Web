@@ -136,7 +136,7 @@ const TileSettings = ({
             Close
           </button>
           <button className="primary" type="submit" disabled={busy}>
-            Apply Tile Changes
+            {busy ? "Applying…" : "Apply Tile Changes"}
           </button>
         </div>
       </form>
