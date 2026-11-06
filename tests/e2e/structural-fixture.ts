@@ -24,6 +24,7 @@ export const structuralFixture = async (
     | "delete-lost"
     | "move-lost"
     | "status-lost" = "normal",
+  extraTasks = 0,
 ) => {
   await installCookieFixture(page);
   const tasks = new Map<string, Task>();
@@ -43,6 +44,10 @@ export const structuralFixture = async (
       type: "Task",
       updated: 1,
     });
+  for (let index = 0; index < extraTasks; index++) {
+    const id = "PMON-" + (901000 + index);
+    tasks.set(id, { ...tasks.get("PMON-900002")!, id, summary: "Scroll fixture " + index });
+  }
   const writes: { method: string; path: string }[] = [];
   let creates = 0,
     lost = false;

@@ -20,7 +20,7 @@ const DeviceBody = ({
     <TaskDragContext value={drag}>
       <DetailNavigationProvider>
         <div
-          className="device-body"
+          className={"device-body" + (drag.dragId ? " drag-active" : "")}
           inert={inert}
           {...(enabled ? drag.handlers : {})}
         >

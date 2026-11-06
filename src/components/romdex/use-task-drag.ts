@@ -1,8 +1,8 @@
-import { commitBulkTaskDrop } from "@/domain/bulk-drop-commit";
 import type { DropTarget } from "@/domain/task-drop";
-import { commitTaskDrop } from "@/domain/task-drop-commit";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import { taskDragPreview } from "./task-drag-preview";
+import { finishTaskDrag } from "./task-drag-finish";
+import { refreshTaskDrag, scrollTaskDrag } from "./task-drag-navigation";
+import type { DragPoint } from "./task-drag-preview";
 import { startTaskDrag } from "./task-drag-start";
 import type { Drag } from "./task-drag-state";
 export const useTaskDrag = (
@@ -12,19 +12,61 @@ export const useTaskDrag = (
   const dragRef = useRef<Drag | null>(null),
     mountedRef = useRef(true),
     suppressClickUntilRef = useRef(0);
+  const pointRef = useRef<DragPoint | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hoverRef = useRef<{ id: string; since: number } | null>(null);
   const [preview, setPreview] = useState<DropTarget | null>(null);
   const [message, setMessage] = useState("");
   const [dragId, setDragId] = useState<string | null>(null);
   const cancel = () => {
     if (dragRef.current?.active)
       suppressClickUntilRef.current = Date.now() + 350;
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+    pointRef.current = null;
+    hoverRef.current = null;
+    const capture = dragRef.current?.capture;
+    if (capture?.hasPointerCapture?.(dragRef.current?.pointer ?? -1))
+      capture.releasePointerCapture(dragRef.current?.pointer ?? -1);
     dragRef.current = null;
     setPreview(null);
     setDragId(null);
   };
+  const down = (event: PointerEvent<HTMLElement>) => {
+    try {
+      dragRef.current = startTaskDrag(event, selectedIds);
+      setMessage("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Move unavailable.");
+    }
+  };
+  const refresh = (point: DragPoint, current: Drag) => {
+    refreshTaskDrag(
+      point,
+      current,
+      hoverRef,
+      setPreview,
+      setMessage,
+      mountedRef,
+    );
+  };
+  const tick = () => {
+    const point = pointRef.current;
+    const { current } = dragRef;
+    if (point && current?.active && (scrollTaskDrag(point) || hoverRef.current))
+      refresh(point, current);
+  };
   useEffect(() => {
     mountedRef.current = true;
     const escape = (event: KeyboardEvent) => {
+      if (
+        event.key === "Shift" &&
+        pointRef.current &&
+        dragRef.current?.active
+      ) {
+        pointRef.current.shiftKey = event.shiftKey;
+        refresh(pointRef.current, dragRef.current);
+      }
       if (event.key === "Escape" && dragRef.current) {
         event.preventDefault();
         cancel();
@@ -32,24 +74,17 @@ export const useTaskDrag = (
       }
     };
     window.addEventListener("keydown", escape);
+    window.addEventListener("keyup", escape);
+    window.addEventListener("blur", cancel);
     return () => {
       mountedRef.current = false;
+      if (timerRef.current) clearInterval(timerRef.current);
       dragRef.current = null;
       window.removeEventListener("keydown", escape);
+      window.removeEventListener("keyup", escape);
+      window.removeEventListener("blur", cancel);
     };
   }, []);
-  const down = (event: PointerEvent<HTMLElement>) => {
-    try {
-      dragRef.current = startTaskDrag(event, selectedIds);
-      setMessage("");
-    } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "This selection cannot be moved.",
-      );
-    }
-  };
   const move = (event: PointerEvent<HTMLElement>) => {
     const { current } = dragRef;
     if (current?.pointer !== event.pointerId) return;
@@ -61,21 +96,16 @@ export const useTaskDrag = (
     current.active = true;
     setDragId(current.id);
     event.preventDefault();
-    current.intent = null;
-    setPreview(null);
-    try {
-      const preview = taskDragPreview(event, current);
-      if (!preview) return;
-      current.intent = preview.intent;
-      setPreview(preview.result);
-      setMessage(
-        `Move to level ${preview.result.depth + 1}. Release to move; Escape to cancel.`,
-      );
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "This move is unavailable.",
-      );
-    }
+    const point = {
+      clientX: event.clientX,
+      clientY: event.clientY,
+      shiftKey: event.shiftKey,
+      currentTarget: event.currentTarget,
+    };
+    pointRef.current = point;
+    refresh(point, current);
+    if (!timerRef.current && point.currentTarget)
+      timerRef.current = setInterval(tick, 32);
   };
   const up = (event: PointerEvent<HTMLElement>) => {
     const { current } = dragRef;
@@ -83,33 +113,13 @@ export const useTaskDrag = (
     if (current.active) move(event);
     cancel();
     if (!current.active || !current.intent) return;
-    const { intent } = current;
-    const stillCurrent = () => {
-      return mountedRef.current;
-    };
-    const commit = current.bulkIds
-      ? commitBulkTaskDrop(
-          current.bulkIds,
-          intent,
-          current.signature,
-          stillCurrent,
-        )
-      : commitTaskDrop(intent, current.signature, stillCurrent);
-    void commit.then(
+    finishTaskDrag(
+      current,
       () => {
-        if (mountedRef.current) {
-          setMessage(current.bulkIds ? "Selected Items Moved." : "Item moved.");
-          if (current.bulkIds) clearSelection?.();
-        }
+        return mountedRef.current;
       },
-      (error: unknown) => {
-        if (mountedRef.current)
-          setMessage(
-            error instanceof Error
-              ? error.message
-              : "The move could not be saved.",
-          );
-      },
+      setMessage,
+      clearSelection,
     );
   };
   return {

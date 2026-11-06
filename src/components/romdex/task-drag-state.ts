@@ -1,6 +1,7 @@
 import type { DropIntent } from "@/domain/task-drop";
 export interface Drag {
   id: string;
+  capture?: HTMLElement;
   bulkIds?: string[];
   x: number;
   y: number;

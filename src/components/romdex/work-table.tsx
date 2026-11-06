@@ -5,6 +5,7 @@ import { workRows } from "@/domain/work-rows";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState, type ChangeEvent } from "react";
 import { useWorkspaceDrag } from "./task-drag-context";
+import TaskDropGuide from "./task-drop-guide";
 import TaskRows from "./task-rows";
 import { useTableSelection } from "./use-table-selection";
 import WorkEmpty from "./work-empty";
@@ -116,6 +117,10 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
                 closeGroup={selection.closeGroup}
               />
             </table>
+            <TaskDropGuide
+              target={drag.preview}
+              scopeDepth={scope ? (tree.depths.get(scope) ?? 0) + 1 : 0}
+            />
             {rows.length === 0 && !data.newTask && (
               <WorkEmpty filtered={!!(filtering || data.view.search.trim())} />
             )}
@@ -127,7 +132,7 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
             <span role="status">
               {drag.message ||
                 selection.message ||
-                "Drag to Reorder · Drag Sideways to Change Level"}
+                "Drag title or grip · Shift: keep level · Click grip: exact move"}
             </span>
           </footer>
         </section>

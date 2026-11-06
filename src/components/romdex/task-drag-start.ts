@@ -52,6 +52,7 @@ export const startTaskDrag = (
   return {
     ...(bulkIds ? { bulkIds } : {}),
     id,
+    capture: grip,
     x: event.clientX,
     y: event.clientY,
     pointer: event.pointerId,

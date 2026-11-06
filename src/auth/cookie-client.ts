@@ -46,7 +46,9 @@ export const cookieSession = async (
   cookieGeneration().assertCurrent(generation);
   if (response.status === 401) {
     if (!allowRenewal) return null;
-    const value: unknown = await response.json().catch(() => null);
+    const value: unknown = await response.json().catch(() => {
+      return null;
+    });
     cookieGeneration().assertCurrent(generation);
     const challenge = parseRenewalChallenge(value);
     if (!challenge) return null;
@@ -56,7 +58,9 @@ export const cookieSession = async (
       async () => {
         return (await cookieSession(false)) !== null;
       },
-      () => cookieGeneration().assertCurrent(generation),
+      () => {
+        return cookieGeneration().assertCurrent(generation);
+      },
     );
     cookieGeneration().assertCurrent(generation);
     const renewed = await cookieSession(false);
