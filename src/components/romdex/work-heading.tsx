@@ -1,6 +1,6 @@
-import { descendants, indexTree } from "@/domain/accepted/core.mjs";
 import { itemName, taskTier } from "@/domain/task-presentation";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { subtreeIds, workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 const WorkHeading = ({
   items,
@@ -9,11 +9,11 @@ const WorkHeading = ({
   items: TaskItem[];
   data: WorkspaceData;
 }) => {
-  const tree = indexTree(items, data.order);
+  const tree = workspaceTree(items, data.order);
   const { scope } = data.view;
   const selected = scope ? tree.byId.get(scope) : undefined;
   const scopeIds = scope
-    ? descendants(items, scope)
+    ? subtreeIds(tree, scope)
     : items.map((item) => {
         return item.id;
       });

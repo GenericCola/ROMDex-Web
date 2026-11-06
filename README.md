@@ -40,3 +40,8 @@ current rendered verification and delivery evidence.
 October 25: the owner resumed migration. UI source 3e8c0db is deployed at https://romdex-web.vercel.app and all 34 hosted Chrome/Firefox checks pass, including actual CORS refusal messages. See docs/MIGRATION-RESUME-2026-10-25.md (relative to repository root) for the active queue and evidence. Authenticated native acceptance, concurrent shared-status safety and desktop cutover remain pending.
 
 November 7: browser acceptance of the YouTrack data store (PMON-575) passed against a fake YouTrack; no live check and no Vercel preview were possible yet. The e2e specs were brought up to date with cookie sign-in and the desktop-parity UI. See [ACCEPTANCE-YOUTRACK-STORE.md](docs/ACCEPTANCE-YOUTRACK-STORE.md) for results and the open app questions.
+
+Performance and loading states (PMON-576): typing, selection and idle work
+no longer re-render or re-derive the whole task list, rarely used views load on
+demand, and waits share one delayed loader. See docs/PERFORMANCE.md for the
+method, findings and before/after numbers.

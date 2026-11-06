@@ -6,7 +6,7 @@ import {
   commitInlineRename,
   indentInlineRename,
 } from "@/domain/task-rename";
-import type { TaskItem, WorkspaceData } from "@/domain/types";
+import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
 import { useDelayedRowOpen } from "./use-delayed-row-open";
@@ -14,14 +14,15 @@ import { useInlineAction } from "./use-inline-action";
 import { useTaskTextEditing } from "./use-task-text-editing";
 const TaskRowTitle = ({
   item,
-  data,
+  renaming,
+  titleDraft,
   select,
 }: {
   item: TaskItem;
-  data: WorkspaceData;
+  renaming: boolean;
+  titleDraft: string | undefined;
   select: () => void;
 }) => {
-  const renaming = data.view.renameId === item.id;
   const inputRef = useRef<HTMLInputElement>(null);
   const delayed = useDelayedRowOpen(select);
   const editing = useTaskTextEditing(item.id, "inline-title");
@@ -69,7 +70,7 @@ const TaskRowTitle = ({
           id="rename-input"
           className="draft-input"
           aria-label="Rename Task"
-          value={data.titleDrafts[item.id] ?? item.summary}
+          value={titleDraft ?? item.summary}
           readOnly={busy || taskEditingLocked(item.id)}
           onCompositionStart={editing.compositionStart}
           onCompositionEnd={editing.compositionEnd}
@@ -110,7 +111,7 @@ const TaskRowTitle = ({
             else delayed.schedule();
           }}
         >
-          {data.titleDrafts[item.id] ?? itemName(item)}
+          {titleDraft ?? itemName(item)}
         </button>
       )}
       {error && (

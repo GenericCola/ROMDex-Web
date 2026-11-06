@@ -1,6 +1,7 @@
 import { verifyRetainedAssets } from "@/migration/verify-assets";
 import { WorkspaceStorage } from "@/storage/workspace-storage";
 import { persistHierarchyRecovery } from "./hierarchy-recovery-store";
+import { shareStructure } from "./share-structure";
 import type { WorkspaceData, WorkspaceSnapshot } from "./types";
 import { emptyWorkspace, validateWorkspace } from "./workspace-data";
 import type { WorkspacePersistence } from "./workspace-lifecycle";
@@ -58,9 +59,10 @@ export class WorkspacePersistenceStore {
             ? "An app update is being prepared."
             : "Wait for your workspace to open."),
       );
-    const data = structuredClone(this.state.data);
-    update(data);
-    validateWorkspace(data);
+    const draft = structuredClone(this.state.data);
+    update(draft);
+    // Unchanged parts keep their identity so the UI can skip re-deriving them.
+    const data = shareStructure(this.state.data, validateWorkspace(draft));
     if (this.state.error) {
       // Browsing is session-only while saving is unavailable. Never change the
       // queued operations, journal, drafts, or revision to make navigation work.

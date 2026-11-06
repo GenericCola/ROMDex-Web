@@ -1,9 +1,11 @@
 import { refreshIncomingTask } from "@/cloud/incoming-refresh";
 import type { TaskItem } from "@/domain/types";
 import { useEffect, useRef, useState } from "react";
+import { useDelayedFlag } from "./use-delayed-flag";
 export const useFreshTask = (id: string) => {
   const [checking, setChecking] = useState(false),
     [error, setError] = useState("");
+  const slow = useDelayedFlag(checking);
   const epochRef = useRef({ epoch: 0, busy: false });
   useEffect(() => {
     const lifetime = epochRef.current;
@@ -37,5 +39,5 @@ export const useFreshTask = (id: string) => {
         if (epoch === epochRef.current.epoch) setChecking(false);
       });
   };
-  return { checking, error, open };
+  return { checking, slow, error, open };
 };

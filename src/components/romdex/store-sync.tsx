@@ -134,26 +134,4 @@ const StoreSync = () => {
     </section>
   );
 };
-/** One line outside the dialog when a store needs the user. */
-export const StoreNotice = ({ review }: { review: () => void }) => {
-  const statuses = useSyncExternalStore(
-    storeSync.subscribe,
-    storeSync.getSnapshot,
-    storeSync.getSnapshot,
-  );
-  const needs = Object.values(statuses).filter((status) => {
-    return status.review.length > 0 || status.refused.length > 0;
-  });
-  if (!needs.length) return null;
-  return (
-    <p className="port-notice" role="status">
-      {needs
-        .map((status) => {
-          return `${status.title}: ${status.message}`;
-        })
-        .join(" ")}{" "}
-      <button onClick={review}>Review</button>
-    </p>
-  );
-};
 export default StoreSync;

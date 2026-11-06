@@ -13,6 +13,7 @@ import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useState, type KeyboardEvent } from "react";
 import type { GroupDraft } from "./group-draft-row";
 import { useSelectionWork } from "./use-selection-work";
+import { useStableCallback } from "./use-stable-callback";
 import { useWorkSelection } from "./work-selection-context";
 export const useTableSelection = (rows: TaskItem[]) => {
   const selection = useWorkSelection();
@@ -37,28 +38,30 @@ export const useTableSelection = (rows: TaskItem[]) => {
     }
     selection.reconcile(JSON.parse(visibleKey) as string[], mapping);
   }, [visibleKey, selection]);
-  const choose = (id: string, modifiers: SelectionModifiers) => {
-    if (group || work.busy) return;
-    work.run(async () => {
-      await flushDraftEditors();
-      const visible = rows.map((item) => {
-        return item.id;
+  const choose = useStableCallback(
+    (id: string, modifiers: SelectionModifiers) => {
+      if (group || work.busy) return;
+      work.run(async () => {
+        await flushDraftEditors();
+        const visible = rows.map((item) => {
+          return item.id;
+        });
+        const chosen = toggleSelection(
+          selection.selection,
+          id,
+          visible,
+          modifiers,
+        );
+        await workspaceStore.change((next) => {
+          if (next.newTask || next.view.renameId)
+            throw Error("Finish or Cancel the Current Editor First.");
+          next.view.selected =
+            chosen.ids.length === 1 ? (chosen.ids[0] ?? null) : null;
+        });
+        selection.toggle(id, visible, modifiers);
       });
-      const chosen = toggleSelection(
-        selection.selection,
-        id,
-        visible,
-        modifiers,
-      );
-      await workspaceStore.change((next) => {
-        if (next.newTask || next.view.renameId)
-          throw Error("Finish or Cancel the Current Editor First.");
-        next.view.selected =
-          chosen.ids.length === 1 ? (chosen.ids[0] ?? null) : null;
-      });
-      selection.toggle(id, visible, modifiers);
-    });
-  };
+    },
+  );
   const closeGroup = () => {
     setGroup(null);
     selection.clear();

@@ -5,6 +5,7 @@ import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
 import { useEffect, useRef } from "react";
 import { useDetailNavigation } from "./detail-navigation-context";
+import Pending from "./pending";
 import TaskCommentList from "./task-comment-list";
 import { queuedTaskComments, useTaskComments } from "./use-task-comments";
 import { useTaskTextEditing } from "./use-task-text-editing";
@@ -98,11 +99,13 @@ const TaskWriting = ({
         </section>
       ) : (
         <section id="comments-panel">
-          {nativeComments.message && (
-            <p role="status">{nativeComments.message}</p>
-          )}
-          {nativeComments.busy && <p role="status">Reading Comments…</p>}
+          <Pending
+            active={nativeComments.busy}
+            label="Reading Comments…"
+            message={nativeComments.message}
+          />
           <TaskCommentList
+            loading={nativeComments.busy}
             comments={[...shownComments, ...queued]}
             remoteCount={remoteCount}
           />

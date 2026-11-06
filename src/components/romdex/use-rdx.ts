@@ -11,7 +11,7 @@ export const useRdx = () => {
     [name, setName] = useState(""),
     [confirmed, setConfirmed] = useState(false),
     [choices, setChoices] = useState<Record<string, string>>({});
-  const { busy, message, setMessage, run } = useRdxOperation();
+  const { busy, label, message, setMessage, run } = useRdxOperation();
   const controllerRef = useRef<AbortController | null>(null),
     sourceRef = useRef<Uint8Array | null>(null),
     localRef = useRef<RdxFile | null>(null),
@@ -66,7 +66,7 @@ export const useRdx = () => {
     if (!active.signal.aborted) verified(result);
   };
   const select = (file: File) => {
-    return run(async () => {
+    return run("Validating RDX file…", async () => {
       setValue(null);
       if (file.size > 64 * 1024 * 1024)
         throw Error("Choose an RDX file no larger than 64 MiB.");
@@ -82,7 +82,7 @@ export const useRdx = () => {
     const bytes = sourceRef.current,
       local = localRef.current;
     if (!bytes || !local) return;
-    void run(async () => {
+    void run("Merging RDX choices…", async () => {
       const active = start();
       const result = await runRdx(
         { action: "merge", bytes, local: fileBytes(local), choices: next },
@@ -92,7 +92,7 @@ export const useRdx = () => {
     });
   };
   const save = (open = false) => {
-    return run(async () => {
+    return run("Saving RDX…", async () => {
       if (!value || !confirmed || !originalRef.current) return;
       await saveRdx(
         rdxFile(name, value),
@@ -111,12 +111,12 @@ export const useRdx = () => {
     });
   };
   const openFile = (file: RdxFile) => {
-    void run(async () => {
+    void run("Validating RDX file…", async () => {
       await load(fileBytes(file), file.name, false);
     });
   };
   const download = (file: RdxFile) => {
-    return run(async () => {
+    return run("Exporting RDX…", async () => {
       await exportRdx(file);
     });
   };
@@ -125,6 +125,7 @@ export const useRdx = () => {
     name,
     message,
     busy,
+    label,
     confirmed,
     setConfirmed,
     choices,

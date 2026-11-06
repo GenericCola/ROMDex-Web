@@ -1,9 +1,9 @@
-import { indexTree, materialize } from "@/domain/accepted/core.mjs";
 import { editTask } from "@/domain/task-actions";
 import { taskAssigneeLabel } from "@/domain/task-assignee-label";
 import { taskEditingLocked } from "@/domain/task-edit-lock";
 import { itemName, taskTier } from "@/domain/task-presentation";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { workspaceItems, workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent, ReactNode } from "react";
 import TaskField from "./task-field";
@@ -23,7 +23,7 @@ const TaskProperties = ({
 }) => {
   const readOnly = taskEditingLocked(item.id, data);
   const editing = useTaskTextEditing(item.id, "title");
-  const tree = indexTree(materialize(data.remote, data.operations), data.order);
+  const tree = workspaceTree(workspaceItems(data), data.order);
   const parents: string[] = [];
   let parent = tree.byId.get(item.parentId ?? "");
   while (parent) {

@@ -3,7 +3,6 @@ import { itemName, taskTier } from "@/domain/task-presentation";
 import { applyTileSettings, type TileDraft } from "@/domain/tile-settings";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { taskImage } from "@/rdx/images";
 import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import Dialog from "./dialog";
 import TileImagePreview from "./tile-image-preview";
@@ -107,6 +106,7 @@ const TileSettings = ({
                 event.target.value = "";
                 if (file)
                   run(async () => {
+                    const { taskImage } = await import("@/rdx/images");
                     const nextImage = await taskImage(file);
                     setDraft((next) => {
                       return { ...next, image: nextImage };
@@ -136,7 +136,7 @@ const TileSettings = ({
             Close
           </button>
           <button className="primary" type="submit" disabled={busy}>
-            Apply Tile Changes
+            {busy ? "Applying…" : "Apply Tile Changes"}
           </button>
         </div>
       </form>

@@ -1,15 +1,13 @@
-import { knownAttachmentCount } from "@/attachments/count";
-import type { TaskItem, WorkspaceData } from "@/domain/types";
+import type { TaskItem } from "@/domain/types";
 import { useOpenAttachments } from "./task-attachment-context";
 const TaskAttachmentButton = ({
   item,
-  data,
+  count,
 }: {
   item: TaskItem;
-  data: WorkspaceData;
+  count: number;
 }) => {
-  const count = knownAttachmentCount(data, item.id),
-    open = useOpenAttachments();
+  const open = useOpenAttachments();
   if (!count) return null;
   return (
     <button
