@@ -66,10 +66,10 @@ export const npcdexBinding: StoreBinding = {
   remote: (parts) => {
     return flattenNpcdex(decode(parts));
   },
-  local: (data, base, remote) => {
+  local: (data, base) => {
     const flat = flattenNpcdex(localState(data));
     if (data.npcdex) return flat;
-    for (const [key, value] of Object.entries(base ?? remote))
+    for (const [key, value] of Object.entries(base ?? {}))
       if (!isDraftKey(key)) flat[key] = value;
     return flat;
   },

@@ -51,8 +51,11 @@ export const localOrders = (
   base: Record<string, unknown> | null,
   remote: Record<string, unknown>,
 ): Record<string, unknown> => {
+  // Lists to compare with: a browser that never synced compares with YouTrack's.
   const source = base ?? remote;
-  const out: Record<string, unknown> = Object.fromEntries(orderEntries(source));
+  // Carried unchanged only from a base: with none, the merge already takes
+  // YouTrack's values, and carrying them would hide them from this browser.
+  const out: Record<string, unknown> = Object.fromEntries(orderEntries(base));
   if (hierarchyPending(data)) return out;
   const items = materialize(data.remote, data.operations);
   const known = new Set(

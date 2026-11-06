@@ -18,7 +18,8 @@ test("a workspace without NPCDex never removes it", () => {
   };
   const local = npcdexBinding.local(data, base, {});
   assert.deepEqual(local, base);
-  assert.deepEqual(npcdexBinding.local(data, null, base), base);
+  // Never synced: nothing carried, so the merge takes YouTrack's values.
+  assert.deepEqual(npcdexBinding.local(data, null, base), {});
 });
 
 test("local to parts to remote round trips with drafts", async () => {
