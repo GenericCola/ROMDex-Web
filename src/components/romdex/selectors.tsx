@@ -1,5 +1,5 @@
-import { indexTree } from "@/domain/accepted/core.mjs";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import Image from "next/image";
 import { useState } from "react";
@@ -12,7 +12,7 @@ interface SelectorProps {
   add: (parentId: string | null) => void;
 }
 const Selectors = ({ data, items, add }: SelectorProps) => {
-  const tree = indexTree(items, data.order);
+  const tree = workspaceTree(items, data.order);
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const settingsItem = settingsId ? tree.byId.get(settingsId) : undefined;
   const all = () => {

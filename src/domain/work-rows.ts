@@ -1,19 +1,19 @@
-import { descendants, indexTree } from "./accepted/core.mjs";
 import {
   filtersActive,
   matchesFilters,
   type TaskFilters,
 } from "./task-filters";
 import type { TaskItem, WorkspaceData } from "./types";
+import { subtreeIds, workspaceTree } from "./workspace-derived";
 export const workRows = (
   items: TaskItem[],
   data: WorkspaceData,
   filters: TaskFilters,
+  tree = workspaceTree(items, data.order),
 ) => {
-  const tree = indexTree(items, data.order),
-    { scope } = data.view,
+  const { scope } = data.view,
     filtering = filtersActive(filters);
-  const allowed = scope ? new Set(descendants(items, scope)) : null;
+  const allowed = scope ? new Set(subtreeIds(tree, scope)) : null;
   const query = data.view.search.trim().toLowerCase();
   const rows: TaskItem[] = [];
   const collect = (parentId: string | null) => {

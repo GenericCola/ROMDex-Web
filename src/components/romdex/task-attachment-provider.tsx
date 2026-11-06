@@ -1,4 +1,4 @@
-import { materialize } from "@/domain/accepted/core.mjs";
+import { workspaceItems } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import {
   useCallback,
@@ -21,11 +21,12 @@ const TaskAttachmentProvider = ({ children }: PropsWithChildren) => {
   const close = () => {
     setId(null);
   };
-  const item = materialize(state.data.remote, state.data.operations).find(
-    (entry) => {
-      return entry.id === id;
-    },
-  );
+  const item =
+    id === null
+      ? undefined
+      : workspaceItems(state.data).find((entry) => {
+          return entry.id === id;
+        });
   return (
     <TaskAttachmentContext value={open}>
       {children}

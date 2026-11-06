@@ -2,13 +2,13 @@
 import { WorkSelectionProvider } from "./work-selection-provider";
 
 import { recoveryMode } from "@/auth/recovery-mode";
-import { materialize } from "@/domain/accepted/core.mjs";
 import {
   hasDraftEdits,
   noDraftEdits,
   subscribeDraftEditors,
 } from "@/domain/editor-drafts";
 import { beginInlineTask } from "@/domain/task-inline";
+import { workspaceItems } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import Npcdex from "@components/npcdex";
 import NpcdexSidebar from "@components/npcdex/sidebar";
@@ -57,7 +57,7 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
   const closeMigration = () => {
     setMigration(false);
   };
-  const items = materialize(state.data.remote, state.data.operations);
+  const items = workspaceItems(state.data);
   const openConnection = () => {
     return setConnection(true);
   };

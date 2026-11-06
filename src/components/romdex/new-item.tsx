@@ -1,7 +1,7 @@
-import { indexTree } from "@/domain/accepted/core.mjs";
 import { commitInlineTask, indentInlineTask } from "@/domain/task-inline";
 import { taskTier } from "@/domain/task-presentation";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import {
   useLayoutEffect,
@@ -24,7 +24,7 @@ const NewItem = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const editing = useTaskTextEditing("new-task", "inline");
   const { run, error, busy } = useInlineAction();
-  const tree = indexTree(items, data.order),
+  const tree = workspaceTree(items, data.order),
     depth = draft.parentId ? (tree.depths.get(draft.parentId) ?? 0) + 1 : 0;
   useLayoutEffect(() => {
     inputRef.current?.focus();

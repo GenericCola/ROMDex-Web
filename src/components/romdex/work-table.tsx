@@ -1,7 +1,7 @@
-import { descendants, indexTree } from "@/domain/accepted/core.mjs";
 import { emptyFilters, filtersActive } from "@/domain/task-filters";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workRows } from "@/domain/work-rows";
+import { subtreeIds, workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState, type ChangeEvent } from "react";
 import { useWorkspaceDrag } from "./task-drag-context";
@@ -19,10 +19,10 @@ interface WorkTableProps {
 const WorkTable = ({ data, items, add }: WorkTableProps) => {
   const [filters, setFilters] = useState(emptyFilters);
   const filtering = filtersActive(filters);
-  const tree = indexTree(items, data.order);
+  const tree = workspaceTree(items, data.order);
   const { scope } = data.view;
-  const scopeCount = scope ? descendants(items, scope).length : items.length;
-  const rows = workRows(items, data, filters);
+  const scopeCount = scope ? subtreeIds(tree, scope).length : items.length;
+  const rows = workRows(items, data, filters, tree);
   const selection = useTableSelection(rows);
   const drag = useWorkspaceDrag();
   const search = (event: ChangeEvent<HTMLInputElement>) => {

@@ -1,7 +1,7 @@
 import { cloudData } from "@/cloud/types";
-import { indexTree, materialize } from "@/domain/accepted/core.mjs";
 import { DetailNavigation } from "@/domain/accepted/detail-navigation.mjs";
 import { flushDraftEditors } from "@/domain/editor-drafts";
+import { workspaceItems, workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useRef, useState, type PropsWithChildren } from "react";
 import { DetailNavigationContext } from "./detail-navigation-context";
@@ -23,7 +23,7 @@ const DetailNavigationProvider = ({ children }: PropsWithChildren) => {
   }, [state.data.view.scope]);
   const tree = () => {
     const { data } = workspaceStore.getSnapshot();
-    return indexTree(materialize(data.remote, data.operations), data.order);
+    return workspaceTree(workspaceItems(data), data.order);
   };
   useEffect(() => {
     if (!state.data.view.selected) navigationRef.current.reset();
