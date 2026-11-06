@@ -1,6 +1,6 @@
 // QA-only preview build wrapper. NEVER promote this branch to production.
 // The application sources are identical to the candidate; all OAuth is synthetic.
-import { writeFileSync, mkdtempSync } from "node:fs";
+import { writeFileSync, mkdtempSync, cpSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -28,8 +28,9 @@ run("corepack", ["pnpm", "build"]);
 run("corepack", ["pnpm", "check"]);
 run("dnf", ["install", "-y", "nss", "atk", "at-spi2-atk", "cups-libs", "libdrm", "libXcomposite", "libXdamage", "libXext", "libXfixes", "libXrandr", "libxkbcommon", "pango", "alsa-lib", "mesa-libgbm"]);
 run("node", ["scripts/playwright.mjs", "install", "chromium", "--only-shell"]);
-run("node", ["scripts/playwright.mjs", "test", "--project=chromium", "tests/e2e/drag-precision.spec.ts", "tests/e2e/ui-layout.spec.ts", "tests/e2e/notes-editing.spec.ts", "tests/e2e/task-port.spec.ts", "--reporter=line"], 600000);
+run("node", ["scripts/playwright.mjs", "test", "--project=chromium", "tests/e2e/drag-precision.spec.ts", "tests/e2e/ui-layout.spec.ts", "tests/e2e/save-isolation.spec.ts", "tests/e2e/session-entry-flow.spec.ts", "--reporter=line"], 600000);
 run("dnf", ["install", "-y", "gtk3", "dbus-glib", "libXt"]);
 run("node", ["scripts/playwright.mjs", "install", "firefox"]);
-run("node", ["scripts/playwright.mjs", "test", "--project=firefox", "tests/e2e/drag-precision.spec.ts", "tests/e2e/ui-layout.spec.ts", "tests/e2e/notes-editing.spec.ts", "tests/e2e/task-port.spec.ts", "--reporter=line"], 600000);
+run("node", ["scripts/playwright.mjs", "test", "--project=firefox", "tests/e2e/drag-precision.spec.ts", "tests/e2e/ui-layout.spec.ts", "tests/e2e/save-isolation.spec.ts", "tests/e2e/session-entry-flow.spec.ts", "--reporter=line"], 600000);
+cpSync("artifacts/drag-precision", "out/qa-drag-evidence", { recursive: true });
 console.log("ROMDEX_DRAG_PRECISION_QA_COMPLETE");

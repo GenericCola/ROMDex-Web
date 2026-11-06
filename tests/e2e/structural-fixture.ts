@@ -46,7 +46,11 @@ export const structuralFixture = async (
     });
   for (let index = 0; index < extraTasks; index++) {
     const id = "PMON-" + (901000 + index);
-    tasks.set(id, { ...tasks.get("PMON-900002")!, id, summary: "Scroll fixture " + index });
+    tasks.set(id, {
+      ...tasks.get("PMON-900002")!,
+      id,
+      summary: "Scroll fixture " + index,
+    });
   }
   const writes: { method: string; path: string }[] = [];
   let creates = 0,

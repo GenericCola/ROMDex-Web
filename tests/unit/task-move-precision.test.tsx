@@ -3,12 +3,17 @@ import test from "node:test";
 import { dragDepthDelta } from "../../src/components/romdex/task-drag-preview";
 import { indexTree, materialize } from "../../src/domain/accepted/core.mjs";
 import { createTask } from "../../src/domain/task-actions";
-import { applyTaskDrop, hierarchySignature, rowDropTarget } from "../../src/domain/task-drop";
+import {
+  applyTaskDrop,
+  hierarchySignature,
+  rowDropTarget,
+} from "../../src/domain/task-drop";
 import { exactMoveIntent } from "../../src/domain/task-move";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 
 test("sideways precision has a full-step dead zone in both directions", () => {
-  for (const distance of [-25, -13, -1, 0, 1, 13, 25]) assert.equal(dragDepthDelta(distance), 0);
+  for (const distance of [-25, -13, -1, 0, 1, 13, 25])
+    assert.equal(dragDepthDelta(distance), 0);
   for (const distance of [26, 51, 52, 78]) {
     assert.equal(dragDepthDelta(distance), Math.floor(distance / 26));
     assert.equal(dragDepthDelta(-distance), -Math.floor(distance / 26));
@@ -26,10 +31,18 @@ test("exact move inserts before first child, between siblings, at end and back t
   const move = (parent: string | null, before: string | null) => {
     const intent = exactMoveIntent(data, moving, parent, before);
     assert.ok(intent);
-    const preview = rowDropTarget(materialize(data.remote, data.operations), data.order, intent, [root, child, next, moving]);
+    const preview = rowDropTarget(
+      materialize(data.remote, data.operations),
+      data.order,
+      intent,
+      [root, child, next, moving],
+    );
     assert.equal(preview?.parentId, parent);
     applyTaskDrop(data, intent, hierarchySignature(data));
-    const tree = indexTree(materialize(data.remote, data.operations), data.order);
+    const tree = indexTree(
+      materialize(data.remote, data.operations),
+      data.order,
+    );
     assert.equal(tree.byId.get(moving)?.parentId, parent);
     return tree.children.get(parent)?.map((item) => item.id);
   };
@@ -47,14 +60,20 @@ test("exact moves reject cycles, wrong-parent boundaries and stale hierarchy wit
   const other = createTask(data, null, "Other");
   const before = structuredClone(data);
   assert.throws(() => exactMoveIntent(data, root, child, null), /descendants/);
-  assert.throws(() => exactMoveIntent(data, other, root, other), /insertion target/);
+  assert.throws(
+    () => exactMoveIntent(data, other, root, other),
+    /insertion target/,
+  );
   assert.deepEqual(data, before);
   const intent = exactMoveIntent(data, other, root, child);
   const signature = hierarchySignature(data);
   assert.ok(intent);
   data.order[root] = 50;
   const changed = structuredClone(data);
-  assert.throws(() => applyTaskDrop(data, intent, signature), /hierarchy changed/);
+  assert.throws(
+    () => applyTaskDrop(data, intent, signature),
+    /hierarchy changed/,
+  );
   assert.deepEqual(data, changed);
 });
 
