@@ -28,6 +28,9 @@ Verified on October 22, 2026: pnpm check passed 88 unit tests and 8 worker/build
   - [x] NPCDex and ROMDex metadata sync with conflict review (PMON-572); live
         round trip passed in test articles in TST.
   - [ ] Migration from ROMDex-Data (PMON-573) and cutover (PMON-574).
+  - [x] Browser acceptance with a fake YouTrack (PMON-575), see
+        ACCEPTANCE-YOUTRACK-STORE.md. No live browser check or Vercel preview
+        yet, so the item above stays open.
 - [ ] RDX import/export, managed-container browser equivalents and human testing gates.
 - [ ] Previewed desktop-data import with preservation and acceptance checks.
 - [ ] Full parity checks, real-device PWA and HTTPS deployment acceptance.
