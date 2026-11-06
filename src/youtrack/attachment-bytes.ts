@@ -8,7 +8,8 @@ export const attachmentBytes = (value: string) => {
   return async (
     raw: string,
     expected: number,
-    attachment?: { issue: string; id: string },
+    attachment?:
+      { issue: string; id: string } | { article: string; id: string },
   ) => {
     assertSession();
     if (expected > MAX_UPLOAD)
@@ -26,8 +27,14 @@ export const attachmentBytes = (value: string) => {
     const response = isCookieHandle(token)
       ? await cookieFetch(
           token,
-          "/api/attachment?issue=" +
-            encodeURIComponent(attachment?.issue ?? "") +
+          "/api/attachment?" +
+            ("article" in (attachment ?? {})
+              ? "article=" +
+                encodeURIComponent((attachment as { article: string }).article)
+              : "issue=" +
+                encodeURIComponent(
+                  (attachment as { issue: string } | undefined)?.issue ?? "",
+                )) +
             "&id=" +
             encodeURIComponent(attachment?.id ?? "") +
             "&size=" +
