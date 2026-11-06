@@ -1,6 +1,6 @@
-import { indexTree, materialize } from "./accepted/core.mjs";
+import { materializeShared } from "./materialize-shared";
+import { reuseTree, type Tree, type TreeMemo } from "./tree-reuse";
 import type { TaskItem, TaskOperation, WorkspaceData } from "./types";
-type Tree = ReturnType<typeof indexTree>;
 const itemCache = new WeakMap<
   TaskOperation[],
   { remote: TaskItem[]; items: TaskItem[] }
@@ -10,12 +10,13 @@ const treeCache = new WeakMap<
   { order: Record<string, number>; tree: Tree }
 >();
 let previous: TaskItem[] = [];
+let lastTree: TreeMemo | undefined;
 export const workspaceItems = (
   data: Pick<WorkspaceData, "remote" | "operations">,
 ): TaskItem[] => {
   const hit = itemCache.get(data.operations);
   if (hit?.remote === data.remote) return hit.items;
-  const fresh = materialize(data.remote, data.operations);
+  const fresh = materializeShared(data.remote, data.operations);
   const before = new Map(
     previous.map((item) => {
       return [item.id, item] as const;
@@ -24,7 +25,7 @@ export const workspaceItems = (
   let reused = 0;
   const merged = fresh.map((item) => {
     const old = before.get(item.id);
-    if (old && JSON.stringify(old) === JSON.stringify(item)) {
+    if (old && (old === item || JSON.stringify(old) === JSON.stringify(item))) {
       reused += 1;
       return old;
     }
@@ -47,8 +48,9 @@ export const workspaceTree = (
 ): Tree => {
   const hit = treeCache.get(items);
   if (hit?.order === order) return hit.tree;
-  const tree = indexTree(items, order);
+  const tree = reuseTree(lastTree, items, order);
   treeCache.set(items, { order, tree });
+  lastTree = { items, order, tree };
   return tree;
 };
 export const subtreeIds = (tree: Tree, id: string): string[] => {
