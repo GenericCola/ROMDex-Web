@@ -1,8 +1,7 @@
 import {test,expect} from "@playwright/test";
 import {structuralFixture} from "./structural-fixture";
-import {setStatus,expectAssigned,moveTask} from "./task-status";
+import {setStatus,expectAssigned,moveTask,selectTask as select} from "./task-status";
 test.use({serviceWorkers:"block"});
-const select=async(page:import("@playwright/test").Page,name:string)=>{await page.getByRole("button",{name,exact:true}).last().click();};
 test("a parent's own status survives child rollup, reload, refresh and last-child movement",async({page})=>{
   const s=await structuralFixture(page);await select(page,"Fixture Root");await setStatus(page,"Fixture Root","Standby");await s.connect();await s.save();await s.confirmed();expect(s.tasks.get("PMON-900001")?.state).toBe("To do");expect(s.writes).toHaveLength(0);
   await page.getByRole("button",{name:"Expand Fixture Root",exact:true}).last().click();await select(page,"Fixture Child");await setStatus(page,"Fixture Child","Complete");await s.save();await s.confirmed();expect(s.tasks.get("PMON-900001")?.state).toBe("Done");await select(page,"Fixture Root");await expectAssigned(page,"Fixture Root","Standby");

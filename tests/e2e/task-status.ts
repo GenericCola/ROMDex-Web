@@ -23,6 +23,12 @@ export const expectAssigned = async (page: Page, summary: string, status: string
   await popup(page).getByRole("button", { name: "Close Set Status", exact: true }).click();
   await expect(popup(page)).toHaveCount(0);
 };
+// A single click on a row title opens the task after a short delay so a double-click can rename
+// instead, and any later pointerdown cancels it. Wait for the details pane before the next click.
+export const selectTask = async (page: Page, summary: string) => {
+  await page.getByRole("button", { name: summary, exact: true }).last().click();
+  await expect(page.getByRole("textbox", { name: "Task Title", exact: true })).toHaveValue(summary);
+};
 // The exact-destination dialog opened by the row grip replaces the old "Task Parent" select.
 export const moveTask = async (page: Page, summary: string, parentId: string) => {
   await page.getByRole("button", { name: "Drag " + summary, exact: true }).last().click();

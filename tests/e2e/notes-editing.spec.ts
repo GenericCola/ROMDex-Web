@@ -1,11 +1,10 @@
 import {test,expect} from "@playwright/test";
 import {structuralFixture} from "./structural-fixture";
-import {storedSelection} from "./task-status";
+import {storedSelection,selectTask as select} from "./task-status";
 test.use({serviceWorkers:"block"});
 const save=(page:import("@playwright/test").Page)=>page.getByRole("button",{name:/^Save Changes/});
 // The "All changes saved in this browser" line only shows in recovery mode; the Save title carries the same no-draft, no-pending-write state.
 const saved=(page:import("@playwright/test").Page,queued=0)=>expect(save(page)).toHaveAttribute("title",queued?queued+" queued change"+(queued>1?"s":"")+" not yet confirmed in YouTrack.":"No pending changes in this browser.");
-const select=async(page:import("@playwright/test").Page,name:string)=>{await page.getByRole("button",{name,exact:true}).last().click();};
 test("notes persist locally while focused; explicit Save and leaving the editor send only complete snapshots",async({page})=>{
  await page.clock.install();const s=await structuralFixture(page);await s.connect();await page.getByRole("switch",{name:"Auto-Sync Data",exact:true}).click();await select(page,"Fixture Root");
  const notes=page.getByRole("textbox",{name:"Notes and Instructions",exact:true});
