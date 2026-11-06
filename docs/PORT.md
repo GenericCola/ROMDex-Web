@@ -8,7 +8,7 @@ The migration archive's installed-source is the accepted 0.5.15 client with Octo
 
 Browser-compatible domain rules can be reused with provenance. Renderers must be React; no legacy HTML renderer or iframe wrapper. The first reused modules are public/core.mjs and its pure plan-queue.mjs dependency, for hierarchy, rollups, operation materialization and conflict contracts. Shared Poké Ball/settings SVGs are original UI assets. Never copy source examples, real content or saved maps into public web fixtures.
 
-YouTrack-backed cross-device assigned status and its installable app are documented in SHARED-STATUS.md. The earlier browser-only status checkpoint is in STATUS-DELIVERY.md. Task creation, deletion and hierarchy delivery are documented in STRUCTURAL-DELIVERY.md. The earlier existing-task adapter checkpoint is in CLOUD-DELIVERY.md. The checklist below tracks full accepted-app parity.
+The "ROMDex data" article is the decided home for assigned status, and the store is described in YOUTRACK-STORAGE.md. SHARED-STATUS.md is the earlier app-based design. The earlier browser-only status checkpoint is in STATUS-DELIVERY.md. Task creation, deletion and hierarchy delivery are documented in STRUCTURAL-DELIVERY.md. The earlier existing-task adapter checkpoint is in CLOUD-DELIVERY.md. The checklist below tracks full accepted-app parity.
 
 ## Web status extension
 
