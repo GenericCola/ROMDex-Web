@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
-import { delayedFlagStep } from "../../src/components/romdex/delayed-flag-step";
+import {
+  delayedFlagStep,
+  loaderShown,
+} from "../../src/components/romdex/delayed-flag-step";
 import Pending from "../../src/components/romdex/pending";
 const DELAY = 250,
   MINIMUM = 400;
@@ -72,4 +75,12 @@ test("Pending with no message is an empty reserved line and keeps className", ()
     html,
     '<p class="romdex-pending small" role="status" aria-live="polite"></p>',
   );
+});
+
+test("a finished result message replaces a held loader at once", () => {
+  assert.equal(loaderShown(true, true, "Done"), true);
+  assert.equal(loaderShown(true, false, undefined), true);
+  assert.equal(loaderShown(true, false, ""), true);
+  assert.equal(loaderShown(true, false, "Done"), false);
+  assert.equal(loaderShown(false, true, undefined), false);
 });

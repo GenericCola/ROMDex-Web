@@ -24,3 +24,15 @@ export const delayedFlagStep = (
     ? { next: true, wait: Math.max(0, delay - elapsed) }
     : { next: false, wait: null };
 };
+
+/**
+ * The minimum display only prevents loader-to-blank flicker. Once the work
+ * has finished, a result message replaces the loader at once.
+ */
+export const loaderShown = (
+  delayed: boolean,
+  active: boolean,
+  message: string | undefined,
+) => {
+  return delayed && (active || !message);
+};

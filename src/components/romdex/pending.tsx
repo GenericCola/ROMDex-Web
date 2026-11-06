@@ -1,4 +1,5 @@
 import { tw } from "@utils/tw";
+import { loaderShown } from "./delayed-flag-step";
 import { useDelayedFlag } from "./use-delayed-flag";
 interface PendingProps {
   active: boolean;
@@ -8,7 +9,7 @@ interface PendingProps {
 }
 /** One reserved status line: spinner and label while slow work runs. */
 const Pending = ({ active, label, message, className }: PendingProps) => {
-  const shown = useDelayedFlag(active);
+  const shown = loaderShown(useDelayedFlag(active), active, message);
   return (
     <p
       className={tw("romdex-pending", className)}
