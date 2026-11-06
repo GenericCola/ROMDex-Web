@@ -197,7 +197,7 @@ test("exact placement flushes notes and scoped drag guides use relative depth", 
     head: document.querySelector("thead")?.getBoundingClientRect().toJSON(),
     scroll: document.querySelector(".table-scroll")?.scrollTop,
     status: document.querySelector(".work-footer [role=status]")?.textContent,
-  })), { x: source.x + 8, y: child.y + 4 }));
+  }), { x: source.x + 8, y: child.y + 4 }));
   await expect(page.locator(".work-footer [role=status]")).toContainText(
     "before Fixture Child",
   );
@@ -238,7 +238,7 @@ test("checked siblings retain order when moved together", async ({ page }) => {
     head: document.querySelector("thead")?.getBoundingClientRect().toJSON(),
     scroll: document.querySelector(".table-scroll")?.scrollTop,
     status: document.querySelector(".work-footer [role=status]")?.textContent,
-  })), { x: source.x + 8, y: target.y + 4 }));
+  }), { x: source.x + 8, y: target.y + 4 }));
   await page.mouse.up();
   await page.keyboard.up("Shift");
   await expect
