@@ -1,10 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
+import { LOCAL_ORIGIN } from "./tests/e2e/local-origin";
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: false,
   workers: 1,
   globalSetup: "./tests/e2e/global-setup.mjs",
-  use: { baseURL: "http://127.0.0.1:3100", trace: "retain-on-failure" },
+  use: { baseURL: LOCAL_ORIGIN, trace: "retain-on-failure" },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "firefox", use: { ...devices["Desktop Firefox"] } },

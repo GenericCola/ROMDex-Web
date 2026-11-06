@@ -1,5 +1,6 @@
 import { expect, type Page, type Route } from "@playwright/test";
 import { resolve } from "node:path";
+import { LOCAL_ORIGIN } from "./local-origin";
 export const APP = "https://romdex.vercel.app";
 const YOUTRACK = "https://thegobindsingh.youtrack.cloud";
 export const installCookieFixture = async (
@@ -11,7 +12,7 @@ export const installCookieFixture = async (
     if (url.origin !== APP) return route.abort();
     if (url.pathname === "/__attachment-transport") {
       const response = await route.fetch({
-        url: "http://127.0.0.1:3100/__attachment-transport",
+        url: LOCAL_ORIGIN + "/__attachment-transport",
       });
       return route.fulfill({ response });
     }
