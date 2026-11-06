@@ -106,12 +106,19 @@ export const partsToNpcdex = (
   const document: Json = {};
   for (const key of root.keys) {
     const own = OWN_PARTS[key];
+    // A town or field part refused for size was never stored: it is left out
+    // here and stays pending on the device that holds it.
     if (key === "towns")
-      document[key] = root.towns.map((id) => {
-        return restore(`${TOWN_PREFIX}${id}`);
-      });
-    else if (own !== undefined) document[key] = restore(own);
-    else if (key in root.fields)
+      document[key] = root.towns
+        .filter((id) => {
+          return byKey.has(`${TOWN_PREFIX}${id}`);
+        })
+        .map((id) => {
+          return restore(`${TOWN_PREFIX}${id}`);
+        });
+    else if (own !== undefined) {
+      if (byKey.has(own)) document[key] = restore(own);
+    } else if (key in root.fields)
       document[key] = restoreImages(root.fields[key], images);
     else throw new Error(`Part "root" lacks field "${key}".`);
   }

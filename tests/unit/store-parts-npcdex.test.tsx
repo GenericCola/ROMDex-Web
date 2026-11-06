@@ -54,9 +54,13 @@ test("invalid documents and parts throw", async () => {
   const parts = await npcdexToParts(fixture());
   const noImage = parts.filter((p) => !p.key.startsWith("image/"));
   assert.throws(() => partsToNpcdex(noImage), /Missing part "image\//);
-  assert.throws(
-    () => partsToNpcdex(parts.filter((p) => p.key !== "town/c")),
-    /town\/c/,
+  // A town part refused for size was never stored: the rest still rebuilds.
+  const withoutC = partsToNpcdex(parts.filter((p) => p.key !== "town/c"));
+  assert.deepEqual(
+    (withoutC.document.towns as { id: string }[]).map((town) => town.id),
+    (fixture().towns as { id: string }[])
+      .map((town) => town.id)
+      .filter((id) => id !== "c"),
   );
   assert.throws(
     () =>
