@@ -180,6 +180,11 @@ test("exact placement flushes notes and scoped drag guides use relative depth", 
     "Unsaved synthetic note survives exact placement.",
   );
   await page.locator('.selector-main[data-select="PMON-900001"]').click();
+  await expect(
+    page.locator('.selector-main[data-select="PMON-900001"]'),
+  ).toHaveAttribute("aria-current", "true");
+  await expect(row(page, 900001)).toHaveCount(0);
+  await row(page, 900003).scrollIntoViewIfNeeded();
   const source = await bounds(row(page, 900002).locator(".grip"));
   const child = await bounds(row(page, 900003));
   await page.mouse.move(source.x + 8, source.y + 10);
@@ -201,10 +206,19 @@ test("checked siblings retain order when moved together", async ({ page }) => {
   await structuralFixture(page, "normal", 2);
   await page
     .getByRole("checkbox", { name: "Select Fixture Other", exact: true })
-    .check();
+    .click();
   await page
     .getByRole("checkbox", { name: "Select Scroll fixture 0", exact: true })
-    .check();
+    .click();
+  await expect(
+    page.getByRole("checkbox", { name: "Select Fixture Other", exact: true }),
+  ).toBeChecked();
+  await expect(
+    page.getByRole("checkbox", {
+      name: "Select Scroll fixture 0",
+      exact: true,
+    }),
+  ).toBeChecked();
   const source = await bounds(row(page, 900002).locator(".grip"));
   const target = await bounds(row(page, 900001));
   await page.mouse.move(source.x + 8, source.y + 10);
