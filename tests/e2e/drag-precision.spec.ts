@@ -191,6 +191,13 @@ test("exact placement flushes notes and scoped drag guides use relative depth", 
   await page.mouse.down();
   await page.keyboard.down("Shift");
   await page.mouse.move(source.x + 8, child.y + 4, { steps: 5 });
+  console.log("ROMDEX_SCOPED_POINTER", await page.evaluate(({ x, y }) => ({
+    x, y, hit: document.elementFromPoint(x, y)?.outerHTML.slice(0, 800),
+    rows: [...document.querySelectorAll("[data-row]")].map(e => ({ id: e.getAttribute("data-row"), box: e.getBoundingClientRect().toJSON() })),
+    head: document.querySelector("thead")?.getBoundingClientRect().toJSON(),
+    scroll: document.querySelector(".table-scroll")?.scrollTop,
+    status: document.querySelector(".work-footer [role=status]")?.textContent,
+  })), { x: source.x + 8, y: child.y + 4 }));
   await expect(page.locator(".work-footer [role=status]")).toContainText(
     "before Fixture Child",
   );
@@ -225,6 +232,13 @@ test("checked siblings retain order when moved together", async ({ page }) => {
   await page.mouse.down();
   await page.keyboard.down("Shift");
   await page.mouse.move(source.x + 8, target.y + 4, { steps: 5 });
+  console.log("ROMDEX_BULK_POINTER", await page.evaluate(({ x, y }) => ({
+    x, y, hit: document.elementFromPoint(x, y)?.outerHTML.slice(0, 800),
+    rows: [...document.querySelectorAll("[data-row]")].map(e => ({ id: e.getAttribute("data-row"), box: e.getBoundingClientRect().toJSON() })),
+    head: document.querySelector("thead")?.getBoundingClientRect().toJSON(),
+    scroll: document.querySelector(".table-scroll")?.scrollTop,
+    status: document.querySelector(".work-footer [role=status]")?.textContent,
+  })), { x: source.x + 8, y: target.y + 4 }));
   await page.mouse.up();
   await page.keyboard.up("Shift");
   await expect
