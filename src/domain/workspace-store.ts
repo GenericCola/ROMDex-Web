@@ -95,6 +95,8 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
       await this.flush();
       await run(commit);
     } finally {
+      // A read that started during this delivery may predate its writes; end the epoch so it cannot apply.
+      this.deliveryCount++;
       this.activeTickets.clear();
       this.activeOperations.clear();
       this.publish({ delivering: false });

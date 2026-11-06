@@ -490,3 +490,39 @@ test("membership full refresh detects deletion older than the unchanged top ten 
     env.close();
   }
 });
+test("a read that overlaps the end of a delivery cannot restore a task the delivery deleted", async () => {
+  const env = await setup();
+  const finish = gate<void>(),
+    started = gate<void>();
+  try {
+    const delivery = workspaceStore.deliver(async (commit) => {
+      started.release();
+      await finish.promise;
+      await commit((data) => {
+        data.remote = data.remote.filter((item) => {
+          return item.id !== "PMON-3";
+        });
+      });
+    });
+    await started.promise;
+    // YouTrack answers this read with PMON-3 as it was before the deletion.
+    const held = env.hold();
+    const running = refreshIncoming(true);
+    const rejected = assert.rejects(running, /workspace changed/);
+    await Promise.race([held.started, running]);
+    finish.release();
+    await delivery;
+    held.release();
+    await rejected;
+    const ids = workspaceStore.getSnapshot().data.remote.map((item) => {
+      return item.id;
+    });
+    assert.deepEqual(ids, ["PMON-1", "PMON-2"]);
+    assert.notEqual(
+      workspaceStore.getSnapshot().data.cloud?.rollupPending,
+      true,
+    );
+  } finally {
+    env.close();
+  }
+});
