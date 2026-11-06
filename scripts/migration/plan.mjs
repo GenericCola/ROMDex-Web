@@ -138,10 +138,20 @@ const draftManifest = ({ store, encoded, source }) => ({
   source,
 });
 
-const storePlan = ({ store, target, encoded, refused, source, extra }) => ({
+const storePlan = ({
+  store,
+  target,
+  values,
+  encoded,
+  refused,
+  source,
+  extra,
+}) => ({
   store,
   article: target,
   parts: describeParts(encoded),
+  // The parts as values, for commitStore; left out of the JSON report.
+  values,
   encoded,
   totals: {
     parts: encoded.length,
@@ -179,10 +189,11 @@ const rejoin = async ({ encoded, refused }, join, hash) =>
 export const buildPlan = async ({
   source,
   target = "production",
+  articles = TARGETS[target],
   log = () => {},
 }) => {
-  const articles = TARGETS[target];
-  if (!articles) throw new Error(`Unknown target ${target}`);
+  if (!TARGETS[target] || !articles)
+    throw new Error(`Unknown target ${target}`);
   const startedAt = new Date().toISOString();
 
   const pinned = await source.pin();
@@ -255,7 +266,8 @@ export const buildPlan = async ({
   const unused = [...layout.objects.keys()].filter((sha) => !used.has(sha));
 
   // Split, encode, then prove the round trip from the encoded bytes.
-  const metadataEncoded = await encodeParts(splitMetadata(metadata.document));
+  const metadataValues = splitMetadata(metadata.document);
+  const metadataEncoded = await encodeParts(metadataValues);
   const metadataRejoined = await rejoin(
     metadataEncoded,
     joinMetadata,
@@ -303,6 +315,7 @@ export const buildPlan = async ({
     metadata: storePlan({
       store: "romdex-metadata",
       target: articles.metadata,
+      values: metadataValues,
       encoded: metadataEncoded.encoded,
       refused: metadataEncoded.refused,
       source: { ...sourceBase, head: metadata.head, sha256: metadata.sha256 },
@@ -337,6 +350,7 @@ export const buildPlan = async ({
     npcdex: storePlan({
       store: "npcdex",
       target: articles.npcdex,
+      values: npcdexSplit.parts,
       encoded: npcdexEncoded.encoded,
       refused: npcdexEncoded.refused,
       source: { ...sourceBase, head: npcdex.recordId, sha256: npcdex.sha256 },
@@ -387,10 +401,12 @@ const storeSection = (title, store) => [
   ...partLines(store),
 ];
 
-export const formatReport = (plan) => {
+export const formatReport = (plan, { write = false } = {}) => {
   const { source, metadata: m, npcdex: n } = plan;
   return [
-    "ROMDex-Data to YouTrack migration: DRY RUN (nothing written)",
+    write
+      ? "ROMDex-Data to YouTrack migration: WRITE (plan below; results follow)"
+      : "ROMDex-Data to YouTrack migration: DRY RUN (nothing written)",
     `Run ${plan.startedAt} to ${plan.finishedAt}, target ${plan.target}`,
     "",
     `Source ${source.repo} ${source.branch} at ${source.commit} (committed ${source.committedAt}), tree ${source.tree}`,
@@ -426,7 +442,7 @@ export const reportJson = (plan) =>
   JSON.stringify(
     plan,
     function omit(key, value) {
-      return key === "encoded" ? undefined : value;
+      return key === "encoded" || key === "values" ? undefined : value;
     },
     2,
   );
