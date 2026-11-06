@@ -247,10 +247,12 @@ thead th,.eyebrow{text-transform:none}
 .bulb.red::after{background:#ff4248;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #ff424848;animation:indicator-red-blink 1.2s steps(1,end) infinite}
 .device-header .save .save-light{margin-left:9px}
 .device-header .save .save-light.green::after{animation:indicator-save-pulse 4s ease-in-out infinite}
-@keyframes indicator-yellow-pulse{0%,100%{background:#8d4d17;box-shadow:0 0 0 0 transparent}50%{background:#f6cd61;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #f6cd6138}}
-@keyframes indicator-blue-pulse{0%,100%{background:#183e66;box-shadow:0 0 0 0 transparent}50%{background:#5ec6ef;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #5ec6ef38}}
-@keyframes indicator-red-blink{0%{background:#ff4248;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #ff424848}50%,100%{background:#76282a;box-shadow:0 0 0 0 transparent}}
-@keyframes indicator-save-pulse{0%,100%{background:#245533;box-shadow:0 0 0 0 transparent}50%{background:#45d97e;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #45d97e38}}
+/* Pulses fade a lit layer over the dim face with opacity only, so they run on the compositor instead of repainting every frame. */
+.bulb.yellow{background:#8d4d17}.bulb.blue{background:#183e66}.bulb.red{background:#76282a}.bulb.purple{background:#45255e}.bulb.amber{background:var(--indicator-amber-dim)}.device-header .save .save-light.green{background:#245533}
+@keyframes indicator-yellow-pulse{0%,100%{opacity:0}50%{opacity:1}}
+@keyframes indicator-blue-pulse{0%,100%{opacity:0}50%{opacity:1}}
+@keyframes indicator-red-blink{0%{opacity:1}50%,100%{opacity:0}}
+@keyframes indicator-save-pulse{0%,100%{opacity:0}50%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.bulb::after{animation:none!important}}
 
 /* Shared automatic-sync control and the separate connection lens. Save retains its reference anchor. */
@@ -271,16 +273,16 @@ thead th,.eyebrow{text-transform:none}
 
 /* The connection lens is one bordered circle; its inner light fills the centered content box. */
 .connection-status{left:calc(100% + 5px);width:11px;height:11px;--indicator-size:11px}
-.connection-status .bulb{border:2px solid var(--indicator-ring);overflow:hidden}
+.connection-status .bulb{border:2px solid var(--indicator-ring);overflow:hidden;background-clip:padding-box}
 .connection-status .bulb::before{display:none}
 .connection-status .bulb::after{inset:0;transform:none;box-shadow:none}
 .bulb.purple::after{background:#b980ff;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #b980ff48;animation:indicator-purple-blink 1.2s steps(1,end) infinite}
-@keyframes indicator-purple-blink{0%{background:#b980ff;box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) #b980ff48}50%,100%{background:#45255e;box-shadow:0 0 0 0 transparent}}
+@keyframes indicator-purple-blink{0%{opacity:1}50%,100%{opacity:0}}
 
 /* Awaiting Testing follows In Development; reduced-motion keeps the lit amber face. */
 :scope{--indicator-amber:#f5a623;--indicator-amber-dim:#73470f;--indicator-amber-glow:#f5a62348}
 .bulb.amber::after{background:var(--indicator-amber);box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) var(--indicator-amber-glow);animation:indicator-amber-blink 1.2s steps(1,end) infinite}
-@keyframes indicator-amber-blink{0%{background:var(--indicator-amber);box-shadow:0 0 var(--indicator-glow-blur) var(--indicator-glow-spread) var(--indicator-amber-glow)}50%,100%{background:var(--indicator-amber-dim);box-shadow:0 0 0 0 transparent}}
+@keyframes indicator-amber-blink{0%{opacity:1}50%,100%{opacity:0}}
 
 /* Shared geometry; layout/row behavior remains in the tool stylesheet. */
 :scope{--header-control-height:34px;--workspace-switch-size:calc(var(--header-control-height)*.8*.7);--settings-face-size:18px;--settings-art-size:12px}
