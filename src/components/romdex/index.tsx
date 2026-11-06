@@ -10,22 +10,24 @@ import {
 import { beginInlineTask } from "@/domain/task-inline";
 import { workspaceItems } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
-import Npcdex from "@components/npcdex";
-import NpcdexSidebar from "@components/npcdex/sidebar";
 import { usePwa } from "@components/pwa-controls/use-pwa";
 import type { ReactNode } from "react";
 import { useState, useSyncExternalStore } from "react";
-import Connection from "./connection";
 import Details from "./details";
 import DeviceBody from "./device-body";
 import Divider from "./divider";
 import Header from "./header";
+import {
+  LazyConnection,
+  LazyMigration,
+  LazyNpcdex,
+  LazyNpcdexSidebar,
+  LazyRdxLibrary,
+  LazyUpdateCheck,
+} from "./lazy-views";
 import LocalSaveRecovery from "./local-save-recovery";
-import Migration from "./migration";
-import RdxLibrary from "./rdx-library";
 import SaveFeedback from "./save-feedback";
 import Selectors from "./selectors";
-import UpdateCheck from "./update-check";
 import { useInlineAction } from "./use-inline-action";
 import { useStableCallback } from "./use-stable-callback";
 import { useWorkspace } from "./use-workspace";
@@ -104,7 +106,7 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
               {view.workspace === "romdex" ? (
                 <Selectors data={state.data} items={items} add={add} />
               ) : (
-                <NpcdexSidebar data={state.data} />
+                <LazyNpcdexSidebar data={state.data} />
               )}
               {view.workspace === "romdex" ? (
                 <WorkTrays view={view}>
@@ -113,16 +115,16 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
                   <Details data={state.data} items={items} />
                 </WorkTrays>
               ) : (
-                <Npcdex data={state.data} />
+                <LazyNpcdex data={state.data} />
               )}
             </DeviceBody>
           )}
           {connection && (
-            <Connection close={closeConnection} account={account} />
+            <LazyConnection close={closeConnection} account={account} />
           )}
-          {migration && <Migration close={closeMigration} />}
+          {migration && <LazyMigration close={closeMigration} />}
           {(tool === "import" || tool === "export") && (
-            <RdxLibrary
+            <LazyRdxLibrary
               data={state.data}
               mode={tool}
               close={() => {
@@ -131,7 +133,7 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
             />
           )}
           {tool === "updates" && (
-            <UpdateCheck
+            <LazyUpdateCheck
               update={update}
               close={() => {
                 return setTool(null);

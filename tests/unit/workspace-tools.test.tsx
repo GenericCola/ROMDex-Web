@@ -28,7 +28,7 @@ test("account, project, recovery and update safety remain accessible outside nor
   assert.match(workspace, /recoveryMode\(\) &&[\s\S]*<WorkspaceStatus/);
   assert.match(
     workspace,
-    /<Connection close=\{closeConnection\} account=\{account\}/,
+    /<(Lazy)?Connection close=\{closeConnection\} account=\{account\}/,
   );
   assert.match(source("selectors.tsx"), /<ProjectSelector/);
   assert.match(auth, /!connected \|\| recoveryBlocked/);

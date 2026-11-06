@@ -4,7 +4,7 @@ import { workspaceItems } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
-import ItemEditDialog from "./item-edit-dialog";
+import { LazyItemEditDialog } from "./lazy-views";
 import { useFreshTask } from "./use-fresh-task";
 const TaskRowActions = ({
   item,
@@ -59,7 +59,7 @@ const TaskRowActions = ({
       </button>
       {fresh.error && <p role="status">{fresh.error}</p>}
       {editing && (
-        <ItemEditDialog
+        <LazyItemEditDialog
           item={editing}
           close={() => {
             setEditing(null);

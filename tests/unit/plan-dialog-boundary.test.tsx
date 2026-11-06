@@ -19,5 +19,5 @@ void test("reused desktop plan dialog stays inside the scoped app and preserves 
   assert.match(wrapper, /createPortal\(<SessionNotice/);
   assert.match(wrapper, /registerDraftEditor/);
   assert.match(wrapper, /trackWorkspaceWork/);
-  assert.match(wrapper, /host.cancel\(\)/);
+  assert.match(wrapper, /host\?.cancel\(\)/);
 });

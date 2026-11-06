@@ -3,9 +3,9 @@ import { workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import Image from "next/image";
 import { useState } from "react";
+import { LazyTileSettings } from "./lazy-views";
 import ProjectSelector from "./project-selector";
 import SelectorBranch from "./selector-branch";
-import TileSettings from "./tile-settings";
 interface SelectorProps {
   data: WorkspaceData;
   items: TaskItem[];
@@ -65,7 +65,7 @@ const Selectors = ({ data, items, add }: SelectorProps) => {
         {(tree.children.get(null) ?? []).map(render)}
       </nav>
       {settingsItem && (
-        <TileSettings
+        <LazyTileSettings
           key={settingsItem.id}
           item={settingsItem}
           depth={tree.depths.get(settingsItem.id) ?? 0}
