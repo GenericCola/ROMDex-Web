@@ -2,15 +2,28 @@ import { materialize } from "@/domain/accepted/core.mjs";
 import { bulkMovePlan } from "@/domain/bulk-hierarchy";
 import { hierarchySignature, rowDropTarget } from "@/domain/task-drop";
 import { workspaceStore } from "@/domain/workspace-store";
-import type { PointerEvent } from "react";
 import type { Drag } from "./task-drag-state";
-export const taskDragPreview = (
-  event: PointerEvent<HTMLElement>,
-  current: Drag,
-) => {
-  const row = document
+export interface DragPoint {
+  clientX: number;
+  clientY: number;
+  shiftKey: boolean;
+  currentTarget: HTMLElement;
+}
+export const taskDragPreview = (event: DragPoint, current: Drag) => {
+  let row = document
     .elementFromPoint(event.clientX, event.clientY)
     ?.closest<HTMLElement>("[data-row],[data-selector]");
+  // Empty space below the last row is still an end-of-list drop target.
+  if (!row) {
+    const scroller = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest<HTMLElement>(".table-scroll");
+    const last = scroller
+      ? [...scroller.querySelectorAll<HTMLElement>("[data-row]")].at(-1)
+      : null;
+    if (last && event.clientY >= last.getBoundingClientRect().bottom)
+      row = last;
+  }
   const targetId = row?.dataset.row ?? row?.dataset.selector;
   if (!row || !targetId || !event.currentTarget.contains(row)) return null;
   const selector = !!row.dataset.selector;
@@ -18,7 +31,11 @@ export const taskDragPreview = (
   const intent = {
     dragId: current.id,
     targetId,
-    delta: selector ? 1 : Math.round((event.clientX - current.x) / 26),
+    delta: selector
+      ? 1
+      : event.shiftKey
+        ? 0
+        : dragDepthDelta(event.clientX - current.x),
     after: selector || event.clientY >= bounds.top + bounds.height / 2,
   };
   const { data } = workspaceStore.getSnapshot();
@@ -45,15 +62,14 @@ export const taskDragPreview = (
       result.beforeId,
     );
 
-  const scroller = row.closest(".table-scroll,#selectors");
-  if (scroller) {
-    const rect = scroller.getBoundingClientRect();
-    if (event.clientY < rect.top + 35) scroller.scrollTop -= 14;
-    else if (event.clientY > rect.bottom - 35) scroller.scrollTop += 14;
-  }
-
   return {
     result: { ...result, ...(selector ? { selectorId: targetId } : {}) },
     intent,
   };
+};
+
+// A full deliberate step before changing level avoids accidental 13px nesting.
+export const dragDepthDelta = (distance: number) => {
+  const steps = Math.floor(Math.abs(distance) / 26);
+  return steps === 0 ? 0 : Math.sign(distance) * steps;
 };

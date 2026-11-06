@@ -88,6 +88,7 @@ const TaskRowTitle = ({
       ) : (
         <button
           className="row-title"
+          data-drag={item.id}
           title={item.summary}
           onDoubleClick={rename}
           onKeyDown={(event) => {
