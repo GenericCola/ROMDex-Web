@@ -87,7 +87,7 @@ test("updates require consent and protect other windows", async ({
     await page.getByRole("button", { name: "Reload to update" }).click();
     await expect(
       page.getByText(
-        "Close other ROMDex windows, then choose Reload to update again.",
+        "Close other ROMDex windows, then try applying the update again.",
       ),
     ).toBeVisible();
     await expect(other.getByRole("button", { name: "Count: 1" })).toBeVisible();
