@@ -67,3 +67,32 @@ test("invalid documents and parts throw", async () => {
     /mystery/,
   );
 });
+
+test("an image over the part limit stays inline so its town is refused whole", async () => {
+  const { npcdexToParts, encodeParts } =
+    await import("../../src/store/parts/index.ts");
+  const bytes = new Uint8Array(4_000_100);
+  bytes.set([137, 80, 78, 71, 13, 10, 26, 10]);
+  for (let at = 8; at < bytes.length; at += 65536)
+    crypto.getRandomValues(
+      bytes.subarray(at, Math.min(at + 65536, bytes.length)),
+    );
+  let binary = "";
+  for (let at = 0; at < bytes.length; at += 8192)
+    binary += String.fromCharCode(...bytes.subarray(at, at + 8192));
+  const big = "data:image/png;base64," + btoa(binary);
+  const parts = await npcdexToParts({ towns: [{ id: "t", map: big }] });
+  assert.equal(
+    parts.some((part) => {
+      return part.key.startsWith("image/");
+    }),
+    false,
+  );
+  const { refused } = await encodeParts(parts);
+  assert.deepEqual(
+    refused.map((part) => {
+      return part.key;
+    }),
+    ["town/t"],
+  );
+});
