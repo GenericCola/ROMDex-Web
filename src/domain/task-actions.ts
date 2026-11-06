@@ -1,5 +1,6 @@
 import { cloudData } from "@/cloud/types";
 import { descendants, materialize, validateMove } from "./accepted/core.mjs";
+import { materializeShared } from "./materialize-shared";
 import { reviewedTicketIds } from "./ticket-locks";
 import type { TaskItem, TaskPatch, WorkspaceData } from "./types";
 const requireReviewClear = (
@@ -54,7 +55,9 @@ export const createTask = (
 };
 export const editTask = (data: WorkspaceData, id: string, patch: TaskPatch) => {
   requireReviewClear(data, [id, patch.parentId]);
-  const items = materialize(data.remote, data.operations);
+  // Read-only lookup: avoid cloning every task on each keystroke. The base
+  // stored below is still a private copy.
+  const items = materializeShared(data.remote, data.operations);
   const item = items.find((candidate) => {
     return candidate.id === id;
   });
