@@ -342,9 +342,8 @@ an upload never replaces a file another device still lists. A writer that finds
 an existing attachment with the same name, size and SHA-256 reuses its id
 instead of uploading again.
 
-Old attachments stay on the article after the manifest moves on. Nothing in this
-design deletes them. A later cleanup can remove files no manifest lists and that
-are older than a few days; that is an owner decision (open question 3).
+Old attachments stay on the article after the manifest moves on. Nothing
+deletes them, and the owner decided there will be no automatic cleanup.
 
 ### Finding the article
 
@@ -358,7 +357,7 @@ are older than a few days; that is an owner decision (open question 3).
    the owner picks one. Never pick one silently, because two stores would split
    the data.
 4. None: the browser shows "Not set up" and keeps working locally. It creates the
-   article only after the user confirms, with `POST articles` and
+   article only after the user confirms (owner decision), with `POST articles` and
    `{project: {id}, summary, content, visibility: {$type: "LimitedVisibility",
 permittedUsers: [{id: "2-1"}, {id: "2-2"}]}}`. Normally the migration
    creates both articles.
@@ -396,9 +395,11 @@ One sync:
 4. Build the new parts, gzip them (`CompressionStream`), hash them, and refuse
    any over the limit (below).
 5. Upload only parts whose SHA-256 changed.
-6. Read the article's `updated` again. If it moved since step 1, start over from
-   step 1 (at most three times, then report "Another device is saving. Try
-   again.").
+6. Read the article again. If its manifest (`writeId` and `revision`) changed
+   since step 1, start over from step 1 (at most three times, then report
+   "Another device is saving. Try again."). The implementation compares the
+   manifest, not `updated`: every attachment upload moves the article's
+   `updated`, including our own from step 5.
 7. Write the body with the new manifest, `revision + 1` and a new `writeId`.
 8. Read the body back. If it carries another `writeId`, a second device wrote
    just after us and replaced our manifest; start over. Our changes are still
@@ -454,6 +455,66 @@ sent while offline. The store retries on the browser's `online` event, on Save
 Changes and on a timer. The status shows "Saved in this browser; waiting to
 sync". A failed sync changes nothing in YouTrack before step 7, and uploads
 without a manifest write are harmless extra files.
+
+## Implementation (PMON-571, PMON-572)
+
+Code lives in `src/store/`:
+
+| Folder              | What                                                                                                                                | Imports                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `src/store/parts`   | Manifest, codecs, SHA-256, attachment names, the 4 MB refusal, ROMDex and NPCDex part split and rebuild                              | Pure; plain Node 24 can import `index.ts`    |
+| `src/store/core`    | Find and create the article, list and upload attachments, `readStore`, `commitStore` (steps 4 to 8), `tokenTransport` for scripts    | Transport injected; Node 24 can import it    |
+| `src/store/merge`   | Per-key three-way merge, merge keys for both stores, web positions to desktop lists and back                                         | Browser                                      |
+| `src/store/browser` | IndexedDB cache `romdex-web-store`, workspace bindings, the sync runner, review, status and the controller started by the app shell | Browser                                      |
+
+The UI is one notice line under the save feedback (only when a store needs
+review or holds a refused part) and a "YouTrack data sync" section in
+Connection Details: a status per store, Sync now, "Set up in YouTrack…" with a
+confirmation, a choice between several matching articles, and the review list
+with Keep mine and Keep YouTrack's.
+
+Where the build differs from the plan above:
+
+- **Change check.** Step 6 compares the manifest, not `updated` (see above).
+- **Reuse.** An attachment with the same name and size is reused only after its
+  bytes are downloaded and compared.
+- **Unchanged parts.** A part whose decoded content equals YouTrack's keeps its
+  manifest entry; nothing is re-encoded, so gzip output differences between
+  browsers never cause uploads.
+- **Conflicts.** The browser shows YouTrack's value at once. Its own value goes
+  to the review list and to an append-only `recovery` store in
+  `romdex-web-store` (not the workspace recovery export). Keep mine writes it
+  back into the workspace and the next sync sends it.
+- **Keys this browser cannot apply now** (orders while a create, delete or move
+  waits for delivery, a status for a task not read yet, or a key edited while
+  the sync ran) keep the old base, so a later sync applies them or reports a
+  conflict.
+- **First sync.** With no base, nothing is carried from YouTrack into the local
+  side, so YouTrack's values are applied; keys only this browser has are sent.
+- **Orders.** A local list that keeps the base list's relative order keeps the
+  base list, including ids this browser does not know. Otherwise ids it does
+  not know are appended after the captured list.
+- **4 MB.** A refused part keeps its previous stored version. All local changes
+  of that sync stay pending, and the status repeats the refusal. An NPCDex image
+  over 4 MB is not split out: it stays inline, so the town or field that holds
+  it is refused whole and no stored part points at a missing image. A town or
+  field part that was never stored is left out of the rebuilt document.
+- **Assigned status.** The whole `assigned` part is handled in
+  `src/store/browser/assigned.ts`. `ASSIGNED_IN_STORE = false` turns it off:
+  the browser then passes YouTrack's `assigned` part through untouched and
+  writes nothing to tasks. It is also off while romdex-status sharing is on
+  (`cloud.sharedStatuses`).
+- **Cookie proxy.** `server/article-policy.ts` allows reads of articles, and
+  writes only to "ROMDex data" in PMON and "NPCDex data" in NPCD: create with
+  exactly the LimitedVisibility for 2-1 and 2-2, content updates up to 1 MB of
+  text, and uploads. `/api/attachment` takes `article=` as well as `issue=`.
+  `AttachmentClient` stays issue-only; article attachments go through
+  `src/store/core/attachments.ts`, and `attachmentBytes` accepts an article
+  target.
+- **When it syncs.** On app start, five seconds after the workspace changes,
+  when the browser comes online, every five minutes, and on Sync now. Syncs run
+  one at a time, and across tabs through Web Locks. Offline, the status says
+  "Saved in this browser; waiting to sync."
 
 ## 4. Migration (PMON-573)
 
@@ -532,15 +593,12 @@ Migrate only after the desktop is quit for good, or the articles fall behind.
    2026-10-22). The plan is to migrate NPCDex from the ROMDex-Data snapshot.
    Please confirm the desktop has no unsynced NPCDex edits, or say whether the
    source should be a fresh desktop export instead.
-2. **Assigned status.** The "ROMDex data" article will hold saved parent
-   statuses, and the romdex-status app can hold them too (sharing still off).
-   Which should the web use? The proposal: the article, and the app stays off.
-3. **Old attachments.** Each change leaves the previous attachment on the
-   article. Keep them all (safe, grows slowly), or allow a cleanup of files no
-   manifest lists after N days?
-4. **Article creation.** The proposal is that only the migration creates the
-   articles and a browser asks before creating one. Is that right, or should a
-   browser create the article silently like Track Suru?
+2. **Assigned status.** Still open: the "ROMDex data" article or the
+   romdex-status app. It is built as the article part `assigned` behind one
+   switch (see Implementation), so it can be dropped without touching the rest.
+3. **Old attachments.** Decided: kept, never cleaned up automatically.
+4. **Article creation.** Decided: only the migration creates articles without
+   asking; a browser asks first.
 
 ## 7. Revised estimate
 

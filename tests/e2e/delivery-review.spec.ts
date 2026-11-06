@@ -83,6 +83,9 @@ const fixture = async (
       const request = route.request(),
         path = new URL(request.url()).pathname;
       const reply = async (body: unknown) => route.fulfill({ json: body });
+      // Store sync searches for its articles; none exist in this fixture.
+      if (path === "/api/articles" && request.method() === "GET")
+        return reply([]);
       if (request.method() === "POST") {
         writes.push(path);
         const patch = request.postDataJSON();

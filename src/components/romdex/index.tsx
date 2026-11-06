@@ -10,11 +10,12 @@ import {
 } from "@/domain/editor-drafts";
 import { beginInlineTask } from "@/domain/task-inline";
 import { workspaceStore } from "@/domain/workspace-store";
+import { storeSync } from "@/store/browser/controller";
 import Npcdex from "@components/npcdex";
 import NpcdexSidebar from "@components/npcdex/sidebar";
 import { usePwa } from "@components/pwa-controls/use-pwa";
 import type { ReactNode } from "react";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Connection from "./connection";
 import Details from "./details";
 import DeviceBody from "./device-body";
@@ -25,6 +26,7 @@ import Migration from "./migration";
 import RdxLibrary from "./rdx-library";
 import SaveFeedback from "./save-feedback";
 import Selectors from "./selectors";
+import { StoreNotice } from "./store-sync";
 import UpdateCheck from "./update-check";
 import { useInlineAction } from "./use-inline-action";
 import { useWorkspace } from "./use-workspace";
@@ -46,6 +48,9 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
   const [connection, setConnection] = useState(false);
   const [migration, setMigration] = useState(false);
   const [tool, setTool] = useState<WorkspaceTool | null>(null);
+  useEffect(() => {
+    return storeSync.start();
+  }, []);
   const update = usePwa(workspaceStore.prepareUpdate);
   const chooseTool = (next: WorkspaceTool) => {
     setTool(next);
@@ -90,6 +95,7 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
             />
           )}
           <SaveFeedback state={state} review={openConnection} />
+          <StoreNotice review={openConnection} />
           {inline.error && (
             <p className="port-recovery" role="alert">
               {inline.error}

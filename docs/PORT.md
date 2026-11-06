@@ -24,6 +24,10 @@ Verified on October 22, 2026: pnpm check passed 88 unit tests and 8 worker/build
 - [ ] Selector/tree drag, reparent, grouping, multi-select and properties/attachments parity.
 - [ ] NPCDex maps, entities, dialogue, timelines, proposals, annotations and history.
 - [ ] YouTrack content backend and metadata replacement for legacy GitHub providers.
+  - [x] Store module and article routes (PMON-571), see YOUTRACK-STORAGE.md.
+  - [x] NPCDex and ROMDex metadata sync with conflict review (PMON-572); live
+        round trip passed in test articles in TST.
+  - [ ] Migration from ROMDex-Data (PMON-573) and cutover (PMON-574).
 - [ ] RDX import/export, managed-container browser equivalents and human testing gates.
 - [ ] Previewed desktop-data import with preservation and acceptance checks.
 - [ ] Full parity checks, real-device PWA and HTTPS deployment acceptance.

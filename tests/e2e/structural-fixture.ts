@@ -111,6 +111,11 @@ export const structuralFixture = async (
         return;
       }
       if (method !== "GET") writes.push({ method, path });
+      // Store sync searches for its articles; none exist in this fixture.
+      if (path === "/api/articles" && method === "GET") {
+        await reply([]);
+        return;
+      }
       if (path === "/api/users/me") {
         await reply({ id: "fixture-owner" });
         return;

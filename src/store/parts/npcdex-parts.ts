@@ -1,5 +1,6 @@
 import { parseImageDataUrl, sha256Hex } from "./bytes.ts";
 import type { PartValue } from "./files.ts";
+import { MAX_PART_BYTES } from "./limits.ts";
 
 export interface NpcdexDraftsPart {
   drafts: Record<string, unknown>;
@@ -45,7 +46,9 @@ const extractImages = async (
 ): Promise<unknown> => {
   if (typeof value === "string") {
     const image = parseImageDataUrl(value);
-    if (image === null) return value;
+    // An image too large to store stays inline, so the part that holds it is
+    // refused as a whole and no stored part points at a missing image.
+    if (image === null || image.bytes.length > MAX_PART_BYTES) return value;
     const hash = await sha256Hex(image.bytes);
     images.set(hash, image);
     return { [NPCDEX_IMAGE_REF]: hash, type: image.type };

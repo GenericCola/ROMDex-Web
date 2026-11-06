@@ -150,6 +150,9 @@ for (const status of ["attempting", "uncertain"] as const)
           const request = route.request(),
             path = new URL(request.url()).pathname;
           const reply = (body: unknown) => route.fulfill({ json: body });
+          // Store sync searches for its articles; none exist in this fixture.
+          if (path === "/api/articles" && request.method() === "GET")
+            return reply([]);
           if (request.method() === "POST") {
             writes.push(path);
             expect(path).toBe("/api/issues/PMON-900002");

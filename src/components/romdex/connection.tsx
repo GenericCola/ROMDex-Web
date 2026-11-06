@@ -10,6 +10,7 @@ import type { FormEvent, ReactNode } from "react";
 import { useRef, useState } from "react";
 import DeliveryControls from "./delivery-controls";
 import Dialog from "./dialog";
+import StoreSync from "./store-sync";
 const Connection = ({
   close,
   account,
@@ -88,6 +89,7 @@ const Connection = ({
       {account}
       <p>thegobindsingh.youtrack.cloud · PMON</p>
       <DeliveryControls />
+      <StoreSync />
       <p className="port-notice">
         Reads use your signed-in YouTrack identity. No cloud writes or desktop
         import runs. Review the result before saving a browser copy.
