@@ -119,10 +119,13 @@ const DeliveryReview = ({
               Check whether this saved
             </button>
             {operation?.type === "edit" &&
-              record.status === "conflict" &&
-              operation.purpose !== "rollup" && (
+              operation.purpose !== "rollup" &&
+              (record.status === "conflict" ||
+                "parentId" in operation.patch) && (
                 <div>
-                  <ReviewGuidance choice="keep" />
+                  <ReviewGuidance
+                    choice={record.status === "conflict" ? "keep" : "move"}
+                  />
                   <button onClick={local} disabled={busy}>
                     {reviewChoiceLabel(operation, record, true) ??
                       "Use my changes"}
