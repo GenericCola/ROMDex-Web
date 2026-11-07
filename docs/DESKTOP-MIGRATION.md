@@ -12,9 +12,15 @@ node scripts/export-desktop.mjs "C:\Users\mrgen\AppData\Local\ROMDexDesktop\Data
 
 The exporter refuses a live desktop owner, an existing destination, linked or unexpected entries, changing source bytes, more than 1,000 files or more than 64 MiB of approved source bytes. It verifies each SHA-256 digest before and after writing. The archive contains the task workspace, assigned-status sidecar, current/recovery NPCDex JSON, journal, managed RDX working/previous/recovery files and queued upload metadata/bytes when present. It excludes encrypted credentials, session files and SQLite databases. It is a portable application export; retain the original profile and a separate full backup for database-only recovery history. No export has yet been applied to the owner's live browser workspace.
 
-Choose Import Desktop or Recovery Data in the web app. The preview verifies bytes and shape locally, compares assigned choices against the current browser task baseline, and requires an explicit choice for conflicts. Applying a desktop import retains the preceding browser copy and original approved files in its migration recovery record. Desktop operations and queued files remain archived for review; they do not enter the active web queue. Delivery disconnects and Auto-Sync stays off.
+Open the app with `?recovery=1` (for example https://romdex.vercel.app/?recovery=1) and choose Import Desktop or Recovery Data. The import only appears in that recovery mode. The preview verifies bytes and shape locally, compares assigned choices against the current browser task baseline, and requires an explicit choice for conflicts. Applying a desktop import retains the preceding browser copy and original approved files in its migration recovery record. Desktop operations and queued files remain archived for review; they do not enter the active web queue. Delivery disconnects and Auto-Sync stays off.
 
 The parser rejects duplicate/reserved object keys, invalid Unicode/UTF-8, excessive depth/count/size and unsafe numbers. Recovery also validates layout/draft fields and rejects task links outside their exact YouTrack issue. An invalid or stale preview cannot replace the browser copy. Recovery imports replace all optional fields as well as required ones and preserve uncertainty markers. A recovery file is local work, not permission to replay requests.
+
+## Recovery copy and recovery mode
+
+Export Recovery Copy is always available: open TOOLS in the task toolbar and choose EXPORT RECOVERY COPY. It downloads the browser workspace, unsaved editor text and queued file bytes as one JSON file without saving, flushing or sending anything. It also appears in recovery mode, after a failed local save and when an expired session blocks local saving.
+
+Recovery mode (`?recovery=1`) is for importing desktop or recovery data and reviewing quarantined work. Delivery stays disconnected and task editing is locked there, so Save Changes refuses with "Recovery mode: delivery is disconnected" instead of saving or sending. This is intended: nothing can be edited in that mode, and the workspace still saves itself in the browser. Leave recovery mode (open the app without `?recovery=1`) to edit and save again.
 
 ## NPCDex in this checkpoint
 

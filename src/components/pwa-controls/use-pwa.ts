@@ -15,9 +15,11 @@ export const usePwa = (
 ) => {
   const [install, setInstall] = useState<InstallPrompt | null>(null);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
-  const [message, setMessage] = useState(
+  // Install help and installed-app status stay apart from update messages.
+  const [installMessage, setInstallMessage] = useState(
     "Chrome: use Install ROMDex or the address-bar install icon. Firefox on Windows: use the address-bar web apps button. On iPhone or iPad, choose Share, then Add to Home Screen.",
   );
+  const [message, setMessage] = useState("");
   const {
     checking,
     checkForUpdates: check,
@@ -33,7 +35,7 @@ export const usePwa = (
   };
   useEffect(() => {
     if (window.matchMedia("(display-mode: standalone)").matches)
-      setMessage("ROMDex is running as an installed app.");
+      setInstallMessage("ROMDex is running as an installed app.");
     const listeners = new AbortController();
     const options = { signal: listeners.signal };
     let disposed = false;
@@ -45,7 +47,7 @@ export const usePwa = (
     };
     const installed = () => {
       setInstall(null);
-      setMessage("ROMDex is installed.");
+      setInstallMessage("ROMDex is installed.");
     };
     const inspect = () => {
       if (
@@ -106,13 +108,15 @@ export const usePwa = (
       await install.prompt();
       const choice = await install.userChoice;
       setInstall(null);
-      setMessage(
+      setInstallMessage(
         choice.outcome === "accepted"
           ? "Installation requested."
           : "Installation dismissed.",
       );
     } catch {
-      setMessage("Installation failed. Use the browser menu to try again.");
+      setInstallMessage(
+        "Installation failed. Use the browser menu to try again.",
+      );
     }
   };
   const reloadToUpdate = async () => {
@@ -131,6 +135,7 @@ export const usePwa = (
     checkForUpdates,
     canInstall: Boolean(install),
     hasUpdate: Boolean(waiting),
+    installMessage,
     message,
     installApp,
     reloadToUpdate,
