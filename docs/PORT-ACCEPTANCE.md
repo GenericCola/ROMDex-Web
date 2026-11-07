@@ -15,7 +15,7 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 
 ## Task workspace and delivery
 
-- [x] Durable tasks, title/comment drafts, selected task, scope, search, expanded trees and split-pane mode. Evidence: workspace unit tests and task-port browser tests, including offline reopening and stale-window rejection.
+- [x] Durable tasks, title/comment drafts, selected task, scope, search, expanded trees and split-pane mode. Evidence: workspace unit tests and task-port browser tests, including stale-window rejection. Offline reopening has failed since cookie sign-in: the app needs the session request before it opens saved work (PMON-628, owner question 9 in PMON-622).
 - [x] Creation remaps local IDs and descendants; explicit exact-ID recovery prevents duplicate POST. Evidence: structural-delivery tests.
 - [x] Reparenting rejects cycles and preserves detached-link recovery. Evidence: workspace, hierarchy and structural-delivery tests.
 - [x] Sibling up/down ordering is local, durable and limited to siblings. Evidence: task-layout unit test; complete drag behavior is still open below.

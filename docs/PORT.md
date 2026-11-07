@@ -23,14 +23,17 @@ Verified on October 22, 2026: pnpm check passed 88 unit tests and 8 worker/build
 - [ ] Direct YouTrack authentication, task reads and safe sync with uncertain-operation recovery.
 - [ ] Selector/tree drag, reparent, grouping, multi-select and properties/attachments parity.
 - [ ] NPCDex maps, entities, dialogue, timelines, proposals, annotations and history.
-- [ ] YouTrack content backend and metadata replacement for legacy GitHub providers.
+- [x] YouTrack content backend and metadata replacement for legacy GitHub providers.
+      Vercel preview of the branch is pending owner question A1 (PMON-608).
   - [x] Store module and article routes (PMON-571), see YOUTRACK-STORAGE.md.
   - [x] NPCDex and ROMDex metadata sync with conflict review (PMON-572); live
         round trip passed in test articles in TST.
-  - [ ] Migration from ROMDex-Data (PMON-573) and cutover (PMON-574).
-  - [x] Browser acceptance with a fake YouTrack (PMON-575), see
-        ACCEPTANCE-YOUTRACK-STORE.md. No live browser check or Vercel preview
-        yet, so the item above stays open.
+  - [x] Migration from ROMDex-Data (PMON-573) and cutover (PMON-574) on
+        2026-11-07, see CUTOVER-2026-11-07.md.
+  - [x] Browser acceptance (PMON-575), see ACCEPTANCE-YOUTRACK-STORE.md: the
+        store specs pass on chromium, firefox and mobile-chromium with a fake
+        YouTrack, and a read-only Node check of PMON-A-3 and NPCD-A-1 matches
+        the cutover hashes. No browser has run against live YouTrack yet.
 - [ ] RDX import/export, managed-container browser equivalents and human testing gates.
 - [ ] Previewed desktop-data import with preservation and acceptance checks.
 - [ ] Full parity checks, real-device PWA and HTTPS deployment acceptance.
