@@ -6,6 +6,26 @@ Production builds inventory public exported shell assets and hash their content 
 
 Updates wait for Reload to update. The worker refuses activation while another ROMDex window is open. Only the consenting page reloads. The task workspace locks editing and waits for durable saves before activation. A blocked or failed update releases the editing lock. Storage failures block activation and keep recovery export available. Activation deletes obsolete romdex-shell-* caches only. A failed new install leaves the current worker and cache usable.
 
+## One active window
+
+ROMDex runs in one window at a time; tabs and the installed app count alike
+(owner answer Q4, PMON-638). The active window holds the Web Lock
+`romdex-active-window`. Another window shows "ROMDex is open in another window"
+with a **Use here** button. Use here asks the active window over the
+`romdex-window` BroadcastChannel to save its drafts and queued work and stop;
+that window then shows the same notice, and the new window opens from the saved
+data. If the old window never answers (for example a frozen background tab),
+the lock is taken after 10 s. A window handed away reloads when it is made
+active again, so it never continues from stale memory.
+
+Saves still carry a revision check. If two windows ever write (a browser without
+Web Locks, or a forced takeover), a window with nothing unsaved adopts the
+newer save when the other window announces it on the `romdex-workspace`
+channel; a window with unsaved edits keeps "Another ROMDex window saved first"
+and its recovery export, so nothing is overwritten. Changes made while a workspace save runs
+share the next save, which writes only the newest snapshot; a waiting save
+starts at once when the page is hidden or closed.
+
 The preview server applies public/_headers. A production static host must do the same. HTTPS and a root-origin deployment are required, along with YouTrack CORS permission for the eventual origin. Development is on port 3000 and production preview on 3001; never serve development through the production origin.
 
 Offline, the cached shell reopens the last signed-in PMON workspace from IndexedDB (see PORT-ACCEPTANCE.md). The shell cache itself holds no application data. The initial task workflow uses IndexedDB for tasks, drafts and pending operations, separate from shell Cache Storage. Optional session delivery journals uncertain requests in IndexedDB and blocks app updates during delivery. See STRUCTURAL-DELIVERY.md. Opt-in assigned-status sharing uses the included YouTrack app; see SHARED-STATUS.md. Desktop/recovery import and separate NPCDex draft storage are available; see DESKTOP-MIGRATION.md. ROMDex metadata and NPCDex sync through two private YouTrack articles with their own IndexedDB cache (`romdex-web-store`); see YOUTRACK-STORAGE.md. Update preparation also flushes dirty NPCDex editors and refuses activation after an editor-save failure. Real iPhone/iPad and HTTPS deployment acceptance tests remain required.

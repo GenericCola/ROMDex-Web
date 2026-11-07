@@ -1,5 +1,4 @@
 import type { Attachment, AttachmentOperation } from "@/attachments/types";
-import type { SharedStatus } from "@/cloud/shared-status-types";
 import type { CloudData } from "@/cloud/types";
 import type { MigrationRecord } from "@/migration/types";
 import type { NpcdexDraft, NpcdexTarget } from "@/npcdex/model";
@@ -30,7 +29,6 @@ export interface TaskItem {
   parentId: string | null;
   state: string;
   assignedState?: string;
-  sharedStatus?: SharedStatus;
   priority: string;
   complexity: string | null;
   type: string;

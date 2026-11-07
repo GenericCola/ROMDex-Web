@@ -2,57 +2,61 @@ import { subscribeDraftEditors } from "@/domain/editor-drafts";
 import { subscribeTaskEditing } from "@/domain/task-editing";
 import { workspaceStore } from "@/domain/workspace-store";
 import { incomingFailureMessage, IncomingSuperseded } from "./incoming-error";
+import type { IncomingMode } from "./incoming-refresh";
 import { incomingContext, refreshIncoming } from "./incoming-refresh";
 import { setIncomingMessage } from "./incoming-status";
+import { subscribeRefresh } from "./refresh-request";
+const RANK: Record<IncomingMode, number> = { cached: 0, check: 1, full: 2 };
+/*
+ * Reads YouTrack only when something suggests it changed: on connecting, when
+ * the window comes back into view or online, after this window's delivery
+ * finished, and on Refresh. Editor and queue changes re-apply the last read
+ * without a request. There is no timer that reads on its own.
+ */
 export const watchIncoming = () => {
   let alive = true,
     busy = false,
-    force = true,
-    delay = 3000;
-  let timer: ReturnType<typeof setTimeout> | undefined;
+    wanted: IncomingMode | null = null;
   let connection: unknown;
-  let holds = "";
+  let holds = "",
+    epoch = workspaceStore.deliveryEpoch();
+  let settle: ReturnType<typeof setTimeout> | undefined;
   const visible = () => {
     return document.visibilityState !== "hidden";
   };
-  const schedule = (wait: number) => {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => {
-      void run();
-    }, wait);
+  const request = (mode: IncomingMode) => {
+    if (!wanted || RANK[mode] > RANK[wanted]) wanted = mode;
+    void run();
   };
   const run = async () => {
-    if (!alive || busy) return;
-    if (!visible() || !incomingContext()) {
-      schedule(3000);
-      return;
-    }
+    if (!alive || busy || !wanted) return;
+    if (!visible() || !incomingContext()) return;
+    const mode = wanted;
+    wanted = null;
     busy = true;
-    const fresh = force;
-    force = false;
     try {
-      await refreshIncoming(fresh, () => {
+      await refreshIncoming(mode, () => {
         return alive;
       });
       if (alive) setIncomingMessage("");
-      delay = 3000;
     } catch (error) {
-      if (error instanceof IncomingSuperseded) {
-        force = true;
-        return;
-      }
-      delay = Math.min(Math.max(delay * 2, 15000), 60000);
-      if (alive && incomingContext())
+      // A superseded read is checked again; a failure waits for the next event.
+      if (error instanceof IncomingSuperseded) request("check");
+      else if (alive && incomingContext())
         setIncomingMessage(incomingFailureMessage(error));
     } finally {
       busy = false;
-      if (alive) schedule(force ? 250 : delay);
+      if (alive && wanted) void run();
     }
   };
-  const focus = () => {
-    if (!visible()) return;
-    force = true;
-    if (!busy) schedule(100);
+  const shown = () => {
+    if (visible()) request("check");
+  };
+  const reapply = () => {
+    clearTimeout(settle);
+    settle = setTimeout(() => {
+      request("cached");
+    }, 250);
   };
   const changed = () => {
     const state = workspaceStore.getSnapshot();
@@ -71,36 +75,40 @@ export const watchIncoming = () => {
     ]);
     if (nextHolds !== holds) {
       holds = nextHolds;
-      if (!busy && visible()) schedule(250);
-      else if (busy) force = true;
+      reapply();
+    }
+    // A finished delivery may have changed issues (ours, or YouTrack rules).
+    const nextEpoch = workspaceStore.deliveryEpoch();
+    if (nextEpoch !== epoch && !state.delivering) {
+      epoch = nextEpoch;
+      request("check");
     }
     const client = incomingContext()?.client;
     if (client !== connection) {
       connection = client;
-      if (client) focus();
+      if (client) request("full");
       else setIncomingMessage("");
     }
   };
-  const editorChanged = () => {
-    if (busy) force = true;
-    else if (visible()) schedule(250);
+  const full = () => {
+    request("full");
   };
   const stops = [
     workspaceStore.subscribe(changed),
-    subscribeDraftEditors(editorChanged),
-    subscribeTaskEditing(editorChanged),
+    subscribeDraftEditors(reapply),
+    subscribeTaskEditing(reapply),
+    subscribeRefresh(full),
   ];
-  window.addEventListener("focus", focus);
-  window.addEventListener("online", focus);
-  document.addEventListener("visibilitychange", focus);
+  window.addEventListener("focus", shown);
+  window.addEventListener("online", shown);
+  document.addEventListener("visibilitychange", shown);
   changed();
-  schedule(100);
   return () => {
     alive = false;
-    if (timer) clearTimeout(timer);
+    clearTimeout(settle);
     for (const stop of stops) stop();
-    window.removeEventListener("focus", focus);
-    window.removeEventListener("online", focus);
-    document.removeEventListener("visibilitychange", focus);
+    window.removeEventListener("focus", shown);
+    window.removeEventListener("online", shown);
+    document.removeEventListener("visibilitychange", shown);
   };
 };

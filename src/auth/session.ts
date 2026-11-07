@@ -6,8 +6,17 @@ let current: {
   userId: string;
   projectId: string;
 } | null = null;
+const listeners = new Set<() => void>();
 export const setAuthSession = (value: typeof current) => {
   current = value;
+  for (const listener of listeners) listener();
+};
+/** Calls `listener` whenever the session is set or cleared. */
+export const subscribeAuthSession = (listener: () => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 };
 export const authToken = () => {
   if (!current || Date.now() >= current.expiresAt)

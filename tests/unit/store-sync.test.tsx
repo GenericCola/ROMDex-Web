@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { imageUrl } from "../../src/storage/image-storage";
 import { settleReview } from "../../src/store/browser/review";
 import { romdexBinding } from "../../src/store/browser/romdex-binding";
 import { syncStore } from "../../src/store/browser/sync";
@@ -14,6 +15,14 @@ import {
   twoArticles,
   withIdb,
 } from "../fixtures/store-sync-setup";
+
+const imageUrls = (images: Record<string, string> | undefined) => {
+  return Object.fromEntries(
+    Object.entries(images ?? {}).map(([id, value]) => {
+      return [id, imageUrl(value)];
+    }),
+  );
+};
 
 const synced = async (
   d: ReturnType<typeof device>,
@@ -64,15 +73,15 @@ test("first sync uploads; a fresh device keeps its own keys and takes YouTrack's
     assert.equal(second.state.review.length, 0);
     assert.equal(second.written, true);
     // B took YouTrack's value for the keys YouTrack has.
-    assert.equal(b.snapshot.data.images?.["PMON-2"], PNG);
+    assert.equal(imageUrl(b.snapshot.data.images?.["PMON-2"]), PNG);
     assert.ok(
       (b.snapshot.data.order["PMON-4"] ?? 9) <
         (b.snapshot.data.order["PMON-2"] ?? 0),
     );
     // B kept and uploaded its own key.
-    assert.equal(b.snapshot.data.images?.["PMON-3"], GIF);
+    assert.equal(imageUrl(b.snapshot.data.images?.["PMON-3"]), GIF);
     await synced(a, fake);
-    assert.equal(a.snapshot.data.images?.["PMON-3"], GIF);
+    assert.equal(imageUrl(a.snapshot.data.images?.["PMON-3"]), GIF);
   });
 });
 
@@ -89,7 +98,7 @@ test("edits to different keys on both devices merge and converge", () => {
     await synced(b, fake);
     await synced(a, fake);
     for (const d of [a, b])
-      assert.deepEqual(d.snapshot.data.images, {
+      assert.deepEqual(imageUrls(d.snapshot.data.images), {
         "PMON-2": PNG,
         "PMON-3": GIF,
       });
@@ -112,7 +121,7 @@ test("same-key change is a conflict reviewed and settled", () => {
     assert.equal(review?.key, "image/PMON-2");
     assert.equal(review?.local, GIF);
     assert.equal(review?.remote, PNG);
-    assert.equal(b.snapshot.data.images?.["PMON-2"], PNG);
+    assert.equal(imageUrl(b.snapshot.data.images?.["PMON-2"]), PNG);
     const recovery = await b.cache.listRecovery(SCOPE);
     assert.deepEqual(
       recovery.map((entry) => {
@@ -123,15 +132,15 @@ test("same-key change is a conflict reviewed and settled", () => {
     // YouTrack keeps the first value for another device.
     const c = device("c");
     await synced(c, fake);
-    assert.equal(c.snapshot.data.images?.["PMON-2"], PNG);
+    assert.equal(imageUrl(c.snapshot.data.images?.["PMON-2"]), PNG);
 
     await settleReview(b.deps(fake), romdexBinding, "image/PMON-2", "mine");
-    assert.equal(b.snapshot.data.images?.["PMON-2"], GIF);
+    assert.equal(imageUrl(b.snapshot.data.images?.["PMON-2"]), GIF);
     const after = await synced(b, fake);
     assert.equal(after.state.review.length, 0);
     assert.equal(after.written, true);
     await synced(a, fake);
-    assert.equal(a.snapshot.data.images?.["PMON-2"], GIF);
+    assert.equal(imageUrl(a.snapshot.data.images?.["PMON-2"]), GIF);
     assert.equal((await b.cache.listRecovery(SCOPE)).length, 2);
   });
 });
@@ -219,6 +228,6 @@ test("three consecutive moves are busy and lose nothing", () => {
     assert.equal(outcome.kind, "busy");
     assert.equal(moves(), 3);
     assert.deepEqual(await b.cache.getState(SCOPE, "romdex-metadata"), before);
-    assert.equal(b.snapshot.data.images?.["PMON-2"], PNG);
+    assert.equal(imageUrl(b.snapshot.data.images?.["PMON-2"]), PNG);
   });
 });

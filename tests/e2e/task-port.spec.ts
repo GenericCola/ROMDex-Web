@@ -20,14 +20,15 @@ test("task notes and comment drafts survive switching, restart and offline reope
   await routeLocalWorkspace(context);await context.setOffline(false);await expect(offline).toBeHidden();
   await page.getByRole("button",{name:"Comments",exact:true}).click();await expect(page.getByRole("textbox",{name:"Write a Comment",exact:true})).toHaveValue("Unposted synthetic draft");
 });
-test("a stale second window cannot overwrite a newer browser save",async({page,context})=>{
+test("a second window waits for Use here, then takes over with the newest save",async({page,context})=>{
+  const notes=(target:typeof page)=>target.getByRole("textbox",{name:"Notes and Instructions",exact:true});
+  const notice=(target:typeof page)=>target.getByRole("heading",{name:"ROMDex is open in another window",exact:true});
   await routeLocalWorkspace(context);await openLocalWorkspace(page);await page.getByRole("button",{name:"Add Epic",exact:true}).click();await finishInlineTask(page, "Synthetic concurrent task");await savedLocally(page,"Synthetic concurrent task");
-  const other=await context.newPage();await openLocalWorkspace(other);await expect(other.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("");
-  // Opening a connected window saves its refreshed baseline, so the first window reloads to be current again.
-  await page.reload();await expect(page.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("");
-  await page.getByRole("textbox",{name:"Notes and Instructions",exact:true}).fill("First window saved");await savedLocally(page,"First window saved");
-  await other.getByRole("textbox",{name:"Notes and Instructions",exact:true}).fill("Second window recovery");await expect(other.getByRole("alert").filter({hasText:"Another ROMDex window saved first"})).toContainText("Another ROMDex window saved first");await expect(other.getByRole("button",{name:"Export Recovery Copy",exact:true})).toBeEnabled();
-  await page.reload();await expect(page.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("First window saved");
+  await notes(page).fill("First window saved");await savedLocally(page,"First window saved");
+  const other=await context.newPage();await other.goto("/");await expect(notice(other)).toBeVisible();await expect(other.getByRole("button",{name:/^Save Changes/})).toHaveCount(0);
+  await other.getByRole("button",{name:"Use here",exact:true}).click();await expect(notice(page)).toBeVisible();await expect(page.getByRole("button",{name:/^Save Changes/})).toHaveCount(0);
+  await expect(notes(other)).toHaveValue("First window saved");await notes(other).fill("Second window saved");await savedLocally(other,"Second window saved");
+  await page.getByRole("button",{name:"Use here",exact:true}).click();await expect(notice(other)).toBeVisible();await expect(notes(page)).toHaveValue("Second window saved");
 });
 test.describe("signed-in reader without a worker", () => { test.use({serviceWorkers:"block"});
 test("YouTrack read uses only GET through the signed-in session and never persists the session secret",async({page,context})=>{

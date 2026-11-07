@@ -19,11 +19,10 @@
     "browser:install": "node scripts/playwright.mjs install chromium",
     "typecheck": "tsc --noEmit",
     "typecheck:tests": "tsc --noEmit -p tests/tsconfig.json",
-    "test": "tsx --tsconfig tests/tsconfig.json --test tests/unit/*.test.tsx && node --test tests/worker.test.mjs tests/build.test.mjs tests/hosting.test.mjs tests/youtrack/*.test.mjs scripts/migration/*.test.mjs",
+    "test": "tsx --tsconfig tests/tsconfig.json --test tests/unit/*.test.tsx && node --test tests/worker.test.mjs tests/build.test.mjs tests/hosting.test.mjs scripts/migration/*.test.mjs",
     "check": "pnpm typecheck && pnpm typecheck:tests && pnpm typecheck:server && pnpm lint && pnpm test && pnpm test:server",
     "test:e2e": "node scripts/playwright.mjs test",
     "icons:build": "node scripts/build-icons.mjs",
-    "package:youtrack": "node scripts/package-youtrack.mjs",
     "test:server": "node --experimental-strip-types --test server/*.test.ts",
     "typecheck:server": "tsc -p server/tsconfig.json"
   },

@@ -7,9 +7,8 @@ import { setTaskTextEditing } from "../../src/domain/task-editing";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
 import { normalize, type RawIssue } from "../../src/youtrack/read-tasks";
-import { required } from "../fixtures/values";
 
-test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces wakeups and cleans up", async () => {
+test("watcher never reads on a timer: it reads on connect, focus, visibility and online, coalesces wakeups and cleans up", async () => {
   const saved = {
     fetch: globalThis.fetch,
     now: Date.now,
@@ -41,8 +40,6 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
   const data = emptyWorkspace();
   data.remote = [normalize(raw)];
   let stop: (() => void) | undefined;
-  let heldResponse: Promise<Response> | undefined;
-  let releaseResponse: ((response: Response) => void) | undefined;
   const advance = async (ms: number) => {
     now += ms;
     for (const [key, timer] of [...timers])
@@ -69,10 +66,8 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
         return Response.json({ id: "user-A" });
       requests++;
       if (fail) throw Error("synthetic offline");
-      if (url.searchParams.get("$top") !== "10" && heldResponse)
-        return heldResponse;
       return Response.json(
-        url.searchParams.get("$top") === "10"
+        url.searchParams.get("fields") === "idReadable,updated"
           ? [{ idReadable: "PMON-1", updated: raw.updated }]
           : [raw],
       );
@@ -84,7 +79,7 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
     });
     setAuthSession({
       token: "synthetic",
-      expiresAt: now + 1000000,
+      expiresAt: now + 10 * 60 * 60_000,
       userId: "user-A",
       projectId: "project-PMON",
     });
@@ -97,63 +92,45 @@ test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces 
     globalThis.clearTimeout = ((key: number) => {
       timers.delete(key);
     }) as unknown as typeof clearTimeout;
+    const settle = async () => {
+      for (let round = 0; round < 20; round++)
+        await new Promise<void>((resolve) => saved.setTimeout(resolve, 0));
+    };
     stop = watchIncoming();
-    await advance(100);
-    assert.equal(requests, 1);
-    assert.equal(required([...timers.values()][0]).at - now, 15000);
-    await advance(15000);
-    assert.equal(requests, 2);
-    assert.equal(required([...timers.values()][0]).at - now, 30000);
-    await advance(30000);
-    assert.equal(requests, 3);
-    assert.equal(required([...timers.values()][0]).at - now, 60000);
-    await advance(60000);
-    assert.equal(requests, 4);
-    assert.equal(required([...timers.values()][0]).at - now, 60000);
+    await settle();
+    assert.equal(requests, 1, "connecting reads once");
+    await advance(60 * 60_000);
+    await settle();
+    assert.equal(requests, 1, "a failed read is not retried on a timer");
     doc.visibilityState = "hidden";
-    await advance(60000);
-    assert.equal(requests, 4);
-    assert.equal(required([...timers.values()][0]).at - now, 3000);
+    win.dispatchEvent(new Event("focus"));
+    win.dispatchEvent(new Event("online"));
+    await settle();
+    assert.equal(requests, 1, "a hidden window does not read");
     fail = false;
     doc.visibilityState = "visible";
     doc.dispatchEvent(new Event("visibilitychange"));
     win.dispatchEvent(new Event("focus"));
     win.dispatchEvent(new Event("online"));
-    assert.equal(timers.size, 1);
-    await advance(100);
-    assert.equal(requests, 5);
-    assert.equal(required([...timers.values()][0]).at - now, 3000);
-    await advance(3000);
-    assert.equal(requests, 6);
-    assert.equal(timers.size, 1);
-    raw.updated = 2;
-    heldResponse = new Promise<Response>((resolve) => {
-      releaseResponse = resolve;
-    });
+    await settle();
+    // The first event reads everything; the two that arrived meanwhile share
+    // one light check.
+    assert.equal(requests, 3);
+    await advance(60 * 60_000);
+    await settle();
+    assert.equal(requests, 3, "an idle visible window does not read");
     setTaskTextEditing("PMON-1:title", true);
-    await advance(3000);
-    assert.equal(
-      timers.size,
-      1,
-      "only the editor idle lease remains during the full read",
-    );
-    assert.equal(required([...timers.values()][0]).at - now, 297000);
     setTaskTextEditing("PMON-1:title", false);
-    releaseResponse?.(Response.json([raw]));
-    await new Promise<void>((resolve) => saved.setTimeout(resolve, 0));
-    assert.equal(
-      required([...timers.values()][0]).at - now,
-      250,
-      "blur during busy schedules prompt reapply",
-    );
+    await advance(250);
+    await settle();
+    assert.equal(requests, 3, "closing an editor re-applies without a read");
     stop();
-    assert.equal(timers.size, 0);
     win.dispatchEvent(new Event("focus"));
     doc.dispatchEvent(new Event("visibilitychange"));
-    assert.equal(timers.size, 0);
+    await settle();
+    assert.equal(requests, 3);
   } finally {
     stop?.();
-    releaseResponse?.(Response.json([raw]));
     setTaskTextEditing("PMON-1:title", false);
     disconnectDelivery();
     setAuthSession(null);

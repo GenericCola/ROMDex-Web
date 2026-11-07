@@ -11,7 +11,6 @@ Requires Node.js 24.x and pnpm 11.25.0.
     pnpm build
     pnpm browser:install
     pnpm test:e2e
-    pnpm package:youtrack
 
 Run pnpm dev at http://localhost:3000 (also reachable as https://nextjsdev.letmecome.in). It starts a local API next to Next, so sign-in and YouTrack reads work in dev too. Sign in with a pasted permanent token, or with "Sign in with the developer token": one click signs you in with YOUTRACK_TOKEN from .env, and it exists only in dev. Anyone who opens the dev URL (including the public https://nextjsdev.letmecome.in) while pnpm dev runs is signed in as the token's owner; the owner accepted this (PMON-622, Q11). See docs/TOKEN-SIGN-IN.md. Run pnpm build followed by pnpm start for the static preview at http://localhost:3001. Browser tests serve the build on port 3100; set E2E_PORT to use another port. Browser tests run only on Chromium: the `chromium` and `mobile-chromium` (Pixel 7) projects. Firefox, WebKit and iPhone emulation were dropped from the default run on November 7 (owner answer A2, PMON-622), so `pnpm browser:install` fetches Chromium only. Service workers register only in production.
 
@@ -26,8 +25,8 @@ The task toolbar filter popup is available in the web/PWA port and installed des
 Desktop Status popups retain working close controls while metadata preparation is pending. See docs/STATUS-DIALOG-REPAIR.md for the repair and verification.
 
 The Vercel preview is live at https://romdex-web.vercel.app. All 26 hosted
-Chrome/Firefox checks pass. Authenticated browser acceptance and the native shared-status race
-still block daily-work cutover. The administrator has completed the exact-origin
+Chrome/Firefox checks pass. Authenticated browser acceptance
+still blocks daily-work cutover. The administrator has completed the exact-origin
 CORS allowance, and its anonymous preflights pass. Keep the desktop for current work. Current
 hosted evidence and the one-origin administrator note are linked from
 [the migration checklist](docs/TASK-FIRST-MIGRATION.md).

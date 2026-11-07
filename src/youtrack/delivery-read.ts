@@ -10,6 +10,8 @@ export const readDeliveryTasks = async (request: YouTrackRequest) => {
     "issues",
     nativeIssueFields,
     "project: PMON sort by: created asc",
+    // PMON fits in one or two pages, so a full read is one or two requests.
+    500,
   );
   return raw.map((issue) => {
     const stateValue = issue.customFields?.find((field) => {

@@ -18,7 +18,7 @@ Deleting a local task that has never been sent cancels its queued subtree locall
 
 Moves use the discovered inward Subtask link ID and actual target database ID. The adapter reads the destination ancestor chain and rejects unreadable ancestors, multiple parents and cycles. It compares the current parent with the reconciled baseline, reads the full paginated parent-link list, removes the old link, verifies detachment, adds the new link and verifies the resulting parent.
 
-The attempt marker covers the whole move. An interruption can leave a task detached. Readback confirmation sends no write; if the desired parent is not present, an explicit rebase can queue the remaining edit against the current result. The next Save compares again. Comments and creation never use this rebase path.
+The attempt marker covers the whole move. An interruption can leave a task detached. Readback confirmation sends no write; if the desired parent is not present, the review offers Use my changes, an explicit rebase that queues the remaining edit against the current result. Other uncertain edits do not offer it. The next Save compares again. Comments and creation never use this rebase path.
 
 ## Deletion
 

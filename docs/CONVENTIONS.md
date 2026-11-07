@@ -76,8 +76,7 @@ apart in small ways, so keep new code on them.
 
 Left duplicated on purpose: `src/domain/accepted/**` is hash-pinned desktop code; the
 `scripts/verify-desktop-*` and `scripts/install-desktop-*` files are one-off checks of historical
-desktop patches that can only run against an installed desktop build; shared-status code and
-`youtrack-app/` wait on the owner's retirement decision. Dialog button rows stay written out
+desktop patches that can only run against an installed desktop build. Dialog button rows stay written out
 because each row differs in labels, button type, tone and disabled rules.
 
 ## Git

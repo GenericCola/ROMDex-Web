@@ -67,19 +67,20 @@ export const list = async <T>(
   route: string,
   fields: string,
   query?: string,
+  page = 100,
 ): Promise<T[]> => {
   const result: T[] = [];
-  for (let skip = 0; skip < 100000; skip += 100) {
+  for (let skip = 0; skip < 100000; skip += page) {
     const params = new URLSearchParams({
       fields,
-      $top: "100",
+      $top: String(page),
       $skip: String(skip),
       ...(query ? { query } : {}),
     });
-    const page = await request(route + "?" + params.toString());
-    if (!Array.isArray(page)) throw Error("YouTrack returned an invalid list.");
-    result.push(...(page as T[]));
-    if (page.length < 100) return result;
+    const rows = await request(route + "?" + params.toString());
+    if (!Array.isArray(rows)) throw Error("YouTrack returned an invalid list.");
+    result.push(...(rows as T[]));
+    if (rows.length < page) return result;
   }
   throw Error("YouTrack list exceeded its safety limit.");
 };

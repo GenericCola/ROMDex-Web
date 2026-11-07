@@ -6,14 +6,8 @@ import { nativeTagBaseline, prepareEditPatch } from "./edit-patch-delivery";
 import { finishExisting } from "./finish-existing";
 import { attemptDelivery, recordDelivery } from "./journal";
 import { OperationReviewRequired } from "./review-isolation";
-import {
-  confirmStatusAttempt,
-  saveStatusAttempt,
-  sharedWrite,
-} from "./shared-status-delivery";
 import { tagReconcileValues } from "./tag-reconcile";
 import type { Commit, DeliveryPort } from "./types";
-import { cloudData } from "./types";
 type Existing = Extract<TaskOperation, { type: "edit" | "comment" }>;
 export const deliverExisting = async (
   operation: Existing,
@@ -56,19 +50,6 @@ export const deliverExisting = async (
       normalized.remote,
     );
     ({ patch } = result);
-    if (
-      cloudData(snapshot()).sharedStatuses &&
-      patch.assignedState !== undefined &&
-      (operation.base.sharedStatus
-        ? operation.base.sharedStatus.revision !== remote.sharedStatus?.revision
-        : remote.sharedStatus?.initialized)
-    )
-      result.conflicts.push({
-        field: "assignedState revision",
-        base: operation.base.sharedStatus?.revision ?? 0,
-        local: patch.assignedState,
-        remote: remote.sharedStatus?.revision,
-      });
     if (result.conflicts.length) {
       await commit((data) => {
         recordDelivery(data, operation.opId, {
@@ -84,18 +65,10 @@ export const deliverExisting = async (
     }
   }
   const { assignedState, ...nativePatch } = patch;
-  const metadata =
-    cloudData(snapshot()).sharedStatuses && assignedState !== undefined
-      ? sharedWrite(operation, remote, "assign", assignedState)
-      : undefined;
   const finish = (verified: TaskItem) => {
     return finishExisting(operation, remote, assignedState, verified, commit);
   };
-  if (
-    operation.type === "edit" &&
-    !metadata &&
-    !Object.keys(nativePatch).length
-  ) {
+  if (operation.type === "edit" && !Object.keys(nativePatch).length) {
     await finish(remote);
     return;
   }
@@ -114,11 +87,6 @@ export const deliverExisting = async (
     operation,
     commit,
     async () => {
-      if (metadata) {
-        if (!port.metadata)
-          throw Error("Shared-status delivery is unavailable.");
-        await port.metadata.write(operation.issueId, metadata);
-      }
       if (deliverPatch) await deliverPatch();
       else if (operation.type === "comment") {
         const receipt = await port.comment(operation.issueId, operation.text);
@@ -137,12 +105,8 @@ export const deliverExisting = async (
         })
       )
         throw Error("Readback differs.");
-      confirmStatusAttempt(verified, metadata);
       await finish(verified);
     },
     operation.issueId,
-    (data) => {
-      saveStatusAttempt(data, operation, metadata);
-    },
   );
 };

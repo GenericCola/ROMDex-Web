@@ -2,14 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TaskItem, WorkspaceData } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-import {
-  ASSIGNED_IN_STORE,
-  applyAssigned,
-  applyAssignedWith,
-  assignedActive,
-  localAssigned,
-  localAssignedWith,
-} from "../../src/store/browser/assigned";
+import { applyAssigned, localAssigned } from "../../src/store/browser/assigned";
 import { taskItem } from "../fixtures/task-item";
 
 const item = (id: string, parentId: string | null = null): TaskItem =>
@@ -25,34 +18,7 @@ const workspace = (): WorkspaceData => {
   return data;
 };
 
-test("switch is on and sharedStatuses turns it off", () => {
-  const data = workspace();
-  assert.equal(ASSIGNED_IN_STORE, true);
-  assert.equal(assignedActive(data), true);
-  data.cloud = { autoSync: false, records: {}, sharedStatuses: true };
-  assert.equal(assignedActive(data), false);
-});
-
-test("off path passes remote assigned keys through", () => {
-  const data = workspace();
-  const remote = { "assigned/PMON-9": "Done", "orders/ROOT": ["a"] };
-  assert.deepEqual(
-    localAssignedWith(false, data, { "assigned/x": "y" }, remote),
-    {
-      "assigned/PMON-9": "Done",
-    },
-  );
-  const before = structuredClone(data);
-  assert.deepEqual(
-    applyAssignedWith(false, data, { "assigned/PMON-1": "Done" }, [
-      "assigned/PMON-1",
-    ]),
-    [],
-  );
-  assert.deepEqual(data, before);
-});
-
-test("active capture covers parents and known ids and carries the rest", () => {
+test("capture covers parents and known ids and carries the rest", () => {
   const data = workspace();
   const base = { "assigned/PMON-3": "Old", "assigned/PMON-99": "Done" };
   assert.deepEqual(localAssigned(data, base, {}), {

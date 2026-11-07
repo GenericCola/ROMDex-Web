@@ -47,7 +47,7 @@ void test("actual local review choice stays ready while unrelated auto work send
   assert.deepEqual(f.sent(), ["scalar:" + B, "scalar:" + A]);
   assert.equal(f.state().operations.length, 0);
 });
-for (const branch of ["ordinary", "tags", "shared"]) {
+for (const branch of ["ordinary", "tags"]) {
   void test(`${branch} rebase persists a validated ready receipt across reopen and never auto-selects it`, async () => {
     const f = await fixture(),
       data = structuredClone(f.state()),
@@ -56,20 +56,6 @@ for (const branch of ["ordinary", "tags", "shared"]) {
     if (branch === "tags") {
       op.base.tags = ["old"];
       op.patch = { tags: ["new"] };
-    }
-    if (branch === "shared") {
-      data.cloud!.sharedStatuses = true;
-      for (const item of data.remote)
-        item.sharedStatus = {
-          schema: 1,
-          id: item.id,
-          revision: 0,
-          initialized: false,
-          assignedState: item.assignedState!,
-          state: item.state,
-          updated: item.updated!,
-          receipt: null,
-        };
     }
     const remote = structuredClone(
       data.remote.find((item) => {

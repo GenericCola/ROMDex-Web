@@ -4,13 +4,14 @@ import { setAuthSession } from "../../src/auth/session";
 import {
   incomingContext,
   refreshIncoming,
+  refreshIncomingTask,
 } from "../../src/cloud/incoming-refresh";
 import { connectDelivery, disconnectDelivery } from "../../src/cloud/session";
 import { setTaskTextEditing } from "../../src/domain/task-editing";
 import type { WorkspaceData } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
-import { incomingRevision } from "../../src/youtrack/incoming-revision";
+import { incomingMarks } from "../../src/youtrack/incoming-revision";
 import { normalize, type RawIssue } from "../../src/youtrack/read-tasks";
 import { required } from "../fixtures/values";
 const gate = <T,>() => {
@@ -45,25 +46,30 @@ const setup = async () => {
   let started: ReturnType<typeof gate<void>> | undefined;
   let fail = false,
     reads = 0,
-    probes = 0;
+    probes = 0,
+    singles = 0;
   Date.now = () => now;
   globalThis.fetch = async (input, options) => {
     assert.equal(options?.method, "GET", "incoming must never write HTTP");
     const url = new URL(String(input));
     if (url.pathname.endsWith("users/me"))
       return Response.json({ id: "user-A" });
+    const single = /issues\/(PMON-\d+)$/.exec(url.pathname)?.[1];
+    if (single) {
+      singles++;
+      if (fail) throw Error("offline fixture");
+      const issue = remote.find((item) => item.idReadable === single);
+      return issue ? Response.json(issue) : new Response(null, { status: 404 });
+    }
     assert.ok(url.pathname.endsWith("issues"));
-    if (url.searchParams.get("$top") === "10") {
+    if (url.searchParams.get("fields") === "idReadable,updated") {
       probes++;
       if (fail) throw Error("offline fixture");
       return Response.json(
-        [...remote]
-          .sort((a, b) => b.updated! - a.updated!)
-          .slice(0, 10)
-          .map((item) => ({
-            idReadable: item.idReadable,
-            updated: item.updated,
-          })),
+        remote.map((item) => ({
+          idReadable: item.idReadable,
+          updated: item.updated,
+        })),
       );
     }
     reads++;
@@ -117,6 +123,7 @@ const setup = async () => {
       fail = value;
     },
     counts: () => ({ reads, probes }),
+    singles: () => singles,
     close: () => {
       disconnectDelivery();
       setAuthSession(null);
@@ -136,9 +143,9 @@ test("real request pipeline coalesces reads; active editor A held while B update
       raw("PMON-3"),
     ]);
     const held = env.hold();
-    const first = refreshIncoming(true);
+    const first = refreshIncoming("full");
     await Promise.race([held.started, first]);
-    assert.equal(refreshIncoming(true), first);
+    assert.equal(refreshIncoming("full"), first);
     held.release();
     await first;
     assert.equal(
@@ -155,7 +162,7 @@ test("real request pipeline coalesces reads; active editor A held while B update
       required(workspaceStore.getSnapshot().data.remote[0]).summary,
       "A new",
     );
-    assert.deepEqual(env.counts(), { reads: 1, probes: 0 });
+    assert.deepEqual(env.counts(), { reads: 1, probes: 1 });
     assert.equal(workspaceStore.getSnapshot().data.operations.length, 0);
   } finally {
     env.close();
@@ -170,7 +177,7 @@ test("account or project session change while full read is pending cannot apply 
     try {
       env.setRemote([{ ...raw("PMON-1", 2), summary: "stale" }]);
       const held = env.hold();
-      const running = refreshIncoming(true);
+      const running = refreshIncoming("full");
       const rejected = assert.rejects(
         running,
         /session changed|workspace changed/,
@@ -193,13 +200,13 @@ test("delivery epoch change during read rejects snapshot; rejected refresh relea
   try {
     env.setRemote([{ ...raw("PMON-1", 2), summary: "new" }]);
     const held = env.hold();
-    const running = refreshIncoming(true);
+    const running = refreshIncoming("full");
     const rejected = assert.rejects(running, /workspace changed/);
     await Promise.race([held.started, running]);
     await workspaceStore.deliver(async () => {});
     held.release();
     await rejected;
-    await refreshIncoming(true);
+    await refreshIncoming("full");
     assert.equal(
       required(workspaceStore.getSnapshot().data.remote[0]).summary,
       "new",
@@ -217,17 +224,17 @@ test("older full response cannot undo newer per-ticket baseline, failures preser
       () => {},
     );
     env.setRemote([raw("PMON-1", 2)]);
-    await refreshIncoming(true);
+    await refreshIncoming("full");
     assert.equal(
       required(workspaceStore.getSnapshot().data.remote[0]).summary,
       "latest",
     );
     env.advance();
     env.fail(true);
-    await assert.rejects(refreshIncoming(true), /offline fixture/);
+    await assert.rejects(refreshIncoming("full"), /offline fixture/);
     env.fail(false);
     env.setRemote([{ ...raw("PMON-2", 6), summary: "after retry" }]);
-    await refreshIncoming(true);
+    await refreshIncoming("full");
     assert.equal(
       workspaceStore
         .getSnapshot()
@@ -277,7 +284,7 @@ test("queued deletion and attachment remain untouched while unrelated incoming t
       raw("PMON-2", 2),
       { ...raw("PMON-3", 2), summary: "independent" },
     ]);
-    await refreshIncoming(true);
+    await refreshIncoming("full");
     assert.deepEqual(workspaceStore.getSnapshot().data.operations, before);
     assert.equal(
       required(workspaceStore.getSnapshot().data.remote[0]).updated,
@@ -300,7 +307,7 @@ test("reconnecting creates a new port and cannot reuse held old-port cached snap
   try {
     setTaskTextEditing("PMON-1:title", true);
     env.setRemote([{ ...raw("PMON-1", 2), summary: "old cache" }]);
-    await refreshIncoming(true);
+    await refreshIncoming("full");
     disconnectDelivery();
     await connectDelivery("synthetic-token", "user-A");
     env.setRemote([{ ...raw("PMON-1", 3), summary: "fresh port" }]);
@@ -327,13 +334,9 @@ test("revision probe validates IDs and finite safe timestamps without any write 
       { idReadable: "PMON-1", updated: 1 },
       { idReadable: "PMON-1", updated: 2 },
     ],
-    Array.from({ length: 11 }, (_, index) => ({
-      idReadable: `PMON-${index + 1}`,
-      updated: 1,
-    })),
   ])
-    await assert.rejects(incomingRevision(async () => result));
-  const revision = await incomingRevision(async (route, method) => {
+    await assert.rejects(incomingMarks(async () => result));
+  const marks = await incomingMarks(async (route, method) => {
     assert.equal(method, undefined);
     assert.match(route, /updated/);
     return [
@@ -341,7 +344,12 @@ test("revision probe validates IDs and finite safe timestamps without any write 
       { idReadable: "PMON-1", updated: 1 },
     ];
   });
-  assert.equal(revision, "PMON-1:1|PMON-2:2");
+  assert.deepEqual([...(marks ?? [])], [["PMON-2", 2], ["PMON-1", 1]]);
+  const tooMany = Array.from({ length: 2000 }, (_, index) => ({
+    idReadable: `PMON-${index + 1}`,
+    updated: 1,
+  }));
+  assert.equal(await incomingMarks(async () => tooMany), null);
 });
 
 test("same-account persistence switch fences a pending read and stale cached auth cannot apply", async () => {
@@ -349,7 +357,7 @@ test("same-account persistence switch fences a pending read and stale cached aut
   try {
     env.setRemote([{ ...raw("PMON-1", 2), summary: "old workspace" }]);
     const held = env.hold();
-    const running = refreshIncoming(true);
+    const running = refreshIncoming("full");
     const rejected = assert.rejects(running, /workspace changed/);
     await Promise.race([held.started, running]);
     const replacement = emptyWorkspace();
@@ -363,7 +371,7 @@ test("same-account persistence switch fences a pending read and stale cached aut
     held.release();
     await rejected;
     setTaskTextEditing("PMON-1:title", true);
-    await refreshIncoming(true);
+    await refreshIncoming("full");
     env.session();
     setTaskTextEditing("PMON-1:title", false);
     await refreshIncoming();
@@ -399,7 +407,7 @@ test("incoming refresh remains available during active delivery for unrelated ti
       { ...raw("PMON-1", 2), summary: "locked" },
       { ...raw("PMON-2", 2), summary: "unrelated fresh" },
     ]);
-    await refreshIncoming(true);
+    await refreshIncoming("full");
     assert.equal(workspaceStore.getSnapshot().delivering, true);
     assert.equal(
       required(workspaceStore.getSnapshot().data.remote[0]).summary,
@@ -422,7 +430,7 @@ test("watcher shutdown prevents an in-flight snapshot from applying; malformed f
   try {
     env.setRemote([{ ...raw("PMON-1", 2), summary: "after stop" }]);
     const held = env.hold();
-    const running = refreshIncoming(true, () => alive);
+    const running = refreshIncoming("full", () => alive);
     const rejected = assert.rejects(running, /watcher stopped/);
     await Promise.race([held.started, running]);
     alive = false;
@@ -433,13 +441,13 @@ test("watcher shutdown prevents an in-flight snapshot from applying; malformed f
       "PMON-1",
     );
     env.setRemote([raw("PMON-1", 2), raw("PMON-1", 2)]);
-    await assert.rejects(refreshIncoming(true), /duplicate|invalid/i);
+    await assert.rejects(refreshIncoming("full"), /duplicate|invalid/i);
     assert.equal(
       required(workspaceStore.getSnapshot().data.remote[0]).updated,
       1,
     );
     env.setRemote([{ ...raw("PMON-1", 3), summary: "retry valid" }]);
-    await refreshIncoming(true);
+    await refreshIncoming("full");
     assert.equal(
       required(workspaceStore.getSnapshot().data.remote[0]).summary,
       "retry valid",
@@ -449,7 +457,7 @@ test("watcher shutdown prevents an in-flight snapshot from applying; malformed f
   }
 });
 
-test("membership full refresh detects deletion older than the unchanged top ten revisions within six seconds", async () => {
+test("the light check finds deletions and edits anywhere, reading only what changed", async () => {
   const env = await setup();
   try {
     const items = Array.from({ length: 12 }, (_, index) =>
@@ -459,28 +467,40 @@ test("membership full refresh detects deletion older than the unchanged top ten 
     await refreshIncoming();
     assert.deepEqual(env.counts(), { reads: 1, probes: 0 });
     assert.equal(workspaceStore.getSnapshot().data.remote.length, 12);
-    env.setRemote(items.slice(0, 11));
-    env.advance(3000);
     await refreshIncoming();
     assert.deepEqual(env.counts(), { reads: 1, probes: 1 });
-    assert.ok(
-      workspaceStore
-        .getSnapshot()
-        .data.remote.some((item) => item.id === "PMON-12"),
-    );
-    env.advance(3000);
+    // PMON-12 is the oldest update, which a top-ten probe never saw.
+    env.setRemote(items.slice(0, 11));
     await refreshIncoming();
-    assert.deepEqual(env.counts(), { reads: 2, probes: 1 });
-    assert.ok(
-      !workspaceStore
-        .getSnapshot()
-        .data.remote.some((item) => item.id === "PMON-12"),
-    );
+    assert.deepEqual(env.counts(), { reads: 1, probes: 2 });
+    const remote = () => workspaceStore.getSnapshot().data.remote;
+    assert.ok(!remote().some((item) => item.id === "PMON-12"));
     assert.ok(
       workspaceStore
         .getSnapshot()
         .data.cloud?.unavailable?.tasks.some((item) => item.id === "PMON-12"),
     );
+    env.setRemote([
+      ...items.slice(0, 10),
+      { ...raw("PMON-11", 50), summary: "edited old task" },
+    ]);
+    await refreshIncoming();
+    assert.deepEqual(env.counts(), { reads: 1, probes: 3 });
+    assert.equal(env.singles(), 1);
+    assert.equal(
+      remote().find((item) => item.id === "PMON-11")?.summary,
+      "edited old task",
+    );
+    // A task already read back (as after a delivery) is not read again.
+    env.setRemote([
+      ...items.slice(0, 10),
+      { ...raw("PMON-11", 60), summary: "read back" },
+    ]);
+    await refreshIncomingTask("PMON-11");
+    assert.equal(env.singles(), 2);
+    await refreshIncoming();
+    assert.equal(env.singles(), 2);
+    assert.deepEqual(env.counts(), { reads: 1, probes: 4 });
     assert.deepEqual(workspaceStore.getSnapshot().data.operations, []);
   } finally {
     env.close();
@@ -503,7 +523,7 @@ test("a read that overlaps the end of a delivery cannot restore a task the deliv
     await started.promise;
     // YouTrack answers this read with PMON-3 as it was before the deletion.
     const held = env.hold();
-    const running = refreshIncoming(true);
+    const running = refreshIncoming("full");
     const rejected = assert.rejects(running, /workspace changed/);
     await Promise.race([held.started, running]);
     finish.release();

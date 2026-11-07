@@ -13,7 +13,6 @@ import { deliveryPreflight } from "./delivery-preflight";
 import { dispatchOperation } from "./dispatch-operation";
 import { assertNoBlockedReview, blockedByReview } from "./review-isolation";
 import { planRollup } from "./rollup";
-import { refreshShared } from "./shared-status-delivery";
 import type { Commit, DeliveryPort } from "./types";
 import { cloudData } from "./types";
 import { validateQueue } from "./validation";
@@ -40,7 +39,6 @@ export const deliverQueue = async (
     seedAssigned(data);
     data.cloud = { ...cloudData(data), accountId: port.accountId };
   });
-  await refreshShared(snapshot, commit, port);
   while (snapshot().operations.length || cloudData(snapshot()).rollupPending) {
     if (!keepGoing()) return;
     for (const op of snapshot().operations)

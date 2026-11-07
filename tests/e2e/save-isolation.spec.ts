@@ -253,6 +253,8 @@ test("one uncertain upload preserves multiple additions while unrelated saves an
     .getByRole("switch", { name: "Auto-Sync Data", exact: true })
     .click();
   await page.clock.fastForward(61_000);
+  // No timer re-checks the upload (PMON-641): returning to the window does.
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await page.clock.runFor(2500);
   await expect(
     page.getByRole("button", { name: "Cancel Upload", exact: true }),
