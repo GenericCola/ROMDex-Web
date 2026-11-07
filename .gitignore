@@ -29,6 +29,9 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+# editor swap files (e.g. vim swap of .env)
+*.swp
+*.swo
 
 # vercel
 .vercel
