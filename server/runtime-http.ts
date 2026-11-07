@@ -1,6 +1,4 @@
 import { HttpFailure } from "./runtime-types.ts";
-import { ORIGIN } from "./session-contract.ts";
-export const CALLBACK = ORIGIN + "/api/auth/callback";
 export const TRANSACTION = "__Host-romdex-login";
 export const cookieValue = (request: Request, name: string) => {
   const values = (request.headers.get("cookie") ?? "")
@@ -40,7 +38,7 @@ export const redirect = (url: string, cookies: string[]) => {
 };
 export const sameOrigin = (request: Request) => {
   if (
-    request.headers.get("origin") !== ORIGIN ||
+    request.headers.get("origin") !== new URL(request.url).origin ||
     request.headers.get("sec-fetch-site") !== "same-origin"
   )
     throw new HttpFailure(403);

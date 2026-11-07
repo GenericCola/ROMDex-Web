@@ -1,6 +1,6 @@
 import { EncryptJWT, jwtDecrypt } from "jose";
 import { HttpFailure } from "./runtime-types.ts";
-import { ORIGIN } from "./session-contract.ts";
+import { ISSUER } from "./session-contract.ts";
 export const SESSION = "__Host-romdex-access";
 export const LOGIN = "__Host-romdex-pkce";
 export const FENCE = "__Host-romdex-generation";
@@ -24,6 +24,7 @@ export interface CookieEnvelope {
   accessExpiresAt?: number;
   scope?: string;
   renewUntil?: number;
+  permanent?: true;
 }
 export function readCookie(request: Request, name: string): string | null {
   const values = (request.headers.get("cookie") ?? "")
@@ -48,7 +49,7 @@ export async function sealCookie(
 ): Promise<string> {
   return new EncryptJWT({ ...value })
     .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
-    .setIssuer(ORIGIN)
+    .setIssuer(ISSUER)
     .setAudience("romdex:" + value.kind)
     .setExpirationTime(value.expiresAt)
     .encrypt(key);
@@ -61,7 +62,7 @@ export async function openCookie(
 ): Promise<CookieEnvelope> {
   try {
     const { payload } = await jwtDecrypt(value, key, {
-      issuer: ORIGIN,
+      issuer: ISSUER,
       audience: "romdex:" + kind,
       currentDate: new Date(now * 1000),
       keyManagementAlgorithms: ["dir"],

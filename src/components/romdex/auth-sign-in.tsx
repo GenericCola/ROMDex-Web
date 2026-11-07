@@ -1,5 +1,7 @@
 import { isOAuthOrigin, OAUTH_ORIGIN } from "@/auth/oauth";
-import { useState, useSyncExternalStore } from "react";
+import { type ChangeEvent, useState, useSyncExternalStore } from "react";
+import DevTokenSignIn from "./dev-token-sign-in";
+import TokenSignIn from "./token-sign-in";
 const subscribe = () => {
   return () => {
     return undefined;
@@ -26,31 +28,23 @@ const AuthSignIn = ({
     canonicalOrigin,
     serverOrigin,
   );
-  if (!canonical)
-    return (
-      <>
-        <a className="primary" href={OAUTH_ORIGIN + "/"}>
-          Sign in with YouTrack at romdex.vercel.app
-        </a>
-        <p>
-          This address does not start sign-in. Existing browser data here stays
-          untouched and is not automatically transferred to the new address.
-        </p>
-      </>
-    );
   const open = () => {
     void signIn(rememberDevice);
   };
+  const handleRemember = (event: ChangeEvent<HTMLInputElement>) => {
+    setRememberDevice(event.target.checked);
+  };
   return (
     <>
+      {process.env.NODE_ENV === "development" ? (
+        <DevTokenSignIn busy={busy} />
+      ) : null}
       <label>
         <input
           type="checkbox"
           checked={rememberDevice}
           disabled={busy}
-          onChange={(event) => {
-            setRememberDevice(event.target.checked);
-          }}
+          onChange={handleRemember}
         />
         Keep me signed in on this device (30 days)
       </label>
@@ -58,13 +52,26 @@ const AuthSignIn = ({
         Use this only on a device you trust. YouTrack may still ask you to sign
         in again.
       </p>
-      <button className="primary" disabled={busy} onClick={open}>
-        {busy
-          ? "Signing in…"
-          : signedIn
-            ? "Sign in again with YouTrack"
-            : "Sign in with YouTrack"}
-      </button>
+      {canonical ? (
+        <button className="primary" disabled={busy} onClick={open}>
+          {busy
+            ? "Signing in…"
+            : signedIn
+              ? "Sign in again with YouTrack"
+              : "Sign in with YouTrack"}
+        </button>
+      ) : (
+        <>
+          <a className="primary" href={OAUTH_ORIGIN + "/"}>
+            Sign in with YouTrack at romdex.vercel.app
+          </a>
+          <p>
+            YouTrack sign-in runs only at that address. Existing browser data
+            here stays untouched and is not transferred to it.
+          </p>
+        </>
+      )}
+      <TokenSignIn busy={busy} rememberDevice={rememberDevice} />
     </>
   );
 };

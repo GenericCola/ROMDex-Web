@@ -35,6 +35,7 @@ export async function issueSessionCookies(
     accessToken: tokens.accessToken,
     userId,
     ...(rememberDevice ? { rememberDevice: true } : {}),
+    ...(tokens.permanent ? { permanent: true } : {}),
   };
   const refreshToken = rememberDevice
     ? (tokens.refreshToken ?? previous?.refreshToken)
