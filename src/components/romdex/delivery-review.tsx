@@ -11,6 +11,7 @@ import LocalUploadReview from "./local-upload-review";
 import ReviewComparison from "./review-comparison";
 import ReviewGuidance from "./review-guidance";
 import {
+  offersLocalChoice,
   reviewChoiceLabel,
   reviewResultMessage,
 } from "./review-operation-summary";
@@ -118,17 +119,17 @@ const DeliveryReview = ({
             >
               Check whether this saved
             </button>
-            {operation?.type === "edit" &&
-              record.status === "conflict" &&
-              operation.purpose !== "rollup" && (
-                <div>
-                  <ReviewGuidance choice="keep" />
-                  <button onClick={local} disabled={busy}>
-                    {reviewChoiceLabel(operation, record, true) ??
-                      "Use my changes"}
-                  </button>
-                </div>
-              )}
+            {offersLocalChoice(operation, record) && (
+              <div>
+                <ReviewGuidance
+                  choice={record.status === "conflict" ? "keep" : "move"}
+                />
+                <button onClick={local} disabled={busy}>
+                  {reviewChoiceLabel(operation, record, true) ??
+                    "Use my changes"}
+                </button>
+              </div>
+            )}
             <ReviewGuidance choice="stop" />
             <button onClick={cloud} disabled={busy || !operation}>
               {reviewChoiceLabel(operation, record, false) ??

@@ -20,6 +20,8 @@ export interface StoreBinding {
     remoteParts: PartValue[],
     data: WorkspaceData,
   ) => Promise<PartValue[]>;
+  /** Runs before `apply`, outside the workspace change; saves anything `apply` needs to find ready. */
+  prepare?: (values: Record<string, unknown>, keys: string[]) => Promise<void>;
   /** Writes `values[key]` (absent = removed) for each key into data. Answers the keys it could not apply now. */
   apply: (
     data: WorkspaceData,

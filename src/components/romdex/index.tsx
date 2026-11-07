@@ -22,8 +22,6 @@ import {
   LazyMigration,
   LazyNpcdex,
   LazyNpcdexSidebar,
-  LazyRdxLibrary,
-  LazyUpdateCheck,
 } from "./lazy-views";
 import LocalSaveRecovery from "./local-save-recovery";
 import SaveFeedback from "./save-feedback";
@@ -36,6 +34,7 @@ import WorkTable from "./work-table";
 import WorkTrays from "./work-trays";
 import WorkspaceSkeleton from "./workspace-skeleton";
 import WorkspaceStatus from "./workspace-status";
+import WorkspaceToolViews from "./workspace-tool-views";
 import {
   WorkspaceToolsContext,
   type WorkspaceTool,
@@ -55,6 +54,9 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
   const chooseTool = (next: WorkspaceTool) => {
     setTool(next);
     if (next === "updates") void update.checkForUpdates();
+  };
+  const closeTool = () => {
+    setTool(null);
   };
   const openMigration = () => {
     setMigration(true);
@@ -125,21 +127,12 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
             <LazyConnection close={closeConnection} account={account} />
           )}
           {migration && <LazyMigration close={closeMigration} />}
-          {(tool === "import" || tool === "export") && (
-            <LazyRdxLibrary
+          {tool && (
+            <WorkspaceToolViews
+              tool={tool}
               data={state.data}
-              mode={tool}
-              close={() => {
-                setTool(null);
-              }}
-            />
-          )}
-          {tool === "updates" && (
-            <LazyUpdateCheck
               update={update}
-              close={() => {
-                return setTool(null);
-              }}
+              close={closeTool}
             />
           )}
         </div>

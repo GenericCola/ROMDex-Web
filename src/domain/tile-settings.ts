@@ -1,6 +1,8 @@
+import { imageRefOf, imageUrl, putImage } from "@/storage/image-storage";
 import { editTask } from "./task-actions";
 import type { WorkspaceData } from "./types";
 import { findWorkspaceItem } from "./workspace-item";
+import { workspaceStore } from "./workspace-store";
 
 export interface TileDraft {
   id: string;
@@ -14,7 +16,7 @@ export const applyTileSettings = (data: WorkspaceData, draft: TileDraft) => {
   if (!item) throw Error("The item no longer exists.");
   if (
     item.summary !== draft.baseSummary ||
-    (data.images?.[draft.id] ?? null) !== draft.baseImage
+    imageUrl(data.images?.[draft.id]) !== draft.baseImage
   )
     throw Error(
       "Tile settings changed. Close and reopen this dialog before applying.",
@@ -25,7 +27,15 @@ export const applyTileSettings = (data: WorkspaceData, draft: TileDraft) => {
   if (summary !== item.summary) editTask(data, item.id, { summary });
   if (draft.image !== draft.baseImage) {
     data.images ??= {};
-    if (draft.image) data.images[item.id] = draft.image;
+    if (draft.image) data.images[item.id] = imageRefOf(draft.image);
     else delete data.images[item.id];
   }
+};
+/** Saves the image first, so the workspace never refers to an unsaved image. */
+export const saveTileSettings = async (draft: TileDraft) => {
+  if (draft.image) await putImage(draft.image);
+  await workspaceStore.change((data) => {
+    applyTileSettings(data, draft);
+  });
+  await workspaceStore.flush();
 };

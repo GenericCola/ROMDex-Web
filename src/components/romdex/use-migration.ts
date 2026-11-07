@@ -14,7 +14,9 @@ import type { DesktopPreview } from "@/migration/desktop";
 import { applyDesktop, previewDesktop } from "@/migration/desktop";
 import { readDesktopExport } from "@/migration/desktop-export";
 import { readMigrationText } from "@/migration/file-text";
+import { restoreRecovery } from "@/migration/restore-recovery";
 import { verifyRetainedAssets } from "@/migration/verify-assets";
+import { putImages } from "@/storage/image-storage";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 export const useMigration = (close: () => void) => {
@@ -78,28 +80,10 @@ export const useMigration = (close: () => void) => {
     try {
       disconnectDelivery();
       await stageRecoveryUploads(uploads);
+      await putImages(recovery?.images ?? preview?.source.images);
       await workspaceStore.change((data) => {
         if (preview) applyDesktop(data, preview, new Set(choices));
-        else if (recovery) {
-          if (JSON.stringify(data) !== baseline)
-            throw Error(
-              "The workspace changed after preview. Select the recovery file again.",
-            );
-          const original = structuredClone(data),
-            restored = structuredClone(recovery);
-          restored.cloud = {
-            ...restored.cloud,
-            records: restored.cloud?.records ?? {},
-            autoSync: false,
-          };
-          if (restored.migration)
-            restored.migration.previousBrowser = jsonObject(
-              parseJson(JSON.stringify(original)),
-            );
-          for (const key of Object.keys(data))
-            Reflect.deleteProperty(data, key);
-          Object.assign(data, restored);
-        }
+        else if (recovery) restoreRecovery(data, recovery, baseline);
       });
       await workspaceStore.flush();
       close();

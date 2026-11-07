@@ -79,6 +79,14 @@ test("paused edit names the task, exposes reason and explains safe choices witho
   assert.match(html, /will not send it again/);
   assert.match(html, /recovery history/);
 });
+test("an uncertain move offers Use my changes again; other uncertain edits and rollups do not", () => {
+  const move: TaskOperation = { ...edit, patch: { parentId: "PMON-1" } };
+  const html = render(move);
+  assert.match(html, /Use my changes/);
+  assert.match(html, /move may have stopped part way/);
+  assert.doesNotMatch(render({ ...move, purpose: "rollup" }), /Use my changes/);
+  assert.doesNotMatch(render(edit), /Use my changes/);
+});
 test("create and attachment reviews never offer an edit retry; missing operations cannot act", () => {
   const created = render({
     type: "create",

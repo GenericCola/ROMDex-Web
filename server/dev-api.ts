@@ -51,7 +51,7 @@ createServer(function onRequest(incoming, outgoing) {
 }).listen(DEV_API_PORT, "127.0.0.1", function ready() {
   console.log(
     deps.token
-      ? `Dev API on 127.0.0.1:${DEV_API_PORT}. Developer sign-in code: ${deps.code}`
+      ? `Dev API on 127.0.0.1:${DEV_API_PORT}. Developer sign-in is one click.`
       : "Dev API running. YOUTRACK_TOKEN is not set, so developer sign-in is off.",
   );
 });

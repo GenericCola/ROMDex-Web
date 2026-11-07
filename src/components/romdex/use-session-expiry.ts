@@ -1,5 +1,5 @@
 import { assertCookieHandle, isCookieHandle } from "@/auth/cookie-client";
-import { expired, setAuthSession } from "@/auth/session";
+import { expired, setAuthSession, subscribeAuthSession } from "@/auth/session";
 import { forgetSession } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
 import { useEffect, type RefObject } from "react";
@@ -47,11 +47,35 @@ export const useSessionExpiry = ({
         if (saved && canRenew && run === generationRef.current) resume();
       });
     };
-    const timer = window.setInterval(check, 1000);
+    // One timer at the session's expiry, re-armed whenever the session
+    // changes; focus and visibility catch a cookie changed elsewhere.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const arm = () => {
+      clearTimeout(timer);
+      const run = () => {
+        check();
+        if (sessionRef.current) arm();
+      };
+      timer = undefined;
+      if (!sessionRef.current) return;
+      // Browsers cap timers near 24.8 days; a longer session re-arms.
+      const wait = Math.min(
+        sessionRef.current.expiresAt - Date.now(),
+        2 ** 31 - 1,
+      );
+      timer = setTimeout(run, Math.max(wait, 0));
+    };
+    const changed = () => {
+      // The session ref is set next to the auth session; arm after both.
+      queueMicrotask(arm);
+    };
+    const stopListening = subscribeAuthSession(changed);
+    arm();
     window.addEventListener("focus", check);
     document.addEventListener("visibilitychange", check);
     return () => {
-      window.clearInterval(timer);
+      clearTimeout(timer);
+      stopListening();
       window.removeEventListener("focus", check);
       document.removeEventListener("visibilitychange", check);
     };

@@ -185,6 +185,22 @@ YouTrack instance, user and project (`src/storage/workspace-storage.ts`,
 `workspace-key.ts`). Saves are revision-checked so two windows cannot overwrite
 each other.
 
+Tile image bytes are not in that record. They live in their own IndexedDB
+database `romdex-web-images`, store `images` (`src/storage/image-storage.ts`).
+Each entry is keyed by `sha256-<hex>` of the data URL, so saving the same image
+twice stores it once. The workspace keeps only that ref in `images[id]`. The
+image is written (strict durability, read back and compared) before any
+workspace change names its ref. On load every ref is read into a memory map so
+render code stays synchronous. A ref with no stored image fails softly: the
+workspace still opens, Tile Settings shows "This tile image is missing from
+this browser", sync carries that key from YouTrack's copy instead of removing
+it, and recovery copies list it under `missingImages`. Old records that still hold data URLs keep loading. Each load saves
+those images to the store and then rewrites the workspace to refs; if any save
+fails the record is left as it was and the next load tries again. Sync still
+compares data URLs (the memory map resolves refs), and recovery export writes
+data URLs back, including those under `migration.previousBrowser.images`. Image entries are never deleted; an entry nothing refers to
+is harmless.
+
 | Data                | Field in `WorkspaceData`                    | Matches                                   |
 | ------------------- | ------------------------------------------- | ----------------------------------------- |
 | Tile images         | `images: Record<PMON-N, dataURL>`           | metadata `images`                         |
@@ -511,8 +527,10 @@ Where the build differs from the plan above:
   `AttachmentClient` stays issue-only; article attachments go through
   `src/store/core/attachments.ts`, and `attachmentBytes` accepts an article
   target.
-- **When it syncs.** On app start, five seconds after the workspace changes,
-  when the browser comes online, every five minutes, and on Sync now. Syncs run
+- **When it syncs.** On app start, five seconds after a workspace change that
+  touched a synced value (other changes send nothing), when the browser comes
+  online, when the window comes back into view (at most every 30 s), on Refresh
+  and on Sync now. There is no timer; see docs/SYNC-WITHOUT-POLLING.md. Syncs run
   one at a time, and across tabs through Web Locks. Offline, the status says
   "Saved in this browser; waiting to sync."
 

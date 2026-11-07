@@ -1,16 +1,27 @@
 import type { TaskItem } from "@/domain/types";
 import type { YouTrackRequest } from "./request";
-export const incomingRevision = async (request: YouTrackRequest) => {
+/*
+ * One light read that tells whether anything in PMON changed: every issue's
+ * id and update time. It catches edits, new issues, deletions and moves out of
+ * the project, so the full read runs only when something did change.
+ */
+const LIMIT = 2000;
+export type IncomingMarks = Map<string, number>;
+export const incomingMarks = async (
+  request: YouTrackRequest,
+): Promise<IncomingMarks | null> => {
   const params = new URLSearchParams({
     fields: "idReadable,updated",
-    $top: "10",
-    query: "project: PMON sort by: updated desc",
+    $top: String(LIMIT),
+    query: "project: PMON",
   });
   const result: unknown = await request("issues?" + params.toString());
-  if (!Array.isArray(result) || result.length > 10)
+  if (!Array.isArray(result))
     throw Error("Incoming update check returned an invalid list.");
-  const ids = new Set<string>();
-  const revisions = result.map((entry: unknown) => {
+  // Too many issues for one page: answer "unknown" so the full read runs.
+  if (result.length >= LIMIT) return null;
+  const marks: IncomingMarks = new Map();
+  for (const entry of result as unknown[]) {
     if (
       !entry ||
       typeof entry !== "object" ||
@@ -23,22 +34,24 @@ export const incomingRevision = async (request: YouTrackRequest) => {
       entry.updated < 0
     )
       throw Error("Incoming update revision is invalid.");
-    if (ids.has(entry.idReadable)) throw Error("Duplicate incoming revision.");
-    ids.add(entry.idReadable);
-    return `${entry.idReadable}:${entry.updated}`;
-  });
-  return revisions.sort().join("|");
+    if (marks.has(entry.idReadable))
+      throw Error("Duplicate incoming revision.");
+    marks.set(entry.idReadable, entry.updated);
+  }
+  return marks;
 };
-
-export const snapshotRevision = (items: TaskItem[]) => {
-  return [...items]
-    .sort((a, b) => {
-      return (b.updated ?? 0) - (a.updated ?? 0);
-    })
-    .slice(0, 10)
-    .map((item) => {
-      return `${item.id}:${item.updated}`;
-    })
-    .sort()
-    .join("|");
+/** Ids whose update time differs or that are new, and ids now gone. */
+export const changedMarks = (items: TaskItem[], marks: IncomingMarks) => {
+  const changed = new Set<string>(),
+    removed = new Set<string>();
+  for (const item of items)
+    if (!marks.has(item.id)) removed.add(item.id);
+    else if (marks.get(item.id) !== item.updated) changed.add(item.id);
+  const known = new Set(
+    items.map((item) => {
+      return item.id;
+    }),
+  );
+  for (const id of marks.keys()) if (!known.has(id)) changed.add(id);
+  return { changed, removed };
 };

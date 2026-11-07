@@ -7,8 +7,6 @@ artifacts
 docs
 tests
 patches
-youtrack-app
-youtrack-acceptance
 node_modules
 .next
 out

@@ -1,5 +1,7 @@
 # YouTrack live acceptance
 
+> Historical: the app and `pnpm package:youtrack` were removed on 2026-11-07 (owner answer Q8, PMON-622).
+
 Current native result (October 24): system privileges now permit self-installation. Acceptance 1.0.12 is installed in place as app 155-84 on NPCD only. Native reads, assignment/rollup, receipts, fresh-page persistence and correlated rollback pass after the API/body-stream repairs. The child concurrency test accepted both same-revision writers, so production sharing remains blocked. See [LIVE-ACCEPTANCE-2026-10-24.md](LIVE-ACCEPTANCE-2026-10-24.md) for evidence and pending work. Earlier version, permission and withheld-package paragraphs below are historical. Vercel is the selected eventual host.
 
 The owner authorized test-only app installation and live testing on October 22, 2026. No disposable project exists. The owner then explicitly chose NPCD, an existing project, for testing. Existing NPCD issues and settings must be preserved. Production PMON sharing remains off, and the desktop app, saves, source reference and credentials remain intact.

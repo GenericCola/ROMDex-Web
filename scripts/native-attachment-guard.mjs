@@ -15,7 +15,7 @@ export const validateRecovery = bytes => {
   assert.equal(upload.id,s.opId);assert.deepEqual(upload.file,s.file);
   const payload=Buffer.from(upload.data,'base64');assert.equal(payload.length,s.file.size);assert.equal(createHash('sha256').update(payload).digest('hex'),s.file.hash);
   assert.deepEqual(Object.keys(data.cloud.records),[s.opId]);assert.equal(record.status,'uncertain');assert.equal(record.remoteId,s.receipt);assert.equal(record.targetId,s.fixture);assert.deepEqual(record.attachmentBeforeIds,[]);
-  assert.equal(data.cloud.accountId,s.account);assert.equal(data.cloud.autoSync,false);assert.ok(!data.cloud.sharedStatuses&&!data.cloud.rollupPending);assert.equal(data.newTask,null);
+  assert.equal(data.cloud.accountId,s.account);assert.equal(data.cloud.autoSync,false);assert.ok(!data.cloud.rollupPending);assert.equal(data.newTask,null);
   assert.deepEqual(data.titleDrafts,{});assert.deepEqual(data.commentDrafts,{});assert.deepEqual(data.editorRecovery,[]);
   assert.equal(data.remote.length,3);assert.equal(new Set(data.remote.map(task=>task.id)).size,3);
   for(const task of data.remote) {assert.ok(Object.hasOwn(fixtures,task.id));assert.equal(task.summary,fixtures[task.id].title);assert.equal(task.parentId,fixtures[task.id].parent);}

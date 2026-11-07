@@ -7,7 +7,7 @@ const source = (name: string) =>
     new URL("../../src/components/romdex/" + name, import.meta.url),
     "utf8",
   );
-test("TOOLS replaces header gear beside completed filter with exactly three actions", () => {
+test("TOOLS replaces header gear beside completed filter with exactly five actions", () => {
   const tools = source("workspace-tools.tsx"),
     toolbar = source("work-toolbar.tsx"),
     header = source("header.tsx");
@@ -16,10 +16,17 @@ test("TOOLS replaces header gear beside completed filter with exactly three acti
     /WorkspaceTools|suite-settings-slot|standard-settings-icon/,
   );
   assert.match(toolbar, /<WorkspaceTools[\s\S]*id="toggle-completed"/);
-  for (const label of ["EXPORT RDX", "IMPORT RDX", "CHECK FOR UPDATES"])
+  for (const label of [
+    "EXPORT RDX",
+    "IMPORT RDX",
+    "CHECK FOR UPDATES",
+    "INSTALL ROMDEX",
+    "EXPORT RECOVERY COPY",
+  ])
     assert.equal(tools.split(label).length - 1, 1);
-  assert.equal((tools.match(/<button/g) ?? []).length, 4);
-  assert.doesNotMatch(tools, /Recovery|Migration|Install ROMDex|Sign out/);
+  assert.equal((tools.match(/<button/g) ?? []).length, 6);
+  // Importing desktop or recovery data stays behind ?recovery=1.
+  assert.doesNotMatch(tools, /Migration|Import Desktop|Sign out/);
 });
 test("account, project, recovery and update safety remain accessible outside normal TOOLS menu", () => {
   const workspace = source("index.tsx"),

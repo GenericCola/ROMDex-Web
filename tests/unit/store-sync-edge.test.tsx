@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { imageUrl } from "../../src/storage/image-storage";
 import type { StoreState } from "../../src/store/browser/cache";
 import { npcdexBinding } from "../../src/store/browser/npcdex-binding";
 import { romdexBinding } from "../../src/store/browser/romdex-binding";
@@ -52,7 +53,7 @@ test("offline sync throws, writes nothing and the next sync uploads", () => {
     };
     await assert.rejects(syncStore(a.deps(fake), romdexBinding), /fetch/);
     assert.deepEqual(await a.cache.getState(SCOPE, "romdex-metadata"), before);
-    assert.equal(a.snapshot.data.images["PMON-2"], PNG);
+    assert.equal(imageUrl(a.snapshot.data.images?.["PMON-2"]), PNG);
     fake.request = request;
     const calls = fake.calls.length;
     const outcome = await syncStore(a.deps(fake), romdexBinding);
@@ -60,7 +61,7 @@ test("offline sync throws, writes nothing and the next sync uploads", () => {
     assert.ok(fake.calls.length > calls);
     const b = device("b");
     await syncStore(b.deps(fake), romdexBinding);
-    assert.equal(b.snapshot.data.images?.["PMON-2"], PNG);
+    assert.equal(imageUrl(b.snapshot.data.images?.["PMON-2"]), PNG);
   });
 });
 
@@ -86,7 +87,7 @@ test("a key edited while the sync runs keeps the local edit", () => {
     fake.onBeforeContentWrite = undefined;
     assert.equal(edited, true);
     assert.equal(outcome.kind, "synced");
-    assert.equal(b.snapshot.data.images["PMON-2"], NEWER);
+    assert.equal(imageUrl(b.snapshot.data.images?.["PMON-2"]), NEWER);
     // The edit was not recorded as synced: the next sync sees it as a change.
     if (outcome.kind !== "synced") return;
     assert.equal(
@@ -96,7 +97,7 @@ test("a key edited while the sync runs keeps the local edit", () => {
     assert.equal(outcome.state.base?.values["image/PMON-4"], PNG);
     const next = await syncStore(b.deps(fake), romdexBinding);
     assert.equal(next.kind === "synced" && next.state.review[0]?.local, NEWER);
-    assert.equal(b.snapshot.data.images["PMON-2"], PNG);
+    assert.equal(imageUrl(b.snapshot.data.images?.["PMON-2"]), PNG);
   });
 });
 

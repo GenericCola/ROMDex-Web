@@ -10,7 +10,8 @@ test("task drafts survive a blocked update and the consenting reload",async({pag
     await page.getByRole("textbox",{name:"Notes and Instructions",exact:true}).fill("Draft retained across update");
     await savedLocally(page,"Draft retained across update");
     await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener("controllerchange",()=>resolve(),{once:true}));});
-    const other=await context.newPage();await openLocalWorkspace(other);await expect(other.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("Draft retained across update");
+    // A second window only shows the one-window notice, but still counts as an open window.
+    const other=await context.newPage();await other.goto("/");await expect(other.getByRole("heading",{name:"ROMDex is open in another window",exact:true})).toBeVisible();
         await writeFile("out/sw.js",original.replace("romdex-shell-","romdex-shell-task-test-"));
     await page.getByRole("button",{name:"TOOLS",exact:true}).click();await page.getByRole("button",{name:"CHECK FOR UPDATES",exact:true}).click();
     const updates=page.getByRole("dialog",{name:"Check for updates",exact:true});await updates.getByRole("button",{name:"Apply update",exact:true}).click();

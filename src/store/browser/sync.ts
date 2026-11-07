@@ -61,6 +61,8 @@ const applyRemote = async (
   if (!result.toLocal.length) return [];
   let later = [...result.toLocal];
   try {
+    // Image bytes are saved first, so no workspace change names an unsaved ref.
+    await binding.prepare?.(result.merged, result.toLocal);
     await deps.workspace.change((data) => {
       const now = binding.local(data, seen.base, seen.remote);
       // A key edited here while the sync ran keeps that edit.
@@ -79,13 +81,32 @@ const applyRemote = async (
   return later;
 };
 
+/** True when this browser holds nothing YouTrack's copy lacks. */
+const nothingToSend = (
+  deps: SyncDeps,
+  binding: StoreBinding,
+  state: StoreState,
+) => {
+  if (!state.base || state.pending || state.review.length) return false;
+  const base = state.base.values;
+  const local = binding.local(deps.workspace.getSnapshot().data, base, base);
+  return mergeValues(base, local, base).toRemote.length === 0;
+};
+
+/**
+ * One sync. With `onlyLocal`, a sync started by a local change sends no
+ * request when that change did not touch anything this store holds.
+ */
 export const syncStore = async (
   deps: SyncDeps,
   binding: StoreBinding,
+  onlyLocal = false,
 ): Promise<SyncOutcome> => {
   const reason = blocked(deps.workspace.getSnapshot(), binding);
   if (reason) return { kind: "waiting", reason };
   const state = await deps.cache.getState(deps.scope, binding.store);
+  if (onlyLocal && nothingToSend(deps, binding, state))
+    return { kind: "synced", state, written: false };
   const found = await findArticle(deps.transport, deps.target, state.articleId);
   if (found.kind === "missing") return { kind: "not-set-up" };
   if (found.kind === "ambiguous") return found;
