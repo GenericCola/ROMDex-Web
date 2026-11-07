@@ -27,7 +27,7 @@ const TaskRowTitle = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const delayed = useDelayedRowOpen(select);
   const editing = useTaskTextEditing(item.id, "inline-title");
-  const { run, error, busy } = useInlineAction();
+  const { run, queue, error, busy } = useInlineAction();
   useLayoutEffect(() => {
     if (renaming) {
       inputRef.current?.focus();
@@ -44,7 +44,7 @@ const TaskRowTitle = ({
   const key = (event: KeyboardEvent<HTMLInputElement>) => {
     const press = inlineTitleKey(event);
     if (!press) return;
-    run((next) => {
+    queue((next) => {
       if (press.action === "Enter") commitInlineRename(next, item.id);
       else if (press.action === "Tab")
         indentInlineRename(next, item.id, press.outdent);

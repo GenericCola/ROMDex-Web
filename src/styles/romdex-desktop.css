@@ -112,6 +112,8 @@
 
 /* Compact Work rows keep the title, notes marker and ID on one line. */
 .task-row>td,.draft-row>td{height:36px;padding:3px 5px 3px 0}
+/* Spacer rows stand in for task rows that are scrolled far out of view. */
+.row-gap>td{padding:0;border:0}
 .title-wrap{display:flex;align-items:center;gap:6px;min-width:0}
 .title-wrap .row-title{flex:0 1 auto;max-width:none;min-width:0}
 .title-wrap .draft-input{flex:1;min-width:0}

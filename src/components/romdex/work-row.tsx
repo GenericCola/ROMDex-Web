@@ -29,6 +29,7 @@ const WorkRowView = ({
   choose,
   dragging = false,
   drop = null,
+  rowIndex,
 }: {
   item: TaskItem;
   depth: number;
@@ -48,6 +49,7 @@ const WorkRowView = ({
   choose: (id: string, modifiers: SelectionModifiers) => void;
   dragging?: boolean;
   drop?: "before" | "after" | null;
+  rowIndex: number;
 }) => {
   const navigation = useDetailNavigation();
   const select = () => {
@@ -69,6 +71,7 @@ const WorkRowView = ({
       })}
       style={{ "--depth": Math.max(0, depth) } as CSSProperties}
       data-row={item.id}
+      aria-rowindex={rowIndex}
       aria-selected={checked}
     >
       <td>

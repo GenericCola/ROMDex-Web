@@ -12,14 +12,16 @@ const NewItem = ({
   draft,
   data,
   items,
+  rowIndex,
 }: {
   draft: NonNullable<WorkspaceData["newTask"]>;
+  rowIndex: number;
   data: WorkspaceData;
   items: TaskItem[];
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const editing = useTaskTextEditing("new-task", "inline");
-  const { run, error, busy } = useInlineAction();
+  const { queue, error, busy } = useInlineAction();
   const tree = workspaceTree(items, data.order),
     depth = draft.parentId ? (tree.depths.get(draft.parentId) ?? 0) + 1 : 0;
   useLayoutEffect(() => {
@@ -28,7 +30,7 @@ const NewItem = ({
   const key = (event: KeyboardEvent<HTMLInputElement>) => {
     const press = inlineTitleKey(event);
     if (!press) return;
-    run((next) => {
+    queue((next) => {
       if (press.action === "Enter") commitInlineTask(next);
       else if (press.action === "Tab") indentInlineTask(next, press.outdent);
       else {
@@ -40,6 +42,7 @@ const NewItem = ({
   return (
     <DraftRow
       decorative
+      rowIndex={rowIndex}
       depth={Math.max(
         0,
         depth -

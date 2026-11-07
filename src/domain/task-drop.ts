@@ -22,7 +22,7 @@ export const rowDropTarget = (
   items: TaskItem[],
   order: WorkspaceData["order"],
   intent: DropIntent,
-  visibleIds: string[],
+  visibleIds: readonly string[],
 ): DropTarget | null => {
   if (!Number.isSafeInteger(intent.delta))
     throw Error("Invalid hierarchy level.");

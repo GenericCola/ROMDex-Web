@@ -6,15 +6,21 @@ const DraftRow = ({
   decorative,
   input,
   children,
+  rowIndex,
 }: {
   depth: number;
+  rowIndex: number;
   decorative: boolean;
   input: ReactNode;
   children: ReactNode;
 }) => {
   const hidden = decorative ? ("true" as const) : undefined;
   return (
-    <tr className="draft-row" style={{ "--depth": depth } as CSSProperties}>
+    <tr
+      className="draft-row"
+      style={{ "--depth": depth } as CSSProperties}
+      aria-rowindex={rowIndex}
+    >
       <td>
         <div className="task-cell">
           <span className="row-gutter" aria-hidden={hidden} />
