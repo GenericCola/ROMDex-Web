@@ -13,8 +13,11 @@ test("task notes and comment drafts survive switching, restart and offline reope
   await page.getByRole("button",{name:"Comments",exact:true}).click();await expect(page.getByRole("textbox",{name:"Write a Comment",exact:true})).toHaveValue("Unposted synthetic draft");
   await page.reload();await expect(page.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("Durable synthetic notes");
   // Offline means no session answer either: drop the fixture routes (they would still answer)
-  // so the worker serves the shell. Fails since cookie sign-in; see PMON-628.
-  await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await context.unrouteAll({behavior:"wait"});await context.setOffline(true);await page.reload();await expect(page.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("Durable synthetic notes");await routeLocalWorkspace(context);await context.setOffline(false);
+  // so the worker serves the shell.
+  // The app opens the remembered workspace offline and reconnects on `online` (PMON-628).
+  await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await context.unrouteAll({behavior:"wait"});await context.setOffline(true);await page.reload();await expect(page.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("Durable synthetic notes");
+  const offline=page.getByText("Offline: changes are saved here and sent when you are back online",{exact:true});await expect(offline).toBeVisible();
+  await routeLocalWorkspace(context);await context.setOffline(false);await expect(offline).toBeHidden();
   await page.getByRole("button",{name:"Comments",exact:true}).click();await expect(page.getByRole("textbox",{name:"Write a Comment",exact:true})).toHaveValue("Unposted synthetic draft");
 });
 test("a stale second window cannot overwrite a newer browser save",async({page,context})=>{

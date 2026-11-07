@@ -7,8 +7,8 @@ import type { AuthorizedProject } from "./identity";
 import { readIdentity, readProject } from "./identity";
 import { initializeWorkspaceTasks } from "./initialize-workspace";
 import { ResumeRejected } from "./resume-failure";
-export const openPmonWorkspace = async (
-  token: string,
+// Opens this account's browser workspace; resolves null if the run went stale.
+const switchWorkspace = async (
   userId: string,
   projectId: string,
   isCurrent: () => boolean,
@@ -16,14 +16,38 @@ export const openPmonWorkspace = async (
   const key = scopedWorkspaceKey(YOUTRACK_ORIGIN, userId, projectId);
   const storage = new WorkspaceStorage(key);
   const isNew = !(await storage.load());
-  if (!isCurrent()) return;
+  if (!isCurrent()) return null;
   await workspaceStore.switchPersistence(storage);
   uploadStorage.setScope(key);
   const opened = workspaceStore.getSnapshot();
   if (!opened.ready || opened.error)
     throw Error(opened.error || "Workspace could not open.");
-  if (!isCurrent()) return;
-  if (!opened.data.remote.length && !opened.data.operations.length) {
+  return isCurrent() ? { isNew, data: opened.data } : null;
+};
+const hasSavedWork = (data: { remote: unknown[]; operations: unknown[] }) => {
+  return data.remote.length > 0 || data.operations.length > 0;
+};
+// Offline: open only work already saved in this browser; nothing is read or sent.
+export const openOfflineWorkspace = async (
+  userId: string,
+  projectId: string,
+  isCurrent: () => boolean,
+) => {
+  const opened = await switchWorkspace(userId, projectId, isCurrent);
+  if (opened && !hasSavedWork(opened.data))
+    throw Error("No saved work in this browser yet. Connect to open ROMDex.");
+  return opened !== null;
+};
+export const openPmonWorkspace = async (
+  token: string,
+  userId: string,
+  projectId: string,
+  isCurrent: () => boolean,
+) => {
+  const opened = await switchWorkspace(userId, projectId, isCurrent);
+  if (!opened) return;
+  const { isNew } = opened;
+  if (!hasSavedWork(opened.data)) {
     const assertCurrent = () => {
       if (!isCurrent()) throw Error("The sign-in session changed.");
     };
