@@ -1,4 +1,3 @@
-import { cloudData } from "@/cloud/types";
 import { materialize } from "@/domain/accepted/core.mjs";
 import type { WorkspaceData } from "@/domain/types";
 
@@ -7,14 +6,7 @@ import type { WorkspaceData } from "@/domain/types";
  * Other store code treats "assigned/<id>" as ordinary merge keys.
  */
 
-/** One switch: false drops ROMDex's use of the article's `assigned` part (YouTrack's copy passes through untouched). */
-export const ASSIGNED_IN_STORE = true;
-
 const PREFIX = "assigned/";
-
-export const assignedActive = (data: WorkspaceData): boolean => {
-  return ASSIGNED_IN_STORE && !cloudData(data).sharedStatuses;
-};
 
 const assignedOnly = (
   values: Record<string, unknown> | null,
@@ -26,13 +18,11 @@ const assignedOnly = (
   );
 };
 
-export const localAssignedWith = (
-  enabled: boolean,
+export const localAssigned = (
   data: WorkspaceData,
   base: Record<string, unknown> | null,
   remote: Record<string, unknown>,
 ): Record<string, unknown> => {
-  if (!enabled) return assignedOnly(remote);
   const out = assignedOnly(base ?? remote);
   const known = new Set(Object.keys(assignedOnly(remote)));
   for (const key of Object.keys(assignedOnly(base))) known.add(key);
@@ -54,14 +44,6 @@ export const localAssignedWith = (
       out[key] = item.assignedState ?? item.state;
   }
   return out;
-};
-
-export const localAssigned = (
-  data: WorkspaceData,
-  base: Record<string, unknown> | null,
-  remote: Record<string, unknown>,
-): Record<string, unknown> => {
-  return localAssignedWith(assignedActive(data), data, base, remote);
 };
 
 const stripPendingStatus = (data: WorkspaceData, id: string) => {
@@ -101,13 +83,11 @@ const applyOne = (data: WorkspaceData, id: string, assignedState: string) => {
   return true;
 };
 
-export const applyAssignedWith = (
-  enabled: boolean,
+export const applyAssigned = (
   data: WorkspaceData,
   values: Record<string, unknown>,
   keys: string[],
 ): string[] => {
-  if (!enabled) return [];
   const held: string[] = [];
   for (const key of keys) {
     if (!key.startsWith(PREFIX)) continue;
@@ -116,12 +96,4 @@ export const applyAssignedWith = (
     if (!applyOne(data, key.slice(PREFIX.length), value)) held.push(key);
   }
   return held;
-};
-
-export const applyAssigned = (
-  data: WorkspaceData,
-  values: Record<string, unknown>,
-  keys: string[],
-): string[] => {
-  return applyAssignedWith(assignedActive(data), data, values, keys);
 };

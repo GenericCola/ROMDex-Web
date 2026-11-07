@@ -23,9 +23,7 @@ const outgoingWork = () => {
     !deliveryConnected() ||
     deliveryPaused() ||
     !cloud.autoSync ||
-    (!state.data.operations.length &&
-      !statusReadNeeded(state.data) &&
-      !cloud.sharedStatuses)
+    (!state.data.operations.length && !statusReadNeeded(state.data))
   )
     return null;
   const selected = automaticBatch(state.data);

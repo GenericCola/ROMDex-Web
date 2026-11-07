@@ -125,9 +125,7 @@ export const automaticDelivery = () => {
     state.updating ||
     state.delivering ||
     !cloudData(state.data).autoSync ||
-    (!state.data.operations.length &&
-      !statusReadNeeded(state.data) &&
-      !cloudData(state.data).sharedStatuses)
+    (!state.data.operations.length && !statusReadNeeded(state.data))
   )
     return;
   const failed = (error: unknown) => {

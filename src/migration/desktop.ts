@@ -28,13 +28,12 @@ export const previewDesktop = (
       return !!draft.trim();
     }) ||
     current.newTask ||
-    cloudData(current).sharedStatuses ||
     Object.values(cloudData(current).records).some((record) => {
       return record.status !== "confirmed";
     })
   )
     throw Error(
-      "Finish or export current browser work before importing desktop data. Shared-status workspaces require their separate migration preview.",
+      "Finish or export current browser work before importing desktop data.",
     );
   const source = jsonObject(desktopJson(archive, "desktop-workspace.json"));
   if (

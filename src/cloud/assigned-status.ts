@@ -28,34 +28,6 @@ export const observeStatus = (
     throw Error(
       "An older YouTrack status was returned. Refresh before delivery.",
     );
-  if (cloud.sharedStatuses) {
-    const shared = item.sharedStatus;
-    if (shared?.state !== item.state || shared.updated !== item.updated)
-      throw Error("Shared status is missing or stale. Nothing was replaced.");
-    const known = data.remote.find((entry) => {
-      return entry.id === item.id;
-    })?.sharedStatus;
-    if (known && shared.revision < known.revision)
-      throw Error(
-        "Shared status revision moved backwards. Preserve recovery and check the YouTrack app.",
-      );
-    records[item.id] = {
-      assignedState: shared.assignedState,
-      lastState: item.state,
-      lastUpdated: item.updated,
-      pendingState: null,
-    };
-    data.cloud = {
-      ...cloud,
-      assigned: records,
-      ...(previous &&
-      (previous.assignedState !== shared.assignedState ||
-        previous.lastState !== item.state)
-        ? { rollupPending: true }
-        : {}),
-    };
-    return { ...item, assignedState: shared.assignedState };
-  }
   const changed = previous !== undefined && item.state !== previous.lastState;
   const ours =
     previous !== undefined &&

@@ -12,7 +12,6 @@ export const deliveryInputs = (data: WorkspaceData) => {
     remote: data.remote,
     operations: data.operations,
     assigned: cloudData(data).assigned,
-    shared: cloudData(data).sharedStatuses,
   });
 };
 export const assertDeliveryInputs = (before: string, data: WorkspaceData) => {

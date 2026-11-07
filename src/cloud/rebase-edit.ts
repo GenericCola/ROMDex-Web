@@ -1,6 +1,6 @@
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { planReceipt } from "@/rdx/plan-ledger";
-import { acknowledge, recordDelivery } from "./journal";
+import { recordDelivery } from "./journal";
 import { cloudData } from "./types";
 export const rebaseEdit = (
   data: WorkspaceData,
@@ -28,17 +28,6 @@ export const rebaseEdit = (
         "Prior tag attempt archived after explicit fresh readback/rebase; its historical request outcome is not inferred.",
     });
     planReceipt(data, opId, {}, replacement.opId);
-  } else if (cloudData(data).sharedStatuses) {
-    acknowledge(data, operation);
-    recordDelivery(data, opId, {
-      message: "Previous edit archived after explicit shared-status rebase.",
-    });
-    readyId = crypto.randomUUID();
-    data.operations.splice(at, 0, {
-      ...operation,
-      opId: readyId,
-      base: remote,
-    });
   } else {
     operation.base = remote;
     const cloud = cloudData(data);
