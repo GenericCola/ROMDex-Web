@@ -1,4 +1,5 @@
 import { indexTree, materialize, validateMove } from "./accepted/core.mjs";
+import { placeAmongSiblings } from "./sibling-placement";
 import { editTask } from "./task-actions";
 import { guardTicketChanges, reviewedTicketIds } from "./ticket-locks";
 import type { TaskItem, WorkspaceData } from "./types";
@@ -107,12 +108,7 @@ const stageTaskDrop = (
       : siblings.findIndex((entry) => {
           return entry.id === target.beforeId;
         });
-  siblings.splice(at < 0 ? siblings.length : at, 0, item);
-  siblings.forEach((entry, index) => {
-    data.order[entry.id] = index;
-  });
-  if (target.parentId && !data.view.expanded.includes(target.parentId))
-    data.view.expanded.push(target.parentId);
+  placeAmongSiblings(data, siblings, at, item, target.parentId);
 };
 
 export const applyTaskDrop = (
