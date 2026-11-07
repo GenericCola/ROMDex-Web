@@ -4,6 +4,7 @@ import { setAuthSession } from "../../src/auth/session";
 import {
   incomingContext,
   refreshIncoming,
+  refreshIncomingTask,
 } from "../../src/cloud/incoming-refresh";
 import { connectDelivery, disconnectDelivery } from "../../src/cloud/session";
 import { setTaskTextEditing } from "../../src/domain/task-editing";
@@ -490,6 +491,16 @@ test("the light check finds deletions and edits anywhere, reading only what chan
       remote().find((item) => item.id === "PMON-11")?.summary,
       "edited old task",
     );
+    // A task already read back (as after a delivery) is not read again.
+    env.setRemote([
+      ...items.slice(0, 10),
+      { ...raw("PMON-11", 60), summary: "read back" },
+    ]);
+    await refreshIncomingTask("PMON-11");
+    assert.equal(env.singles(), 2);
+    await refreshIncoming();
+    assert.equal(env.singles(), 2);
+    assert.deepEqual(env.counts(), { reads: 1, probes: 4 });
     assert.deepEqual(workspaceStore.getSnapshot().data.operations, []);
   } finally {
     env.close();

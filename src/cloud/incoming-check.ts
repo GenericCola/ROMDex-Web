@@ -19,6 +19,8 @@ export const checkedItems = async (
   client: IncomingClient,
   cached: TaskItem[],
   current: () => void,
+  /** This browser's saved copy of an issue, e.g. read back after delivery. */
+  saved: (id: string) => TaskItem | undefined,
 ) => {
   const marks = await incomingStep("revision", client.marks);
   current();
@@ -36,9 +38,14 @@ export const checkedItems = async (
       }),
   );
   for (const id of changed) {
-    const item = await incomingStep("tasks", () => {
-      return client.get(id);
-    });
+    // A delivery already read this version back: no need to read it again.
+    const known = saved(id);
+    const item =
+      known && known.updated === marks.get(id)
+        ? known
+        : await incomingStep("tasks", () => {
+            return client.get(id);
+          });
     current();
     // Unreadable now (deleted or hidden since the light read): read everything.
     if (!item) return null;

@@ -28,7 +28,8 @@ date.
 It returns every issue's id and update time (about 20 bytes per issue), so it
 sees edits, new issues, deletions and moves out of the project, wherever they
 are in the list. If nothing changed, nothing else is read. If up to 10 issues
-changed, only those are read, one request each. Otherwise, or when an issue
+changed, only those are read, one request each; an issue this window just
+delivered and read back is not read again. Otherwise, or when an issue
 can no longer be read, the full list is read. The old check looked only at the
 10 most recently updated issues, so it could not see deletions; that is why the
 old code also re-read everything every 5 s.

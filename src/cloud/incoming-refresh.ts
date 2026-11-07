@@ -12,6 +12,11 @@ import { workspaceStore } from "@/domain/workspace-store";
 import { checkedItems } from "./incoming-check";
 import { incomingStep, IncomingSuperseded } from "./incoming-error";
 import { deliveryConnected, requireDelivery } from "./session";
+const savedItem = (id: string) => {
+  return workspaceStore.getSnapshot().data.remote.find((item) => {
+    return item.id === id;
+  });
+};
 const heldTickets = () => {
   return new Set([...draftTicketIds(), ...editingTicketIds()]);
 };
@@ -105,7 +110,7 @@ export const refreshIncoming = (
       const next =
         mode === "cached"
           ? cached
-          : await checkedItems(context.client, cached, current);
+          : await checkedItems(context.client, cached, current, savedItem);
       if (next) {
         if (next.length) await apply(next);
         return;
