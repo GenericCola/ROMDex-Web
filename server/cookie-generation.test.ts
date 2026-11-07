@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { FENCE } from "./cookie-codec.ts";
 import { fixture } from "./cookie-fixture.ts";
-import { createGeneration, GENERATION_COOKIE } from "./cookie-generation.ts";
+import { createGeneration, GENERATION_COOKIE } from "../src/auth/cookie-generation.ts";
 test("browser-only generation rotates without token/Node dependencies and rejects cross-tab stale results", () => {
   assert.equal(GENERATION_COOKIE, FENCE);
   let cookie = "";

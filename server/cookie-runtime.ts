@@ -42,6 +42,21 @@ export async function bound(
     throw new HttpFailure(401);
   return value;
 }
+export async function verifiedIdentity(
+  request: Request,
+  value: CookieEnvelope,
+  deps: CookieDependencies,
+) {
+  const identity = await deps.oauth.verify(value.accessToken!);
+  validIdentity(identity);
+  if (
+    identity.id !== value.userId ||
+    deps.now() >= value.expiresAt ||
+    request.signal.aborted
+  )
+    throw new HttpFailure(401);
+  return identity;
+}
 async function session(request: Request, deps: CookieDependencies) {
   if (request.headers.get("sec-fetch-site") !== "same-origin")
     throw new HttpFailure(403);
@@ -53,14 +68,7 @@ async function session(request: Request, deps: CookieDependencies) {
       return renewalChallenge(request, deps);
     throw error;
   }
-  const identity = await deps.oauth.verify(value.accessToken!);
-  validIdentity(identity);
-  if (
-    identity.id !== value.userId ||
-    deps.now() >= value.expiresAt ||
-    request.signal.aborted
-  )
-    throw new HttpFailure(401);
+  const identity = await verifiedIdentity(request, value, deps);
   // No cookie writes on reads/errors: late responses cannot erase a newer login.
   return response(200, {
     userId: identity.id,
