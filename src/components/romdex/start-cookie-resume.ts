@@ -9,6 +9,7 @@ import type {
 import { setAuthSession } from "@/auth/session";
 import { rememberSession } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
+import { resumeCleanup } from "./resume-cleanup";
 import type { SessionRefs } from "./use-session-expiry";
 export const startCookieResume = (
   {
@@ -93,10 +94,5 @@ export const startCookieResume = (
     }
   };
   void restore();
-  return () => {
-    ++generationRef.current;
-    disconnectDelivery();
-    setAuthSession(null);
-    sessionRef.current = null;
-  };
+  return resumeCleanup({ sessionRef, generationRef });
 };

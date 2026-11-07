@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import DeviceBrand from "./device-brand";
 const AuthShell = ({
   children,
   connected = false,
@@ -12,17 +13,7 @@ const AuthShell = ({
     >
       {!connected && (
         <header className="device-header" aria-label="Application Header">
-          <div className="brand">
-            <div className="lens" aria-hidden="true" />
-            <h1>
-              <span className="brand-title">ROMDex</span>
-            </h1>
-            <div className="lamps" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </div>
-          </div>
+          <DeviceBrand title="ROMDex" />
           <span className="eyebrow">Your YouTrack workspace</span>
         </header>
       )}
