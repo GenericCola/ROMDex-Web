@@ -92,7 +92,13 @@ export const claimWindow = (
     steal = setTimeout(force, STEAL_AFTER_MS);
   };
   channel?.addEventListener("message", received);
-  void request({ ifAvailable: true });
+  // `ifAvailable` may not carry a signal (NotSupportedError); it answers at
+  // once anyway. If Web Locks fail, the revision check still guards saves.
+  const unavailable = () => {
+    if (release) lost();
+    else if (!abort.signal.aborted) setRole("active");
+  };
+  void locks.request(LOCK, { ifAvailable: true }, hold).catch(unavailable);
   const stop = () => {
     clearTimeout(steal);
     abort.abort();
