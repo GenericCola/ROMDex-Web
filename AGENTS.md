@@ -48,9 +48,9 @@ Read README.md, docs/PROJECT.md, docs/PWA.md, docs/CONVENTIONS.md and docs/DESIG
 
 Use named callbacks, strict TypeScript, token-based styles and accessible React controls. Keep secrets outside Git and browser-public variables. Never read or print .env files. Update documentation with behavior changes.
 
-Run pnpm check, pnpm build and pnpm test:e2e. Do not call historical test results current verification. Keep dev on 3000 and preview on 3001. Preserve production data and the original app separately. Never resume cloud queues as a test.
+Run pnpm check and pnpm build locally. Browser tests (pnpm test:e2e) run in GitHub Actions (.github/workflows/ci.yml), not on the VPS, Chromium-based projects only (owner, 2026-11-07). Do not call historical test results current verification. Keep dev on 3000 and preview on 3001. Preserve production data and the original app separately. Never resume cloud queues as a test.
 
-The template remote has push URL DISABLED. Verify private visibility before publishing. The owner subsequently authorized Vercel hosting for the installed web app. Deploy only the reviewed static shell, with no desktop data or credentials. Billing changes and Actions enablement remain unauthorized.
+The template remote has push URL DISABLED. Verify private visibility before publishing. The owner subsequently authorized Vercel hosting for the installed web app. Deploy only the reviewed static shell, with no desktop data or credentials. The owner authorized GitHub Actions for checks and browser tests on 2026-11-07. Billing changes remain unauthorized.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
