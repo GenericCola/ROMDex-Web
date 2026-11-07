@@ -19,7 +19,8 @@ export const mayOpenDelayedRow = (
 };
 interface QueueClock {
   after: (callback: () => void, delay: number) => () => void;
-  interrupt: (cancel: () => void) => () => void;
+  /** `cancel` drops the pending open; `commit` runs it at once (Save). */
+  interrupt: (cancel: () => void, commit: () => void) => () => void;
 }
 // One pending Work-row intent, like the original desktop workOpenTimer.
 export const createRowOpenQueue = (clock: QueueClock) => {
@@ -36,16 +37,18 @@ export const createRowOpenQueue = (clock: QueueClock) => {
   ) => {
     cancel();
     let live = true;
-    const stopInterrupt = clock.interrupt(() => {
-      cancel();
-    });
-    const stopTimer = clock.after(() => {
+    const run = () => {
       if (!live) return;
       live = false;
       active = null;
+      stopTimer();
       stopInterrupt();
       if (allowed()) open();
-    }, 220);
+    };
+    const stopInterrupt = clock.interrupt(() => {
+      cancel();
+    }, run);
+    const stopTimer = clock.after(run, 220);
     active = {
       owner,
       stop: () => {
