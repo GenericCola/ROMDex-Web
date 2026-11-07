@@ -8,11 +8,12 @@ import {
 } from "@/domain/task-rename";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, type KeyboardEvent } from "react";
 import { inlineTitleKey } from "./inline-title-key";
 import { useDelayedRowOpen } from "./use-delayed-row-open";
 import { useInlineAction } from "./use-inline-action";
 import { useTaskTextEditing } from "./use-task-text-editing";
+type InlinePress = NonNullable<ReturnType<typeof inlineTitleKey>>;
 const TaskRowTitle = ({
   item,
   renaming,
@@ -41,9 +42,9 @@ const TaskRowTitle = ({
       beginInlineRename(next, item.id);
     });
   };
-  const key = (event: KeyboardEvent<HTMLInputElement>) => {
-    const press = inlineTitleKey(event);
-    if (!press) return;
+  // A key pressed while the rename is still being saved waits for it instead of being dropped.
+  const pendingRef = useRef<InlinePress | null>(null);
+  const apply = (press: InlinePress) => {
     run((next) => {
       if (press.action === "Enter") commitInlineRename(next, item.id);
       else if (press.action === "Tab")
@@ -55,6 +56,19 @@ const TaskRowTitle = ({
       }
     });
   };
+  const key = (event: KeyboardEvent<HTMLInputElement>) => {
+    const press = inlineTitleKey(event);
+    if (!press) return;
+    if (busy) pendingRef.current = press;
+    else apply(press);
+  };
+  const applyPendingKey = () => {
+    const press = pendingRef.current;
+    if (busy || !press) return;
+    pendingRef.current = null;
+    apply(press);
+  };
+  useEffect(applyPendingKey);
   return (
     <>
       {renaming ? (
