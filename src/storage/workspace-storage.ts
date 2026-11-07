@@ -1,5 +1,6 @@
 import type { WorkspaceData } from "@/domain/types";
 import { validateWorkspace } from "@/domain/workspace-data";
+import { openDatabase } from "@/storage/open-database";
 interface WorkspaceRecord {
   revision: number;
   data: WorkspaceData;
@@ -10,30 +11,14 @@ export class WorkspaceStorage {
   }
   private connection: Promise<IDBDatabase> | undefined;
   private open = (): Promise<IDBDatabase> => {
-    this.connection ??= new Promise((resolve, reject) => {
-      const request = indexedDB.open("romdex-web-workspace", 1);
-      const upgrade = () => {
-        return request.result.createObjectStore("workspace");
-      };
-      const success = () => {
-        const db = request.result;
-        db.onversionchange = () => {
-          return db.close();
-        };
-        resolve(db);
-      };
-      const failure = () => {
-        return reject(
-          Error(
-            "Browser storage could not open. No existing data was replaced.",
-          ),
-        );
-      };
-      request.onupgradeneeded = upgrade;
-      request.onsuccess = success;
-      request.onerror = failure;
-      request.onblocked = failure;
-    });
+    this.connection ??= openDatabase(
+      "romdex-web-workspace",
+      1,
+      (db) => {
+        db.createObjectStore("workspace");
+      },
+      "Browser storage could not open. No existing data was replaced.",
+    );
     return this.connection;
   };
   load = async (): Promise<WorkspaceRecord | undefined> => {

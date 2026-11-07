@@ -1,3 +1,4 @@
+import { openDatabase } from "@/storage/open-database";
 import type { BlobCache } from "../core/read.ts";
 import type { StoreName } from "../parts/manifest.ts";
 
@@ -51,31 +52,16 @@ export class StoreCache {
   constructor(private name = "romdex-web-store") {}
   private connection: Promise<IDBDatabase> | undefined;
   private open = (): Promise<IDBDatabase> => {
-    this.connection ??= new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.name, 1);
-      const upgrade = () => {
-        const db = request.result;
+    this.connection ??= openDatabase(
+      this.name,
+      1,
+      (db) => {
         db.createObjectStore("state");
         db.createObjectStore("blobs");
         db.createObjectStore("recovery", { autoIncrement: true });
-      };
-      const success = () => {
-        const db = request.result;
-        db.onversionchange = () => {
-          return db.close();
-        };
-        resolve(db);
-      };
-      const failure = () => {
-        return reject(
-          Error("Browser storage could not open. No store data was replaced."),
-        );
-      };
-      request.onupgradeneeded = upgrade;
-      request.onsuccess = success;
-      request.onerror = failure;
-      request.onblocked = failure;
-    });
+      },
+      "Browser storage could not open. No store data was replaced.",
+    );
     return this.connection;
   };
   private run = async <T>(
