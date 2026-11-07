@@ -1,5 +1,9 @@
 # YouTrack-backed assigned status
 
+> Historical. Retired 2026-11-07 by owner answer Q8 on PMON-622. The code (`youtrack-app/`,
+> `youtrack-acceptance/`, `src/cloud/shared-status-*`, `pnpm package:youtrack`) was removed, and the
+> owner uninstalled YouTrack app 155-84. Read this only for background.
+
 ## Status as of 2026-11-07
 
 On 2026-11-07 the owner decided that assigned status lives in the "ROMDex data" article (PMON-A-3). See YOUTRACK-STORAGE.md and CUTOVER-2026-11-07.md. The shared-status UI and its e2e specs were removed.
