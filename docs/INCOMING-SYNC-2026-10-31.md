@@ -1,5 +1,9 @@
 # Incoming sync and understandable conflict recovery
 
+> Superseded 2026-11-07 for timing: incoming sync no longer polls. It reads on
+> connect, focus, visibility, online, after delivery and on Refresh. See
+> [SYNC-WITHOUT-POLLING.md](SYNC-WITHOUT-POLLING.md). The fencing rules below still hold.
+
 ## Root cause
 
 The web workspace mounted only an outgoing scheduler. Existing saved workspaces

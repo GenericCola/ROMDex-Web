@@ -7,7 +7,7 @@ import { AttachmentClient } from "./attachment-client";
 import { postComment, verifyComment } from "./comments";
 import { readDeliveryTasks } from "./delivery-read";
 import { changeParent, childrenOf } from "./hierarchy";
-import { incomingRevision } from "./incoming-revision";
+import { incomingMarks } from "./incoming-revision";
 import type { Field } from "./issue-body";
 import { creationBody, issueBody } from "./issue-body";
 import { NativeEditAdapter } from "./native-edit-adapter";
@@ -46,8 +46,8 @@ export class DeliveryClient implements DeliveryPort {
     this.accountId = user.id;
     await this.metadata?.probe();
   };
-  latestRevision = () => {
-    return incomingRevision(this.request);
+  marks = () => {
+    return incomingMarks(this.request);
   };
   all = async () => {
     const items = await readDeliveryTasks(this.request);

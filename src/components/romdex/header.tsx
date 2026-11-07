@@ -13,6 +13,7 @@ import ConnectionIndicator from "./connection-indicator";
 import DeviceBrand from "./device-brand";
 import { saveIndicator, syncControl } from "./header-status";
 import Lamp from "./lamp";
+import RefreshButton from "./refresh-button";
 import { useSaveOverdue } from "./use-save-overdue";
 import WorkspaceMenu from "./workspace-menu";
 interface HeaderProps {
@@ -69,6 +70,7 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
           >
             Auto-Sync Data <span className="toggle-value">{sync.value}</span>
           </button>
+          <RefreshButton connected={sync.connected} />
           <div className="save-controls">
             <button
               id="save"

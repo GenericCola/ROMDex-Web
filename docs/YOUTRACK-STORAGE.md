@@ -511,8 +511,10 @@ Where the build differs from the plan above:
   `AttachmentClient` stays issue-only; article attachments go through
   `src/store/core/attachments.ts`, and `attachmentBytes` accepts an article
   target.
-- **When it syncs.** On app start, five seconds after the workspace changes,
-  when the browser comes online, every five minutes, and on Sync now. Syncs run
+- **When it syncs.** On app start, five seconds after a workspace change that
+  touched a synced value (other changes send nothing), when the browser comes
+  online, when the window comes back into view (at most every 30 s), on Refresh
+  and on Sync now. There is no timer; see docs/SYNC-WITHOUT-POLLING.md. Syncs run
   one at a time, and across tabs through Web Locks. Offline, the status says
   "Saved in this browser; waiting to sync."
 

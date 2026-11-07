@@ -9,7 +9,7 @@ import { editingTicketIds } from "@/domain/task-editing";
 import type { TaskItem } from "@/domain/types";
 import { findWorkspaceItem } from "@/domain/workspace-item";
 import { workspaceStore } from "@/domain/workspace-store";
-import { snapshotRevision } from "@/youtrack/incoming-revision";
+import { checkedItems } from "./incoming-check";
 import { incomingStep, IncomingSuperseded } from "./incoming-error";
 import { deliveryConnected, requireDelivery } from "./session";
 const heldTickets = () => {
@@ -60,14 +60,17 @@ export const incomingContext = () => {
     return null;
   }
 };
+/**
+ * - `cached`: re-apply the last read (no request), e.g. after an editor closes.
+ * - `check`: one light read of every issue's update time; read only what changed.
+ * - `full`: read every issue (connect, Refresh, or when the light read cannot tell).
+ */
+export type IncomingMode = "cached" | "check" | "full";
 let previous: ReturnType<typeof incomingContext>;
-let revision = "",
-  fullAt = 0,
-  checkedAt = 0;
 let cached: TaskItem[] = [],
   running: Promise<void> | null = null;
 export const refreshIncoming = (
-  force = false,
+  mode: IncomingMode = "check",
   alive: () => boolean = () => {
     return true;
   },
@@ -83,43 +86,34 @@ export const refreshIncoming = (
   }
   if (stale || previous?.client !== context.client) {
     previous = context;
-    revision = "";
-    fullAt = 0;
-    checkedAt = 0;
     cached = [];
   }
   const current = () => {
     if (!alive()) throw new IncomingSuperseded("Incoming watcher stopped.");
     context.current();
   };
-  const apply = (items: TaskItem[]) => {
-    return incomingStep("apply", () => {
+  const apply = async (items: TaskItem[]) => {
+    await incomingStep("apply", () => {
       return workspaceStore.applyIncoming(items, heldTickets(), current);
     });
+    current();
+    cached = items;
   };
   const run = async () => {
     current();
-    if (Date.now() - checkedAt >= 1000) {
-      const membershipDue = force || !fullAt || Date.now() - fullAt >= 5000;
-      const next = membershipDue
-        ? null
-        : await incomingStep("revision", context.client.latestRevision);
-      current();
-      if (membershipDue || next !== revision) {
-        const items = await incomingStep("tasks", context.client.all);
-        current();
-        await apply(items);
-        current();
-        cached = items;
-        fullAt = Date.now();
-        revision = snapshotRevision(items);
-      } else if (cached.length) {
-        await apply(cached);
+    if (mode === "cached" || (mode === "check" && cached.length)) {
+      const next =
+        mode === "cached"
+          ? cached
+          : await checkedItems(context.client, cached, current);
+      if (next) {
+        if (next.length) await apply(next);
+        return;
       }
-      checkedAt = Date.now();
-    } else if (cached.length) {
-      await apply(cached);
     }
+    const items = await incomingStep("tasks", context.client.all);
+    current();
+    await apply(items);
   };
   running = run().finally(() => {
     running = null;

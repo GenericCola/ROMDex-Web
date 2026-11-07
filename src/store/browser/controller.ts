@@ -19,8 +19,8 @@ import { withLock } from "./with-lock";
 
 /*
  * Runs store syncs one at a time per browser tab (and across tabs through Web
- * Locks): on start, when the browser comes online, a while after the
- * workspace changes, on a timer, and on request. Publishes a status per store.
+ * Locks): on start, when the browser comes online or the window comes back
+ * into view, a while after the workspace changes, and on request. Publishes a status per store.
  */
 
 const BINDINGS: Record<StoreName, StoreBinding> = {
@@ -100,20 +100,24 @@ export class StoreSyncController {
     this.queue = this.queue.then(step);
     return this.queue;
   };
-  sync = (store: StoreName) => {
+  sync = (store: StoreName, onlyLocal = false) => {
     return this.run(store, async (deps) => {
       this.publish(store, {
         ...this.statuses[store],
         kind: "syncing",
         message: "Syncing…",
       });
-      const outcome = await syncStore(deps, BINDINGS[store]);
+      const outcome = await syncStore(deps, BINDINGS[store], onlyLocal);
       const state = await deps.cache.getState(deps.scope, store);
       this.publish(store, outcomeStatus(store, outcome, state));
     });
   };
   syncAll = async () => {
     for (const store of STORES) await this.sync(store);
+  };
+  /** Syncs only stores whose synced values changed here. */
+  syncChanged = async () => {
+    for (const store of STORES) await this.sync(store, true);
   };
   /** Creates the missing article; call only after the user confirmed. */
   create = async (store: StoreName) => {
@@ -150,7 +154,7 @@ export class StoreSyncController {
     await this.sync(store);
   };
   start = () => {
-    return autoSync(this.syncAll);
+    return autoSync(this.syncAll, this.syncChanged);
   };
 }
 

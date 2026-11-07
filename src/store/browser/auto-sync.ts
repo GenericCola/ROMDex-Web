@@ -1,22 +1,35 @@
+import { subscribeRefresh } from "@/cloud/refresh-request";
 import { workspaceStore } from "@/domain/workspace-store";
 
-const TIMER_MS = 5 * 60 * 1000;
 const SETTLE_MS = 5000;
+const FOCUS_GAP_MS = 30_000;
 
 /**
- * Syncs soon after start, when the browser comes back online, a few seconds
- * after the workspace changes, and every five minutes. Answers a stop function.
+ * Syncs on start, when the browser comes back online, when the window comes
+ * back into view (at most every 30 s), on Refresh, and a few seconds after the workspace
+ * changes. There is no timer that re-reads YouTrack on its own. A change-driven
+ * sync sends nothing when the change did not touch a synced value. Answers a
+ * stop function.
  */
-export const autoSync = (syncAll: () => Promise<void>) => {
+export const autoSync = (
+  syncAll: () => Promise<void>,
+  syncChanged: () => Promise<void>,
+) => {
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let lastFull = 0;
+  const full = () => {
+    lastFull = Date.now();
+    void syncAll();
+  };
   const soon = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      void syncAll();
+      void syncChanged();
     }, SETTLE_MS);
   };
-  const online = () => {
-    void syncAll();
+  const shown = () => {
+    if (document.visibilityState === "hidden") return;
+    if (Date.now() - lastFull >= FOCUS_GAP_MS) full();
   };
   let last = workspaceStore.getSnapshot().data;
   const changed = () => {
@@ -25,14 +38,18 @@ export const autoSync = (syncAll: () => Promise<void>) => {
     last = data;
     soon();
   };
-  window.addEventListener("online", online);
+  window.addEventListener("online", full);
+  window.addEventListener("focus", shown);
+  document.addEventListener("visibilitychange", shown);
   const unsubscribe = workspaceStore.subscribe(changed);
-  const interval = setInterval(online, TIMER_MS);
-  soon();
+  const stopRefresh = subscribeRefresh(full);
+  full();
   return () => {
     clearTimeout(timer);
-    clearInterval(interval);
     unsubscribe();
-    window.removeEventListener("online", online);
+    stopRefresh();
+    window.removeEventListener("online", full);
+    window.removeEventListener("focus", shown);
+    document.removeEventListener("visibilitychange", shown);
   };
 };
