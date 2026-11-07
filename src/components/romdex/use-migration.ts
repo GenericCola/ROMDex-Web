@@ -15,6 +15,7 @@ import { applyDesktop, previewDesktop } from "@/migration/desktop";
 import { readDesktopExport } from "@/migration/desktop-export";
 import { readMigrationText } from "@/migration/file-text";
 import { verifyRetainedAssets } from "@/migration/verify-assets";
+import { imageRefOf, putImages } from "@/storage/image-storage";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 export const useMigration = (close: () => void) => {
@@ -78,6 +79,10 @@ export const useMigration = (close: () => void) => {
     try {
       disconnectDelivery();
       await stageRecoveryUploads(uploads);
+      // Image bytes are saved before any workspace change refers to them.
+      await putImages(
+        recovery?.images ?? (preview ? preview.source.images : undefined),
+      );
       await workspaceStore.change((data) => {
         if (preview) applyDesktop(data, preview, new Set(choices));
         else if (recovery) {
@@ -98,6 +103,8 @@ export const useMigration = (close: () => void) => {
             );
           for (const key of Object.keys(data))
             Reflect.deleteProperty(data, key);
+          for (const [id, value] of Object.entries(restored.images ?? {}))
+            if (restored.images) restored.images[id] = imageRefOf(value);
           Object.assign(data, restored);
         }
       });

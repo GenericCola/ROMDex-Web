@@ -1,6 +1,7 @@
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
+import { imageUrl } from "@/storage/image-storage";
 import Image from "next/image";
 import { useState } from "react";
 import { LazyTileSettings } from "./lazy-views";
@@ -69,7 +70,7 @@ const Selectors = ({ data, items, add }: SelectorProps) => {
           key={settingsItem.id}
           item={settingsItem}
           depth={tree.depths.get(settingsItem.id) ?? 0}
-          image={data.images?.[settingsItem.id] ?? null}
+          image={imageUrl(data.images?.[settingsItem.id])}
           close={() => {
             return setSettingsId(null);
           }}

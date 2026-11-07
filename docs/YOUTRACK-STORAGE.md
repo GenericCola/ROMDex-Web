@@ -185,6 +185,20 @@ YouTrack instance, user and project (`src/storage/workspace-storage.ts`,
 `workspace-key.ts`). Saves are revision-checked so two windows cannot overwrite
 each other.
 
+Tile image bytes are not in that record. They live in their own IndexedDB
+database `romdex-web-images`, store `images` (`src/storage/image-storage.ts`).
+Each entry is keyed by `sha256-<hex>` of the data URL, so saving the same image
+twice stores it once. The workspace keeps only that ref in `images[id]`. The
+image is written (strict durability, read back and compared) before any
+workspace change names its ref. On load every ref is read into a memory map so
+render code stays synchronous; a ref with no stored image stops the load with
+an error. Old records that still hold data URLs keep loading. Each load saves
+those images to the store and then rewrites the workspace to refs; if any save
+fails the record is left as it was and the next load tries again. Sync still
+compares data URLs (the memory map resolves refs), and recovery export writes
+data URLs back. Image entries are never deleted; an entry nothing refers to
+is harmless.
+
 | Data                | Field in `WorkspaceData`                    | Matches                                   |
 | ------------------- | ------------------------------------------- | ----------------------------------------- |
 | Tile images         | `images: Record<PMON-N, dataURL>`           | metadata `images`                         |

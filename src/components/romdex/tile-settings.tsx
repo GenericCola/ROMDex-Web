@@ -2,6 +2,7 @@ import { registerDraftEditor } from "@/domain/editor-drafts";
 import { itemName, taskTier } from "@/domain/task-presentation";
 import { applyTileSettings, type TileDraft } from "@/domain/tile-settings";
 import type { TaskItem } from "@/domain/types";
+import { putImage } from "@/storage/image-storage";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import Dialog from "./dialog";
@@ -62,6 +63,8 @@ const TileSettings = ({
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     run(async () => {
+      // The image is saved before the workspace refers to it.
+      if (currentRef.current.image) await putImage(currentRef.current.image);
       await workspaceStore.change((data) => {
         return applyTileSettings(data, currentRef.current);
       });

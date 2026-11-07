@@ -1,4 +1,5 @@
 import type { WorkspaceData } from "@/domain/types";
+import { imageRefOf, imageUrl, putImage } from "@/storage/image-storage";
 import { flattenMetadata, unflattenMetadata } from "@/store/merge";
 import type { PartValue } from "../parts/files.ts";
 import { metadataToParts, partsToMetadata } from "../parts/romdex-parts.ts";
@@ -25,8 +26,12 @@ const carriedExtras = (
 
 const localImages = (data: WorkspaceData) => {
   const out: Record<string, unknown> = {};
-  for (const [id, url] of Object.entries(data.images ?? {}))
-    if (IMAGE_ID.test(id)) out[`${IMAGE}${id}`] = url;
+  for (const [id, value] of Object.entries(data.images ?? {})) {
+    if (!IMAGE_ID.test(id)) continue;
+    const url = imageUrl(value);
+    if (url === null) throw Error("A tile image is not loaded; sync waits.");
+    out[`${IMAGE}${id}`] = url;
+  }
   return out;
 };
 
@@ -41,7 +46,7 @@ const applyImages = (
     if (!IMAGE_ID.test(id)) continue;
     const value = values[key];
     if (typeof value === "string") {
-      data.images = { ...data.images, [id]: value };
+      data.images = { ...data.images, [id]: imageRefOf(value) };
     } else if (data.images && Object.hasOwn(data.images, id)) {
       const images = { ...data.images };
       delete images[id];
@@ -70,6 +75,13 @@ export const romdexBinding: StoreBinding = {
     return Promise.resolve(
       metadataToParts(unflattenMetadata(merged), { assigned: true }),
     );
+  },
+  prepare: async (values, keys) => {
+    for (const key of keys) {
+      const value = values[key];
+      if (key.startsWith(IMAGE) && typeof value === "string")
+        await putImage(value);
+    }
   },
   apply: (data, values, keys) => {
     applyImages(data, values, keys);

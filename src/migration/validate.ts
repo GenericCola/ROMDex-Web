@@ -3,6 +3,7 @@ import type { WorkspaceData } from "@/domain/types";
 import { validateNpcdexDrafts } from "@/npcdex/model";
 import { validateEditorRecovery } from "@/npcdex/recovery";
 import { validateNpcdex } from "@/npcdex/validate";
+import { IMAGE_DATA_URL, IMAGE_REF } from "@/storage/image-storage";
 import { validateRdxFiles } from "@/rdx/library";
 export const validateMigration = (data: WorkspaceData) => {
   validateRdxFiles(data);
@@ -13,7 +14,7 @@ export const validateMigration = (data: WorkspaceData) => {
       return (
         !/^(PMON-[1-9]\d*|local-[A-Za-z0-9-]+)$/.test(id) ||
         typeof value !== "string" ||
-        !/^data:image\/(png|jpeg|gif|webp);base64,/.test(value)
+        !(IMAGE_REF.test(value) || IMAGE_DATA_URL.test(value))
       );
     })
   )

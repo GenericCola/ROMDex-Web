@@ -61,6 +61,8 @@ const applyRemote = async (
   if (!result.toLocal.length) return [];
   let later = [...result.toLocal];
   try {
+    // Image bytes are saved first, so no workspace change names an unsaved ref.
+    await binding.prepare?.(result.merged, result.toLocal);
     await deps.workspace.change((data) => {
       const now = binding.local(data, seen.base, seen.remote);
       // A key edited here while the sync ran keeps that edit.
