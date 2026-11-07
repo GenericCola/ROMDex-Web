@@ -104,6 +104,10 @@
       "destination": "/api"
     },
     {
+      "source": "/api/auth/token",
+      "destination": "/api"
+    },
+    {
       "source": "/api/youtrack",
       "destination": "/api"
     },
