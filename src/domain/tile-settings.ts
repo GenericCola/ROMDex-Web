@@ -1,6 +1,6 @@
-import { materialize } from "./accepted/core.mjs";
 import { editTask } from "./task-actions";
 import type { WorkspaceData } from "./types";
+import { findWorkspaceItem } from "./workspace-item";
 
 export interface TileDraft {
   id: string;
@@ -10,9 +10,7 @@ export interface TileDraft {
   image: string | null;
 }
 export const applyTileSettings = (data: WorkspaceData, draft: TileDraft) => {
-  const item = materialize(data.remote, data.operations).find((candidate) => {
-    return candidate.id === draft.id;
-  });
+  const item = findWorkspaceItem(data, draft.id);
   if (!item) throw Error("The item no longer exists.");
   if (
     item.summary !== draft.baseSummary ||

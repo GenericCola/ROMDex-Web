@@ -1,6 +1,7 @@
-import { materialize, STATES } from "./accepted/core.mjs";
+import { STATES } from "./accepted/core.mjs";
 import { editTask } from "./task-actions";
 import type { LampColor, WorkspaceData } from "./types";
+import { findWorkspaceItem } from "./workspace-item";
 
 export const assignTaskStatus = (
   data: WorkspaceData,
@@ -8,9 +9,7 @@ export const assignTaskStatus = (
   color: LampColor,
   base: string,
 ) => {
-  const item = materialize(data.remote, data.operations).find((candidate) => {
-    return candidate.id === id;
-  });
+  const item = findWorkspaceItem(data, id);
   if (!item) throw Error("The item no longer exists.");
   if ((item.assignedState ?? item.state) !== base)
     throw Error("Assigned status changed. Close and reopen the status menu.");

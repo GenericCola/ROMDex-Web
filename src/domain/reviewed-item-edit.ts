@@ -1,11 +1,11 @@
 import { equal, supported } from "@/cloud/delivery-helpers";
 import { tagIds, validateTagSelection } from "@/cloud/tag-types";
 import { nativeEditPayload } from "@/youtrack/native-edit-payload";
-import { materialize } from "./accepted/core.mjs";
 import type { JsonObject } from "./json";
 import { nativeEditKey } from "./native-edit-fields";
 import { editTask } from "./task-actions";
 import type { TaskPatch, WorkspaceData } from "./types";
+import { findWorkspaceItem } from "./workspace-item";
 export const reviewedItemEdit = (
   data: WorkspaceData,
   id: string,
@@ -22,9 +22,7 @@ export const reviewedItemEdit = (
       throw Error("This field needs its web delivery adapter configuration.");
     nativeEditPayload(patch, options);
   }
-  const item = materialize(data.remote, data.operations).find((item) => {
-    return item.id === id;
-  });
+  const item = findWorkspaceItem(data, id);
   if (!item) throw Error("This item no longer exists.");
   if (patch.tags !== undefined)
     validateTagSelection(

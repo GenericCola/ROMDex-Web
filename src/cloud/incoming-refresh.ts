@@ -4,10 +4,10 @@ import {
   authToken,
   hasAuthSession,
 } from "@/auth/session";
-import { materialize } from "@/domain/accepted/core.mjs";
 import { draftTicketIds } from "@/domain/editor-drafts";
 import { editingTicketIds } from "@/domain/task-editing";
 import type { TaskItem } from "@/domain/types";
+import { findWorkspaceItem } from "@/domain/workspace-item";
 import { workspaceStore } from "@/domain/workspace-store";
 import { snapshotRevision } from "@/youtrack/incoming-revision";
 import { incomingStep, IncomingSuperseded } from "./incoming-error";
@@ -142,9 +142,7 @@ export const refreshIncomingTask = async (id: string) => {
     context.current();
   }
   const { data } = workspaceStore.getSnapshot();
-  const item = materialize(data.remote, data.operations).find((entry) => {
-    return entry.id === id;
-  });
+  const item = findWorkspaceItem(data, id);
   if (!item) throw Error("The ticket is no longer in this workspace.");
   return item;
 };

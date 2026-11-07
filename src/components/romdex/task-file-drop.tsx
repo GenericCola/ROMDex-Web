@@ -1,6 +1,6 @@
-import { materialize } from "@/domain/accepted/core.mjs";
 import { FileDropTarget } from "@/domain/accepted/file-drop.mjs";
 import { taskEditingLocked } from "@/domain/task-edit-lock";
+import { findWorkspaceItem } from "@/domain/workspace-item";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useRef } from "react";
 import { stageTaskFiles } from "./stage-task-files";
@@ -32,9 +32,7 @@ const TaskFileDrop = ({ enabled }: { enabled: boolean }) => {
       item: (id) => {
         if (taskEditingLocked(id)) return undefined;
         const { data } = workspaceStore.getSnapshot();
-        return materialize(data.remote, data.operations).find((item) => {
-          return item.id === id;
-        });
+        return findWorkspaceItem(data, id);
       },
       attach: async (id, files) => {
         let staged: string[] = [];
