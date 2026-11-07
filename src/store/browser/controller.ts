@@ -3,6 +3,7 @@ import { workspaceStore } from "@/domain/workspace-store";
 import { createArticle } from "@/store/core/article";
 import { STORE_TARGETS } from "@/store/core/transport";
 import type { StoreName } from "@/store/parts/manifest";
+import { errorText } from "@utils/error-text";
 import { autoSync } from "./auto-sync";
 import type { StoreBinding } from "./binding";
 import { StoreCache } from "./cache";
@@ -84,7 +85,7 @@ export class StoreSyncController {
         });
       } catch (error) {
         const state = await deps.cache.getState(deps.scope, store);
-        const message = error instanceof Error ? error.message : "Sync failed.";
+        const message = errorText(error, "Sync failed.");
         await deps.cache.putState(deps.scope, store, {
           ...state,
           lastError: message,
