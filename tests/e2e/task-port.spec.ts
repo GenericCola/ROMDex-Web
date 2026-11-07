@@ -12,8 +12,8 @@ test("task notes and comment drafts survive switching, restart and offline reope
   await page.getByRole("button",{name:"Switch Workspace",exact:true}).click();await page.getByRole("menuitemradio",{name:"ROMDex",exact:true}).click();
   await page.getByRole("button",{name:"Comments",exact:true}).click();await expect(page.getByRole("textbox",{name:"Write a Comment",exact:true})).toHaveValue("Unposted synthetic draft");
   await page.reload();await expect(page.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("Durable synthetic notes");
-  // Offline means no session answer either: drop the fixture routes (they would still answer, and in Firefox they also send
-  // requests past the service worker) so the worker serves the shell. Fails since cookie sign-in; see PMON-628.
+  // Offline means no session answer either: drop the fixture routes (they would still answer)
+  // so the worker serves the shell. Fails since cookie sign-in; see PMON-628.
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await context.unrouteAll({behavior:"wait"});await context.setOffline(true);await page.reload();await expect(page.getByRole("textbox",{name:"Notes and Instructions",exact:true})).toHaveValue("Durable synthetic notes");await routeLocalWorkspace(context);await context.setOffline(false);
   await page.getByRole("button",{name:"Comments",exact:true}).click();await expect(page.getByRole("textbox",{name:"Write a Comment",exact:true})).toHaveValue("Unposted synthetic draft");
 });

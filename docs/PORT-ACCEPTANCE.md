@@ -80,7 +80,7 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 - [x] Draft flush/save failure prevents update activation; update refusal releases its lock. Evidence: workspace/NPCDex units and task-update browser scenario.
 - [ ] Choose the HTTPS hosting account and root-origin address. A hosting clarification is pending; no destination is invented.
 - [ ] Deploy with the actual static-host headers, configure YouTrack CORS for that origin and verify direct requests. No proxy workaround.
-- [ ] Accept real iPhone/iPad installation, storage quota, offline reopening, suspension and update behavior. WebKit/iPhone emulation is automated browser evidence only.
+- [ ] Accept real iPhone/iPad installation, storage quota, offline reopening, suspension and update behavior. Automated browser tests run on Chromium only (desktop and Pixel 7 emulation) since November 7, so iPhone behavior has no automated evidence.
 - [ ] Run final complete checks, publish the private checkpoint, provide the tested build and a concise manual acceptance list, then accept cutover. Current test counts and live blockers are recorded in DESKTOP-MIGRATION.md and LIVE-ACCEPTANCE.md.
 
 Migration/RDX checkpoint 47a7df8 verification: pnpm check passed type checking, zero-warning lint, 116 unit tests and eight worker/build checks. pnpm build passed. The complete frozen browser run passed 173 checks with two expected mobile desktop-layout skips. The independent desktop reader accepted browser-repacked synthetic map/plan files. These results close only the verified rows above; production migration, remaining feature implementation and human/device acceptance stay open.

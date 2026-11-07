@@ -19,14 +19,9 @@ const comparableCookies = (cookies: Cookie[]) =>
     .sort((a, b) => a.name.localeCompare(b.name));
 test("durable cookies survive a real browser restart and renew into PMON", async ({
   playwright,
-  browserName,
 }, testInfo) => {
   // Persistent Chromium contexts close their owned browser process. This is not
   // a new page/context or a storageState export/import simulation of restart.
-  test.skip(
-    browserName !== "chromium",
-    "Persistent-profile restart gate runs on Chromium desktop/mobile.",
-  );
   const profile = await mkdtemp(join(tmpdir(), "romdex-synthetic-restart-"));
   const use = testInfo.project.use;
   const launch = () =>

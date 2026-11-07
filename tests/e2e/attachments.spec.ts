@@ -8,38 +8,6 @@ const attachmentFixture = async (
   page: Page,
   mode: "normal" | "lost-upload" | "lost-delete" = "normal",
 ) => {
-  const nativeWire = ["webkit", "iphone"].includes(test.info().project.name);
-  if (nativeWire)
-    await page.addInitScript(() => {
-      const send = window.fetch.bind(window);
-      window.fetch = async (input, init) => {
-        if (
-          decodeURIComponent(String(input)).includes("/attachments?") &&
-          init?.method === "POST" &&
-          init.body instanceof FormData
-        ) {
-          const encoded = new Request(
-            new URL("/__attachment-transport", location.href),
-            { method: "POST", body: init.body },
-          );
-          const response = await send("/__attachment-transport", {
-            method: "POST",
-            headers: encoded.headers,
-            body: await encoded.arrayBuffer(),
-          });
-          const { body } = await response.json();
-          const text = new TextDecoder().decode(
-            Uint8Array.from(atob(body), (c) => c.charCodeAt(0)),
-          );
-          if (
-            !text.includes("ROMDex attachment: durable bytes \u00e9\n") ||
-            !text.includes('filename="fixture.txt"')
-          )
-            throw Error("Native attachment multipart bytes differ.");
-        }
-        return send(input, init);
-      };
-    });
   const s = await structuralFixture(page);
   await page
     .getByRole("button", { name: "Fixture Root", exact: true })
@@ -112,7 +80,7 @@ const attachmentFixture = async (
           "multipart/form-data; boundary=",
         );
         const body = r.postDataBuffer()!;
-        if (!nativeWire) expect(body.includes(content)).toBe(true);
+        expect(body.includes(content)).toBe(true);
         expect(body.toString()).toContain('filename="fixture.txt"');
         const key = "134-" + ++uploads;
         files.set(key, {
@@ -206,7 +174,7 @@ test("attachments stage offline, survive reload, download exact bytes and delete
   const s = await attachmentFixture(page);
   await s.stage();
   expect(s.uploads()).toBe(0);
-  const legacy = ["chromium", "firefox"].includes(test.info().project.name);
+  const legacy = test.info().project.name === "chromium";
   await page.evaluate(async (legacy) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const r = indexedDB.open("romdex-web-upload-bytes", 1);
