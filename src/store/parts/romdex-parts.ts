@@ -19,6 +19,14 @@ export const EXTRA_FIELDS = [
   "testing",
 ] as const;
 
+/** Every metadata map in document order; migration and merge derive from this. */
+export const ROMDEX_FIELDS = [
+  "images",
+  "orders",
+  "assigned",
+  ...EXTRA_FIELDS,
+] as const;
+
 type ExtraField = (typeof EXTRA_FIELDS)[number];
 
 export interface RomdexPartOptions {

@@ -1,25 +1,7 @@
 import type { FlatValues } from "@/store/merge/merge";
+import { ROMDEX_FIELDS, type RomdexMetadata } from "@/store/parts/romdex-parts";
 
-export interface RomdexMetadata {
-  version: number;
-  images: Record<string, string>;
-  orders: Record<string, string[]>;
-  assigned: Record<string, string>;
-  authorizations?: Record<string, unknown>;
-  acceptances?: Record<string, unknown>;
-  reviews?: Record<string, unknown>;
-  testing?: Record<string, unknown>;
-}
-
-export const ROMDEX_FIELDS = [
-  "images",
-  "orders",
-  "assigned",
-  "authorizations",
-  "acceptances",
-  "reviews",
-  "testing",
-] as const;
+export { ROMDEX_FIELDS, type RomdexMetadata };
 type RomdexField = (typeof ROMDEX_FIELDS)[number];
 
 /** Merge-key prefix for each field ("images" is keyed as "image/<id>"). */

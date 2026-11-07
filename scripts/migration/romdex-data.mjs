@@ -3,6 +3,7 @@
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { gunzipSync } from "node:zlib";
+import { ROMDEX_FIELDS } from "../../src/store/parts/romdex-parts.ts";
 
 export function sha256Hex(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
@@ -89,18 +90,8 @@ export async function assembleBlob(
   return { bytes, stored: stored.length, objects };
 }
 
-export const METADATA_FIELDS = [
-  "images",
-  "orders",
-  "assigned",
-  "authorizations",
-  "acceptances",
-  "reviews",
-  "testing",
-];
-
 function fieldsFor(doc) {
-  return METADATA_FIELDS.slice(0, doc.version + 2);
+  return ROMDEX_FIELDS.slice(0, doc.version + 2);
 }
 
 export function emptyMetadata() {
