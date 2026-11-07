@@ -2,6 +2,7 @@ import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { trackWorkspaceWork } from "@/domain/workspace-work";
 import { taskImage } from "@/rdx/images";
+import { errorText } from "@utils/error-text";
 import { useState } from "react";
 const TaskImage = ({ id, data }: { id: string; data: WorkspaceData }) => {
   const [message, setMessage] = useState("");
@@ -15,9 +16,7 @@ const TaskImage = ({ id, data }: { id: string; data: WorkspaceData }) => {
       await workspaceStore.flush();
       setMessage("Task image saved in this browser.");
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Image could not be saved.",
-      );
+      setMessage(errorText(error, "Image could not be saved."));
     }
   };
   const clear = () => {

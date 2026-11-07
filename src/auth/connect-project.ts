@@ -1,5 +1,6 @@
 import { connectDelivery, disconnectDelivery } from "@/cloud/session";
 import { YouTrackHttpError } from "@/youtrack/http-error";
+import { errorText } from "@utils/error-text";
 import type { AuthorizedProject } from "./identity";
 import { ResumeRejected } from "./resume-failure";
 import { authIdentity, setAuthSession } from "./session";
@@ -38,7 +39,7 @@ export const connectProject = async (
     }
     return (
       "Signed in, but data connection could not be established. Retry in Connection Details. " +
-      (error instanceof Error ? error.message : "Connection unavailable.")
+      errorText(error, "Connection unavailable.")
     );
   }
 };

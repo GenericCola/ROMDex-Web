@@ -4,6 +4,7 @@ import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { NpcdexDraft, NpcdexTarget } from "@/npcdex/model";
 import { contentRevision, saveNpcdexDraft, targetKey } from "@/npcdex/model";
+import { errorText } from "@utils/error-text";
 import {
   useCallback,
   useEffect,
@@ -49,9 +50,7 @@ export const useNpcdexDraft = (data: WorkspaceData, target: NpcdexTarget) => {
           "Draft saved in this browser. Current content and testing evidence are unchanged.",
         );
       } catch (error) {
-        setMessage(
-          error instanceof Error ? error.message : "Draft save failed.",
-        );
+        setMessage(errorText(error, "Draft save failed."));
         throw error;
       } finally {
         setBusy(false);
@@ -104,7 +103,7 @@ export const useNpcdexDraft = (data: WorkspaceData, target: NpcdexTarget) => {
   };
   const submit = () => {
     void save().catch((error: unknown) => {
-      setMessage(error instanceof Error ? error.message : "Draft save failed.");
+      setMessage(errorText(error, "Draft save failed."));
     });
   };
   return { draft, dirty, busy, message, edit, submit, setDraft, setDirty };

@@ -1,5 +1,6 @@
 import { startCookieLogin } from "@/auth/cookie-client";
 import { flushLocal } from "@/auth/flush-local";
+import { errorText } from "@utils/error-text";
 export const cookieSignIn = async (
   isCurrent: () => boolean,
   clearIdentity: () => void,
@@ -15,8 +16,7 @@ export const cookieSignIn = async (
     clearIdentity();
     await startCookieLogin(rememberDevice);
   } catch (error) {
-    if (isCurrent())
-      setMessage(error instanceof Error ? error.message : "Sign-in failed.");
+    if (isCurrent()) setMessage(errorText(error, "Sign-in failed."));
   } finally {
     if (isCurrent()) setBusy(false);
   }

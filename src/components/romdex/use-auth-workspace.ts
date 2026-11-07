@@ -11,6 +11,7 @@ import { ResumeRejected } from "@/auth/resume-failure";
 import { expired, setAuthSession } from "@/auth/session";
 import { rememberSession } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
+import { errorText } from "@utils/error-text";
 import { useEffect, useRef, useState } from "react";
 import { cookieSignIn } from "./cookie-sign-in";
 import { cookieSignOut } from "./cookie-sign-out";
@@ -86,9 +87,7 @@ export const useAuthWorkspace = () => {
         sessionRef.current = null;
         setIdentity(null);
       }
-      setMessage(
-        error instanceof Error ? error.message : "Project could not open.",
-      );
+      setMessage(errorText(error, "Project could not open."));
     } finally {
       if (run === generationRef.current) setBusy(false);
     }

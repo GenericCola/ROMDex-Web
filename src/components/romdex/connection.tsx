@@ -6,6 +6,7 @@ import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { DeliveryClient } from "@/youtrack/delivery-client";
 import { readTasks } from "@/youtrack/read-tasks";
+import { errorText } from "@utils/error-text";
 import type { FormEvent, ReactNode } from "react";
 import { useRef, useState } from "react";
 import DeliveryControls from "./delivery-controls";
@@ -50,7 +51,7 @@ const Connection = ({
         items.length + " tasks read. Review before saving a browser copy.",
       );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Read failed.");
+      setMessage(errorText(error, "Read failed."));
     } finally {
       setBusy(false);
     }

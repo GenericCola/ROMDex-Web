@@ -1,4 +1,5 @@
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { errorText } from "@utils/error-text";
 import type { Deletion } from "./deletion-checks";
 import {
   readDeletion,
@@ -33,8 +34,7 @@ export const deliverDeletion = async (
     await commit((data) => {
       recordDelivery(data, operation.opId, {
         status: "conflict",
-        message:
-          error instanceof Error ? error.message : "Deletion needs review.",
+        message: errorText(error, "Deletion needs review."),
       });
     });
     throw error;

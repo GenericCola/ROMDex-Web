@@ -6,6 +6,7 @@ import {
 import { previewPlanImport } from "@/domain/accepted/rdx/plan-merge.mjs";
 import type { JsonObject } from "@/domain/json";
 import { validateNpcdex } from "@/npcdex/validate";
+import { errorText } from "@utils/error-text";
 import { readRdx, writeRdx } from "./container";
 import type { RdxInspection, RdxRequest } from "./types";
 export const inspectRdx = async (
@@ -102,8 +103,7 @@ export const inspectRdx = async (
       validateNpcdex(projection);
     } catch (error) {
       projection = null;
-      projectionError =
-        error instanceof Error ? error.message : "Map projection needs review.";
+      projectionError = errorText(error, "Map projection needs review.");
     }
   }
   return {

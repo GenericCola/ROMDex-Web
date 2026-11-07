@@ -1,3 +1,4 @@
+import { errorText } from "@utils/error-text";
 import { inspectRdx } from "./inspect";
 import type { RdxRequest } from "./types";
 self.onmessage = async (event: MessageEvent<RdxRequest>) => {
@@ -7,7 +8,7 @@ self.onmessage = async (event: MessageEvent<RdxRequest>) => {
   } catch (error) {
     self.postMessage({
       ok: false,
-      error: error instanceof Error ? error.message : "RDX validation failed.",
+      error: errorText(error, "RDX validation failed."),
     });
   }
 };

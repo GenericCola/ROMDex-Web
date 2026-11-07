@@ -1,4 +1,5 @@
 import type { DropTarget } from "@/domain/task-drop";
+import { errorText } from "@utils/error-text";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { finishTaskDrag } from "./task-drag-finish";
 import { refreshTaskDrag, scrollTaskDrag } from "./task-drag-navigation";
@@ -37,7 +38,7 @@ export const useTaskDrag = (
       dragRef.current = startTaskDrag(event, selectedIds);
       setMessage("");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Move unavailable.");
+      setMessage(errorText(error, "Move unavailable."));
     }
   };
   const refresh = (point: DragPoint, current: Drag) => {

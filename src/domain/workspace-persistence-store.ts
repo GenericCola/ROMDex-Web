@@ -1,5 +1,6 @@
 import { verifyRetainedAssets } from "@/migration/verify-assets";
 import { WorkspaceStorage } from "@/storage/workspace-storage";
+import { errorText } from "@utils/error-text";
 import { persistHierarchyRecovery } from "./hierarchy-recovery-store";
 import { shareStructure } from "./share-structure";
 import type { WorkspaceData, WorkspaceSnapshot } from "./types";
@@ -46,8 +47,7 @@ export class WorkspacePersistenceStore {
     } catch (error) {
       if (generation !== this.generation) return;
       this.publish({
-        error:
-          error instanceof Error ? error.message : "Workspace could not load.",
+        error: errorText(error, "Workspace could not load."),
       });
     }
   };
@@ -82,8 +82,7 @@ export class WorkspacePersistenceStore {
         this.revision = await this.storage.save(data, this.revision);
       } catch (error) {
         this.publish({
-          error:
-            error instanceof Error ? error.message : "Local saving failed.",
+          error: errorText(error, "Local saving failed."),
         });
       } finally {
         this.publish({ pendingWrites: this.state.pendingWrites - 1 });
@@ -109,8 +108,7 @@ export class WorkspacePersistenceStore {
         this.publish({ error: "" });
       } catch (error) {
         this.publish({
-          error:
-            error instanceof Error ? error.message : "Local saving failed.",
+          error: errorText(error, "Local saving failed."),
         });
         throw error;
       } finally {
