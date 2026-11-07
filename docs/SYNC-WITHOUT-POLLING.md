@@ -53,7 +53,7 @@ is one or two requests instead of five.
 
 | Where | Why it stays |
 |---|---|
-| `src/domain/save-queue.ts` | 200 ms quiet period before a workspace save, so fast typing writes once. One-shot. |
+| `src/domain/save-queue.ts` | Optional quiet period before a workspace save (unused by the app: 0 ms; changes made while a save runs join the next one). |
 | `src/store/browser/auto-sync.ts` | 5 s settle timer after a local change. One-shot debounce. |
 | `src/cloud/watch-incoming.ts` | 250 ms settle before re-applying the last read after an editor closes. One-shot, no request. |
 | `src/cloud/outgoing-scheduler.ts` | 750 ms settle before automatic delivery. One-shot debounce. |

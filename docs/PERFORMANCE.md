@@ -222,11 +222,13 @@ Inventory of waits and what changed:
 
 ## Not changed, and why
 
-- **Save coalescing.** Done later in PMON-640 (owner answer P1): changes now
-  wait 200 ms and share one put of the newest snapshot
-  (`src/domain/save-queue.ts`). Each change's save promise still resolves only
-  after a put that includes it, and a waiting save starts at once on flush,
-  delivery, app update, page hide and `beforeunload`.
+- **Save coalescing.** Done later in PMON-640 (owner answer P1): changes made
+  while a save is running wait and share one put of the newest snapshot
+  (`src/domain/save-queue.ts`), so a slow put no longer leaves a queue of
+  690 KB writes behind it. Each change's save promise still resolves only after
+  a put that includes it, and a waiting save starts at once on flush, delivery,
+  app update, page hide and `beforeunload`. A fixed 200 ms quiet period was
+  tried and dropped: awaited edits such as rename and Escape stayed busy.
 - **Per-change cost of the write path.** Each store change still runs
   `structuredClone` on the workspace, `validateWorkspace` (including
   `indexTree`) and a full-record IndexedDB put. After the fixes these, plus

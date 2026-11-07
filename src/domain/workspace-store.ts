@@ -148,5 +148,6 @@ export class WorkspaceStore extends WorkspaceSaveStore {
     return exportWorkspace(this.state.data);
   };
 }
-// Typing settles for 200 ms before the workspace is written once.
-export const workspaceStore = new WorkspaceStore(undefined, 200);
+// No added wait: changes made while a save runs join the next save. A timed
+// quiet period kept awaited edits (rename, Escape) busy for too long.
+export const workspaceStore = new WorkspaceStore();

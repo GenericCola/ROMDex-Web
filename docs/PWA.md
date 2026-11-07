@@ -22,9 +22,9 @@ Saves still carry a revision check. If two windows ever write (a browser without
 Web Locks, or a forced takeover), a window with nothing unsaved adopts the
 newer save when the other window announces it on the `romdex-workspace`
 channel; a window with unsaved edits keeps "Another ROMDex window saved first"
-and its recovery export, so nothing is overwritten. Workspace saves wait 200 ms
-and write only the newest snapshot; a waiting save starts at once when the page
-is hidden or closed.
+and its recovery export, so nothing is overwritten. Changes made while a workspace save runs
+share the next save, which writes only the newest snapshot; a waiting save
+starts at once when the page is hidden or closed.
 
 The preview server applies public/_headers. A production static host must do the same. HTTPS and a root-origin deployment are required, along with YouTrack CORS permission for the eventual origin. Development is on port 3000 and production preview on 3001; never serve development through the production origin.
 
