@@ -113,7 +113,8 @@ gzip.
      so it is reported here rather than changed.
 7. **Mounting 490 rows at once is slow.** Expand All and clearing a search
    take a single 1.2–2.4 s task, mostly style recalc and layout for about 20k
-   elements. Memoized rows don't help with the first mount. See "Not changed".
+   elements. Memoized rows don't help with the first mount. Fixed later by
+   rendering only the rows near the viewport; see "Row windowing (PMON-636)".
 
 ## Fixes
 
@@ -237,15 +238,83 @@ Inventory of waits and what changed:
   per task, or the validation contract. Both belong with the storage work.
 - **Full re-read every 5 s.** Removed in PMON-641 (owner answer P3): incoming
   sync no longer polls. See docs/SYNC-WITHOUT-POLLING.md.
-- **Row virtualization.** Expand All with 490 rows still mounts every row in
-  one task. Virtualizing the table would interact with drag precision, exact
-  insertion guides and keyboard navigation, which have their own acceptance
-  suite, so it needs a separate, focused change.
+- **Row virtualization (done).** See "Row windowing (PMON-636)" below.
 - **Tile images (done).** The image bytes now live in their own IndexedDB
   database (`romdex-web-images`) and the workspace record keeps only a short
   ref per image, so clone, validation and save no longer carry them. Entries
   there are never deleted, so unused images still take browser storage. See
   `docs/YOUTRACK-STORAGE.md`.
+
+## Row windowing (PMON-636)
+
+Expand All and clearing a search used to mount every task row in one long
+task. The task table body now renders only the rows near the viewport.
+
+- **How it works.** `useRowWindow` (`src/components/romdex/use-row-window.ts`)
+  renders the rows that overlap the table viewport plus 600 px above and
+  below. One spacer row stands in for each run of skipped rows. No library is
+  used: the pure range logic in `row-window.ts` is about 50 lines.
+- **Row heights are measured.** After every commit, and whenever the table or
+  its scroll area resizes, each rendered row's height is read and stored by
+  task id. Rows not measured yet use the mean measured height, so the spacers
+  stay close and correct themselves as rows are seen. The e2e spec
+  `virtual-table.spec.ts` makes every seventh row 90 px tall and checks that
+  rendered rows always touch and the last row lines up at the end.
+- **Rows that always render.** These stay in the DOM wherever the table is
+  scrolled:
+  - the new-task and group drafts;
+  - the inline rename row;
+  - the row last pressed or focused, with its two neighbours.
+
+  So focus, an open move dialog, drag pointer capture and the delayed
+  single-click open all survive scrolling, and Tab from a far-away focused
+  row reaches the next row.
+- **Drag and drop.** Drop targets read the full visible row order
+  (`task-row-order.ts`) instead of the rows in the DOM, so insertion guides
+  and "after this subtree" anchors are the same as before. A drop below a
+  spacer is not taken as the end of the list. The drag-precision unit and e2e
+  suites pass with their assertions unchanged.
+- **Accessibility.** The table carries `aria-rowcount` (header, rows and any
+  open draft). Every row carries its `aria-rowindex`. Spacer rows are
+  `aria-hidden`.
+- **Limits.** The browser's own Find (Ctrl+F) only sees rendered rows; the
+  app's Search field still filters all of them. The app has no print styles,
+  so nothing relied on every row being in the DOM.
+
+### Results
+
+GitHub Actions `ubuntu-latest`, means of three paired runs (baseline then
+head, alternating) with the `tests/perf` harness and its 490-task fixture.
+The baseline is `feat/youtrack-storage` at `65029ca`; the head is `542ebc6`.
+That head differs from the final branch only by the inline-key fixes, which
+don't touch rendering. Two harness changes apply to both builds:
+
+- a `scroll-expanded` step wheels the expanded table from top to bottom;
+- rows are scrolled on screen before the select and toggle steps, outside the
+  measured action.
+
+| Step | Long-task total ms | Worst input delay ms | Task ms | DOM nodes |
+|---|---|---|---|---|
+| Expand All (490 rows) | 629 → 17 | 699 → 80 | 813 → 159 | 57,928 → 3,937 |
+| Scroll expanded table top to bottom | 0 → 0 | – | 849 → 75 | 57,929 → 3,938 |
+| Select a row | 57 → 0 | 104 → 32 | 656 → 186 | 58,110 → 5,328 |
+| Toggle one row | 127 → 0 | 187 → 48 | 344 → 103 | 58,117 → 8,351 |
+| Type 30 chars in Notes (expanded) | 47 → 0 | 99 → 48 | 2,109 → 1,032 | 57,544 → 2,973 |
+| Type 10 chars in Search | 220 → 0 | 123 → 64 | 855 → 458 | 58,154 → 3,093 |
+| Clear Search (all rows back) | 630 → 0 | 635 → 59 | 843 → 108 | 57,621 → 5,508 |
+| Collapse All | 94 → 0 | 133 → 64 | 562 → 108 | 57,621 → 6,609 |
+| Cold open, idle, collapsed typing, NPCDex switch | unchanged within noise | | | |
+
+- **Expand All and Clear Search.** Each was a single long task of over
+  0.5 s; both now finish in well under 0.1 s.
+- **Scrolling.** Neither build dropped a frame over 50 ms on the runner. The
+  worst frame gap fell from 28 ms to 17 ms. Style recalculation while
+  scrolling fell from 174 ms to 21 ms.
+- **DOM nodes.** This is the CDP count. It includes nodes that are detached
+  but not yet garbage-collected, which is why it creeps up after toggles.
+- **Absolute values.** The runner is much faster than the shared VPS the
+  earlier tables used, so compare ratios across the two pages, not
+  milliseconds.
 
 ## Verification
 
