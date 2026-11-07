@@ -48,11 +48,13 @@ list says. The sealed-cookie issuer label is fixed, so existing sessions keep wo
   `skipTrailingSlashRedirect` exist only in the development phase of `next.config.js`; the
   static export is unchanged.
 
-The dev sign-in screen adds "Sign in with the developer token". It signs in as the account
-behind `YOUTRACK_TOKEN` in `.env`, after you type the code the dev API prints at start-up
-("Developer sign-in code: …"). nextjsdev.letmecome.in is public, so the code keeps strangers
-from borrowing the owner's account while `pnpm dev` runs. Ten wrong codes switch the route off
-until the next restart. Pasting a token also works in dev.
+The dev sign-in screen adds "Sign in with the developer token". One click signs you in as
+the account behind `YOUTRACK_TOKEN` in `.env`. There is no code and no lockout.
+
+Anyone who opens the dev URL, including the public https://nextjsdev.letmecome.in, while
+`pnpm dev` runs is signed in as the token's owner. The owner accepted this (PMON-622, Q11).
+Stop `pnpm dev` when you do not want that. The route keeps its Origin and Fetch Metadata
+checks. Pasting a token also works in dev.
 
 None of this reaches production. `/api/auth/dev-token` lives in `server/dev-token.ts`, which
 only `server/dev-application.ts` imports; `api/index.ts` never loads either, and the

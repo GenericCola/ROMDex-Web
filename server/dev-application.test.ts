@@ -7,8 +7,8 @@ import { DEV_TOKEN_ROUTE } from "./dev-token.ts";
 import { fence, jarOf, post, tokenDeps } from "./token-test-support.ts";
 const dev = "https://nextjsdev.letmecome.in";
 const api = "http://127.0.0.1:3002";
-const login = (code = "abcdefghjk", origin = dev, cookie?: string) =>
-  post(api + DEV_TOKEN_ROUTE, JSON.stringify({ code }), origin, cookie);
+const login = (origin = dev, cookie?: string) =>
+  post(api + DEV_TOKEN_ROUTE, "{}", origin, cookie);
 test("dev token login issues a session the normal session route accepts", async () => {
   const handle = createDevApplication(tokenDeps());
   const result = await handle(login());
@@ -28,38 +28,39 @@ test("dev token login issues a session the normal session route accepts", async 
   assert.equal(session.status, 200);
   assert.equal((await session.json()).userId, "owner");
 });
-test("dev token login refuses a wrong code, a foreign origin and a bad token", async () => {
+test("dev token login refuses a foreign origin and a bad token", async () => {
   const handle = createDevApplication(tokenDeps());
-  assert.equal((await handle(login("wrong-code"))).status, 401);
-  assert.equal(
-    (await handle(login(undefined, "https://evil.example"))).status,
-    403,
-  );
+  assert.equal((await handle(login("https://evil.example"))).status, 403);
   const refused = await createDevApplication(tokenDeps({ token: "revoked" }))(
     login(),
   );
   assert.equal(refused.status, 401);
   assert.deepEqual(refused.headers.getSetCookie(), []);
-  assert.equal((await handle(login(undefined, dev, ""))).status, 503);
+  assert.equal((await handle(login(dev, ""))).status, 503);
 });
-test("dev token login locks after repeated wrong codes", async () => {
-  const handle = createDevApplication(tokenDeps());
-  for (let i = 0; i < 10; i++) await handle(login("wrong-code"));
-  assert.equal((await handle(login())).status, 503);
-});
-test("dev token login is off without a token or code", async () => {
+test("dev token login is off without a token", async () => {
   assert.equal(
     (await createDevApplication(tokenDeps({ token: "" }))(login())).status,
     503,
   );
+});
+test("dev token login needs POST and a same-origin request", async () => {
+  const handle = createDevApplication(tokenDeps());
   assert.equal(
-    (await createDevApplication(tokenDeps({ code: "" }))(login())).status,
-    503,
+    (
+      await handle(
+        new Request(api + DEV_TOKEN_ROUTE, { headers: { origin: dev } }),
+      )
+    ).status,
+    405,
   );
+  const crossSite = post(api + DEV_TOKEN_ROUTE, "{}", dev);
+  crossSite.headers.set("sec-fetch-site", "cross-site");
+  assert.equal((await handle(crossSite)).status, 403);
 });
 test("dev dependencies use a random session key, dev origins and a server-side token", () => {
-  const a = devDependencies({ YOUTRACK_TOKEN: "synthetic-token" }, "code");
-  const b = devDependencies({ YOUTRACK_TOKEN: "synthetic-token" }, "code");
+  const a = devDependencies({ YOUTRACK_TOKEN: "synthetic-token" });
+  const b = devDependencies({ YOUTRACK_TOKEN: "synthetic-token" });
   assert.notDeepEqual(a.key, b.key);
   assert.equal(a.token, "synthetic-token");
   assert.ok(a.origins.includes(dev));
@@ -70,10 +71,7 @@ test("production has no dev token route", async () => {
   process.env.ROMDEX_SESSION_KEY = Buffer.alloc(32, 3).toString("base64url");
   try {
     const result = await productionHandler(
-      post(
-        "https://romdex.vercel.app" + DEV_TOKEN_ROUTE,
-        JSON.stringify({ code: "x" }),
-      ),
+      post("https://romdex.vercel.app" + DEV_TOKEN_ROUTE, "{}"),
     );
     assert.equal(result.status, 405);
     assert.deepEqual(result.headers.getSetCookie(), []);
