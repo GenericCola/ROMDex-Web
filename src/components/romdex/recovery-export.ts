@@ -1,6 +1,7 @@
 import { recoveryWithUploads } from "@/attachments/recovery";
 import { authIdentity, hasAuthSession } from "@/auth/session";
 import { workspaceStore } from "@/domain/workspace-store";
+import { errorText } from "@utils/error-text";
 export const downloadRecoveryText = (text: string, filename: string) => {
   const blob = new Blob([text], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -27,8 +28,6 @@ const downloadRecovery = async () => {
 };
 export const exportRecovery = () => {
   void downloadRecovery().catch((error: unknown) => {
-    window.alert(
-      error instanceof Error ? error.message : "Recovery export failed.",
-    );
+    window.alert(errorText(error, "Recovery export failed."));
   });
 };

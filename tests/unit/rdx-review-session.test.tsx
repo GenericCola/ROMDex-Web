@@ -1,14 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { authIdentity, setAuthSession } from "../../src/auth/session";
-import type { WorkspaceData } from "../../src/domain/types";
-import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
 import { writeRdx } from "../../src/rdx/container";
 import {
   PlanReviewSession,
   publicationInput,
 } from "../../src/rdx/plan-review-session";
+import { memoryPersistence } from "../fixtures/memory-persistence";
 import { planDocument } from "../fixtures/rdx";
 const signIn = (projectId = "0-1") => {
   setAuthSession({
@@ -51,18 +50,8 @@ const schemaFetch: typeof fetch = (input, init) => {
   return Promise.resolve(new Response(JSON.stringify(value)));
 };
 void test("signed-in plan review stages only its exact local batch and never sends a mutation", async () => {
-  let data = emptyWorkspace(),
-    revision = 0;
-  await workspaceStore.switchPersistence({
-    load: () => {
-      return Promise.resolve({ data, revision });
-    },
-    save: (next: WorkspaceData, expected: number) => {
-      assert.equal(expected, revision);
-      data = structuredClone(next);
-      return Promise.resolve(++revision);
-    },
-  });
+  const persisted = memoryPersistence();
+  await workspaceStore.switchPersistence(persisted);
   const prior = globalThis.fetch;
   globalThis.fetch = schemaFetch;
   try {
@@ -74,18 +63,18 @@ void test("signed-in plan review stages only its exact local batch and never sen
     assert.equal(preview.ready, true);
     assert.equal(typeof preview.token, "string");
     if (typeof preview.token !== "string") throw Error("Missing preview token");
-    assert.equal(data.operations.length, 0);
+    assert.equal(persisted.data.operations.length, 0);
     await assert.rejects(
       session.queue(bytes, { token: preview.token }),
       /approval/,
     );
     await session.queue(bytes, { token: preview.token, approved: true });
-    assert.equal(data.operations.length, 1);
+    assert.equal(persisted.data.operations.length, 1);
     await assert.rejects(
       session.queue(bytes, { token: preview.token, approved: true }),
       /changed/,
     );
-    assert.equal(data.operations.length, 1);
+    assert.equal(persisted.data.operations.length, 1);
     setAuthSession(null);
     await assert.rejects(session.preview(bytes, {}), /session changed/);
   } finally {

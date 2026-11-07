@@ -1,6 +1,6 @@
 import type { WorkspaceSnapshot } from "@/domain/types";
 import { useEffect, useRef, useState } from "react";
-import { pendingSaveKeys, saveOverdue } from "./save-age";
+import { nextOverdueAt, pendingSaveKeys, saveOverdue } from "./save-age";
 export const useSaveOverdue = (state: WorkspaceSnapshot, drafts: boolean) => {
   const agesRef = useRef(new Map<string, number>());
   const [overdue, setOverdue] = useState(false);
@@ -15,9 +15,12 @@ export const useSaveOverdue = (state: WorkspaceSnapshot, drafts: boolean) => {
       );
     };
     update();
-    const timer = setInterval(update, 15_000);
+    // One timer for the moment the oldest unsaved change becomes overdue.
+    const due = nextOverdueAt(agesRef.current, Date.now());
+    if (due === null) return undefined;
+    const timer = setTimeout(update, due - Date.now());
     return () => {
-      return clearInterval(timer);
+      return clearTimeout(timer);
     };
   }, [state, drafts]);
   return overdue;

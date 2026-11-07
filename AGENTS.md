@@ -48,16 +48,16 @@ Read README.md, docs/PROJECT.md, docs/PWA.md, docs/CONVENTIONS.md and docs/DESIG
 
 Use named callbacks, strict TypeScript, token-based styles and accessible React controls. Keep secrets outside Git and browser-public variables. Never read or print .env files. Update documentation with behavior changes.
 
-Run pnpm check, pnpm build and pnpm test:e2e. Do not call historical test results current verification. Keep dev on 3001 and preview on 3000. Preserve production data and the original app separately. Never resume cloud queues as a test.
+The VPS is shared: heavy checks run in GitHub Actions (.github/workflows/ci.yml), not locally (owner, 2026-11-07). CI runs lint, typecheck (app, tests, server), unit and server tests, build and the e2e suite (chromium and mobile-chromium, sharded) on every push and PR; manual runs take a single spec, a project or the perf measurement (tests/perf). Locally run only what a change touches (one unit test file, one e2e spec at most, tsc on one project), one heavy command at a time under `nice -n 15 flock /tmp/claude-1001/heavy.lock`; never run local perf. Push and read results with `gh run watch` and `gh run view --log-failed`. Stop dev and preview servers once their check is done. Secrets come from GitHub repository secrets, never from the workflow file. Never merge into main unless the pull request's CI run (check and both e2e jobs) has passed on its latest commit; verify with `gh pr checks <number>` right before merging. Do not call historical test results current verification. Keep dev on 3000 and preview on 3001. Preserve production data and the original app separately. Never resume cloud queues as a test.
 
-The template remote has push URL DISABLED. Verify private visibility before publishing. The owner subsequently authorized Vercel hosting for the installed web app. Deploy only the reviewed static shell, with no desktop data or credentials. Billing changes and Actions enablement remain unauthorized.
+The template remote has push URL DISABLED. Verify private visibility before publishing. The owner subsequently authorized Vercel hosting for the installed web app. Deploy only the reviewed static shell, with no desktop data or credentials. The owner authorized GitHub Actions for checks and browser tests on 2026-11-07. Billing changes remain unauthorized.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in`node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the`next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
-This block is written and re-added by`next dev` — verify at`node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->

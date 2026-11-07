@@ -10,8 +10,10 @@ import type { WorkspaceSnapshot } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useSyncExternalStore } from "react";
 import ConnectionIndicator from "./connection-indicator";
+import DeviceBrand from "./device-brand";
 import { saveIndicator, syncControl } from "./header-status";
 import Lamp from "./lamp";
+import RefreshButton from "./refresh-button";
 import { useSaveOverdue } from "./use-save-overdue";
 import WorkspaceMenu from "./workspace-menu";
 interface HeaderProps {
@@ -52,19 +54,9 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
   return (
     <>
       <header className="device-header" aria-label="Application Header">
-        <div className="brand">
-          <div className="lens" aria-hidden="true" />
-          <h1>
-            <span className="brand-title">
-              {state.data.view.workspace === "romdex" ? "ROMDex" : "NPCDex"}
-            </span>
-          </h1>
-          <div className="lamps" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </div>
-        </div>
+        <DeviceBrand
+          title={state.data.view.workspace === "romdex" ? "ROMDex" : "NPCDex"}
+        />
         <div className="header-actions">
           <WorkspaceMenu workspace={state.data.view.workspace} />
           <button
@@ -78,6 +70,7 @@ const Header = ({ state, connect, unsavedDrafts = false }: HeaderProps) => {
           >
             Auto-Sync Data <span className="toggle-value">{sync.value}</span>
           </button>
+          <RefreshButton connected={sync.connected} />
           <div className="save-controls">
             <button
               id="save"

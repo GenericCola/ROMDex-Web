@@ -3,9 +3,10 @@ import { boundedText } from "./transport-bounds.ts";
 
 export async function cookieInput(
   request: Request,
+  limit = 256,
 ): Promise<Record<string, unknown>> {
   try {
-    const text = await boundedText(request.body, 256);
+    const text = await boundedText(request.body, limit);
     if (!text) return {};
     if (
       request.headers.get("content-type")?.split(";")[0]?.trim() !==

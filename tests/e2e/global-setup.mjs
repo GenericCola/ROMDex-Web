@@ -1,6 +1,6 @@
 import { createPreview } from "../../scripts/serve.mjs";
 export default async function setup() {
-  const server = await createPreview(3100);
+  const server = await createPreview(Number(process.env.E2E_PORT ?? 3100));
   const [serve] = server.listeners("request");
   server.removeAllListeners("request");
   const transport = async (request, response) => {

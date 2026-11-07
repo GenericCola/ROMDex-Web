@@ -5,14 +5,9 @@ import type {
   TaskPatch,
   WorkspaceData,
 } from "@/domain/types";
-import type {
-  SharedStatusPort,
-  SharedStatusWrite,
-} from "./shared-status-types";
 export interface DeliveryRecord {
   localFileState?: "missing" | "restored";
   tagSteps?: import("./tag-types").TagStep[];
-  metadataWrite?: SharedStatusWrite;
   attachmentBeforeIds?: string[];
   status: "attempting" | "uncertain" | "conflict" | "confirmed" | "ready";
   message: string;
@@ -39,7 +34,6 @@ export interface AssignedStatus {
 }
 export interface CloudData {
   unavailable?: import("./unavailable-tasks").UnavailableTasks;
-  sharedStatuses?: boolean;
   assigned?: Record<string, AssignedStatus>;
   rollupPending?: boolean;
   accountId?: string;
@@ -49,7 +43,6 @@ export interface CloudData {
 export interface DeliveryPort {
   tags?: import("./tag-types").TagPort;
   files?: AttachmentPort;
-  metadata?: SharedStatusPort;
   accountId: string;
   all: () => Promise<TaskItem[]>;
   get: (id: string) => Promise<TaskItem | null>;

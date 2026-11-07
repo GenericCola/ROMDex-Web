@@ -1,28 +1,10 @@
 import type { JsonObject } from "@/domain/json";
+import { readPmonSchema } from "./pmon-project";
 import { list, type YouTrackRequest } from "./request";
 export const readPlanSchema = async (
   request: YouTrackRequest,
 ): Promise<JsonObject> => {
-  const projects = await list<{ id: string; shortName: string }>(
-    request,
-    "admin/projects",
-    "id,shortName",
-    "PMON",
-  );
-  const matches = projects.filter((project) => {
-    return project.shortName === "PMON";
-  });
-  const project = matches[0];
-  if (matches.length !== 1 || !project || !/^\d+-\d+$/.test(project.id))
-    throw Error("Cannot verify the PMON project.");
-  const schema = await list<{
-    id: string;
-    field: { name: string; fieldType: { id: string } };
-  }>(
-    request,
-    "admin/projects/" + project.id + "/customFields",
-    "id,field(name,fieldType(id))",
-  );
+  const { project, schema } = await readPmonSchema(request);
   const connection: JsonObject = {
     project: "PMON",
     projectId: project.id,

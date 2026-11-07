@@ -1,16 +1,16 @@
 import { taskEditingLocked } from "@/domain/task-edit-lock";
 import type { TaskItem } from "@/domain/types";
+import { workspaceItems } from "@/domain/workspace-derived";
+import { workspaceStore } from "@/domain/workspace-store";
 import { useState } from "react";
 import DeleteReview from "./delete-review";
-import ItemEditDialog from "./item-edit-dialog";
+import { LazyItemEditDialog } from "./lazy-views";
 import { useFreshTask } from "./use-fresh-task";
 const TaskRowActions = ({
   item,
-  items,
   add,
 }: {
   item: TaskItem;
-  items: TaskItem[];
   add: (parentId: string | null) => void;
 }) => {
   const fresh = useFreshTask(item.id);
@@ -30,6 +30,8 @@ const TaskRowActions = ({
       </button>
       <button
         disabled={taskEditingLocked(item.id) || fresh.checking}
+        className={fresh.slow ? "romdex-fresh-checking" : undefined}
+        aria-busy={fresh.slow ? "true" : undefined}
         title={fresh.checking ? "Checking latest ticket…" : "Edit Item"}
         aria-label={"Edit " + item.summary}
         onClick={() => {
@@ -57,7 +59,7 @@ const TaskRowActions = ({
       </button>
       {fresh.error && <p role="status">{fresh.error}</p>}
       {editing && (
-        <ItemEditDialog
+        <LazyItemEditDialog
           item={editing}
           close={() => {
             setEditing(null);
@@ -67,7 +69,7 @@ const TaskRowActions = ({
       {deleting && (
         <DeleteReview
           item={item}
-          items={items}
+          items={workspaceItems(workspaceStore.getSnapshot().data)}
           close={() => {
             setDeleting(false);
           }}

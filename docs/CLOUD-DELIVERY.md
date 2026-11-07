@@ -29,7 +29,7 @@ A timeout, lost response, malformed response, failed readback or interrupted con
 Connection Details shows the pending operation and any conflicting values. Editing remains blocked until review completes.
 
 - Read back and confirm sends no mutation. Edits must match the entire queued patch. Comments require the exact comment ID and matching text on an undeleted comment, never a text-only search.
-- Keep my edit rebases a conflicting edit against a fresh read. The next Save compares again before sending. This choice is unavailable for uncertain requests.
+- Keep my edit rebases a conflicting edit against a fresh read. The next Save compares again before sending. This choice is unavailable for uncertain requests, except an uncertain move, where it queues the move again.
 - Keep YouTrack archives the original operation in the local journal and removes it from the active queue. The archived change remains in Export Recovery Copy.
 
 If the uncertain result cannot be proved, preserve a recovery copy and inspect YouTrack before archiving it. A missing or unreadable task remains queued. Invalid operation types, duplicate IDs and malformed journals block delivery; existing browser storage is kept. Recovery import and a repair interface are still pending.

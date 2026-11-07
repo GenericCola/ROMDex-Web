@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { resolve } from "node:path";
+import { fulfillFromOut } from "./cookie-fixture";
 test.use({ serviceWorkers: "block", baseURL: "https://romdex.vercel.app" });
 const content = Buffer.from("Synthetic upload recovery bytes");
 const fixture = async (page: Page, lost = false, denyBytes = false) => {
@@ -7,14 +7,7 @@ const fixture = async (page: Page, lost = false, denyBytes = false) => {
   await page.context().route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (url.origin !== "https://romdex.vercel.app") return route.abort();
-    const root = resolve("out"),
-      file = resolve(
-        root,
-        "." + url.pathname + (url.pathname.endsWith("/") ? "index.html" : ""),
-      );
-    if (!file.startsWith(root + "/") && !file.startsWith(root + "\\"))
-      throw Error("Invalid synthetic asset path");
-    await route.fulfill({ path: file });
+    await fulfillFromOut(route, url);
   });
   const tasks = new Map(
     ["PMON-900001", "PMON-900002"].map((id, i) => [
@@ -260,6 +253,8 @@ test("one uncertain upload preserves multiple additions while unrelated saves an
     .getByRole("switch", { name: "Auto-Sync Data", exact: true })
     .click();
   await page.clock.fastForward(61_000);
+  // No timer re-checks the upload (PMON-641): returning to the window does.
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await page.clock.runFor(2500);
   await expect(
     page.getByRole("button", { name: "Cancel Upload", exact: true }),

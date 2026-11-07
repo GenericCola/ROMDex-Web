@@ -2,6 +2,7 @@ import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { nodeText, saveNpcdexDraft } from "@/npcdex/model";
 import { recoveredDraft } from "@/npcdex/recovered-draft";
+import { errorText } from "@utils/error-text";
 import { useState } from "react";
 const RecoveredEditors = ({ data }: { data: WorkspaceData }) => {
   const [message, setMessage] = useState("");
@@ -23,9 +24,7 @@ const RecoveredEditors = ({ data }: { data: WorkspaceData }) => {
       await workspaceStore.flush();
       setMessage("Recovered draft saved. Current content is unchanged.");
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Recovery needs review.",
-      );
+      setMessage(errorText(error, "Recovery needs review."));
     }
   };
   return (

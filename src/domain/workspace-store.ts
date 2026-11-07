@@ -7,11 +7,11 @@ import type { TaskItem, WorkspaceData } from "./types";
 import { emptyWorkspace } from "./workspace-data";
 import type { WorkspacePersistence } from "./workspace-lifecycle";
 import { prepareWorkspaceUpdate } from "./workspace-lifecycle";
-import { WorkspacePersistenceStore } from "./workspace-persistence-store";
 import { exportWorkspace } from "./workspace-recovery";
+import { WorkspaceSaveStore } from "./workspace-save-store";
 import { hasWorkspaceWork } from "./workspace-work";
 export type { WorkspacePersistence } from "./workspace-lifecycle";
-export class WorkspaceStore extends WorkspacePersistenceStore {
+export class WorkspaceStore extends WorkspaceSaveStore {
   private deliveryCount = 0;
   private activeOperations = new Set<string>();
   private activeTickets = new Set<string>();
@@ -43,7 +43,7 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
     return persistIncoming(
       this.state,
       this.switching,
-      this.write,
+      this.writeNow,
       this.flush,
       items,
       new Set([...held, ...this.activeTickets]),
@@ -74,7 +74,7 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
     this.deliveryCount++;
     this.publish({ delivering: true });
     const commit = async (update: (data: WorkspaceData) => void) => {
-      await this.write((data) => {
+      await this.writeNow((data) => {
         update(data);
         for (const id of deliveryTicketLocks(
           data,
@@ -95,6 +95,8 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
       await this.flush();
       await run(commit);
     } finally {
+      // A read that started during this delivery may predate its writes; end the epoch so it cannot apply.
+      this.deliveryCount++;
       this.activeTickets.clear();
       this.activeOperations.clear();
       this.publish({ delivering: false });
@@ -146,4 +148,6 @@ export class WorkspaceStore extends WorkspacePersistenceStore {
     return exportWorkspace(this.state.data);
   };
 }
+// No added wait: changes made while a save runs join the next save. A timed
+// quiet period kept awaited edits (rename, Escape) busy for too long.
 export const workspaceStore = new WorkspaceStore();

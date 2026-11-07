@@ -1,18 +1,19 @@
-import { indexTree } from "@/domain/accepted/core.mjs";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
+import { imageUrl } from "@/storage/image-storage";
 import Image from "next/image";
 import { useState } from "react";
+import { LazyTileSettings } from "./lazy-views";
 import ProjectSelector from "./project-selector";
 import SelectorBranch from "./selector-branch";
-import TileSettings from "./tile-settings";
 interface SelectorProps {
   data: WorkspaceData;
   items: TaskItem[];
   add: (parentId: string | null) => void;
 }
 const Selectors = ({ data, items, add }: SelectorProps) => {
-  const tree = indexTree(items, data.order);
+  const tree = workspaceTree(items, data.order);
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const settingsItem = settingsId ? tree.byId.get(settingsId) : undefined;
   const all = () => {
@@ -65,11 +66,11 @@ const Selectors = ({ data, items, add }: SelectorProps) => {
         {(tree.children.get(null) ?? []).map(render)}
       </nav>
       {settingsItem && (
-        <TileSettings
+        <LazyTileSettings
           key={settingsItem.id}
           item={settingsItem}
           depth={tree.depths.get(settingsItem.id) ?? 0}
-          image={data.images?.[settingsItem.id] ?? null}
+          image={imageUrl(data.images?.[settingsItem.id])}
           close={() => {
             return setSettingsId(null);
           }}

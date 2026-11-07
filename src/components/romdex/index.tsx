@@ -2,35 +2,39 @@
 import { WorkSelectionProvider } from "./work-selection-provider";
 
 import { recoveryMode } from "@/auth/recovery-mode";
-import { materialize } from "@/domain/accepted/core.mjs";
 import {
   hasDraftEdits,
   noDraftEdits,
   subscribeDraftEditors,
 } from "@/domain/editor-drafts";
 import { beginInlineTask } from "@/domain/task-inline";
+import { workspaceItems } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
-import Npcdex from "@components/npcdex";
-import NpcdexSidebar from "@components/npcdex/sidebar";
 import { usePwa } from "@components/pwa-controls/use-pwa";
 import type { ReactNode } from "react";
 import { useState, useSyncExternalStore } from "react";
-import Connection from "./connection";
 import Details from "./details";
 import DeviceBody from "./device-body";
 import Divider from "./divider";
 import Header from "./header";
+import {
+  LazyConnection,
+  LazyMigration,
+  LazyNpcdex,
+  LazyNpcdexSidebar,
+} from "./lazy-views";
 import LocalSaveRecovery from "./local-save-recovery";
-import Migration from "./migration";
-import RdxLibrary from "./rdx-library";
 import SaveFeedback from "./save-feedback";
 import Selectors from "./selectors";
-import UpdateCheck from "./update-check";
+import StoreNotice from "./store-notice";
 import { useInlineAction } from "./use-inline-action";
+import { useStableCallback } from "./use-stable-callback";
 import { useWorkspace } from "./use-workspace";
 import WorkTable from "./work-table";
 import WorkTrays from "./work-trays";
+import WorkspaceSkeleton from "./workspace-skeleton";
 import WorkspaceStatus from "./workspace-status";
+import WorkspaceToolViews from "./workspace-tool-views";
 import {
   WorkspaceToolsContext,
   type WorkspaceTool,
@@ -51,24 +55,27 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
     setTool(next);
     if (next === "updates") void update.checkForUpdates();
   };
+  const closeTool = () => {
+    setTool(null);
+  };
   const openMigration = () => {
     setMigration(true);
   };
   const closeMigration = () => {
     setMigration(false);
   };
-  const items = materialize(state.data.remote, state.data.operations);
+  const items = workspaceItems(state.data);
   const openConnection = () => {
     return setConnection(true);
   };
   const closeConnection = () => {
     return setConnection(false);
   };
-  const add = (parentId: string | null) => {
+  const add = useStableCallback((parentId: string | null) => {
     inline.run((data) => {
       beginInlineTask(data, parentId);
     });
-  };
+  });
   const { view } = state.data;
   return (
     <WorkspaceToolsContext value={chooseTool}>
@@ -90,18 +97,20 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
             />
           )}
           <SaveFeedback state={state} review={openConnection} />
+          <StoreNotice review={openConnection} />
           {inline.error && (
             <p className="port-recovery" role="alert">
               {inline.error}
             </p>
           )}
           {state.error && <LocalSaveRecovery state={state} />}
+          {!state.ready && !state.error && <WorkspaceSkeleton />}
           {state.ready && (
             <DeviceBody enabled={view.workspace === "romdex"} inert={false}>
               {view.workspace === "romdex" ? (
                 <Selectors data={state.data} items={items} add={add} />
               ) : (
-                <NpcdexSidebar data={state.data} />
+                <LazyNpcdexSidebar data={state.data} />
               )}
               {view.workspace === "romdex" ? (
                 <WorkTrays view={view}>
@@ -110,29 +119,20 @@ const Romdex = ({ account }: { account?: ReactNode }) => {
                   <Details data={state.data} items={items} />
                 </WorkTrays>
               ) : (
-                <Npcdex data={state.data} />
+                <LazyNpcdex data={state.data} />
               )}
             </DeviceBody>
           )}
           {connection && (
-            <Connection close={closeConnection} account={account} />
+            <LazyConnection close={closeConnection} account={account} />
           )}
-          {migration && <Migration close={closeMigration} />}
-          {(tool === "import" || tool === "export") && (
-            <RdxLibrary
+          {migration && <LazyMigration close={closeMigration} />}
+          {tool && (
+            <WorkspaceToolViews
+              tool={tool}
               data={state.data}
-              mode={tool}
-              close={() => {
-                setTool(null);
-              }}
-            />
-          )}
-          {tool === "updates" && (
-            <UpdateCheck
               update={update}
-              close={() => {
-                return setTool(null);
-              }}
+              close={closeTool}
             />
           )}
         </div>

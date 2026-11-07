@@ -9,6 +9,7 @@ import {
 } from "@/cloud/session";
 import { cloudData } from "@/cloud/types";
 import { workspaceStore } from "@/domain/workspace-store";
+import { errorText } from "@utils/error-text";
 import { useRef, useState, useSyncExternalStore } from "react";
 import DeliveryFeedback from "./delivery-feedback";
 import DeliveryReview from "./delivery-review";
@@ -43,9 +44,7 @@ const DeliveryControls = () => {
       const result = await action();
       setMessage(result ?? success);
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Delivery setup failed.",
-      );
+      setMessage(errorText(error, "Delivery setup failed."));
     } finally {
       runningRef.current = false;
       setBusy(false);

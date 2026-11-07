@@ -46,11 +46,14 @@ export async function durableCookieFixture(
           refreshToken: "synthetic-refresh-" + user,
         };
       },
-      verify: async (token) => ({
-        id: owners.get(token) ?? "fixture-owner",
-        guest: false,
-        projects: [{ id: "0-1", shortName: "PMON", name: "Synthetic PMON" }],
-      }),
+      verify: async (token) => {
+        if (token === "revoked-token") throw Error("Synthetic revoked token");
+        return {
+          id: owners.get(token) ?? "fixture-owner",
+          guest: false,
+          projects: [{ id: "0-1", shortName: "PMON", name: "Synthetic PMON" }],
+        };
+      },
       refresh: async () => ({
         accessToken: "synthetic-renewed",
         expiresIn: 300,

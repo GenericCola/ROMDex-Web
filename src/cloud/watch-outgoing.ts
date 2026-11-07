@@ -23,9 +23,7 @@ const outgoingWork = () => {
     !deliveryConnected() ||
     deliveryPaused() ||
     !cloud.autoSync ||
-    (!state.data.operations.length &&
-      !statusReadNeeded(state.data) &&
-      !cloud.sharedStatuses)
+    (!state.data.operations.length && !statusReadNeeded(state.data))
   )
     return null;
   const selected = automaticBatch(state.data);
@@ -45,14 +43,28 @@ export const watchOutgoing = () => {
       await automaticDelivery();
     },
     (changed) => {
-      const readbackTimer = setInterval(changed, 60_000);
+      // An uncertain upload is read back again when the window returns or
+      // comes online (at most once a minute), not on a timer.
+      const shown = () => {
+        if (document.visibilityState !== "hidden") changed();
+      };
+      const browser = typeof window !== "undefined";
+      if (browser) {
+        window.addEventListener("focus", shown);
+        window.addEventListener("online", shown);
+        document.addEventListener("visibilitychange", shown);
+      }
       const stops = [
         workspaceStore.subscribe(changed),
         subscribeDraftEditors(changed),
         subscribeTaskEditing(changed),
       ];
       return () => {
-        clearInterval(readbackTimer);
+        if (browser) {
+          window.removeEventListener("focus", shown);
+          window.removeEventListener("online", shown);
+          document.removeEventListener("visibilitychange", shown);
+        }
         for (const stop of stops) stop();
       };
     },

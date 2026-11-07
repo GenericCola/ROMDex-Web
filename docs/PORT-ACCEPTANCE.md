@@ -15,7 +15,7 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 
 ## Task workspace and delivery
 
-- [x] Durable tasks, title/comment drafts, selected task, scope, search, expanded trees and split-pane mode. Evidence: workspace unit tests and task-port browser tests, including offline reopening and stale-window rejection.
+- [x] Durable tasks, title/comment drafts, selected task, scope, search, expanded trees and split-pane mode. Evidence: workspace unit tests and task-port browser tests, including stale-window rejection. Offline reopening works again (PMON-628, owner answer Q9 in PMON-622): the browser remembers the last signed-in account and PMON project (ids and names only, no token, in localStorage `romdex-offline-account-v1`). When the session request fails with a network error, the app opens that saved workspace for normal local editing with the banner "Offline: changes are saved here and sent when you are back online". Nothing is delivered until a session check succeeds; the app checks again on the browser `online` event and on window focus, never on a timer. A 401 still goes to sign-in, sign-out forgets the account so nothing opens offline afterwards, and a browser with no saved work shows "No saved work in this browser yet". Evidence: `tests/unit/offline-reopen.test.tsx` and the task-port browser test, which drops its fixture routes and goes offline before reloading.
 - [x] Creation remaps local IDs and descendants; explicit exact-ID recovery prevents duplicate POST. Evidence: structural-delivery tests.
 - [x] Reparenting rejects cycles and preserves detached-link recovery. Evidence: workspace, hierarchy and structural-delivery tests.
 - [x] Sibling up/down ordering is local, durable and limited to siblings. Evidence: task-layout unit test; complete drag behavior is still open below.
@@ -80,7 +80,7 @@ A code check, synthetic browser result, live read and human acceptance are diffe
 - [x] Draft flush/save failure prevents update activation; update refusal releases its lock. Evidence: workspace/NPCDex units and task-update browser scenario.
 - [ ] Choose the HTTPS hosting account and root-origin address. A hosting clarification is pending; no destination is invented.
 - [ ] Deploy with the actual static-host headers, configure YouTrack CORS for that origin and verify direct requests. No proxy workaround.
-- [ ] Accept real iPhone/iPad installation, storage quota, offline reopening, suspension and update behavior. WebKit/iPhone emulation is automated browser evidence only.
+- [ ] Accept real iPhone/iPad installation, storage quota, offline reopening, suspension and update behavior. Automated browser tests run on Chromium only (desktop and Pixel 7 emulation) since November 7, so iPhone behavior has no automated evidence.
 - [ ] Run final complete checks, publish the private checkpoint, provide the tested build and a concise manual acceptance list, then accept cutover. Current test counts and live blockers are recorded in DESKTOP-MIGRATION.md and LIVE-ACCEPTANCE.md.
 
 Migration/RDX checkpoint 47a7df8 verification: pnpm check passed type checking, zero-warning lint, 116 unit tests and eight worker/build checks. pnpm build passed. The complete frozen browser run passed 173 checks with two expected mobile desktop-layout skips. The independent desktop reader accepted browser-repacked synthetic map/plan files. These results close only the verified rows above; production migration, remaining feature implementation and human/device acceptance stay open.

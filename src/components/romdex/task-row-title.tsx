@@ -6,26 +6,28 @@ import {
   commitInlineRename,
   indentInlineRename,
 } from "@/domain/task-rename";
-import type { TaskItem, WorkspaceData } from "@/domain/types";
+import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { inlineTitleKey } from "./inline-title-key";
 import { useDelayedRowOpen } from "./use-delayed-row-open";
 import { useInlineAction } from "./use-inline-action";
 import { useTaskTextEditing } from "./use-task-text-editing";
 const TaskRowTitle = ({
   item,
-  data,
+  renaming,
+  titleDraft,
   select,
 }: {
   item: TaskItem;
-  data: WorkspaceData;
+  renaming: boolean;
+  titleDraft: string | undefined;
   select: () => void;
 }) => {
-  const renaming = data.view.renameId === item.id;
   const inputRef = useRef<HTMLInputElement>(null);
   const delayed = useDelayedRowOpen(select);
   const editing = useTaskTextEditing(item.id, "inline-title");
-  const { run, error, busy } = useInlineAction();
+  const { run, queue, error, busy } = useInlineAction();
   useLayoutEffect(() => {
     if (renaming) {
       inputRef.current?.focus();
@@ -40,20 +42,12 @@ const TaskRowTitle = ({
     });
   };
   const key = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (
-      event.nativeEvent.isComposing ||
-      event.ctrlKey ||
-      event.altKey ||
-      event.metaKey
-    )
-      return;
-    const action = event.key,
-      outdent = event.shiftKey;
-    if (!["Enter", "Tab", "Escape"].includes(action)) return;
-    event.preventDefault();
-    run((next) => {
-      if (action === "Enter") commitInlineRename(next, item.id);
-      else if (action === "Tab") indentInlineRename(next, item.id, outdent);
+    const press = inlineTitleKey(event);
+    if (!press) return;
+    queue((next) => {
+      if (press.action === "Enter") commitInlineRename(next, item.id);
+      else if (press.action === "Tab")
+        indentInlineRename(next, item.id, press.outdent);
       else if (next.view.renameId === item.id) {
         delete next.titleDrafts[item.id];
         next.view.renameId = null;
@@ -69,7 +63,7 @@ const TaskRowTitle = ({
           id="rename-input"
           className="draft-input"
           aria-label="Rename Task"
-          value={data.titleDrafts[item.id] ?? item.summary}
+          value={titleDraft ?? item.summary}
           readOnly={busy || taskEditingLocked(item.id)}
           onCompositionStart={editing.compositionStart}
           onCompositionEnd={editing.compositionEnd}
@@ -110,7 +104,7 @@ const TaskRowTitle = ({
             else delayed.schedule();
           }}
         >
-          {data.titleDrafts[item.id] ?? itemName(item)}
+          {titleDraft ?? itemName(item)}
         </button>
       )}
       {error && (

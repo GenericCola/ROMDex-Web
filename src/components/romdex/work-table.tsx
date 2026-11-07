@@ -1,15 +1,18 @@
-import { descendants, indexTree } from "@/domain/accepted/core.mjs";
 import { emptyFilters, filtersActive } from "@/domain/task-filters";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { workRows } from "@/domain/work-rows";
+import { subtreeIds, workspaceTree } from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useState, type ChangeEvent } from "react";
+import { rowFacts } from "./row-facts";
+import { rowLockKey } from "./row-lock-key";
 import { useWorkspaceDrag } from "./task-drag-context";
 import TaskDropGuide from "./task-drop-guide";
 import TaskRows from "./task-rows";
 import { useTableSelection } from "./use-table-selection";
 import WorkEmpty from "./work-empty";
 import WorkRow from "./work-row";
+import WorkTableHead from "./work-table-head";
 import WorkToolbar from "./work-toolbar";
 interface WorkTableProps {
   data: WorkspaceData;
@@ -19,10 +22,10 @@ interface WorkTableProps {
 const WorkTable = ({ data, items, add }: WorkTableProps) => {
   const [filters, setFilters] = useState(emptyFilters);
   const filtering = filtersActive(filters);
-  const tree = indexTree(items, data.order);
+  const tree = workspaceTree(items, data.order);
   const { scope } = data.view;
-  const scopeCount = scope ? descendants(items, scope).length : items.length;
-  const rows = workRows(items, data, filters);
+  const scopeCount = scope ? subtreeIds(tree, scope).length : items.length;
+  const rows = workRows(items, data, filters, tree);
   const selection = useTableSelection(rows);
   const drag = useWorkspaceDrag();
   const search = (event: ChangeEvent<HTMLInputElement>) => {
@@ -51,14 +54,19 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
   const addItem = () => {
     return add(scope);
   };
-  const render = (item: TaskItem) => {
+  const lockKey = rowLockKey(data);
+  // Header row, task rows and any open draft row.
+  const rowCount =
+    1 + rows.length + Number(!!selection.group) + Number(!!data.newTask);
+  const scopeDepth = scope ? (tree.depths.get(scope) ?? 0) + 1 : 0;
+  const render = (item: TaskItem, rowIndex: number) => {
     return (
       <WorkRow
         key={item.id}
         item={item}
-        data={data}
-        tree={tree}
-        scope={scope}
+        rowIndex={rowIndex}
+        {...rowFacts(data, tree, scopeDepth, item)}
+        lockKey={lockKey}
         add={add}
         checked={selection.selection.ids.includes(item.id)}
         selectionDisabled={selection.busy || !!selection.group}
@@ -97,17 +105,8 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
       <div className="work-body">
         <section className="table-area" aria-label="Task List">
           <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th className="title-column">Name</th>
-                  <th>Priority</th>
-                  <th>Complexity</th>
-                  <th className="actions-column">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
+            <table aria-rowcount={rowCount}>
+              <WorkTableHead />
               <TaskRows
                 rows={rows}
                 data={data}
@@ -117,10 +116,7 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
                 closeGroup={selection.closeGroup}
               />
             </table>
-            <TaskDropGuide
-              target={drag.preview}
-              scopeDepth={scope ? (tree.depths.get(scope) ?? 0) + 1 : 0}
-            />
+            <TaskDropGuide target={drag.preview} scopeDepth={scopeDepth} />
             {rows.length === 0 && !data.newTask && (
               <WorkEmpty filtered={!!(filtering || data.view.search.trim())} />
             )}

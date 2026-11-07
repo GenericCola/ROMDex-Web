@@ -2,6 +2,7 @@ import { customDefinitions } from "@/domain/accepted/custom-editor.mjs";
 import { editorConfiguration } from "@/domain/accepted/item-editor.mjs";
 import { jsonObject, type JsonObject } from "@/domain/json";
 import { fieldType, id, users } from "./edit-option-values";
+import { readPmonProject } from "./pmon-project";
 import { list, type YouTrackRequest } from "./request";
 import { tagOptions } from "./tag-options";
 const object = (value: unknown) => {
@@ -11,23 +12,11 @@ export const readEditOptions = async (
   request: YouTrackRequest,
   expectedProject?: string,
 ) => {
-  const projects = (
-    await list<{ id: string; shortName: string }>(
-      request,
-      "admin/projects",
-      "id,shortName",
-      "PMON",
-    )
-  ).filter((project) => {
-    return project.shortName === "PMON";
-  });
-  const project = projects[0];
-  if (
-    projects.length !== 1 ||
-    !project ||
-    !/^\d+-\d+$/.test(project.id) ||
-    (expectedProject && project.id !== expectedProject)
-  )
+  const project = await readPmonProject(
+    request,
+    "Cannot verify the selected PMON project.",
+  );
+  if (expectedProject && project.id !== expectedProject)
     throw Error("Cannot verify the selected PMON project.");
   const schema = await list<JsonObject>(
     request,

@@ -2,7 +2,9 @@ import type { TaskComment } from "@/domain/types";
 const TaskCommentList = ({
   comments,
   remoteCount,
+  loading = false,
 }: {
+  loading?: boolean;
   comments: (TaskComment & { pending?: boolean })[];
   remoteCount: number;
 }) => {
@@ -21,7 +23,7 @@ const TaskCommentList = ({
           </article>
         );
       })}
-      {!comments.length && !remoteCount && (
+      {!comments.length && !remoteCount && !loading && (
         <p className="muted small">No comments yet.</p>
       )}
     </div>

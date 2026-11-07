@@ -111,6 +111,11 @@ export const structuralFixture = async (
         return;
       }
       if (method !== "GET") writes.push({ method, path });
+      // Store sync searches for its articles; none exist in this fixture.
+      if (path === "/api/articles" && method === "GET") {
+        await reply([]);
+        return;
+      }
       if (path === "/api/users/me") {
         await reply({ id: "fixture-owner" });
         return;
@@ -133,7 +138,10 @@ export const structuralFixture = async (
       }
       if (path === "/api/issues") {
         if (method === "GET") {
-          await reply([...tasks.values()].map(raw));
+          // Honour paging so fixtures larger than one page end.
+          const skip = Number(url.searchParams.get("$skip") ?? 0),
+            top = Number(url.searchParams.get("$top") ?? tasks.size);
+          await reply([...tasks.values()].slice(skip, skip + top).map(raw));
           return;
         }
         if (method === "POST") {

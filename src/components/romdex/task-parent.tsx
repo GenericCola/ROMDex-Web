@@ -1,6 +1,10 @@
-import { descendants, materialize } from "@/domain/accepted/core.mjs";
 import { editTask } from "@/domain/task-actions";
 import type { TaskItem, WorkspaceData } from "@/domain/types";
+import {
+  subtreeIds,
+  workspaceItems,
+  workspaceTree,
+} from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { ChangeEvent } from "react";
 const TaskParent = ({
@@ -10,8 +14,11 @@ const TaskParent = ({
   item: TaskItem;
   data: WorkspaceData;
 }) => {
-  const items = materialize(data.remote, data.operations);
-  const excluded = new Set([item.id, ...descendants(items, item.id)]);
+  const items = workspaceItems(data);
+  const excluded = new Set([
+    item.id,
+    ...subtreeIds(workspaceTree(items, data.order), item.id),
+  ]);
   const candidates = items.filter((entry) => {
     return !excluded.has(entry.id);
   });

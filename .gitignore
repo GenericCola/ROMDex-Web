@@ -29,6 +29,9 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+# editor swap files (e.g. vim swap of .env)
+*.swp
+*.swo
 
 # vercel
 .vercel
@@ -65,3 +68,5 @@ __pycache__/
 
 # Local installable YouTrack app packages
 /artifacts/
+tests/perf/results/
+blob-report/

@@ -4,6 +4,7 @@ import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { NpcdexDraft, NpcdexTarget } from "@/npcdex/model";
 import { contentRevision, saveNpcdexDraft, targetKey } from "@/npcdex/model";
+import { errorText } from "@utils/error-text";
 import {
   useCallback,
   useEffect,
@@ -11,22 +12,25 @@ import {
   useRef,
   useState,
 } from "react";
+const emptyDraft = (target: NpcdexTarget, revision: string): NpcdexDraft => {
+  return {
+    target,
+    sourceRevision: revision,
+    note: "",
+    intent: "",
+    instructions: "",
+    proposedText: "",
+    flag: "none",
+    updatedAt: "",
+  };
+};
 export const useNpcdexDraft = (data: WorkspaceData, target: NpcdexTarget) => {
   const key = targetKey(target),
     revision = data.npcdex ? contentRevision(data.npcdex) : "";
   const saved = data.npcdexDrafts?.[key];
-  const [draft, setDraft] = useState<NpcdexDraft>(
-    saved ?? {
-      target,
-      sourceRevision: revision,
-      note: "",
-      intent: "",
-      instructions: "",
-      proposedText: "",
-      flag: "none",
-      updatedAt: "",
-    },
-  );
+  const [draft, setDraft] = useState<NpcdexDraft>(() => {
+    return saved ?? emptyDraft(target, revision);
+  });
   const [dirty, setDirty] = useState(false),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
@@ -49,9 +53,7 @@ export const useNpcdexDraft = (data: WorkspaceData, target: NpcdexTarget) => {
           "Draft saved in this browser. Current content and testing evidence are unchanged.",
         );
       } catch (error) {
-        setMessage(
-          error instanceof Error ? error.message : "Draft save failed.",
-        );
+        setMessage(errorText(error, "Draft save failed."));
         throw error;
       } finally {
         setBusy(false);
@@ -65,19 +67,7 @@ export const useNpcdexDraft = (data: WorkspaceData, target: NpcdexTarget) => {
     }
   }, [dirty, draft]);
   useEffect(() => {
-    if (!dirty)
-      setDraft(
-        saved ?? {
-          target,
-          sourceRevision: revision,
-          note: "",
-          intent: "",
-          instructions: "",
-          proposedText: "",
-          flag: "none",
-          updatedAt: "",
-        },
-      );
+    if (!dirty) setDraft(saved ?? emptyDraft(target, revision));
   }, [dirty, saved, target, revision]);
   const registration = () => {
     return registerDraftEditor({
@@ -104,7 +94,7 @@ export const useNpcdexDraft = (data: WorkspaceData, target: NpcdexTarget) => {
   };
   const submit = () => {
     void save().catch((error: unknown) => {
-      setMessage(error instanceof Error ? error.message : "Draft save failed.");
+      setMessage(errorText(error, "Draft save failed."));
     });
   };
   return { draft, dirty, busy, message, edit, submit, setDraft, setDirty };

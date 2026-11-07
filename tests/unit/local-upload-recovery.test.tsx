@@ -41,7 +41,6 @@ test("local-file markers reject malformed state, non-upload intent, and dispatch
     { attachmentBeforeIds: [] },
     { targetId: "PMON-900101" },
     { archivedOperation: baseline.operations[0] },
-    { metadataWrite: {} },
     { tagSteps: [] },
   ]) {
     const bad = structuredClone(baseline);

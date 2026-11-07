@@ -10,10 +10,8 @@ import {
   requireDelivery,
 } from "../../src/cloud/session";
 import { cloudData } from "../../src/cloud/types";
-import { workspaceStore } from "../../src/domain/workspace-store";
-import { uploadStorage } from "../../src/storage/upload-storage";
 import { YouTrackHttpError } from "../../src/youtrack/http-error";
-import { A, fixture } from "../fixtures/review-isolation";
+import { A, fixture, mockDeliveryFixture } from "../fixtures/review-isolation";
 const setup = async (t: TestContext) => {
   const f = await fixture();
   setAuthSession({
@@ -22,17 +20,7 @@ const setup = async (t: TestContext) => {
     projectId: "0-1",
     expiresAt: Date.now() + 60_000,
   });
-  t.mock.method(workspaceStore, "start", async () => undefined);
-  t.mock.method(workspaceStore, "getSnapshot", f.store.getSnapshot);
-  t.mock.method(workspaceStore, "change", f.store.change);
-  t.mock.method(workspaceStore, "flush", f.store.flush);
-  t.mock.method(workspaceStore, "deliver", f.store.deliver);
-  t.mock.method(workspaceStore, "setConnection", f.store.setConnection);
-  t.mock.method(uploadStorage, "get", f.storage.get);
-  t.mock.method(uploadStorage, "remove", f.storage.remove);
-  t.mock.method(globalThis, "fetch", async () =>
-    Response.json({ id: f.port.accountId }),
-  );
+  mockDeliveryFixture(t, f);
   await connectDelivery("synthetic-auth", f.port.accountId);
   Object.assign(requireDelivery(), f.port);
   return f;

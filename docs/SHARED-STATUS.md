@@ -1,5 +1,17 @@
 # YouTrack-backed assigned status
 
+> Historical. Retired 2026-11-07 by owner answer Q8 on PMON-622. The code (`youtrack-app/`,
+> `youtrack-acceptance/`, `src/cloud/shared-status-*`, `pnpm package:youtrack`) was removed, and the
+> owner uninstalled YouTrack app 155-84. Read this only for background.
+
+## Status as of 2026-11-07
+
+On 2026-11-07 the owner decided that assigned status lives in the "ROMDex data" article (PMON-A-3). See YOUTRACK-STORAGE.md and CUTOVER-2026-11-07.md. The shared-status UI and its e2e specs were removed.
+
+The romdex-status app source (youtrack-app/), the src/cloud/shared-status-* modules, src/youtrack/shared-status-client.ts and the installed acceptance app 155-84 are kept. They stay until the owner decides whether to retire them. The question is open in PMON-622.
+
+The rest of this document is the historical design. It is not rewritten.
+
 October 24 native acceptance gate: GenericCola now has verified app-update access. Acceptance 1.0.12 is installed as app 155-84, Active on NPCD only. API access, request-stream parsing, receipts, persistence and correlated rollback are verified, but the child race accepted two same-revision writers. Keep production sharing OFF and production source 1.0.8 withheld until supported atomic concurrency is implemented and natively retested. Preserve both synthetic fixtures and their receipts, all PMON tasks and the desktop app/data. See [LIVE-ACCEPTANCE-2026-10-24.md](LIVE-ACCEPTANCE-2026-10-24.md). The owner selected Vercel for eventual hosting; no deployment is performed by this checkpoint.
 
 ROMDex Web can store assigned status in YouTrack app-owned issue properties. Each enabled web device reads the same assigned choice, while native State continues to represent the leaf or parent calculation. Existing browser-only workspaces stay unchanged until the user previews and enables sharing.

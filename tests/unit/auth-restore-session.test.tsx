@@ -5,21 +5,12 @@ import { RESUME_KEY, writeResumeRecord } from "../../src/auth/resume-record";
 import { deliveryConnected, disconnectDelivery } from "../../src/cloud/session";
 import { YouTrackHttpError } from "../../src/youtrack/http-error";
 import { YOUTRACK_ORIGIN } from "../../src/youtrack/read-tasks";
+import { memoryStorage } from "../fixtures/memory-storage";
 const project = { id: "0-1", name: "Fixture", shortName: "PMON" };
 const identity = { id: "1-1", name: "Fixture", projects: [project] };
 const fixture = () => {
-  const values = new Map<string, string>();
-  const storage = {
-    getItem: (key: string) => {
-      return values.get(key) ?? null;
-    },
-    setItem: (key: string, value: string) => {
-      values.set(key, value);
-    },
-    removeItem: (key: string) => {
-      values.delete(key);
-    },
-  };
+  const storage = memoryStorage(),
+    { values } = storage;
   const record: import("../../src/auth/resume-record").ResumeRecord = {
     version: 1 as const,
     instance: YOUTRACK_ORIGIN,

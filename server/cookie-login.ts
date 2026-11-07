@@ -24,9 +24,11 @@ import {
   validTokens,
 } from "./runtime-http.ts";
 import { HttpFailure } from "./runtime-types.ts";
-import { ORIGIN } from "./session-contract.ts";
+import { OAUTH_ORIGIN } from "./session-contract.ts";
 export async function begin(request: Request, deps: CookieDependencies) {
   sameOrigin(request);
+  // OAuth returns only to the registered callback; other origins sign in with a token.
+  if (new URL(request.url).origin !== OAUTH_ORIGIN) throw new HttpFailure(403);
   const input = await cookieInput(request);
   if (
     Object.keys(input).some((key) => key !== "rememberDevice") ||
@@ -106,7 +108,7 @@ export async function callback(request: Request, deps: CookieDependencies) {
   if (request.signal.aborted || deps.now() >= expiresAt)
     throw new HttpFailure(401);
   // Query bypasses older service-worker shells after OAuth; never put credentials here.
-  return redirect(ORIGIN + "/?auth=complete", [
+  return redirect(OAUTH_ORIGIN + "/?auth=complete", [
     ...cookies,
     setCookie(LOGIN, "", 0),
   ]);

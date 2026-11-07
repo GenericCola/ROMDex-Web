@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  nextOverdueAt,
   SAVE_ATTENTION_AFTER,
   saveOverdue,
 } from "../../src/components/romdex/save-age";
@@ -37,4 +38,17 @@ void test("recovered work with unknown age starts a full observation window", ()
     ),
     true,
   );
+});
+void test("the overdue light needs one timer at the oldest change's deadline, not a tick", () => {
+  const ages = new Map([
+    ["old", 100],
+    ["new", 500],
+  ]);
+  assert.equal(nextOverdueAt(ages, 200), 100 + SAVE_ATTENTION_AFTER);
+  assert.equal(
+    nextOverdueAt(ages, 100 + SAVE_ATTENTION_AFTER),
+    500 + SAVE_ATTENTION_AFTER,
+  );
+  assert.equal(nextOverdueAt(ages, 500 + SAVE_ATTENTION_AFTER), null);
+  assert.equal(nextOverdueAt(new Map(), 0), null);
 });

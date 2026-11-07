@@ -7,7 +7,7 @@ import {
 import { oauthUpstream } from "./oauth-upstream.ts";
 import { response } from "./runtime-http.ts";
 import { HttpFailure } from "./runtime-types.ts";
-import { ORIGIN } from "./session-contract.ts";
+import { configuredOrigins, DEFAULT_ORIGINS } from "./session-contract.ts";
 import { downloadAttachment, jsonProxy } from "./youtrack.ts";
 export interface ApplicationDependencies extends CookieDependencies {
   fetch: typeof fetch;
@@ -17,7 +17,8 @@ export function createApplication(deps: ApplicationDependencies) {
   return async function handle(request: Request): Promise<Response> {
     try {
       const url = new URL(request.url);
-      if (url.origin !== ORIGIN) throw new HttpFailure(403);
+      if (!(deps.origins ?? DEFAULT_ORIGINS).includes(url.origin))
+        throw new HttpFailure(403);
       if (url.pathname.startsWith("/api/auth/")) return await auth(request);
       if (!["/api/youtrack", "/api/attachment"].includes(url.pathname))
         throw new HttpFailure(404);
@@ -55,6 +56,7 @@ export function productionDependencies(
     maxSeconds: 3600,
     oauth: oauthUpstream(clientId),
     fetch,
+    origins: configuredOrigins(env),
   };
 }
 export async function productionHandler(request: Request): Promise<Response> {

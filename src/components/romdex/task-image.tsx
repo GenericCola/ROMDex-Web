@@ -2,22 +2,23 @@ import type { WorkspaceData } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { trackWorkspaceWork } from "@/domain/workspace-work";
 import { taskImage } from "@/rdx/images";
+import { putImage } from "@/storage/image-storage";
+import { errorText } from "@utils/error-text";
 import { useState } from "react";
 const TaskImage = ({ id, data }: { id: string; data: WorkspaceData }) => {
   const [message, setMessage] = useState("");
   const load = async (file: File) => {
     try {
       const image = await taskImage(file);
+      const ref = await putImage(image);
       await workspaceStore.change((next) => {
         next.images ??= {};
-        next.images[id] = image;
+        next.images[id] = ref;
       });
       await workspaceStore.flush();
       setMessage("Task image saved in this browser.");
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Image could not be saved.",
-      );
+      setMessage(errorText(error, "Image could not be saved."));
     }
   };
   const clear = () => {

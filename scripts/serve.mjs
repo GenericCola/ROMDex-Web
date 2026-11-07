@@ -14,7 +14,7 @@ const types = {
   ".woff2": "font/woff2",
   ".txt": "text/plain",
 };
-export const createPreview = async (port = 3000) => {
+export const createPreview = async (port = 3001) => {
   const root = path.resolve("out");
   const policy = await readFile("public/_headers", "utf8");
   const handle = async (request, response) => {
@@ -75,6 +75,6 @@ if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
-  await createPreview(Number(process.env.PORT ?? 3000));
-  console.log("ROMDex preview: http://localhost:" + (process.env.PORT ?? 3000));
+  await createPreview(Number(process.env.PORT ?? 3001));
+  console.log("ROMDex preview: http://localhost:" + (process.env.PORT ?? 3001));
 }

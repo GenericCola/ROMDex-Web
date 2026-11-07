@@ -1,6 +1,7 @@
 import { cloudData } from "@/cloud/types";
 import { jsonObject, parseJson } from "@/domain/json";
 import type { WorkspaceData } from "@/domain/types";
+import { imageRefOf } from "@/storage/image-storage";
 import type { DesktopPreview } from "./desktop";
 export const applyDesktop = (
   data: WorkspaceData,
@@ -48,7 +49,7 @@ export const applyDesktop = (
         typeof value === "string" &&
         /^data:image\/(png|jpeg|gif|webp);base64,/.test(value)
       )
-        data.images[id] = value;
+        data.images[id] = imageRefOf(value);
   }
   if (preview.npcdex) {
     data.npcdex = structuredClone(preview.npcdex);

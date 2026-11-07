@@ -5,19 +5,8 @@ import { applyTaskDrop, hierarchySignature } from "../../src/domain/task-drop";
 import { guardTicketChanges } from "../../src/domain/ticket-locks";
 import type { TaskItem } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-const item = (id: string): TaskItem => ({
-  id,
-  parentId: null,
-  summary: id,
-  description: "",
-  state: "To do",
-  priority: "Normal",
-  complexity: null,
-  type: "Task",
-  updated: 1,
-  comments: [],
-  commentCount: 0,
-});
+import { taskItem } from "../fixtures/task-item";
+const item = (id: string): TaskItem => taskItem(id);
 const fixture = () => {
   const data = emptyWorkspace();
   data.remote = [item("A"), item("B"), item("C")];

@@ -12,12 +12,7 @@ export const openDelivery = async (
   const opened = workspaceStore.getSnapshot();
   if (!opened.ready || opened.error)
     throw Error(opened.error || "Wait for your workspace to open.");
-  if (cloudData(opened.data).sharedStatuses)
-    throw Error("Shared status sync requires its safety check to pass.");
-  const next = new DeliveryClient(
-    token,
-    cloudData(workspaceStore.getSnapshot().data).sharedStatuses ?? false,
-  );
+  const next = new DeliveryClient(token);
   await next.connect();
   assertCurrent();
   if (expectedUserId && next.accountId !== expectedUserId)

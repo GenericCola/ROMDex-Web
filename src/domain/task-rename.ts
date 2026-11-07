@@ -1,16 +1,16 @@
 import { descendants, indexTree, materialize } from "./accepted/core.mjs";
+import { placeAmongSiblings } from "./sibling-placement";
 import { editTask } from "./task-actions";
 import { beginInlineTask } from "./task-inline";
 import type { WorkspaceData } from "./types";
+import { findWorkspaceItem } from "./workspace-item";
 export const beginInlineRename = (data: WorkspaceData, id: string) => {
   if (
     data.newTask?.title.trim() ||
     (data.view.renameId && data.view.renameId !== id)
   )
     throw Error("Finish or cancel the current row first.");
-  const item = materialize(data.remote, data.operations).find((entry) => {
-    return entry.id === id;
-  });
+  const item = findWorkspaceItem(data, id);
   if (!item) throw Error("The item no longer exists.");
   data.newTask = null;
   data.view.renameId = id;
@@ -18,9 +18,7 @@ export const beginInlineRename = (data: WorkspaceData, id: string) => {
 };
 export const commitInlineRename = (data: WorkspaceData, id: string) => {
   if (data.view.renameId !== id) throw Error("The inline editor changed.");
-  const item = materialize(data.remote, data.operations).find((entry) => {
-    return entry.id === id;
-  });
+  const item = findWorkspaceItem(data, id);
   if (!item) throw Error("The item no longer exists.");
   const title = data.titleDrafts[id]?.trim();
   if (!title)
@@ -71,12 +69,7 @@ export const indentInlineRename = (
     at = siblings.findIndex((entry) => {
       return entry.id === beforeId;
     });
-  siblings.splice(at < 0 ? siblings.length : at, 0, item);
-  siblings.forEach((entry, index) => {
-    data.order[entry.id] = index;
-  });
-  if (parentId && !data.view.expanded.includes(parentId))
-    data.view.expanded.push(parentId);
+  placeAmongSiblings(data, siblings, at, item, parentId);
   if (
     data.view.scope &&
     !descendants(

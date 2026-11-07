@@ -8,12 +8,19 @@ const queue = createRowOpenQueue({
       clearTimeout(timer);
     };
   },
-  interrupt: (cancel) => {
+  interrupt: (cancel, commit) => {
+    // Pressing Save keeps the row the user just clicked: select it first, so
+    // a Save within 220 ms does not drop the selection (PMON-639).
+    const pointer = (event: PointerEvent) => {
+      if (event.target instanceof Element && event.target.closest("#save"))
+        commit();
+      else cancel();
+    };
     document.addEventListener("keydown", cancel, true);
-    document.addEventListener("pointerdown", cancel, true);
+    document.addEventListener("pointerdown", pointer, true);
     return () => {
       document.removeEventListener("keydown", cancel, true);
-      document.removeEventListener("pointerdown", cancel, true);
+      document.removeEventListener("pointerdown", pointer, true);
     };
   },
 });

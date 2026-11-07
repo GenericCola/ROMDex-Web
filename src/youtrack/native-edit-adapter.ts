@@ -8,6 +8,21 @@ import { readEditOptions } from "./edit-options";
 import type { Field } from "./issue-body";
 import { nativeEditPayload } from "./native-edit-payload";
 import type { YouTrackRequest } from "./request";
+const unchanged = (
+  fresh: TaskItem | null,
+  patch: TaskPatch,
+  expected: TaskItem,
+): boolean => {
+  return (
+    !!fresh &&
+    Object.keys(patch).every((key) => {
+      return equal(
+        fresh[key as keyof TaskItem],
+        expected[key as keyof TaskItem],
+      );
+    })
+  );
+};
 export class NativeEditAdapter {
   private prepared = new Map<string, { stamp: string; options: JsonObject }>();
   constructor(
@@ -26,15 +41,7 @@ export class NativeEditAdapter {
     this.prepared.delete(id);
     const { options } = await this.options();
     const fresh = await this.get(id);
-    if (
-      !fresh ||
-      Object.keys(patch).some((key) => {
-        return !equal(
-          fresh[key as keyof TaskItem],
-          expected[key as keyof TaskItem],
-        );
-      })
-    )
+    if (!unchanged(fresh, patch, expected))
       throw Error("The item changed during field review. Nothing was sent.");
     nativeEditPayload(patch, options, this.fields(id));
     this.prepared.set(id, { stamp: JSON.stringify(patch), options });
@@ -45,15 +52,7 @@ export class NativeEditAdapter {
     if (review?.stamp !== JSON.stringify(patch) || !expected)
       throw Error("Native field changes require fresh preparation.");
     const fresh = await this.get(id);
-    if (
-      !fresh ||
-      Object.keys(patch).some((key) => {
-        return !equal(
-          fresh[key as keyof TaskItem],
-          expected[key as keyof TaskItem],
-        );
-      })
-    )
+    if (!unchanged(fresh, patch, expected))
       throw Error(
         "The item changed before native field delivery. No new write was sent.",
       );

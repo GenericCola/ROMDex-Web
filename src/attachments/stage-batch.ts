@@ -1,3 +1,4 @@
+import { errorText } from "@utils/error-text";
 import { validateStageFiles } from "./stage-files";
 import type { StoredUpload, UploadStore } from "./types";
 import { stagedFile } from "./validate";
@@ -21,7 +22,7 @@ export const stageFileBatch = async (
         " of " +
         files.length +
         " files confirmed staged locally. Keep the originals and review any saving error. " +
-        (error instanceof Error ? error.message : "File staging failed."),
+        errorText(error, "File staging failed."),
       { cause: error },
     );
   }

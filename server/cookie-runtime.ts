@@ -5,13 +5,15 @@ import {
   openCookie,
   readCookie,
   SESSION,
+  setCookie,
   type CookieEnvelope,
 } from "./cookie-codec.ts";
 import { begin, callback } from "./cookie-login.ts";
 import { renewalChallenge, renewSession } from "./cookie-renewal.ts";
 import { response, sameOrigin, validIdentity } from "./runtime-http.ts";
 import { HttpFailure, type OAuthPort } from "./runtime-types.ts";
-import { ORIGIN } from "./session-contract.ts";
+import { DEFAULT_ORIGINS, OAUTH_ORIGIN } from "./session-contract.ts";
+import { pastedTokenLogin, TOKEN_ROUTE } from "./token-login.ts";
 export interface CookieDependencies {
   key: Uint8Array;
   now(): number;
@@ -20,8 +22,10 @@ export interface CookieDependencies {
   oauth: Pick<OAuthPort, "exchange" | "verify"> &
     Partial<Pick<OAuthPort, "refresh">>;
   maxSeconds: number;
+  /** Browser origins served; defaults to DEFAULT_ORIGINS. */
+  origins?: string[];
 }
-export const COOKIE_CALLBACK = ORIGIN + "/api/auth/callback";
+export const COOKIE_CALLBACK = OAUTH_ORIGIN + "/api/auth/callback";
 export function equal(a: string, b: string): boolean {
   const left = Buffer.from(a);
   const right = Buffer.from(b);
@@ -42,6 +46,21 @@ export async function bound(
     throw new HttpFailure(401);
   return value;
 }
+export async function verifiedIdentity(
+  request: Request,
+  value: CookieEnvelope,
+  deps: CookieDependencies,
+) {
+  const identity = await deps.oauth.verify(value.accessToken!);
+  validIdentity(identity);
+  if (
+    identity.id !== value.userId ||
+    deps.now() >= value.expiresAt ||
+    request.signal.aborted
+  )
+    throw new HttpFailure(401);
+  return identity;
+}
 async function session(request: Request, deps: CookieDependencies) {
   if (request.headers.get("sec-fetch-site") !== "same-origin")
     throw new HttpFailure(403);
@@ -53,14 +72,7 @@ async function session(request: Request, deps: CookieDependencies) {
       return renewalChallenge(request, deps);
     throw error;
   }
-  const identity = await deps.oauth.verify(value.accessToken!);
-  validIdentity(identity);
-  if (
-    identity.id !== value.userId ||
-    deps.now() >= value.expiresAt ||
-    request.signal.aborted
-  )
-    throw new HttpFailure(401);
+  const identity = await verifiedIdentity(request, value, deps);
   // No cookie writes on reads/errors: late responses cannot erase a newer login.
   return response(200, {
     userId: identity.id,
@@ -98,7 +110,9 @@ async function logout(
     throw new HttpFailure(403);
   if (equal(value.fence, readCookie(request, FENCE) ?? ""))
     throw new HttpFailure(409);
-  return response(200, { signedOut: true });
+  // A permanent-token cookie is cleared too: it would stay valid until the token is revoked.
+  const clear = !cancel && value.permanent ? [setCookie(SESSION, "", 0)] : [];
+  return response(200, { signedOut: true }, clear);
 }
 export function createCookieHandler(deps: CookieDependencies) {
   if (
@@ -112,11 +126,14 @@ export function createCookieHandler(deps: CookieDependencies) {
   return async function handle(request: Request): Promise<Response> {
     try {
       const url = new URL(request.url);
-      if (url.origin !== ORIGIN) throw new HttpFailure(403);
+      if (!(deps.origins ?? DEFAULT_ORIGINS).includes(url.origin))
+        throw new HttpFailure(403);
       if (url.pathname === "/api/auth/start" && request.method === "POST")
         return await begin(request, deps);
       if (url.pathname === "/api/auth/callback" && request.method === "GET")
         return await callback(request, deps);
+      if (url.pathname === TOKEN_ROUTE && request.method === "POST")
+        return await pastedTokenLogin(request, deps);
       if (url.pathname === "/api/auth/session" && request.method === "GET")
         return await session(request, deps);
       if (url.pathname === "/api/auth/renew" && request.method === "POST")

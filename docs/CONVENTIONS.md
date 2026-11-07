@@ -39,6 +39,46 @@ An inline script in the root layout's `<head>` adds `<meta name="color-scheme">`
 
 YouTrack is the only application backend. Browser workspace data and the delivery journal use IndexedDB; tokens remain in memory. See STRUCTURAL-DELIVERY.md for direct REST delivery and its limits.
 
+## Shared modules
+
+Reach for these before writing the same thing again. Each one replaced copies that had drifted
+apart in small ways, so keep new code on them.
+
+- `@utils/error-text`: `errorText(error, fallback)` turns a caught value into a message. Use it in
+  every `catch` that shows text; pass the fallback the user should see for non-`Error` values.
+- `@/domain/workspace-item`: `findWorkspaceItem(data, id)` finds one task in the materialized
+  workspace. Call `materialize` yourself only when you need the whole list or the tree.
+- `@/domain/sibling-placement`: `placeAmongSiblings(data, siblings, at, item, parentId)` inserts a
+  moved task, renumbers its siblings and opens the parent. Used by drag moves and inline rename.
+- `@/storage/open-database`: `openDatabase(name, version, upgrade, failureMessage)` is the one
+  IndexedDB open (closes on version change, rejects on error or block). Every browser database
+  uses it.
+- `@/youtrack/pmon-project`: `readPmonProject` and `readPmonSchema` verify the single PMON project
+  and read its custom fields.
+- `src/store/parts/romdex-parts.ts` owns `RomdexMetadata`, `ROMDEX_FIELDS` and `EXTRA_FIELDS`; the
+  merge keys and the migration scripts derive from it.
+- `src/components/romdex`: `DraftRow` (new-item and group draft rows), `inlineTitleKey` (Enter,
+  Tab and Escape on inline title inputs), `DeviceBrand` (the header brand block) and
+  `resumeCleanup` (the cleanup returned by both session resume starters).
+- `server/`: `verifiedIdentity` (cookie-runtime) checks a cookie session against YouTrack;
+  `boundedBytes` (transport-bounds) reads a request body under a byte limit;
+  `tokenSession` (token-login) turns a permanent token into session cookies for both the pasted
+  and the dev token routes. The browser and
+  server share `src/auth/cookie-generation.ts`. Server tests build sessions with
+  `server/app-test-support.ts`.
+- Tests: `tests/fixtures/task-item.ts` (`taskItem`) builds unit-test tasks;
+  `memory-persistence.ts` (`memoryPersistence`, `labelledPersistence`), `memory-storage.ts`,
+  `values.ts` (`deferred`, `required`) and `mockDeliveryFixture` (`review-isolation.tsx`) cover
+  common unit setup;
+  `openWithAutoSyncOff` (e2e `local-workspace.ts`) and `fulfillFromOut` (e2e `cookie-fixture.ts`)
+  open the app and serve the static build; `scripts/migration/test-fixtures.mjs` builds the
+  synthetic ROMDex-Data source for the migration tests.
+
+Left duplicated on purpose: `src/domain/accepted/**` is hash-pinned desktop code; the
+`scripts/verify-desktop-*` and `scripts/install-desktop-*` files are one-off checks of historical
+desktop patches that can only run against an installed desktop build. Dialog button rows stay written out
+because each row differs in labels, button type, tone and disabled rules.
+
 ## Git
 
 Conventional Commits (`feat:`, `fix:`, `docs:`, …), checked by commitlint in `.husky/commit-msg`. The same hook strips Claude and Anthropic co-author trailers. Commit `pnpm-lock.yaml`.

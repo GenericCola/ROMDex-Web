@@ -3,6 +3,7 @@ import type { TaskItem, WorkspaceData } from "@/domain/types";
 import { attachmentsReadable } from "@/youtrack/attachment-reader";
 import AttachmentCache from "./attachment-cache";
 import AttachmentDeleteReview from "./attachment-delete-review";
+import AttachmentStatus from "./attachment-status";
 import NativeAttachmentList from "./native-attachment-list";
 import QueuedAttachments from "./queued-attachments";
 import type { useAttachments } from "./use-attachments";
@@ -46,9 +47,12 @@ const TaskAttachments = ({
         connections support 10 MiB. If an earlier upload needs confirmation,
         additional files stay saved locally until it is resolved.
       </p>
-      <p className="small" role="status" hidden={!model.busy && !model.message}>
-        {model.busy ? "Attachment operation in progress" : model.message}
-      </p>
+      <AttachmentStatus
+        className="small"
+        data={data}
+        id={item.id}
+        model={model}
+      />
       <NativeAttachmentList
         data={
           model.readOnlyFiles

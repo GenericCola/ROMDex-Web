@@ -7,31 +7,9 @@ import {
   disconnectDelivery,
 } from "../../src/cloud/session";
 import { cloudData } from "../../src/cloud/types";
-import type { WorkspaceData } from "../../src/domain/types";
-import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
-const deferred = <T,>() => {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((done) => {
-    resolve = done;
-  });
-  return { promise, resolve };
-};
-const memory = (label: string) => {
-  let data = emptyWorkspace();
-  data.commentDrafts.label = label;
-  let revision = 0;
-  return {
-    load: () => {
-      return Promise.resolve({ data: structuredClone(data), revision });
-    },
-    save: (next: WorkspaceData, expected: number) => {
-      assert.equal(expected, revision);
-      data = structuredClone(next);
-      return Promise.resolve(++revision);
-    },
-  };
-};
+import { labelledPersistence } from "../fixtures/memory-persistence";
+import { deferred } from "../fixtures/values";
 void test("signed-out pending connection cannot bind or activate delivery in the next account", async () => {
   const originalFetch = globalThis.fetch;
   const response = deferred<Response>();
@@ -49,8 +27,8 @@ void test("signed-out pending connection cannot bind or activate delivery in the
     started.resolve();
     return response.promise;
   };
-  const a = memory("account A"),
-    b = memory("account B");
+  const a = labelledPersistence("account A"),
+    b = labelledPersistence("account B");
   try {
     disconnectDelivery();
     await workspaceStore.switchPersistence(a);

@@ -72,3 +72,17 @@ export const reviewResultMessage = (choice: "local" | "cloud" | "confirm") => {
       ? "Your pending change was set aside. Nothing already saved was undone."
       : "Checked without sending the change again.";
 };
+/**
+ * "Use my changes" is offered for a conflicting edit and, after an uncertain
+ * request, for a move (PMON-611): the move may have stopped part way.
+ */
+export const offersLocalChoice = (
+  operation: TaskOperation | undefined,
+  record: DeliveryRecord,
+): operation is Extract<TaskOperation, { type: "edit" }> => {
+  return (
+    operation?.type === "edit" &&
+    operation.purpose !== "rollup" &&
+    (record.status === "conflict" || "parentId" in operation.patch)
+  );
+};

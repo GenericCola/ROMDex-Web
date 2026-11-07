@@ -4,6 +4,7 @@ import { validateNpcdexDrafts } from "@/npcdex/model";
 import { validateEditorRecovery } from "@/npcdex/recovery";
 import { validateNpcdex } from "@/npcdex/validate";
 import { validateRdxFiles } from "@/rdx/library";
+import { IMAGE_DATA_URL, IMAGE_REF } from "@/storage/image-storage";
 export const validateMigration = (data: WorkspaceData) => {
   validateRdxFiles(data);
   validateEditorRecovery(data);
@@ -13,7 +14,7 @@ export const validateMigration = (data: WorkspaceData) => {
       return (
         !/^(PMON-[1-9]\d*|local-[A-Za-z0-9-]+)$/.test(id) ||
         typeof value !== "string" ||
-        !/^data:image\/(png|jpeg|gif|webp);base64,/.test(value)
+        !(IMAGE_REF.test(value) || IMAGE_DATA_URL.test(value))
       );
     })
   )

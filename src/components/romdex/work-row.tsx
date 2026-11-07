@@ -1,44 +1,56 @@
-import { hasMeaningfulNotes, indexTree } from "@/domain/accepted/core.mjs";
-import type { TaskItem, WorkspaceData } from "@/domain/types";
+import { hasMeaningfulNotes } from "@/domain/accepted/core.mjs";
+import type { LampColor, TaskItem } from "@/domain/types";
 import type { SelectionModifiers } from "@/domain/work-selection";
-import { workspaceStore } from "@/domain/workspace-store";
-import type { CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 import { useDetailNavigation } from "./detail-navigation-context";
 import NotesIcon from "./notes-icon";
+import { rowClassName } from "./row-class";
 import RowGutter from "./row-gutter";
+import { toggleExpanded } from "./row-toggle";
 import TaskAttachmentButton from "./task-attachment-button";
 import TaskField from "./task-field";
 import TaskRowActions from "./task-row-actions";
 import TaskRowTitle from "./task-row-title";
 import TaskStatusPopup from "./task-status-popup";
-const WorkRow = ({
+const WorkRowView = ({
   item,
-  data,
-  tree,
-  scope,
+  depth,
+  hasChildren,
+  color,
+  expanded,
+  selected,
+  renaming,
+  titleDraft,
+  pending,
+  attachmentCount,
   add,
   checked,
   selectionDisabled,
   choose,
   dragging = false,
   drop = null,
+  rowIndex,
 }: {
   item: TaskItem;
-  data: WorkspaceData;
-  tree: ReturnType<typeof indexTree>;
-  scope: string | null;
+  depth: number;
+  hasChildren: boolean;
+  color: LampColor;
+  expanded: boolean;
+  selected: boolean;
+  renaming: boolean;
+  titleDraft: string | undefined;
+  pending: boolean;
+  attachmentCount: number;
+  // Not read here: changing it re-renders rows whose children read global lock state.
+  lockKey: string;
   add: (parentId: string | null) => void;
   checked: boolean;
   selectionDisabled: boolean;
   choose: (id: string, modifiers: SelectionModifiers) => void;
   dragging?: boolean;
   drop?: "before" | "after" | null;
+  rowIndex: number;
 }) => {
-  const depth =
-    (tree.depths.get(item.id) ?? 0) -
-    (scope ? (tree.depths.get(scope) ?? 0) + 1 : 0);
-  const children = tree.children.get(item.id) ?? [];
-  const expanded = data.view.expanded.includes(item.id);
   const navigation = useDetailNavigation();
   const select = () => {
     navigation.open(item.id);
@@ -47,29 +59,19 @@ const WorkRow = ({
     navigation.open(item.id, false, true);
   };
   const toggle = () => {
-    void workspaceStore.change((next) => {
-      next.view.expanded = expanded
-        ? next.view.expanded.filter((id) => {
-            return id !== item.id;
-          })
-        : [...next.view.expanded, item.id];
-    });
+    toggleExpanded(item.id, expanded);
   };
   return (
     <tr
-      className={
-        "task-row" +
-        (dragging ? " dragging" : "") +
-        (drop === "before"
-          ? " drop-before"
-          : drop === "after"
-            ? " drop-after"
-            : "") +
-        (children.length ? " has-children" : "") +
-        (data.view.selected === item.id || checked ? " selected" : "")
-      }
+      className={rowClassName({
+        dragging,
+        drop,
+        hasChildren,
+        highlighted: selected || checked,
+      })}
       style={{ "--depth": Math.max(0, depth) } as CSSProperties}
       data-row={item.id}
+      aria-rowindex={rowIndex}
       aria-selected={checked}
     >
       <td>
@@ -82,7 +84,7 @@ const WorkRow = ({
             choose={choose}
           />
           <div className="row-hierarchy">
-            {children.length > 0 ? (
+            {hasChildren ? (
               <button
                 className="row-toggle"
                 aria-label={(expanded ? "Collapse " : "Expand ") + item.summary}
@@ -96,11 +98,16 @@ const WorkRow = ({
             )}
             <TaskStatusPopup
               item={item}
-              color={tree.colors.get(item.id) ?? "grey"}
-              inherited={children.length > 0}
+              color={color}
+              inherited={hasChildren}
             />
             <div className="title-wrap">
-              <TaskRowTitle item={item} data={data} select={select} />
+              <TaskRowTitle
+                item={item}
+                renaming={renaming}
+                titleDraft={titleDraft}
+                select={select}
+              />
               {hasMeaningfulNotes(item.description) && (
                 <button
                   className="note-button"
@@ -111,12 +118,12 @@ const WorkRow = ({
                   <NotesIcon />
                 </button>
               )}
-              <TaskAttachmentButton item={item} data={data} />
+              <TaskAttachmentButton item={item} count={attachmentCount} />
               <span className="row-id">
                 {item.id.startsWith("local-") ? "New · Pending" : item.id}
-                {data.operations.some((op) => {
-                  return op.issueId === item.id;
-                }) && <span className="pending-dot" title="Pending Changes" />}
+                {pending && (
+                  <span className="pending-dot" title="Pending Changes" />
+                )}
               </span>
             </div>
             {!!item.dependencies && (
@@ -134,9 +141,10 @@ const WorkRow = ({
         <TaskField item={item} field="complexity" />
       </td>
       <td>
-        <TaskRowActions item={item} items={[...tree.byId.values()]} add={add} />
+        <TaskRowActions item={item} add={add} />
       </td>
     </tr>
   );
 };
+const WorkRow = memo(WorkRowView);
 export default WorkRow;

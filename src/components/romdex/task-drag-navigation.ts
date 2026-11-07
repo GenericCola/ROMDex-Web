@@ -1,6 +1,7 @@
 import { materialize } from "@/domain/accepted/core.mjs";
 import type { DropTarget } from "@/domain/task-drop";
 import { workspaceStore } from "@/domain/workspace-store";
+import { errorText } from "@utils/error-text";
 import { taskDragPreview, type DragPoint } from "./task-drag-preview";
 import type { Drag } from "./task-drag-state";
 export const refreshTaskDrag = (
@@ -66,9 +67,7 @@ export const refreshTaskDrag = (
     } else hoverRef.current = null;
   } catch (error) {
     hoverRef.current = null;
-    setMessage(
-      error instanceof Error ? error.message : "This move is unavailable.",
-    );
+    setMessage(errorText(error, "This move is unavailable."));
   }
 };
 

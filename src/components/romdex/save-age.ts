@@ -26,3 +26,14 @@ export const saveOverdue = (
     return now - started >= SAVE_ATTENTION_AFTER;
   });
 };
+/** When the next unsaved change becomes overdue, or null if none will. */
+export const nextOverdueAt = (ages: Map<string, number>, now: number) => {
+  const due = [...ages.values()]
+    .map((started) => {
+      return started + SAVE_ATTENTION_AFTER;
+    })
+    .filter((at) => {
+      return at > now;
+    });
+  return due.length ? Math.min(...due) : null;
+};

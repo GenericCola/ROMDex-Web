@@ -1,9 +1,9 @@
-import {
-  descendants,
-  indexTree,
-  materialize,
-} from "@/domain/accepted/core.mjs";
 import { commitExactTaskMove, taskPath } from "@/domain/task-move";
+import {
+  subtreeIds,
+  workspaceItems,
+  workspaceTree,
+} from "@/domain/workspace-derived";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useEffect, useRef, useState } from "react";
 import Dialog from "./dialog";
@@ -21,9 +21,9 @@ const TaskMoveDialog = ({
   const [data] = useState(() => {
     return workspaceStore.getSnapshot().data;
   });
-  const items = materialize(data.remote, data.operations);
-  const tree = indexTree(items, data.order);
-  const excluded = new Set([id, ...descendants(items, id)]);
+  const items = workspaceItems(data);
+  const tree = workspaceTree(items, data.order);
+  const excluded = new Set([id, ...subtreeIds(tree, id)]);
   const [parentId, setParentId] = useState(tree.byId.get(id)?.parentId ?? "");
   const [beforeId, setBeforeId] = useState("");
   const [search, setSearch] = useState("");

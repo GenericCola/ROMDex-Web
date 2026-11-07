@@ -9,25 +9,13 @@ import {
   saveDelivery,
 } from "../../src/cloud/session";
 import { cloudData } from "../../src/cloud/types";
-import { workspaceStore } from "../../src/domain/workspace-store";
-import { uploadStorage } from "../../src/storage/upload-storage";
-import { A, fixture } from "../fixtures/review-isolation";
+import { A, fixture, mockDeliveryFixture } from "../fixtures/review-isolation";
 
 for (const automatic of [true, false])
   for (const failure of ["lost", "size"])
     void test(`${automatic ? "automatic" : "manual"} fresh ${failure} holds only upload ticket and accepts later unrelated saves`, async (t) => {
       const f = await fixture();
-      t.mock.method(workspaceStore, "start", async () => undefined);
-      t.mock.method(workspaceStore, "getSnapshot", f.store.getSnapshot);
-      t.mock.method(workspaceStore, "change", f.store.change);
-      t.mock.method(workspaceStore, "flush", f.store.flush);
-      t.mock.method(workspaceStore, "deliver", f.store.deliver);
-      t.mock.method(workspaceStore, "setConnection", f.store.setConnection);
-      t.mock.method(uploadStorage, "get", f.storage.get);
-      t.mock.method(uploadStorage, "remove", f.storage.remove);
-      t.mock.method(globalThis, "fetch", async () =>
-        Response.json({ id: f.port.accountId }),
-      );
+      mockDeliveryFixture(t, f);
       try {
         await connectDelivery("synthetic-token", f.port.accountId);
         const active = requireDelivery();

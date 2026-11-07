@@ -1,8 +1,13 @@
 import type { ApplicationDependencies } from "./application.ts";
+import {
+  ARTICLE_ID,
+  authorizeArticleWrite,
+  requireStoreArticle,
+} from "./article-policy.ts";
 import type { authorizeCookie } from "./cookie-authorize.ts";
 import { response } from "./runtime-http.ts";
 import { HttpFailure } from "./runtime-types.ts";
-import { boundedText } from "./transport-bounds.ts";
+import { boundedBytes, boundedText } from "./transport-bounds.ts";
 import { transportRoute } from "./transport-policy.ts";
 import { authorizeWrite, requireIssue } from "./write-policy.ts";
 type Session = Awaited<ReturnType<typeof authorizeCookie>>;
@@ -71,22 +76,10 @@ async function uploadBody(request: Request) {
   if (declared && (!/^\d+$/.test(declared) || Number(declared) > 4_100_000))
     throw new HttpFailure(413);
   // Count actual bytes before parsing or dispatch; no reliance on Content-Length.
-  const reader = request.body?.getReader();
-  if (!reader) throw new HttpFailure(400);
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  try {
-    for (;;) {
-      const part = await reader.read();
-      if (part.done) break;
-      size += part.value.byteLength;
-      if (size > 4_100_000) throw new HttpFailure(413);
-      chunks.push(part.value);
-    }
-  } finally {
-    await reader.cancel().catch(() => undefined);
-  }
-  const bytes = Buffer.concat(chunks);
+  if (!request.body) throw new HttpFailure(400);
+  const bytes = await boundedBytes(request.body, 4_100_000, () => {
+    return new HttpFailure(413);
+  });
   const form = await new Response(bytes, {
     headers: { "content-type": request.headers.get("content-type") ?? "" },
   }).formData();
@@ -123,12 +116,15 @@ export async function jsonProxy(
   } catch {
     throw new HttpFailure(403);
   }
+  const write = url.pathname.startsWith("/api/articles")
+    ? authorizeArticleWrite
+    : authorizeWrite;
   let body: unknown,
     send: BodyInit | undefined,
     headers: Record<string, string> = {};
   if (request.method !== "GET") {
     if (url.pathname.endsWith("/attachments") && request.method === "POST") {
-      await authorizeWrite(request, session, deps, url, undefined);
+      await write(request, session, deps, url, undefined);
       send = await uploadBody(request);
     } else {
       const raw = await boundedText(request.body, 1_000_000);
@@ -147,7 +143,7 @@ export async function jsonProxy(
         send = JSON.stringify(body);
         headers = { "Content-Type": "application/json" };
       }
-      await authorizeWrite(request, session, deps, url, body);
+      await write(request, session, deps, url, body);
     }
   }
   const result = await upstream(request, session, deps, url, {
@@ -167,16 +163,20 @@ export async function downloadAttachment(
 ) {
   if (request.method !== "GET") throw new HttpFailure(405);
   const q = new URL(request.url).searchParams;
+  const target = q.has("article") ? "article" : "issue";
+  const names = [target, "id", "size"];
   if (
-    [...q.keys()].some((k) => !["issue", "id", "size"].includes(k)) ||
-    ["issue", "id", "size"].some((k) => q.getAll(k).length !== 1)
+    [...q.keys()].some((k) => !names.includes(k)) ||
+    names.some((k) => q.getAll(k).length !== 1)
   )
     throw new HttpFailure(400);
-  const issue = q.get("issue")!,
+  const owner = q.get(target)!,
     id = q.get("id")!,
     sizeText = q.get("size")!;
   if (
-    !/^PMON-\d+$/.test(issue) ||
+    !(target === "article"
+      ? ARTICLE_ID.test(owner)
+      : /^PMON-\d+$/.test(owner)) ||
     !/^[A-Za-z0-9_-]{1,100}$/.test(id) ||
     !/^\d+$/.test(sizeText)
   )
@@ -184,12 +184,16 @@ export async function downloadAttachment(
   const size = Number(sizeText);
   if (!Number.isSafeInteger(size) || size > 50 * 1024 * 1024)
     throw new HttpFailure(413);
-  await requireIssue(request, session, deps, issue);
+  if (target === "article")
+    await requireStoreArticle(request, session, deps, owner);
+  else await requireIssue(request, session, deps, owner);
   const metadata = await readJSON(
     request,
     session,
     deps,
-    `issues/${issue}/attachments/${id}?fields=id,size,url,removed,draft`,
+    target === "article"
+      ? `articles/${owner}/attachments/${id}?fields=id,size,url,removed`
+      : `issues/${owner}/attachments/${id}?fields=id,size,url,removed,draft`,
   );
   if (
     metadata?.id !== id ||

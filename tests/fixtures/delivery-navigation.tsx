@@ -3,22 +3,9 @@ import { editTask } from "../../src/domain/task-actions";
 import type { TaskItem, WorkspaceData } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { WorkspaceStore } from "../../src/domain/workspace-store";
-const item = (id: string, parentId: string | null): TaskItem => {
-  return {
-    id,
-    parentId,
-    summary: "Synthetic",
-    description: "",
-    state: "To do",
-    assignedState: "To do",
-    priority: "Normal",
-    complexity: null,
-    type: "Task",
-    updated: 1,
-    comments: [],
-    commentCount: 0,
-  };
-};
+import { taskItem } from "./task-item.ts";
+const item = (id: string, parentId: string | null): TaskItem =>
+  taskItem(id, parentId, { summary: "Synthetic", assignedState: "To do" });
 export const gate = () => {
   let release!: () => void;
   const promise = new Promise<void>((resolve) => {

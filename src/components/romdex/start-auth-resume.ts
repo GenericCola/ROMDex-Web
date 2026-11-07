@@ -11,6 +11,7 @@ import { readResumeRecord } from "@/auth/resume-record";
 import { setAuthSession } from "@/auth/session";
 import { tabStorage } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
+import { resumeCleanup } from "./resume-cleanup";
 import type { SessionRefs } from "./use-session-expiry";
 export const startResume = (
   {
@@ -100,10 +101,5 @@ export const startResume = (
     }
   };
   void restore();
-  return () => {
-    ++generationRef.current;
-    disconnectDelivery();
-    setAuthSession(null);
-    sessionRef.current = null;
-  };
+  return resumeCleanup({ sessionRef, generationRef });
 };

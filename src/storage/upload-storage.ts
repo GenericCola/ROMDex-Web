@@ -4,6 +4,7 @@ import {
   sameUploadFile,
   verifyUpload,
 } from "@/attachments/validate";
+import { openDatabase } from "@/storage/open-database";
 type StoredRecord = Pick<StoredUpload, "id" | "file"> & {
   scope?: string;
   bytes?: ArrayBuffer;
@@ -21,24 +22,14 @@ export class UploadStorage implements UploadStore {
   };
   private connection: Promise<IDBDatabase> | undefined;
   private open = () => {
-    this.connection ??= new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open("romdex-web-upload-bytes", 1);
-      request.onupgradeneeded = () => {
-        request.result.createObjectStore("files");
-      };
-      request.onsuccess = () => {
-        const db = request.result;
-        db.onversionchange = () => {
-          db.close();
-        };
-        resolve(db);
-      };
-      request.onerror = request.onblocked = () => {
-        reject(
-          Error("Staged file storage could not open. Keep the original files."),
-        );
-      };
-    });
+    this.connection ??= openDatabase(
+      "romdex-web-upload-bytes",
+      1,
+      (db) => {
+        db.createObjectStore("files");
+      },
+      "Staged file storage could not open. Keep the original files.",
+    );
     return this.connection;
   };
   get = async (id: string) => {

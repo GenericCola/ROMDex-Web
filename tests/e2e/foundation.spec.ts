@@ -1,4 +1,17 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+const waitForServiceWorkerControl = async (page: Page) => {
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller)
+      await new Promise<void>((resolve) =>
+        navigator.serviceWorker.addEventListener(
+          "controllerchange",
+          () => resolve(),
+          { once: true },
+        ),
+      );
+  });
+};
 test("manifest, headers, icons and 404", async ({ request }) => {
   const response = await request.get("/");
   expect(response.headers()["content-security-policy"]).toContain(
@@ -29,17 +42,7 @@ test("cached shell reopens offline in another window", async ({
   context,
 }) => {
   await page.goto("/foundation/");
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-    if (!navigator.serviceWorker.controller)
-      await new Promise<void>((resolve) =>
-        navigator.serviceWorker.addEventListener(
-          "controllerchange",
-          () => resolve(),
-          { once: true },
-        ),
-      );
-  });
+  await waitForServiceWorkerControl(page);
   await context.setOffline(true);
   await page.reload();
   await expect(
@@ -59,17 +62,7 @@ test("updates require consent and protect other windows", async ({
   const original = await readFile("out/sw.js", "utf8");
   try {
     await page.goto("/foundation/");
-    await page.evaluate(async () => {
-      await navigator.serviceWorker.ready;
-      if (!navigator.serviceWorker.controller)
-        await new Promise<void>((resolve) =>
-          navigator.serviceWorker.addEventListener(
-            "controllerchange",
-            () => resolve(),
-            { once: true },
-          ),
-        );
-    });
+    await waitForServiceWorkerControl(page);
     const other = await context.newPage();
     await other.goto("/foundation/");
     await other.getByRole("button", { name: "Count: 0" }).click();
@@ -87,7 +80,7 @@ test("updates require consent and protect other windows", async ({
     await page.getByRole("button", { name: "Reload to update" }).click();
     await expect(
       page.getByText(
-        "Close other ROMDex windows, then choose Reload to update again.",
+        "Close other ROMDex windows, then try applying the update again.",
       ),
     ).toBeVisible();
     await expect(other.getByRole("button", { name: "Count: 1" })).toBeVisible();

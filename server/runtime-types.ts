@@ -3,6 +3,8 @@ export interface Tokens {
   expiresIn: number;
   refreshToken?: string;
   scope?: string;
+  /** A pasted YouTrack permanent token: no refresh, and sign-out clears its cookie. */
+  permanent?: true;
 }
 export interface Identity {
   id: string;

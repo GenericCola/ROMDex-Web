@@ -9,6 +9,7 @@ import type { ItemEditorHost } from "@/domain/accepted/item-editor-view.mjs";
 import type { JsonObject } from "@/domain/json";
 import { reviewedItemEdit } from "@/domain/reviewed-item-edit";
 import type { TaskItem } from "@/domain/types";
+import { findWorkspaceItem } from "@/domain/workspace-item";
 import { workspaceStore } from "@/domain/workspace-store";
 import { trackWorkspaceWork } from "@/domain/workspace-work";
 import { readEditOptions } from "@/youtrack/edit-options";
@@ -57,10 +58,7 @@ export const itemEditorHost = (item: TaskItem): ItemEditorHost => {
       guard();
       ({ options } = result);
       const { data } = workspaceStore.getSnapshot();
-      const current =
-        materialize(data.remote, data.operations).find((entry) => {
-          return entry.id === id;
-        }) ?? null;
+      const current = findWorkspaceItem(data, id) ?? null;
       return { options, item: current };
     },
     edit: (id, patch, base) => {
