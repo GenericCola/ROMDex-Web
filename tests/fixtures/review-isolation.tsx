@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import type { TestContext } from "node:test";
 import type {
   Attachment,
   StoredUpload,
@@ -8,6 +9,8 @@ import { automaticBatch } from "../../src/cloud/automatic-batch";
 import { deliverQueue } from "../../src/cloud/delivery";
 import { sha256 } from "../../src/domain/json";
 import type { TaskOperation } from "../../src/domain/types";
+import { workspaceStore } from "../../src/domain/workspace-store";
+import { uploadStorage } from "../../src/storage/upload-storage";
 import { setup } from "./delivery-navigation";
 import { navigationPort } from "./navigation-port";
 export const A = "PMON-900001",
@@ -156,4 +159,22 @@ export const fixture = async () => {
       return store.getSnapshot().data;
     },
   };
+};
+
+/** Routes the global workspace store, upload storage and the account probe to the fixture. */
+export const mockDeliveryFixture = (
+  t: TestContext,
+  f: Awaited<ReturnType<typeof fixture>>,
+) => {
+  t.mock.method(workspaceStore, "start", async () => undefined);
+  t.mock.method(workspaceStore, "getSnapshot", f.store.getSnapshot);
+  t.mock.method(workspaceStore, "change", f.store.change);
+  t.mock.method(workspaceStore, "flush", f.store.flush);
+  t.mock.method(workspaceStore, "deliver", f.store.deliver);
+  t.mock.method(workspaceStore, "setConnection", f.store.setConnection);
+  t.mock.method(uploadStorage, "get", f.storage.get);
+  t.mock.method(uploadStorage, "remove", f.storage.remove);
+  t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ id: f.port.accountId }),
+  );
 };

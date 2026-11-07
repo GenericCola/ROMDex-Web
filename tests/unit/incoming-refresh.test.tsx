@@ -12,11 +12,7 @@ import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
 import { incomingRevision } from "../../src/youtrack/incoming-revision";
 import { normalize, type RawIssue } from "../../src/youtrack/read-tasks";
-const required = <T,>(value: T | undefined): T => {
-  assert.notEqual(value, undefined, "Expected fixture entry to exist");
-  if (value === undefined) throw new Error("Missing fixture entry");
-  return value;
-};
+import { required } from "../fixtures/values";
 const gate = <T,>() => {
   let release!: (value: T) => void;
   const promise = new Promise<T>((resolve) => {

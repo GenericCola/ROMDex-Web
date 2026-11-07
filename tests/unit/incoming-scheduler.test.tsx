@@ -7,12 +7,8 @@ import { setTaskTextEditing } from "../../src/domain/task-editing";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
 import { normalize, type RawIssue } from "../../src/youtrack/read-tasks";
+import { required } from "../fixtures/values";
 
-const required = <T,>(value: T | undefined): T => {
-  assert.notEqual(value, undefined, "Expected fixture entry to exist");
-  if (value === undefined) throw new Error("Missing fixture entry");
-  return value;
-};
 test("watcher backs off failed reads, waits hidden, resumes on focus, coalesces wakeups and cleans up", async () => {
   const saved = {
     fetch: globalThis.fetch,

@@ -14,11 +14,7 @@ import type { TaskItem, WorkspaceData } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { WorkspaceStore } from "../../src/domain/workspace-store";
 import { taskItem } from "../fixtures/task-item";
-const required = <T,>(value: T | undefined): T => {
-  assert.notEqual(value, undefined, "Expected fixture entry to exist");
-  if (value === undefined) throw new Error("Missing fixture entry");
-  return value;
-};
+import { required } from "../fixtures/values";
 const task = (id: string, updated = 1): TaskItem =>
   taskItem(id, null, { updated });
 const fixture = () => {

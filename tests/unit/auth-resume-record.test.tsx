@@ -8,6 +8,7 @@ import {
   type ResumeRecord,
 } from "../../src/auth/resume-record";
 import { YOUTRACK_ORIGIN } from "../../src/youtrack/read-tasks";
+import { memoryStorage } from "../fixtures/memory-storage";
 const record: ResumeRecord = {
   version: 1,
   instance: YOUTRACK_ORIGIN,
@@ -17,19 +18,7 @@ const record: ResumeRecord = {
   projectId: "0-1",
 };
 const storage = () => {
-  const values = new Map<string, string>([["unrelated", "keep"]]);
-  return {
-    values,
-    getItem: (key: string) => {
-      return values.get(key) ?? null;
-    },
-    setItem: (key: string, value: string) => {
-      values.set(key, value);
-    },
-    removeItem: (key: string) => {
-      values.delete(key);
-    },
-  };
+  return memoryStorage([["unrelated", "keep"]]);
 };
 void test("resume records retain only the existing short-lived session and preserve unrelated storage", () => {
   const local = storage();

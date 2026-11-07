@@ -2,26 +2,15 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { base64Bytes, encodeBytes } from "../../src/domain/bytes";
 import { jsonObject } from "../../src/domain/json";
-import type { WorkspaceData } from "../../src/domain/types";
-import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { workspaceStore } from "../../src/domain/workspace-store";
 import { readRdx, writeRdx } from "../../src/rdx/container";
 import { BrowserPlanHost } from "../../src/rdx/plan-host";
 import { PlanTransfer } from "../../src/rdx/plan-transfer";
+import { memoryPersistence } from "../fixtures/memory-persistence";
 import { planDocument } from "../fixtures/rdx";
 void test("original desktop dialog routes import, edit and export locally without queueing", async () => {
-  let data = emptyWorkspace(),
-    revision = 0;
-  await workspaceStore.switchPersistence({
-    load: () => {
-      return Promise.resolve({ data, revision });
-    },
-    save: (next: WorkspaceData, expected: number) => {
-      assert.equal(expected, revision);
-      data = structuredClone(next);
-      return Promise.resolve(++revision);
-    },
-  });
+  const persisted = memoryPersistence();
+  await workspaceStore.switchPersistence(persisted);
   const host = new BrowserPlanHost();
   const bytes = await writeRdx(planDocument(), new Map());
   const upload = (await host.api("begin", { bytes: bytes.length })) as {
@@ -40,8 +29,8 @@ void test("original desktop dialog routes import, edit and export locally withou
     token: preview.token,
     approved: true,
   })) as { key: string };
-  assert.equal(data.operations.length, 0);
-  assert.equal(data.rdxFiles?.length, 1);
+  assert.equal(persisted.data.operations.length, 0);
+  assert.equal(persisted.data.rdxFiles?.length, 1);
   const view = (await host.api("view", { key: imported.key })) as {
     document: ReturnType<typeof planDocument>;
   };
@@ -51,8 +40,8 @@ void test("original desktop dialog routes import, edit and export locally withou
     expectedRevision: view.document.revision!,
     patch: { title: "Edited synthetic plan" },
   });
-  assert.equal(data.rdxFiles?.length, 2);
-  assert.equal(data.operations.length, 0);
+  assert.equal(persisted.data.rdxFiles?.length, 2);
+  assert.equal(persisted.data.operations.length, 0);
   const exported = (await host.api("export", { key: imported.key })) as {
     id: string;
   };
@@ -74,7 +63,7 @@ void test("original desktop dialog routes import, edit and export locally withou
     host.api("queue", { key: imported.key, approved: true }),
     /approval is required/,
   );
-  assert.equal(data.operations.length, 0);
+  assert.equal(persisted.data.operations.length, 0);
 });
 void test("chunk transfer rejects wrong identity, offset, incomplete bytes and oversize allocations", () => {
   const transfer = new PlanTransfer();

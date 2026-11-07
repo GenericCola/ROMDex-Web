@@ -4,26 +4,8 @@ import type { WorkspaceData } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { WorkspaceStore } from "../../src/domain/workspace-store";
 import { scopedWorkspaceKey } from "../../src/storage/workspace-key";
-const deferred = <T,>() => {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((done) => {
-    resolve = done;
-  });
-  return { promise, resolve };
-};
-const memory = (label: string) => {
-  let data = emptyWorkspace();
-  data.commentDrafts.label = label;
-  let revision = 1;
-  return {
-    load: async () => ({ data: structuredClone(data), revision }),
-    save: async (next: WorkspaceData, expected: number) => {
-      assert.equal(expected, revision);
-      data = structuredClone(next);
-      return ++revision;
-    },
-  };
-};
+import { labelledPersistence } from "../fixtures/memory-persistence";
+import { deferred } from "../fixtures/values";
 test("workspace scopes distinguish account and project without claiming legacy data", async () => {
   const origin = "https://tenant.youtrack.cloud";
   assert.equal(
@@ -46,9 +28,9 @@ test("workspace scopes distinguish account and project without claiming legacy d
   ])
     assert.throws(() => scopedWorkspaceKey(bad, "1-1", "0-1"));
   assert.throws(() => scopedWorkspaceKey(origin, "", "0-1"));
-  const legacy = memory("legacy"),
-    a = memory("A"),
-    b = memory("B");
+  const legacy = labelledPersistence("legacy", 1),
+    a = labelledPersistence("A", 1),
+    b = labelledPersistence("B", 1);
   const store = new WorkspaceStore(legacy);
   await store.start();
   await store.switchPersistence(a);
@@ -81,7 +63,7 @@ test("scope switching hides prior data, rejects concurrent writes and ignores st
   assert.deepEqual(store.getSnapshot().data, emptyWorkspace());
   assert.throws(() => store.change(() => undefined), /switching/);
   await assert.rejects(
-    store.switchPersistence(memory("wrong")),
+    store.switchPersistence(labelledPersistence("wrong", 1)),
     /switching workspaces/,
   );
   const obsolete = emptyWorkspace();
@@ -148,14 +130,14 @@ test("workspace switching waits for old saves and refuses delivery/update sessio
     await delivering.promise;
   });
   await assert.rejects(
-    store.switchPersistence(memory("wrong")),
+    store.switchPersistence(labelledPersistence("wrong", 1)),
     /Finish delivery/,
   );
   delivering.resolve();
   await delivery;
   const release = await store.prepareUpdate();
   await assert.rejects(
-    store.switchPersistence(memory("wrong")),
+    store.switchPersistence(labelledPersistence("wrong", 1)),
     /Finish delivery/,
   );
   release();
