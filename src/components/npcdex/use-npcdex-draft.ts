@@ -12,22 +12,25 @@ import {
   useRef,
   useState,
 } from "react";
+const emptyDraft = (target: NpcdexTarget, revision: string): NpcdexDraft => {
+  return {
+    target,
+    sourceRevision: revision,
+    note: "",
+    intent: "",
+    instructions: "",
+    proposedText: "",
+    flag: "none",
+    updatedAt: "",
+  };
+};
 export const useNpcdexDraft = (data: WorkspaceData, target: NpcdexTarget) => {
   const key = targetKey(target),
     revision = data.npcdex ? contentRevision(data.npcdex) : "";
   const saved = data.npcdexDrafts?.[key];
-  const [draft, setDraft] = useState<NpcdexDraft>(
-    saved ?? {
-      target,
-      sourceRevision: revision,
-      note: "",
-      intent: "",
-      instructions: "",
-      proposedText: "",
-      flag: "none",
-      updatedAt: "",
-    },
-  );
+  const [draft, setDraft] = useState<NpcdexDraft>(() => {
+    return saved ?? emptyDraft(target, revision);
+  });
   const [dirty, setDirty] = useState(false),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
@@ -64,19 +67,7 @@ export const useNpcdexDraft = (data: WorkspaceData, target: NpcdexTarget) => {
     }
   }, [dirty, draft]);
   useEffect(() => {
-    if (!dirty)
-      setDraft(
-        saved ?? {
-          target,
-          sourceRevision: revision,
-          note: "",
-          intent: "",
-          instructions: "",
-          proposedText: "",
-          flag: "none",
-          updatedAt: "",
-        },
-      );
+    if (!dirty) setDraft(saved ?? emptyDraft(target, revision));
   }, [dirty, saved, target, revision]);
   const registration = () => {
     return registerDraftEditor({
