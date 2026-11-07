@@ -6,5 +6,7 @@ const nextConfig = {
   poweredByHeader: false,
   images: { unoptimized: true },
   experimental: { globalNotFound: true },
+  // Dev server reached through the VPS proxy; ignored by the static build.
+  allowedDevOrigins: ["nextjsdev.letmecome.in"],
 };
 export default nextConfig;
