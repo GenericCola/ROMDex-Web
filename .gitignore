@@ -68,3 +68,5 @@ __pycache__/
 
 # Local installable YouTrack app packages
 /artifacts/
+tests/perf/results/
+blob-report/
