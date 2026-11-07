@@ -96,6 +96,8 @@ jobs:
         with:
           name: out
           path: out/
+          # The service worker precaches every file in out/, dotfiles included.
+          include-hidden-files: true
           retention-days: 3
 
   e2e:
