@@ -41,6 +41,10 @@ is one or two requests instead of five.
 
 ### Removed (were polling)
 
+`src/auth/popup.ts` (`signInPopup`) checked every 500 ms whether an OAuth
+sign-in popup had closed. Nothing in the app called it any more (sign-in uses a
+pasted token), so it was deleted together with its unit test.
+
 | Where | What it did | Now |
 |---|---|---|
 | `src/cloud/watch-incoming.ts` | Re-ran incoming sync every 3 s while visible; a top-10 "updated" probe, and a full read of all issues every 5 s. Backed off to 60 s on errors and kept retrying. | Event-driven, see the table above. A failed read shows its message and waits for the next event or Refresh. |
@@ -61,7 +65,6 @@ is one or two requests instead of five.
 | `src/components/romdex/use-delayed-flag.ts`, `use-delayed-row-open.ts` | The 250/400 ms loader delay and the delayed row open. One-shot UI timers. |
 | `src/domain/editing-window.ts` | Editor idle lease. One-shot. |
 | `src/components/romdex/use-task-drag.ts` | 32 ms auto-scroll while a drag is held near an edge. Animation, only during a drag. |
-| `src/auth/popup.ts` | Checks every 500 ms whether the OAuth sign-in popup was closed. Browsers fire no event when a cross-origin popup closes, so this is the only way to notice; it runs only while the popup is open. Nothing in the app calls `signInPopup` today (sign-in uses a pasted token), so it could be deleted with the OAuth flow. |
 | `src/components/pwa-controls/check-update.ts`, `request-update.ts`, `src/rdx/worker-client.ts` | Timeouts that end a wait (update check, worker request). One-shot. |
 | `src/components/romdex/rdx-actions.ts`, `recovery-export.ts`, `src/attachments/download.ts`, `task-file-drop.tsx` | Deferred cleanup (revoke a download URL, clear a drop highlight). One-shot. |
 | `src/domain/accepted/**` | Hash-pinned desktop code: RDX time limit and a download URL revoke. One-shot. |
