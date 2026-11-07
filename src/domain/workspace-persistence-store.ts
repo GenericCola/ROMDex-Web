@@ -1,4 +1,5 @@
 import { verifyRetainedAssets } from "@/migration/verify-assets";
+import { prepareImages, swapToRefs } from "@/storage/image-migration";
 import { WorkspaceStorage } from "@/storage/workspace-storage";
 import { errorText } from "@utils/error-text";
 import { assertBrowseOnly } from "./failed-save-browsing";
@@ -50,12 +51,30 @@ export class WorkspacePersistenceStore {
       if (record) await verifyRetainedAssets(record.data);
       if (generation !== this.generation) return;
       this.revision = record?.revision ?? 0;
+      const migrated = record ? await prepareImages(record.data) : {};
+      if (generation !== this.generation) return;
       this.publish({ data: record?.data ?? emptyWorkspace(), ready: true });
+      if (record && Object.keys(migrated).length)
+        await this.moveImagesToRefs(record.data, migrated, generation);
     } catch (error) {
       if (generation !== this.generation) return;
       this.publish({
         error: errorText(error, "Workspace could not load."),
       });
+    }
+  };
+  private moveImagesToRefs = async (
+    before: WorkspaceData,
+    migrated: Record<string, string>,
+    generation: number,
+  ) => {
+    try {
+      if (generation !== this.generation) return;
+      await this.write((data) => {
+        swapToRefs(data, before, migrated);
+      });
+    } catch {
+      // The legacy values stay valid; the next load tries again.
     }
   };
   protected write = (

@@ -239,8 +239,11 @@ Inventory of waits and what changed:
   one task. Virtualizing the table would interact with drag precision, exact
   insertion guides and keyboard navigation, which have their own acceptance
   suite, so it needs a separate, focused change.
-- **Tile images.** These are stored as data URLs inside the workspace record.
-  Large images make every clone and save larger.
+- **Tile images (done).** The image bytes now live in their own IndexedDB
+  database (`romdex-web-images`) and the workspace record keeps only a short
+  ref per image, so clone, validation and save no longer carry them. Entries
+  there are never deleted, so unused images still take browser storage. See
+  `docs/YOUTRACK-STORAGE.md`.
 
 ## Verification
 

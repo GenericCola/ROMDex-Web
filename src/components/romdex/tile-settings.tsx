@@ -1,8 +1,9 @@
 import { registerDraftEditor } from "@/domain/editor-drafts";
 import { itemName, taskTier } from "@/domain/task-presentation";
-import { applyTileSettings, type TileDraft } from "@/domain/tile-settings";
+import { saveTileSettings, type TileDraft } from "@/domain/tile-settings";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
+import { imageMissing } from "@/storage/image-storage";
 import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import Dialog from "./dialog";
 import TileImagePreview from "./tile-image-preview";
@@ -62,10 +63,7 @@ const TileSettings = ({
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     run(async () => {
-      await workspaceStore.change((data) => {
-        return applyTileSettings(data, currentRef.current);
-      });
-      await workspaceStore.flush();
+      await saveTileSettings(currentRef.current);
       close();
     });
   };
@@ -92,7 +90,12 @@ const TileSettings = ({
           }}
         />
         <h3>Choose Image</h3>
-        <TileImagePreview image={draft.image} />
+        <TileImagePreview
+          image={draft.image}
+          missing={imageMissing(
+            workspaceStore.getSnapshot().data.images?.[item.id],
+          )}
+        />
         <div className="selector-settings-actions">
           <label>
             Upload Image
