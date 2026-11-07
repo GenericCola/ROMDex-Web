@@ -4,7 +4,6 @@ import { FENCE } from "./cookie-codec.ts";
 /** Shaped like DevDependencies so dev tests can share it. */
 export type TokenTestDependencies = ApplicationDependencies & {
   token: string;
-  code: string;
   origins: string[];
 };
 export const fence = "f".repeat(43);
@@ -32,7 +31,6 @@ export function tokenDeps(
     },
     fetch: async () => assert.fail("no upstream call expected"),
     token: "synthetic-token",
-    code: "abcdefghjk",
     origins: ["https://nextjsdev.letmecome.in", "http://localhost:3000"],
     ...overrides,
   };

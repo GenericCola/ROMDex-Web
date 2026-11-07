@@ -11,6 +11,7 @@ import { useDeliveryActive } from "./use-delivery-active";
 const AuthGate = () => {
   const delivering = useDeliveryActive();
   const {
+    offline,
     retryable,
     retryResume,
     identity,
@@ -87,6 +88,11 @@ const AuthGate = () => {
     <SessionRecoveryContext value={recoveryBlocked}>
       <AuthShell connected={connected}>
         {(!connected || recoveryBlocked) && account}
+        {connected && offline && (
+          <p className="port-recovery" role="status">
+            Offline: changes are saved here and sent when you are back online
+          </p>
+        )}
         {connected && message && !recoveryBlocked && (
           <p className="port-recovery" role="status">
             {message}

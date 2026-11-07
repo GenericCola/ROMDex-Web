@@ -16,7 +16,7 @@
     "start": "node scripts/serve.mjs",
     "lint": "node scripts/lint.mjs",
     "lint:fix": "node scripts/lint.mjs --fix",
-    "browser:install": "node scripts/playwright.mjs install chromium firefox webkit",
+    "browser:install": "node scripts/playwright.mjs install chromium",
     "typecheck": "tsc --noEmit",
     "typecheck:tests": "tsc --noEmit -p tests/tsconfig.json",
     "test": "tsx --tsconfig tests/tsconfig.json --test tests/unit/*.test.tsx && node --test tests/worker.test.mjs tests/build.test.mjs tests/hosting.test.mjs tests/youtrack/*.test.mjs scripts/migration/*.test.mjs",

@@ -1,5 +1,5 @@
 // DEVELOPMENT ONLY. Served by dev-api.ts behind `next dev`; api/index.ts never imports it.
-import { randomBytes, randomInt } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import {
   createApplication,
   productionDependencies,
@@ -19,22 +19,14 @@ export interface DevDependencies
   extends ApplicationDependencies, DevTokenDependencies {
   origins: string[];
 }
-const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
-export function signInCode(length = 10) {
-  return Array.from({ length }, function pick() {
-    return alphabet[randomInt(alphabet.length)];
-  }).join("");
-}
 export function devDependencies(
   env: NodeJS.ProcessEnv = process.env,
-  code = signInCode(),
 ): DevDependencies {
   // A fresh key per process: restarting `pnpm dev` signs every dev browser out.
   const key = env.ROMDEX_SESSION_KEY ?? randomBytes(32).toString("base64url");
   return {
     ...productionDependencies({ ...env, ROMDEX_SESSION_KEY: key }),
     token: env.YOUTRACK_TOKEN ?? "",
-    code,
     // DEV_SERVER_ORIGIN adds another public address that proxies to `pnpm dev`.
     origins: [
       ...new Set([...DEV_ORIGINS, env.DEV_SERVER_ORIGIN ?? DEV_ORIGINS[0]!]),

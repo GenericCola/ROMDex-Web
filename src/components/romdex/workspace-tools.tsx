@@ -1,5 +1,6 @@
 import { use, useState } from "react";
 import Dialog from "./dialog";
+import { exportRecovery } from "./recovery-export";
 import {
   WorkspaceToolsContext,
   type WorkspaceTool,
@@ -9,6 +10,11 @@ const WorkspaceTools = () => {
   const [open, setOpen] = useState(false);
   const close = () => {
     return setOpen(false);
+  };
+  // A safety net in every mode; importing stays behind ?recovery=1.
+  const handleExportRecovery = () => {
+    close();
+    exportRecovery();
   };
   const select = (tool: WorkspaceTool) => {
     close();
@@ -51,6 +57,14 @@ const WorkspaceTools = () => {
             >
               CHECK FOR UPDATES
             </button>
+            <button
+              onClick={() => {
+                return select("install");
+              }}
+            >
+              INSTALL ROMDEX
+            </button>
+            <button onClick={handleExportRecovery}>EXPORT RECOVERY COPY</button>
           </div>
         </Dialog>
       )}

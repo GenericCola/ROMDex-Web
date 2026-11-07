@@ -12,11 +12,11 @@ import { expired, setAuthSession } from "@/auth/session";
 import { rememberSession } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
 import { errorText } from "@utils/error-text";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { cookieSignIn } from "./cookie-sign-in";
 import { cookieSignOut } from "./cookie-sign-out";
 import { finishExpiredSession } from "./finish-expired-session";
-import { startCookieResume } from "./start-cookie-resume";
+import { useOfflineResume } from "./use-offline-resume";
 import { useSessionExpiry } from "./use-session-expiry";
 export const useAuthWorkspace = () => {
   const [identity, setIdentity] = useState<YouTrackIdentity | null>(null);
@@ -114,21 +114,19 @@ export const useAuthWorkspace = () => {
     });
   };
   const session = { sessionRef, generationRef, setBusy, setMessage };
-  const resume = () => {
-    return startCookieResume({
-      sessionRef,
-      generationRef,
-      setBusy,
-      setMessage,
-      setIdentity,
-      setSelected,
-      setIssues,
-      setRetryable,
-    });
-  };
+  const { offline, resume } = useOfflineResume({
+    sessionRef,
+    generationRef,
+    setBusy,
+    setMessage,
+    setIdentity,
+    setSelected,
+    setIssues,
+    setRetryable,
+  });
   useSessionExpiry({ ...session, finishExpired, resume });
-  useEffect(resume, []);
   return {
+    offline,
     retryable,
     retryResume: () => {
       if (!recoveryBlocked && !busy) resume();
