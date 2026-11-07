@@ -15,9 +15,11 @@ export interface GroupDraft {
 const GroupDraftRow = ({
   draft,
   close,
+  rowIndex,
 }: {
   draft: GroupDraft;
   close: () => void;
+  rowIndex: number;
 }) => {
   const [title, setTitle] = useState("");
   const titleRef = useRef("");
@@ -80,6 +82,7 @@ const GroupDraftRow = ({
   return (
     <DraftRow
       decorative={false}
+      rowIndex={rowIndex}
       depth={draft.depth}
       input={
         <input

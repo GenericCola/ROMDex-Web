@@ -3,6 +3,7 @@ import { bulkMovePlan } from "@/domain/bulk-hierarchy";
 import { hierarchySignature, rowDropTarget } from "@/domain/task-drop";
 import { workspaceStore } from "@/domain/workspace-store";
 import type { Drag } from "./task-drag-state";
+import { rowOrder } from "./task-row-order";
 export interface DragPoint {
   clientX: number;
   clientY: number;
@@ -21,7 +22,13 @@ export const taskDragPreview = (event: DragPoint, current: Drag) => {
     const last = scroller
       ? [...scroller.querySelectorAll<HTMLElement>("[data-row]")].at(-1)
       : null;
-    if (last && event.clientY >= last.getBoundingClientRect().bottom)
+    // Below a spacer for unrendered rows is not the end of the list.
+    if (
+      last &&
+      scroller &&
+      last.dataset.row === rowOrder(scroller).at(-1) &&
+      event.clientY >= last.getBoundingClientRect().bottom
+    )
       row = last;
   }
   const targetId = row?.dataset.row ?? row?.dataset.selector;
@@ -41,16 +48,11 @@ export const taskDragPreview = (event: DragPoint, current: Drag) => {
   const { data } = workspaceStore.getSnapshot();
   if (hierarchySignature(data) !== current.signature)
     throw Error("The hierarchy changed during the drag. Try again.");
-  const visibleIds = [
-    ...event.currentTarget.querySelectorAll<HTMLElement>("[data-row]"),
-  ].map((element) => {
-    return element.dataset.row ?? "";
-  });
   const result = rowDropTarget(
     materialize(data.remote, data.operations),
     data.order,
     intent,
-    visibleIds,
+    rowOrder(event.currentTarget),
   );
   if (!result) return null;
   if (current.bulkIds)

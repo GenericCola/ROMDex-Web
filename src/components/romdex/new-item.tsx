@@ -12,8 +12,10 @@ const NewItem = ({
   draft,
   data,
   items,
+  rowIndex,
 }: {
   draft: NonNullable<WorkspaceData["newTask"]>;
+  rowIndex: number;
   data: WorkspaceData;
   items: TaskItem[];
 }) => {
@@ -40,6 +42,7 @@ const NewItem = ({
   return (
     <DraftRow
       decorative
+      rowIndex={rowIndex}
       depth={Math.max(
         0,
         depth -

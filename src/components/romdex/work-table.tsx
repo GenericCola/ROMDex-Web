@@ -12,6 +12,7 @@ import TaskRows from "./task-rows";
 import { useTableSelection } from "./use-table-selection";
 import WorkEmpty from "./work-empty";
 import WorkRow from "./work-row";
+import WorkTableHead from "./work-table-head";
 import WorkToolbar from "./work-toolbar";
 interface WorkTableProps {
   data: WorkspaceData;
@@ -54,12 +55,16 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
     return add(scope);
   };
   const lockKey = rowLockKey(data);
+  // Header row, task rows and any open draft row.
+  const rowCount =
+    1 + rows.length + Number(!!selection.group) + Number(!!data.newTask);
   const scopeDepth = scope ? (tree.depths.get(scope) ?? 0) + 1 : 0;
-  const render = (item: TaskItem) => {
+  const render = (item: TaskItem, rowIndex: number) => {
     return (
       <WorkRow
         key={item.id}
         item={item}
+        rowIndex={rowIndex}
         {...rowFacts(data, tree, scopeDepth, item)}
         lockKey={lockKey}
         add={add}
@@ -100,17 +105,8 @@ const WorkTable = ({ data, items, add }: WorkTableProps) => {
       <div className="work-body">
         <section className="table-area" aria-label="Task List">
           <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th className="title-column">Name</th>
-                  <th>Priority</th>
-                  <th>Complexity</th>
-                  <th className="actions-column">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
+            <table aria-rowcount={rowCount}>
+              <WorkTableHead />
               <TaskRows
                 rows={rows}
                 data={data}
