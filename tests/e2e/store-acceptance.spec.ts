@@ -72,6 +72,19 @@ const device = async (
   return { context, page, fixture };
 };
 
+/** Two devices that each completed their first sync against one empty ROMDex store. */
+const twoSyncedDevices = async (browser: Browser) => {
+  const host = newStoreHost();
+  await seedRomdex(host, {});
+  const a = await device(browser, host, { otherIsParent: true });
+  const b = await device(browser, host, { otherIsParent: true });
+  await syncNow(a.page, host);
+  await closeDetails(a.page);
+  await syncNow(b.page, host);
+  await closeDetails(b.page);
+  return { host, a, b };
+};
+
 const openDetails = async (page: Page) => {
   const region = page.getByRole("region", { name: "YouTrack data sync" });
   if (!(await region.isVisible()))
@@ -177,14 +190,7 @@ test("a fresh device takes YouTrack's data and overwrites none of it", async ({
 test("two devices editing different keys both end up with both edits", async ({
   browser,
 }) => {
-  const host = newStoreHost();
-  await seedRomdex(host, {});
-  const a = await device(browser, host, { otherIsParent: true });
-  const b = await device(browser, host, { otherIsParent: true });
-  await syncNow(a.page, host);
-  await closeDetails(a.page);
-  await syncNow(b.page, host);
-  await closeDetails(b.page);
+  const { host, a, b } = await twoSyncedDevices(browser);
 
   await setStatus(a.page, "Fixture Root", "Standby");
   await syncNow(a.page, host);
@@ -229,14 +235,7 @@ test("two devices editing different keys both end up with both edits", async ({
 test("a key changed on two devices goes to review and either choice settles it", async ({
   browser,
 }) => {
-  const host = newStoreHost();
-  await seedRomdex(host, {});
-  const a = await device(browser, host, { otherIsParent: true });
-  const b = await device(browser, host, { otherIsParent: true });
-  await syncNow(a.page, host);
-  await closeDetails(a.page);
-  await syncNow(b.page, host);
-  await closeDetails(b.page);
+  const { host, a, b } = await twoSyncedDevices(browser);
 
   // First conflict: resolved with "Keep mine".
   await setStatus(a.page, "Fixture Root", "Standby");

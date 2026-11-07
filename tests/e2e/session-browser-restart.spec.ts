@@ -5,7 +5,18 @@ import { join } from "node:path";
 import { FENCE, RENEWAL, SESSION } from "../../server/cookie-codec";
 import { APP, routeYouTrack } from "./cookie-fixture";
 import { durableCookieFixture } from "./durable-cookie-fixture";
+type Cookie = Awaited<ReturnType<BrowserContext["cookies"]>>[number];
 
+const comparableCookies = (cookies: Cookie[]) =>
+  cookies
+    .map((cookie) => ({
+      name: cookie.name,
+      value: cookie.value,
+      httpOnly: cookie.httpOnly,
+      secure: cookie.secure,
+      expires: cookie.expires,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 test("durable cookies survive a real browser restart and renew into PMON", async ({
   playwright,
   browserName,
@@ -59,27 +70,7 @@ test("durable cookies survive a real browser restart and renew into PMON", async
     const persisted = (await context.cookies(APP)).filter((cookie) =>
       [FENCE, SESSION, RENEWAL].includes(cookie.name),
     );
-    expect(
-      persisted
-        .map((cookie) => ({
-          name: cookie.name,
-          value: cookie.value,
-          httpOnly: cookie.httpOnly,
-          secure: cookie.secure,
-          expires: cookie.expires,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    ).toEqual(
-      saved
-        .map((cookie) => ({
-          name: cookie.name,
-          value: cookie.value,
-          httpOnly: cookie.httpOnly,
-          secure: cookie.secure,
-          expires: cookie.expires,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    );
+    expect(comparableCookies(persisted)).toEqual(comparableCookies(saved));
     const reopened = context.pages()[0] ?? (await context.newPage());
     const resumed = await durableCookieFixture(reopened, {
       preserveGeneration: true,

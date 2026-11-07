@@ -1,8 +1,20 @@
-import { expect, type Page, type Route } from "@playwright/test";
+import { type Page, type Route } from "@playwright/test";
 import { resolve } from "node:path";
 import { LOCAL_ORIGIN } from "./local-origin";
+import { openWithAutoSyncOff } from "./local-workspace";
 export const APP = "https://romdex.vercel.app";
 const YOUTRACK = "https://thegobindsingh.youtrack.cloud";
+// Serves the exported static app from out/ for a synthetic origin.
+export const fulfillFromOut = async (route: Route, url: URL) => {
+  const root = resolve("out"),
+    file = resolve(
+      root,
+      "." + url.pathname + (url.pathname.endsWith("/") ? "index.html" : ""),
+    );
+  if (!file.startsWith(root + "/") && !file.startsWith(root + "\\"))
+    throw Error("Invalid synthetic asset path");
+  await route.fulfill({ path: file });
+};
 export const installCookieFixture = async (
   page: Page,
   { preserveGeneration = false }: { preserveGeneration?: boolean } = {},
@@ -16,14 +28,7 @@ export const installCookieFixture = async (
       });
       return route.fulfill({ response });
     }
-    const root = resolve("out"),
-      file = resolve(
-        root,
-        "." + url.pathname + (url.pathname.endsWith("/") ? "index.html" : ""),
-      );
-    if (!file.startsWith(root + "/") && !file.startsWith(root + "\\"))
-      throw Error("Invalid synthetic asset path");
-    await route.fulfill({ path: file });
+    await fulfillFromOut(route, url);
   });
   // Reopen tests must not replace the generation loaded from the disk profile.
   if (!preserveGeneration)
@@ -96,15 +101,5 @@ export const routeYouTrack = async (
     await page.route(APP + "/api/attachment?*", bridge);
 };
 export const openCookieFixture = async (page: Page) => {
-  await page.goto(APP + "/");
-  await expect(
-    page.getByRole("button", { name: /^Save Changes/ }),
-  ).toBeVisible();
-  const automatic = page.getByRole("switch", {
-    name: "Auto-Sync Data",
-    exact: true,
-  });
-  if ((await automatic.getAttribute("aria-checked")) === "true")
-    await automatic.click();
-  await expect(automatic).toHaveAttribute("aria-checked", "false");
+  await openWithAutoSyncOff(page, APP + "/");
 };

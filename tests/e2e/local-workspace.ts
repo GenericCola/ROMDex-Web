@@ -82,8 +82,9 @@ export const routeLocalWorkspace = async (
     return route.fulfill({ json: body });
   });
 };
-export const openLocalWorkspace = async (page: Page) => {
-  await page.goto("/");
+// Opens `path`, waits for the workspace and switches Auto-Sync off.
+export const openWithAutoSyncOff = async (page: Page, path = "/") => {
+  await page.goto(path);
   await expect(
     page.getByRole("button", { name: /^Save Changes/ }),
   ).toBeVisible();
@@ -94,6 +95,9 @@ export const openLocalWorkspace = async (page: Page) => {
   if ((await automatic.getAttribute("aria-checked")) === "true")
     await automatic.click();
   await expect(automatic).toHaveAttribute("aria-checked", "false");
+};
+export const openLocalWorkspace = async (page: Page) => {
+  await openWithAutoSyncOff(page);
 };
 // Recovery mode (?recovery=1) is where the migration, recovery export and local
 // save status controls live; delivery stays disconnected there.

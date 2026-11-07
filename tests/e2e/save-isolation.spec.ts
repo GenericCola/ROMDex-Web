@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { resolve } from "node:path";
+import { fulfillFromOut } from "./cookie-fixture";
 test.use({ serviceWorkers: "block", baseURL: "https://romdex.vercel.app" });
 const content = Buffer.from("Synthetic upload recovery bytes");
 const fixture = async (page: Page, lost = false, denyBytes = false) => {
@@ -7,14 +7,7 @@ const fixture = async (page: Page, lost = false, denyBytes = false) => {
   await page.context().route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (url.origin !== "https://romdex.vercel.app") return route.abort();
-    const root = resolve("out"),
-      file = resolve(
-        root,
-        "." + url.pathname + (url.pathname.endsWith("/") ? "index.html" : ""),
-      );
-    if (!file.startsWith(root + "/") && !file.startsWith(root + "\\"))
-      throw Error("Invalid synthetic asset path");
-    await route.fulfill({ path: file });
+    await fulfillFromOut(route, url);
   });
   const tasks = new Map(
     ["PMON-900001", "PMON-900002"].map((id, i) => [

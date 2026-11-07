@@ -182,6 +182,24 @@ const attachmentFixture = async (
   };
 };
 
+const openAttachDialog = async (page: Page) => {
+  await page.getByRole("button", { name: "Attach Files", exact: true }).click();
+  await expect(
+    page
+      .getByRole("dialog", { name: "Attachments", exact: true })
+      .getByRole("status")
+      .filter({ hasText: "0 attachments read" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Attach Files", { exact: true })).toBeEnabled();
+};
+const queueFixtureDeletion = async (page: Page) => {
+  await page
+    .getByRole("button", { name: "Delete fixture.txt", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Queue Attachment Deletion", exact: true })
+    .click();
+};
 test("attachments stage offline, survive reload, download exact bytes and delete only after reviewed Save", async ({
   page,
 }) => {
@@ -275,12 +293,7 @@ test("attachments stage offline, survive reload, download exact bytes and delete
     .getByRole("button", { name: "Cancel", exact: true })
     .click();
   expect(s.deletions()).toBe(0);
-  await page
-    .getByRole("button", { name: "Delete fixture.txt", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Queue Attachment Deletion", exact: true })
-    .click();
+  await queueFixtureDeletion(page);
   await expect(
     page.getByText(
       "Attachment deletion queued. Connected Save Changes sends the reviewed request.",
@@ -339,14 +352,7 @@ test("oversized file selection shows the actual tenant limit without queuing or 
   page,
 }) => {
   const s = await attachmentFixture(page);
-  await page.getByRole("button", { name: "Attach Files", exact: true }).click();
-  await expect(
-    page
-      .getByRole("dialog", { name: "Attachments", exact: true })
-      .getByRole("status")
-      .filter({ hasText: "0 attachments read" }),
-  ).toBeVisible();
-  await expect(page.getByLabel("Attach Files", { exact: true })).toBeEnabled();
+  await openAttachDialog(page);
   await page.getByLabel("Attach Files", { exact: true }).setInputFiles({
     name: "too-large.bin",
     mimeType: "application/octet-stream",
@@ -372,12 +378,7 @@ test("lost deletion stays blocked until exact missing-file acknowledgement, with
   await s.connect();
   await s.save();
   await s.confirmed();
-  await page
-    .getByRole("button", { name: "Delete fixture.txt", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Queue Attachment Deletion", exact: true })
-    .click();
+  await queueFixtureDeletion(page);
   await s.save();
   await s.uncertain();
   expect(s.deletions()).toBe(1);
@@ -419,12 +420,7 @@ test("changed deletion metadata selects the conflict message and sends no DELETE
   await s.connect();
   await s.save();
   await s.confirmed();
-  await page
-    .getByRole("button", { name: "Delete fixture.txt", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Queue Attachment Deletion", exact: true })
-    .click();
+  await queueFixtureDeletion(page);
   s.files.get("134-1")!.updated++;
   await s.save();
   await expect(
@@ -544,14 +540,7 @@ test("failed staged-file storage shows refusal and queues no upload", async ({
       return r;
     };
   });
-  await page.getByRole("button", { name: "Attach Files", exact: true }).click();
-  await expect(
-    page
-      .getByRole("dialog", { name: "Attachments", exact: true })
-      .getByRole("status")
-      .filter({ hasText: "0 attachments read" }),
-  ).toBeVisible();
-  await expect(page.getByLabel("Attach Files", { exact: true })).toBeEnabled();
+  await openAttachDialog(page);
   await page.getByLabel("Attach Files", { exact: true }).setInputFiles({
     name: "fixture.txt",
     mimeType: "text/plain",
