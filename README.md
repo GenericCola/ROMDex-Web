@@ -13,7 +13,7 @@ Requires Node.js 24.x and pnpm 11.25.0.
     pnpm test:e2e
     pnpm package:youtrack
 
-Run pnpm dev at http://localhost:3001. Run pnpm build followed by pnpm start for the static preview at http://localhost:3000. Browser tests serve the build on port 3100; set E2E_PORT to use another port. WebKit needs system libraries that some Linux hosts lack. Service workers register only in production.
+Run pnpm dev at http://localhost:3000. Run pnpm build followed by pnpm start for the static preview at http://localhost:3001. Browser tests serve the build on port 3100; set E2E_PORT to use another port. WebKit needs system libraries that some Linux hosts lack. Service workers register only in production.
 
 Read docs/PROJECT.md, docs/PWA.md, docs/CONVENTIONS.md and docs/DESIGN.md. The template components, styling tokens and tooling are retained where compatible. Payload and Lenis are removed. YouTrack is the only application backend. Optional session delivery supports task creation, explicit deletion lists, hierarchy, assigned choices with calculated parent State, edits and comments. Assigned choices sync across devices through the "ROMDex data" article. The full port remains in progress.
 
