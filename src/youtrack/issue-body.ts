@@ -1,7 +1,7 @@
 import { youTrackState } from "@/domain/accepted/core.mjs";
 import type { TaskItem, TaskPatch } from "@/domain/types";
+import { readPmonSchema } from "./pmon-project";
 import type { YouTrackRequest } from "./request";
-import { list } from "./request";
 export type Field = Record<"name" | "$type" | "id", string> & {
   value?: { name?: string } | null;
 };
@@ -64,26 +64,7 @@ export const creationBody = async (
   request: YouTrackRequest,
   item: TaskItem,
 ) => {
-  const projects = await list<{ id: string; shortName: string }>(
-    request,
-    "admin/projects",
-    "id,shortName",
-    "PMON",
-  );
-  const matches = projects.filter((project) => {
-    return project.shortName === "PMON";
-  });
-  const project = matches[0];
-  if (matches.length !== 1 || !project || !/^\d+-\d+$/.test(project.id))
-    throw Error("Cannot verify the PMON project.");
-  const schema = await list<{
-    id: string;
-    field: { name: string; fieldType: { id: string } };
-  }>(
-    request,
-    "admin/projects/" + project.id + "/customFields",
-    "id,field(name,fieldType(id))",
-  );
+  const { project, schema } = await readPmonSchema(request);
   const fields = schema.map((entry) => {
     const type = entry.field?.fieldType?.id;
     return {
