@@ -161,6 +161,7 @@ test("update waiting result renders both existing actions inside one group witho
   const update = {
     checking: false,
     applying: false,
+    installMessage: "",
     message: "Synthetic update ready",
     hasUpdate: true,
     canInstall: false,

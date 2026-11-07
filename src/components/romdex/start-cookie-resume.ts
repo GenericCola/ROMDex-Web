@@ -6,6 +6,7 @@ import type {
   ProjectIssue,
   YouTrackIdentity,
 } from "@/auth/identity";
+import { isNetworkFailure } from "@/auth/offline-account";
 import { setAuthSession } from "@/auth/session";
 import { rememberSession } from "@/auth/tab-session";
 import { disconnectDelivery } from "@/cloud/session";
@@ -21,11 +22,14 @@ export const startCookieResume = (
     setSelected,
     setIssues,
     setRetryable,
+    openOffline,
   }: SessionRefs & {
     setIdentity: (value: YouTrackIdentity | null) => void;
     setSelected: (value: AuthorizedProject | null) => void;
     setIssues: (value: ProjectIssue[]) => void;
     setRetryable: (value: boolean) => void;
+    // Opens saved work when the session check cannot reach the network.
+    openOffline?: (isCurrent: () => boolean) => Promise<boolean>;
   },
   openProject = activateProject,
 ) => {
@@ -45,7 +49,14 @@ export const startCookieResume = (
     try {
       disconnectDelivery();
       setAuthSession(null);
-      const auth = await cookieSession();
+      let auth;
+      try {
+        auth = await cookieSession();
+      } catch (error) {
+        const offline = isNetworkFailure(error) && current() && openOffline;
+        if (offline && (await offline(current))) return;
+        throw error;
+      }
       if (!current()) return;
       if (!auth) return;
       sessionRef.current = auth;

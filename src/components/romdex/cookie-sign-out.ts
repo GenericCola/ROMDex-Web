@@ -1,4 +1,5 @@
 import { endCookieLogin } from "@/auth/cookie-client";
+import { forgetOfflineAccount } from "@/auth/offline-account";
 import { forgetSession } from "@/auth/tab-session";
 import { errorText } from "@utils/error-text";
 export const cookieSignOut = async (
@@ -11,6 +12,7 @@ export const cookieSignOut = async (
   try {
     await closeProject();
     clearIdentity();
+    forgetOfflineAccount();
     await endCookieLogin();
     try {
       forgetSession();

@@ -1,0 +1,60 @@
+# Checks and browser tests run here, not on the VPS (owner, 2026-11-07).
+# Browser tests use Chromium-based projects only.
+name: CI
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, mobile-chromium]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: node scripts/playwright.mjs install --with-deps chromium
+      - run: pnpm build
+      - name: Browser tests (${{ matrix.project }})
+        run: pnpm test:e2e --project=${{ matrix.project }}
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-${{ matrix.project }}
+          path: test-results/
+          retention-days: 7
