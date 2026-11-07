@@ -10,19 +10,9 @@ import {
 } from "../../src/domain/ticket-locks";
 import type { TaskItem } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-const item = (id: string, parentId: string | null = null): TaskItem => ({
-  id,
-  parentId,
-  summary: "Synthetic",
-  description: "",
-  state: "To do",
-  priority: "Normal",
-  complexity: null,
-  type: "Task",
-  updated: 1,
-  comments: [],
-  commentCount: 0,
-});
+import { taskItem } from "../fixtures/task-item";
+const item = (id: string, parentId: string | null = null): TaskItem =>
+  taskItem(id, parentId, { summary: "Synthetic" });
 const fixture = () => {
   const data = emptyWorkspace();
   data.remote = [

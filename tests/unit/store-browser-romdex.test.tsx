@@ -1,27 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { TaskItem, WorkspaceData } from "../../src/domain/types";
+import type { WorkspaceData } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
 import { romdexBinding } from "../../src/store/browser/romdex-binding";
+import { taskItem as item } from "../fixtures/task-item";
 
 const PNG =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
-
-const item = (id: string, parentId: string | null = null): TaskItem => {
-  return {
-    id,
-    parentId,
-    summary: id,
-    description: "",
-    state: "To do",
-    priority: "Normal",
-    complexity: null,
-    type: "Task",
-    updated: 1,
-    comments: [],
-    commentCount: 0,
-  };
-};
 
 const workspace = (): WorkspaceData => {
   const data = emptyWorkspace();

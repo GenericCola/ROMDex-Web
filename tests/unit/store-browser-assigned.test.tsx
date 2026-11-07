@@ -10,22 +10,10 @@ import {
   localAssigned,
   localAssignedWith,
 } from "../../src/store/browser/assigned";
+import { taskItem } from "../fixtures/task-item";
 
-const item = (id: string, parentId: string | null = null): TaskItem => {
-  return {
-    id,
-    parentId,
-    summary: id,
-    description: "",
-    state: "To do",
-    priority: "Normal",
-    complexity: null,
-    type: "Task",
-    updated: 5,
-    comments: [],
-    commentCount: 0,
-  };
-};
+const item = (id: string, parentId: string | null = null): TaskItem =>
+  taskItem(id, parentId, { updated: 5 });
 
 const workspace = (): WorkspaceData => {
   const data = emptyWorkspace();

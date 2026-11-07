@@ -1,5 +1,4 @@
 import type {
-  TaskItem,
   WorkspaceData,
   WorkspaceSnapshot,
 } from "../../src/domain/types.ts";
@@ -10,24 +9,11 @@ import { createArticle } from "../../src/store/core/article.ts";
 import { STORE_TARGETS } from "../../src/store/core/transport.ts";
 import { FakeYouTrackStore } from "./fake-youtrack-store.tsx";
 import { storeIndexedDb } from "./store-idb.tsx";
+import { taskItem } from "./task-item.ts";
 
 export const SCOPE = "instance|2-1";
 
-export const item = (id: string, parentId: string | null = null): TaskItem => {
-  return {
-    id,
-    parentId,
-    summary: id,
-    description: "",
-    state: "To do",
-    priority: "Normal",
-    complexity: null,
-    type: "Task",
-    updated: 1,
-    comments: [],
-    commentCount: 0,
-  };
-};
+export const item = taskItem;
 
 /** PMON-1 with children PMON-2, PMON-3 and PMON-4. */
 export const taskData = (): WorkspaceData => {

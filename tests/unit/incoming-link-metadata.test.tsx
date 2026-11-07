@@ -4,19 +4,13 @@ import { mergeIncoming } from "../../src/cloud/incoming-merge";
 import { editTask } from "../../src/domain/task-actions";
 import type { TaskItem } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-const task = (): TaskItem => ({
-  id: "PMON-1",
-  updated: 10,
-  parentId: null,
-  summary: "Keep title",
-  description: "Keep notes",
-  state: "To do",
-  priority: "Normal",
-  complexity: null,
-  type: "Task",
-  comments: [],
-  commentCount: 0,
-});
+import { taskItem } from "../fixtures/task-item";
+const task = (): TaskItem =>
+  taskItem("PMON-1", null, {
+    updated: 10,
+    summary: "Keep title",
+    description: "Keep notes",
+  });
 const fixture = () => {
   const data = emptyWorkspace();
   data.remote = [task()];

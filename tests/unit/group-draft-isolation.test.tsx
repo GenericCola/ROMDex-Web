@@ -10,21 +10,8 @@ import {
 } from "../../src/domain/editor-drafts";
 import { createTask, editTask } from "../../src/domain/task-actions";
 import { hierarchySignature } from "../../src/domain/task-drop";
-import type { TaskItem } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-const task = (id: string, parentId: string | null = null): TaskItem => ({
-  id,
-  parentId,
-  summary: id,
-  description: "",
-  state: "To do",
-  priority: "Normal",
-  complexity: null,
-  type: "Task",
-  updated: 1,
-  comments: [],
-  commentCount: 0,
-});
+import { taskItem as task } from "../fixtures/task-item";
 const fixture = () => {
   const data = emptyWorkspace();
   data.remote = [

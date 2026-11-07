@@ -4,23 +4,8 @@ import {
   deletionSnapshot,
   queueReviewedDeletion,
 } from "../../src/domain/reviewed-deletion";
-import type { TaskItem } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-const task = (id: string, parentId: string | null = null): TaskItem => {
-  return {
-    id,
-    parentId,
-    summary: id,
-    description: "",
-    state: "To do",
-    priority: "Normal",
-    complexity: null,
-    type: "Task",
-    updated: 1,
-    comments: [],
-    commentCount: 0,
-  };
-};
+import { taskItem as task } from "../fixtures/task-item";
 void test("deletion cannot include a child added after its exact list was reviewed", () => {
   const data = emptyWorkspace();
   data.remote = [task("PMON-1")];

@@ -3,8 +3,7 @@ import { test } from "node:test";
 import { assignTaskStatus } from "../../src/domain/assigned-status";
 import { indexTree, materialize, STATES, STATUS } from "../../src/domain/accepted/core.mjs";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-import type { TaskItem } from "../../src/domain/types";
-const item = (id: string, parentId: string | null = null): TaskItem => ({ id, parentId, summary: id, description: "", state: "To do", priority: "Normal", complexity: null, type: "Task", updated: 1, comments: [], commentCount: 0 });
+import { taskItem as item } from "../fixtures/task-item";
 test("status popup queues assigned status without replacing native state or child rollup", () => {
   const data = emptyWorkspace(); data.remote = [item("PMON-1"), { ...item("PMON-2", "PMON-1"), state: "Done" }];
   const cloudBefore = structuredClone(data.cloud);

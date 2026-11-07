@@ -5,8 +5,7 @@ import { siblingSelection, stageGroup, stageMove } from "../../src/domain/bulk-h
 import { hierarchySignature } from "../../src/domain/task-drop";
 import { indexTree, materialize } from "../../src/domain/accepted/core.mjs";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-import type { TaskItem } from "../../src/domain/types";
-const item = (id: string, parentId: string | null = null): TaskItem => ({ id, parentId, summary: id, description: "", state: "To do", priority: "Normal", complexity: null, type: "Task", updated: 1, comments: [], commentCount: 0 });
+import { taskItem as item } from "../fixtures/task-item";
 const workspace = () => { const data = emptyWorkspace(); data.remote = [item("a"), item("b"), item("c"), item("d", "a")]; return data; };
 test("selection ranges are visible-only, modifier-additive and remappable", () => {
   const visible = ["a", "b", "c", "d"];

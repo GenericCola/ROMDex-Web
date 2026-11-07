@@ -13,19 +13,9 @@ import {
 import { editTask } from "../../src/domain/task-actions";
 import type { TaskItem } from "../../src/domain/types";
 import { emptyWorkspace } from "../../src/domain/workspace-data";
-const task = (id: string): TaskItem => ({
-  id,
-  updated: 1,
-  parentId: null,
-  summary: id,
-  description: "Keep notes",
-  state: "To do",
-  priority: "Normal",
-  complexity: null,
-  type: "Task",
-  comments: [],
-  commentCount: 0,
-});
+import { taskItem } from "../fixtures/task-item";
+const task = (id: string): TaskItem =>
+  taskItem(id, null, { description: "Keep notes" });
 test("Tile Settings declares its known ticket while keeping explicit Apply/Close", () => {
   const source = readFileSync(
     new URL("../../src/components/romdex/tile-settings.tsx", import.meta.url),
