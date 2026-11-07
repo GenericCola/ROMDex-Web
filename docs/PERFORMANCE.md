@@ -222,20 +222,19 @@ Inventory of waits and what changed:
 
 ## Not changed, and why
 
-- **Save coalescing.** Collapsing queued saves into one put of the newest
-  snapshot was built and tested, then dropped. The existing test "workspace
-  serializes durable writes and waits before update activation" requires one
-  save per change, and weakening it would change the durability contract.
-  The owner may decide this later. It would cut IndexedDB serialization during
-  fast typing.
+- **Save coalescing.** Done later in PMON-640 (owner answer P1): changes now
+  wait 200 ms and share one put of the newest snapshot
+  (`src/domain/save-queue.ts`). Each change's save promise still resolves only
+  after a put that includes it, and a waiting save starts at once on flush,
+  delivery, app update, page hide and `beforeunload`.
 - **Per-change cost of the write path.** Each store change still runs
   `structuredClone` on the workspace, `validateWorkspace` (including
   `indexTree`) and a full-record IndexedDB put. After the fixes these, plus
   the incoming-sync apply step, are most of the remaining Notes keystroke
   cost. Reducing them means changing the storage format, for example a record
   per task, or the validation contract. Both belong with the storage work.
-- **Full re-read every 5 s.** The incoming-sync full membership read (see
-  finding 6) belongs to the sync code in `src/cloud`.
+- **Full re-read every 5 s.** Removed in PMON-641 (owner answer P3): incoming
+  sync no longer polls. See docs/SYNC-WITHOUT-POLLING.md.
 - **Row virtualization.** Expand All with 490 rows still mounts every row in
   one task. Virtualizing the table would interact with drag precision, exact
   insertion guides and keyboard navigation, which have their own acceptance
