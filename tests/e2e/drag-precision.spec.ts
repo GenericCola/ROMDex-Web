@@ -205,6 +205,8 @@ test("exact placement flushes notes and scoped drag guides use relative depth", 
   await expect(page.locator(".work-footer [role=status]")).toContainText(
     "before Fixture Child",
   );
+  // Autoscroll may still be revealing the row from under the sticky header.
+  await expect(page.locator(".drop-guide")).toBeVisible();
   const guide = await bounds(page.locator(".drop-guide"));
   const hierarchy = await bounds(row(page, 900003).locator(".row-hierarchy"));
   expect(Math.abs(guide.x - hierarchy.x)).toBeLessThan(2);
