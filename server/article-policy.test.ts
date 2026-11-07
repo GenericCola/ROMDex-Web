@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createApplication } from "./application.ts";
-import { fixture } from "./cookie-fixture.ts";
-const origin = "https://romdex.vercel.app";
+import { sessionRequest, signedIn } from "./app-test-support.ts";
 const visible = {
   $type: "LimitedVisibility",
   permittedUsers: [{ id: "2-1" }, { id: "2-2" }],
@@ -16,17 +15,10 @@ const articles: Record<string, { summary: string; project: string }> = {
 };
 const ids: Record<string, string> = { PMON: "0-1", NPCD: "0-2", TST: "0-3" };
 async function articleFixture() {
-  const f = fixture();
-  f.deps.oauth.verify = async () => ({
-    id: "non-owner",
-    guest: false,
-    projects: [
-      { id: "0-1", name: "PMON", shortName: "PMON" },
-      { id: "0-2", name: "NPCD", shortName: "NPCD" },
-    ],
-  });
-  await f.login();
-  const session = await (await f.handle(f.request("/api/auth/session"))).json();
+  const { f, session } = await signedIn("non-owner", [
+    { id: "0-1", name: "PMON", shortName: "PMON" },
+    { id: "0-2", name: "NPCD", shortName: "NPCD" },
+  ]);
   const calls: { url: URL; init: RequestInit }[] = [];
   const upstream: typeof fetch = async (input, init = {}) => {
     const url = new URL(String(input));
@@ -56,23 +48,7 @@ async function articleFixture() {
     return Response.json([]);
   };
   const handle = createApplication({ ...f.deps, fetch: upstream });
-  const request = (
-    path: string,
-    method = "GET",
-    body?: BodyInit,
-    extra: Record<string, string> = {},
-  ) =>
-    new Request(origin + path, {
-      method,
-      headers: {
-        cookie: [...f.jar].map(([k, v]) => `${k}=${v}`).join("; "),
-        origin,
-        "sec-fetch-site": "same-origin",
-        "x-romdex-csrf": session.csrf,
-        ...extra,
-      },
-      ...(body === undefined ? {} : { body }),
-    });
+  const request = sessionRequest(f, session);
   const proxy = async (route: string, method = "GET", body?: unknown) => {
     const before = calls.filter((c) => c.init.method === method).length;
     const result = await handle(

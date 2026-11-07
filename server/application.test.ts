@@ -8,17 +8,12 @@ import {
   productionHandler,
 } from "./application.ts";
 import { FENCE } from "./cookie-codec.ts";
+import { origin, sessionRequest, signedIn } from "./app-test-support.ts";
 import { fixture } from "./cookie-fixture.ts";
-const origin = "https://romdex.vercel.app";
 async function appFixture(userId = "non-owner") {
-  const f = fixture();
-  f.deps.oauth.verify = async () => ({
-    id: userId,
-    guest: false,
-    projects: [{ id: "0-1", name: "PMON", shortName: "PMON" }],
-  });
-  await f.login();
-  const session = await (await f.handle(f.request("/api/auth/session"))).json();
+  const { f, session } = await signedIn(userId, [
+    { id: "0-1", name: "PMON", shortName: "PMON" },
+  ]);
   const calls: { url: URL; init: RequestInit }[] = [];
   let metadataURL = "/api/files/1-2/file.txt",
     moved = false,
@@ -76,23 +71,7 @@ async function appFixture(userId = "non-owner") {
     return Response.json([]);
   };
   const handle = createApplication({ ...f.deps, fetch: upstream });
-  const request = (
-    path: string,
-    method = "GET",
-    body?: BodyInit,
-    extra: Record<string, string> = {},
-  ) =>
-    new Request(origin + path, {
-      method,
-      headers: {
-        cookie: [...f.jar].map(([k, v]) => `${k}=${v}`).join("; "),
-        origin,
-        "sec-fetch-site": "same-origin",
-        "x-romdex-csrf": session.csrf,
-        ...extra,
-      },
-      ...(body === undefined ? {} : { body }),
-    });
+  const request = sessionRequest(f, session);
   const proxy = (route: string, method = "GET", body?: unknown) =>
     handle(
       request(
