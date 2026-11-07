@@ -2,8 +2,8 @@ import type { ApplicationDependencies } from "./application.ts";
 import type { authorizeCookie } from "./cookie-authorize.ts";
 import { HttpFailure } from "./runtime-types.ts";
 import { readJSON } from "./youtrack.ts";
-type Session = Awaited<ReturnType<typeof authorizeCookie>>;
-function object(value: unknown): Record<string, any> {
+export type Session = Awaited<ReturnType<typeof authorizeCookie>>;
+export function object(value: unknown): Record<string, any> {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw new HttpFailure(400);
   return value as Record<string, any>;

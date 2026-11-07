@@ -7,7 +7,7 @@ import {
 import type { authorizeCookie } from "./cookie-authorize.ts";
 import { response } from "./runtime-http.ts";
 import { HttpFailure } from "./runtime-types.ts";
-import { boundedText } from "./transport-bounds.ts";
+import { boundedBytes, boundedText } from "./transport-bounds.ts";
 import { transportRoute } from "./transport-policy.ts";
 import { authorizeWrite, requireIssue } from "./write-policy.ts";
 type Session = Awaited<ReturnType<typeof authorizeCookie>>;
@@ -76,22 +76,10 @@ async function uploadBody(request: Request) {
   if (declared && (!/^\d+$/.test(declared) || Number(declared) > 4_100_000))
     throw new HttpFailure(413);
   // Count actual bytes before parsing or dispatch; no reliance on Content-Length.
-  const reader = request.body?.getReader();
-  if (!reader) throw new HttpFailure(400);
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  try {
-    for (;;) {
-      const part = await reader.read();
-      if (part.done) break;
-      size += part.value.byteLength;
-      if (size > 4_100_000) throw new HttpFailure(413);
-      chunks.push(part.value);
-    }
-  } finally {
-    await reader.cancel().catch(() => undefined);
-  }
-  const bytes = Buffer.concat(chunks);
+  if (!request.body) throw new HttpFailure(400);
+  const bytes = await boundedBytes(request.body, 4_100_000, () => {
+    return new HttpFailure(413);
+  });
   const form = await new Response(bytes, {
     headers: { "content-type": request.headers.get("content-type") ?? "" },
   }).formData();

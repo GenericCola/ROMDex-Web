@@ -1,19 +1,13 @@
 import type { ApplicationDependencies } from "./application.ts";
-import type { authorizeCookie } from "./cookie-authorize.ts";
 import { HttpFailure } from "./runtime-types.ts";
 import { readJSON } from "./youtrack.ts";
-type Session = Awaited<ReturnType<typeof authorizeCookie>>;
+import { object, type Session } from "./write-policy.ts";
 export const ARTICLE_ID = /^(?:[0-9]+-[0-9]+|[A-Z][A-Z0-9_]*-A-[0-9]+)$/;
 const STORE: Record<string, string> = {
   "ROMDex data": "PMON",
   "NPCDex data": "NPCD",
 };
 const MAX_CONTENT = 1_000_000;
-function object(value: unknown): Record<string, any> {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new HttpFailure(400);
-  return value as Record<string, any>;
-}
 function exactKeys(value: Record<string, unknown>, expected: string[]) {
   const names = Object.keys(value);
   if (
