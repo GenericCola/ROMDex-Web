@@ -9,6 +9,7 @@ import {
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { inlineTitleKey } from "./inline-title-key";
 import { useDelayedRowOpen } from "./use-delayed-row-open";
 import { useInlineAction } from "./use-inline-action";
 import { useTaskTextEditing } from "./use-task-text-editing";
@@ -41,20 +42,12 @@ const TaskRowTitle = ({
     });
   };
   const key = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (
-      event.nativeEvent.isComposing ||
-      event.ctrlKey ||
-      event.altKey ||
-      event.metaKey
-    )
-      return;
-    const action = event.key,
-      outdent = event.shiftKey;
-    if (!["Enter", "Tab", "Escape"].includes(action)) return;
-    event.preventDefault();
+    const press = inlineTitleKey(event);
+    if (!press) return;
     run((next) => {
-      if (action === "Enter") commitInlineRename(next, item.id);
-      else if (action === "Tab") indentInlineRename(next, item.id, outdent);
+      if (press.action === "Enter") commitInlineRename(next, item.id);
+      else if (press.action === "Tab")
+        indentInlineRename(next, item.id, press.outdent);
       else if (next.view.renameId === item.id) {
         delete next.titleDrafts[item.id];
         next.view.renameId = null;

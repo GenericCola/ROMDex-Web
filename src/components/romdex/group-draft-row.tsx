@@ -1,14 +1,8 @@
 import { stageGroup } from "@/domain/bulk-hierarchy";
 import { registerDraftEditor } from "@/domain/editor-drafts";
 import { workspaceStore } from "@/domain/workspace-store";
-import {
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-} from "react";
-import Lamp from "./lamp";
+import { useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
+import DraftRow from "./draft-row";
 import { useAttachmentWork } from "./use-attachment-work";
 
 export interface GroupDraft {
@@ -84,34 +78,25 @@ const GroupDraftRow = ({
     }
   };
   return (
-    <tr
-      className="draft-row"
-      style={{ "--depth": draft.depth } as CSSProperties}
+    <DraftRow
+      decorative={false}
+      depth={draft.depth}
+      input={
+        <input
+          ref={inputRef}
+          className="draft-input"
+          aria-label="New Parent Title"
+          placeholder="Parent Title…"
+          value={title}
+          disabled={busy}
+          onKeyDown={keyDown}
+          onChange={(event) => {
+            titleRef.current = event.target.value;
+            setTitle(event.target.value);
+          }}
+        />
+      }
     >
-      <td>
-        <div className="task-cell">
-          <span className="row-gutter" />
-          <div className="row-hierarchy">
-            <span className="draft-indent" />
-            <span className="draft-status">
-              <Lamp color="grey" />
-            </span>
-            <input
-              ref={inputRef}
-              className="draft-input"
-              aria-label="New Parent Title"
-              placeholder="Parent Title…"
-              value={title}
-              disabled={busy}
-              onKeyDown={keyDown}
-              onChange={(event) => {
-                titleRef.current = event.target.value;
-                setTitle(event.target.value);
-              }}
-            />
-          </div>
-        </div>
-      </td>
       <td colSpan={3} className="draft-hint">
         {message ? (
           <span role="alert">{message}</span>
@@ -119,7 +104,7 @@ const GroupDraftRow = ({
           "Enter to Group · Esc to Cancel"
         )}
       </td>
-    </tr>
+    </DraftRow>
   );
 };
 export default GroupDraftRow;
