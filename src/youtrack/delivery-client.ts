@@ -15,19 +15,17 @@ import { readDeletionState } from "./read-deletion-state";
 import { readDeliveryIssue } from "./read-delivery-issue";
 import type { YouTrackRequest } from "./request";
 import { issueId, sessionRequest } from "./request";
-import { SharedStatusClient } from "./shared-status-client";
 import { TagClient } from "./tags";
 export class DeliveryClient implements DeliveryPort {
   accountId = "";
   readonly assertCurrent: () => void;
   files: AttachmentClient;
   tags: TagClient;
-  metadata?: SharedStatusClient;
   private request: YouTrackRequest;
   private fields = new Map<string, Field[]>();
   private native: NativeEditAdapter;
   private creations = new Map<string, unknown>();
-  constructor(token: string, shared = false) {
+  constructor(token: string) {
     this.assertCurrent = authRequestGuard(token);
     this.request = sessionRequest(token);
     this.native = new NativeEditAdapter(this.request, this.get, (id) => {
@@ -35,7 +33,6 @@ export class DeliveryClient implements DeliveryPort {
     });
     this.tags = new TagClient(this.request);
     this.files = new AttachmentClient(this.request, token.trim());
-    if (shared) this.metadata = new SharedStatusClient(this.request);
   }
   connect = async () => {
     const user = (await this.request("users/me?fields=id")) as {
@@ -44,21 +41,19 @@ export class DeliveryClient implements DeliveryPort {
     if (!user || typeof user.id !== "string")
       throw Error("Could not verify the YouTrack account.");
     this.accountId = user.id;
-    await this.metadata?.probe();
   };
   latestRevision = () => {
     return incomingRevision(this.request);
   };
   all = async () => {
-    const items = await readDeliveryTasks(this.request);
-    return this.metadata ? this.metadata.annotateAll(items) : items;
+    return readDeliveryTasks(this.request);
   };
   get = async (id: string) => {
     const result = await readDeliveryIssue(this.request, id);
     if (!result) return null;
     const { item, fields } = result;
     this.fields.set(id, fields);
-    return this.metadata ? this.metadata.annotate(item) : item;
+    return item;
   };
   deletionState = (id: string) => {
     return readDeletionState(this.request, this.get, id, this.accountId);
@@ -68,13 +63,6 @@ export class DeliveryClient implements DeliveryPort {
   };
   update = async (id: string, patch: TaskPatch, expected?: TaskItem) => {
     issueId(id);
-    if (
-      this.metadata &&
-      (patch.state !== undefined || patch.assignedState !== undefined)
-    )
-      throw Error(
-        "Shared status must use the revision-checked status endpoint.",
-      );
     if (
       (patch.state !== undefined || patch.assignedState !== undefined) &&
       typeof this.fields.get(id)?.find((field) => {
@@ -136,13 +124,5 @@ export class DeliveryClient implements DeliveryPort {
   };
   comment = (id: string, text: string) => {
     return postComment(this.request, id, text);
-  };
-  readShared = async () => {
-    const metadata = new SharedStatusClient(this.request);
-    await metadata.probe();
-    return metadata.annotateAll(await readDeliveryTasks(this.request));
-  };
-  enableShared = () => {
-    this.metadata = new SharedStatusClient(this.request);
   };
 }

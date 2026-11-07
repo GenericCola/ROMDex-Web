@@ -1,4 +1,3 @@
-import { parseSharedStatus } from "@/cloud/shared-status-protocol";
 import type { TaskItem } from "./types";
 import { validateNativeTask } from "./validate-native-task";
 export const validateTask: (value: unknown) => asserts value is TaskItem = (
@@ -34,8 +33,6 @@ export const validateTask: (value: unknown) => asserts value is TaskItem = (
       item.url !== "https://thegobindsingh.youtrack.cloud/issue/" + item.id)
   )
     throw Error("Task links must point to their verified YouTrack issue.");
-  if (item.sharedStatus !== undefined)
-    parseSharedStatus(item.sharedStatus, item.id);
   if (
     ![item.id, item.summary, item.state, item.priority, item.type].every(
       (entry) => {

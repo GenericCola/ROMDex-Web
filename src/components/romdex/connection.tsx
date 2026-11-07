@@ -1,10 +1,8 @@
 import { authToken } from "@/auth/session";
 import { adoptTasks } from "@/cloud/assigned-status";
-import { cloudData } from "@/cloud/types";
 import { indexTree } from "@/domain/accepted/core.mjs";
 import type { TaskItem } from "@/domain/types";
 import { workspaceStore } from "@/domain/workspace-store";
-import { DeliveryClient } from "@/youtrack/delivery-client";
 import { readTasks } from "@/youtrack/read-tasks";
 import { errorText } from "@utils/error-text";
 import type { FormEvent, ReactNode } from "react";
@@ -34,9 +32,7 @@ const Connection = ({
       if (!opened.ready || opened.error)
         throw Error(opened.error || "Wait for your workspace to open.");
       const token = authToken();
-      const items = cloudData(workspaceStore.getSnapshot().data).sharedStatuses
-        ? await new DeliveryClient(token, true).all()
-        : await readTasks(token);
+      const items = await readTasks(token);
       indexTree(items);
       if (
         workspaceStore.getSnapshot().delivering ||

@@ -31,7 +31,6 @@ void test("original attachment row has one deletion state and retains missing-fi
   data.cloud = {
     autoSync: false,
     records: { delete: { status: "uncertain", message: "Unknown outcome" } },
-    sharedStatuses: false,
   };
   rows = nativeAttachmentRows(data, "PMON-1");
   assert.equal(rows.length, 1);
