@@ -61,7 +61,9 @@ apart in small ways, so keep new code on them.
   Tab and Escape on inline title inputs), `DeviceBrand` (the header brand block) and
   `resumeCleanup` (the cleanup returned by both session resume starters).
 - `server/`: `verifiedIdentity` (cookie-runtime) checks a cookie session against YouTrack;
-  `boundedBytes` (transport-bounds) reads a request body under a byte limit. The browser and
+  `boundedBytes` (transport-bounds) reads a request body under a byte limit;
+  `tokenSession` (token-login) turns a permanent token into session cookies for both the pasted
+  and the dev token routes. The browser and
   server share `src/auth/cookie-generation.ts`. Server tests build sessions with
   `server/app-test-support.ts`.
 - Tests: `tests/fixtures/task-item.ts` (`taskItem`) builds unit-test tasks;

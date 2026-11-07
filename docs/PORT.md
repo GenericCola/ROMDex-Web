@@ -38,7 +38,7 @@ Verified on October 22, 2026: pnpm check passed 88 unit tests and 8 worker/build
 - [ ] Previewed desktop-data import with preservation and acceptance checks.
 - [ ] Full parity checks, real-device PWA and HTTPS deployment acceptance.
 
-Each milestone records fixture tests separately from live checks. Do not enable production writes or import desktop saves as an incidental test. Keep tokens in memory initially. Browser credential persistence requires a separate explicit design. App-shell Cache Storage must never include workspace data or credentials. Any editable workflow must durably save before worker activation.
+Each milestone records fixture tests separately from live checks. Do not enable production writes or import desktop saves as an incidental test. Keep tokens in memory initially. Browser credential persistence requires a separate explicit design. A pasted permanent token is the one exception and is sealed server-side into the HttpOnly session cookie; see TOKEN-SIGN-IN.md. App-shell Cache Storage must never include workspace data or credentials. Any editable workflow must durably save before worker activation.
 
 ## Migration and RDX implementation checkpoint
 

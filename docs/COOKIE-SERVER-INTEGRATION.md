@@ -13,7 +13,10 @@ service, billing change or shared-status SC001 endpoint is introduced.
 - `/api/:path*` rewrites to that function. Global trailing-slash redirects are
   removed so `/api/auth/callback` remains the exact registered callback.
 - Canonical origin: `https://romdex.vercel.app`. Callback:
-  `https://romdex.vercel.app/api/auth/callback`. Other hosts fail closed.
+  `https://romdex.vercel.app/api/auth/callback`. Since November 7 the server also
+  answers the origins in `ROMDEX_ORIGINS` (default: romdex.vercel.app and
+  romdex-web.vercel.app); OAuth still starts only at the canonical origin, and
+  every allowed origin can sign in with a permanent token. See TOKEN-SIGN-IN.md.
 - `ROMDEX_SESSION_KEY` must be a server-only canonical base64url encoding of 32
   random bytes. Missing/invalid configuration returns sanitized 503; no key is
   generated, saved, displayed or configured by this patch.
