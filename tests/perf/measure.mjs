@@ -136,12 +136,24 @@ try {
     const gaps = await page.evaluate(() => window.__frames.t.slice(1).map((x, i) => x - window.__frames.t[i]));
     return { frames: gaps.length + 1, framesOver50: gaps.filter((g) => g > 50).length, worstFrameMs: Math.round(Math.max(0, ...gaps)) };
   });
-  await page.locator(".table-scroll").evaluate((el) => { el.scrollTop = 0; });
-  await quiet();
-  // Scroll the row into view outside the measured action (virtualised builds render only on-screen rows).
-  await page.locator('tr[data-row="PMON-200"]').scrollIntoViewIfNeeded();
-  await quiet();
+  // Bring a row on screen outside the measured action. Windowed builds render only rows near the
+  // viewport, so step the table down until the row exists; on other builds it exists at once.
+  const reveal = async (id) => {
+    await page.locator(".table-scroll").evaluate(async (el, rowId) => {
+      const frame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 50)));
+      el.scrollTop = 0;
+      await frame();
+      while (!document.querySelector(`tr[data-row="${rowId}"]`) && el.scrollTop + el.clientHeight < el.scrollHeight) {
+        el.scrollTop += el.clientHeight / 2;
+        await frame();
+      }
+    }, id);
+    await page.locator(`tr[data-row="${id}"]`).scrollIntoViewIfNeeded();
+    await quiet();
+  };
+  await reveal("PMON-200");
   await measure("select-row", () => page.locator('tr[data-row="PMON-200"] button.row-title').click(), () => page.waitForFunction(() => document.querySelector('tr[data-row="PMON-200"]')?.classList.contains("selected")));
+  await reveal("PMON-2");
   await measure("toggle-one-row", () => page.locator('tr[data-row="PMON-2"] .row-toggle').first().click(), () => page.waitForFunction(() => !/^490 Visible/.test(document.querySelector(".work-footer span")?.textContent ?? "")));
   const notes = page.getByRole("textbox", { name: "Notes and Instructions", exact: true });
   await notes.click();
