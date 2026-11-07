@@ -2,13 +2,15 @@ import { expect, test } from "@playwright/test";
 import { addTask, structuralFixture } from "./structural-fixture";
 import { storedSelection } from "./task-status";
 test.use({ serviceWorkers: "block" });
+// PMON-639 (owner answer Q7): a row click selects after 220 ms; Save pressed
+// before then used to cancel that selection.
 for (const wait of [0, 1000]) {
   test(`Save ${wait} ms after creating a task keeps it selected`, async ({
     page,
   }) => {
     const s = await structuralFixture(page);
-    await addTask(page, "Selected Root");
     await s.connect();
+    await addTask(page, "Selected Root");
     if (wait) await page.waitForTimeout(wait);
     await s.save();
     await s.confirmed();
